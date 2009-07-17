@@ -1,0 +1,21 @@
+[meta]
+TITLE              = IAR ARM
+DESCRIPTION        = IAR C/C++ compiler for ARM
+
+[setup]
+CCCOM              = "%CC %SOURCES %CFLAGS %CPPDEFINES %INCPATHS -o %TARGET"
+CXXCOM             = "%CXX %SOURCES %CFLAGS %CPPDEFINES %INCPATHS -o %TARGET"
+CFILESUFFIX        = ".c"
+CXXFILESUFFIX      = ""
+CPPDEFSUFFIX       = ""
+CC                 = "iccarm"
+CXX                = "iccarm"
+LIBSUFFIX          = ".a"
+OBJSUFFIX          = ".o"
+CPPDEFPREFIX       = "-D"
+LIBPREFIX          = ""
+AR                 = "iarchive"
+ARCOM              = "%AR %TARGET -f%@ %SOURCES"
+INCPREFIX          = '-I"'
+INCSUFFIX          = '"'
+RANLIB             = ""

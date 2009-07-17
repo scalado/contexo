@@ -1,0 +1,22 @@
+[meta]
+TITLE              = CodeWarrior 3.0 (Symbian)
+DESCRIPTION        = CodeWarrior symbian compiler for Windows subsystem
+
+[setup]
+CCCOM              = "%CC -gccinc %CFLAGS %CPPDEFINES %INCPATHS -c %SOURCES -o %TARGET"
+CXXCOM             = "%CXX -gccinc %CFLAGS %CPPDEFINES %INCPATHS -c %SOURCES -o %TARGET"
+ECHO_SOURCES       = YES
+CFILESUFFIX        = '.c'
+CPPDEFSUFFIX       = ' '
+CC                 = "mwccsym2"
+LIBSUFFIX          = ""
+OBJSUFFIX          = '.o'
+INCSUFFIX          = '" '
+CPPDEFPREFIX       = '-d '
+CXX                = "mwccsym2"
+AR                 = "mwldsym2"
+ARCOM              = "%AR -library -msgstyle gcc -stdlib -subsystem windows -o %TARGET @%@ %SOURCES"
+LIBPREFIX          = ''
+INCPREFIX          = '-i "'
+CXXFILESUFFIX      = '.cpp'
+RANLIB             = ""

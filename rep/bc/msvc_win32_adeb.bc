@@ -1,0 +1,17 @@
+#::::::::::::::::::::::::::::::::::::::::::::::::
+# Contexo Build Configuration
+#::::::::::::::::::::::::::::::::::::::::::::::::
+
+[meta]
+TITLE                   = Win32 Debug ASCII
+DESCRIPTION             = For Win32 debug targets with ASCII chars
+
+[config]
+DEBUG_BUILD             = YES
+DEBUGMODE_MEMORY		= YES
+DEBUGMODE_FILE          = NO
+CHAR_ENCODING           = ASCII
+BYTE_ORDER              = LITTLE_ENDIAN
+CDEF                    = msvc.cdef
+CFLAGS                  = /Zi /Od /W4 /Fdmsvc.pdb
+PREP_DEFINES            = WIN32;SCB_DOT

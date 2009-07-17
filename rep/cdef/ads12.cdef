@@ -1,0 +1,22 @@
+[meta]
+TITLE              = ADS 1.2
+DESCRIPTION        = ADS 1.2 compiler for ARM
+
+[setup]
+CCCOM              = "%CC %CFLAGS %CPPDEFINES %INCPATHS -c -o %TARGET %SOURCES"
+CXXCOM             = ""
+CFILESUFFIX        = ".c"
+CPPDEFSUFFIX       = ''
+CC                 = "armcc"
+CXX                = ""
+LIBSUFFIX          = '.a'
+OBJSUFFIX          = ".o"
+CPPDEFPREFIX       = '-D'
+LIBPREFIX          = ''
+AR                 = "armar"
+ARCOM              = "%AR -create %TARGET -via %@ %SOURCES"
+INCPREFIX          = '-I"'
+INCSUFFIX          = '"'
+CXXFILESUFFIX      = ""
+RANLIB             = ""
+ECHO_SOURCES	   = YES

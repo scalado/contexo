@@ -1,0 +1,20 @@
+[meta]
+TITLE              = MSVC7+
+DESCRIPION         = Microsoft Visual C/C++ compiler for VC7 and newer
+
+[setup]
+CC                 = "cl"
+CXX                = "cl"
+CFILESUFFIX        = '.c'
+CXXFILESUFFIX      = '.cpp'
+OBJSUFFIX          = ".obj"
+CPPDEFPREFIX       = '/D '
+CPPDEFSUFFIX       = ' '
+INCPREFIX          = '/I"'
+INCSUFFIX          = '" ' 
+CCCOM              = "%CC  /nologo /c %CFLAGS %CPPDEFINES %INCPATHS /Tc %SOURCES /Fo%TARGET"
+CXXCOM             = "%CXX /nologo /c %CFLAGS %CPPDEFINES %INCPATHS /Tp %SOURCES /Fo%TARGET"
+AR                 = "lib"                                                                  
+LIBPREFIX          = ''                                                                     
+LIBSUFFIX          = '.lib'                                                                 
+ARCOM              = "%AR /NOLOGO /OUT:%TARGET @%@ %SOURCES"                                    

@@ -1,0 +1,21 @@
+[meta]
+TITLE              = RealView 2.x Thumb
+DESCRIPTION        = Generic RealView compiler definition for thumb (tcc, tcpp, armar)
+
+[setup]
+CCCOM              = "%CC --thumb %CFLAGS %CPPDEFINES %INCPATHS -c -o %TARGET %SOURCES"
+CXXCOM             = "%CXX --thumb %CFLAGS %CPPDEFINES %INCPATHS -c -o %TARGET %SOURCES"
+CFILESUFFIX        = '.c'
+CPPDEFSUFFIX       = ''
+CC                 = "tcc"
+LIBSUFFIX          = '.a'
+OBJSUFFIX          = ".o"
+INCSUFFIX          = '"'
+CPPDEFPREFIX       = '-D'
+CXX                = "tcpp"
+AR                 = "armar"
+ARCOM              = "%AR --create %TARGET %SOURCES"
+LIBPREFIX          = ''
+INCPREFIX          = '-I"'
+CXXFILESUFFIX      = '.cpp'
+RANLIB             = ""

@@ -1,0 +1,91 @@
+WHATSNEW CONTEXO
+================
+
+- Improved ctx to support views ( minimal support ).
+- Improved ctx command line tool to support build, info and clean commands.
+- [Johannes] Added update update check to comp2vcproj.
+- [Johannes] Improved comp2vcproj with the following features (Requires Python 2.5):
+             * Separate build directories per vcproj.
+             * Private include directories only available for module source files.
+             * Static GUIDs for vcprojs based on their names => should retain dependency info.
+
+20080326 ctx-0.2.0
+------------------
+
+- Fixed an assertion in ctx_update ( is_canonical ).
+
+
+20080211 ctx-0.1.9
+------------------
+
+- [Johannes] Added a new command tool expmod.
+- [Johannes] Improved comp2vproj command tool (support for setting include path
+                of an external vcproj to same as the ones generated, typically for an
+                exe project). Requires Python 2.5.
+- [Johannes] Fixed bug in comp2vcproj that resulted in incorrect sln files.
+
+
+20080122 ctx-0.1.8
+------------------
+
+- expmodif.h creates directory if given directory in --o does not exists.
+- [Johannes] Improved comp2vproj command tool ( support for target platform 
+             and extra include paths ).
+- [Johannes] Added a new command tool expcompif.
+- Fix bug in buildmod.py that prevents the use of environment files.
+- fixed bug in config.py to that prevented mixing , and ; when defining list values.
+
+
+20071210 ctx-0.1.7
+------------------
+
+- ctx_update is now failsafe.
+- ctx_update_proxy is never reinstalled (since it cannot be reinstalled anyway ).
+- improved info returned by update_tool.
+- fixed bug in getContexoRoot.
+- fixed canonical url assert in ctx_update.py on unix machines.
+
+20071204 ctx-0.1.6
+------------------
+
+- fixed syntax error in buildmod.py
+- ctx.py set the executable property to on.
+
+
+20071204 ctx-0.1.5
+------------------
+
+- upgraded buildmod.py to use user dir when searching for ctx.env file.
+- upgraded buildcomp.py to use user dir when searching for ctx.env file.
+
+
+20071204 ctx-0.1.4
+------------------
+- minor fixes.
+
+20071204 ctx-0.1.3
+------------------
+
+- minor update fixes.
+
+
+20071204 ctx-0.1.2
+------------------
+
+- minor update fixes.
+- added ctx.py command line tool.
+
+
+20071204 ctx-0.1.1
+------------------
+
+- minor update fixes.
+
+20071127 ctx-0.1.0
+------------------
+
++ Change separator to %@ commando file in cdef files to a carry return instead of space.
+- Fix a bug related to external depencies paths.
+- Corrected line ending characters in command line tools ( uses UNIX standard now ).
+
+

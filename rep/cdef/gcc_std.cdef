@@ -1,0 +1,24 @@
+[meta]
+TITLE              = GCC (standard)
+DESCRIPTION        = Standard GCC compiler definition using gcc, g++, ar and ranlib. 
+
+[setup]
+CCCOM              = "%CC %CFLAGS %CPPDEFINES %INCPATHS -c %SOURCES -o %TARGET"
+CXXCOM             = "%CXX %CFLAGS %CPPDEFINES %INCPATHS -c %SOURCES -o %TARGET"
+CFILESUFFIX        = '.c'
+CXXFILESUFFIX      = '.cpp'
+CC                 = "gcc"
+CPPDEFSUFFIX       = ''
+OBJSUFFIX          = ".o"
+INCSUFFIX          = '"'
+CPPDEFPREFIX       = '-D'
+CXX                = "g++"
+AR                 = "ar"
+RANLIB             = "ranlib"
+LIBPREFIX          = ''
+LIBSUFFIX          = '.a'
+INCPREFIX          = '-I"'
+CXXFILESUFFIX      = ""
+ARCOM              = "%AR r %TARGET %SOURCES"
+
+ECHO_SOURCES	   = YES

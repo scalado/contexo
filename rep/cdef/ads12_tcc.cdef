@@ -1,0 +1,23 @@
+[meta]
+TITLE              = ADS 1.2 (tcc)
+DESCRIPTION        = ADS 1.2 compiler for ARM thumb instruction set.
+
+[setup]
+CCCOM              = "%CC %CFLAGS %CPPDEFINES %INCPATHS -c -o %TARGET %SOURCES"
+CXXCOM             = ""
+CFILESUFFIX        = ".c"
+CPPDEFSUFFIX       = ''
+CC                 = "tcc"
+CXX                = ""
+LIBSUFFIX          = '.a'
+OBJSUFFIX          = ".o"
+INCSUFFIX          = '"'
+CPPDEFPREFIX       = '-D'
+LIBPREFIX          = ''
+AR                 = "armar"
+ARCOM              = "%AR -create %TARGET %SOURCES"
+INCPREFIX          = '-I"'
+CXXFILESUFFIX      = ""
+ECHO_SOURCES	   = YES
+
+RANLIB             = ""

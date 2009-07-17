@@ -1,0 +1,20 @@
+[meta]
+TITLE              = MSVC6                                                                  
+DESCRIPION         = Microsoft Visual C/C++ compiler for VC6
+                                                                                          
+[setup]                                                                                   
+CC                 = "cl"                                                                   
+CXX                = "cl"                                                                   
+CFILESUFFIX        = '.c'                                                                   
+CXXFILESUFFIX      = '.cpp'                                                                 
+OBJSUFFIX          = ".obj"                                                                 
+CPPDEFPREFIX       = '/D '                                                                  
+CPPDEFSUFFIX       = ' '                                                                    
+INCPREFIX          = '/I"'                                                                  
+INCSUFFIX          = '" '                                                                    
+CCCOM              = "%CC  /nologo /c /D SCB_NO_64INT %CFLAGS %CPPDEFINES %INCPATHS /Tc %SOURCES /Fo%TARGET"
+CXXCOM             = "%CXX /nologo /c /D SCB_NO_64INT %CFLAGS %CPPDEFINES %INCPATHS /Tp %SOURCES /Fo%TARGET"
+AR                 = "lib"                                                                  
+LIBPREFIX          = ''                                                                     
+LIBSUFFIX          = '.lib'                                                                 
+ARCOM              = "%AR /NOLOGO /OUT:%TARGET @%@ %SOURCES"                                    

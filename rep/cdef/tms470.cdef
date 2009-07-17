@@ -1,0 +1,21 @@
+[meta]
+TITLE              = TMS 470 (TI)
+DESCRIPTION        = TMS 470 compiler (Release 1.22e), for Texas Instruments
+
+[setup]
+CCCOM              = "%CC %CFLAGS %CPPDEFINES %INCPATHS -fc%SOURCES -fr%TARGETDIR -fo%TARGETFILE"
+CXXCOM             = ""
+CFILESUFFIX        = '.c'
+CPPDEFSUFFIX       = ' '
+CC                 = "cl470"
+CXX                = ""
+LIBSUFFIX          = '.lib'
+OBJSUFFIX          = ".obj"
+INCSUFFIX          = '" '
+CPPDEFPREFIX       = '-d'
+LIBPREFIX          = ''
+AR                 = "ar470"
+ARCOM              = ["%AR a %TARGET %SOURCES"]
+INCPREFIX          = '-i"'
+CXXFILESUFFIX      = ""
+RANLIB             = ""

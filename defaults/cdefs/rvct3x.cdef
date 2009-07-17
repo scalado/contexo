@@ -1,0 +1,21 @@
+[meta]
+TITLE              = RealView 3.x
+DESCRIPTION        = Generic RealView compiler definition (armcc, armcpp, armar)
+
+[setup]
+CCCOM              = "%CC %CFLAGS %CPPDEFINES %INCPATHS -c -o %TARGET %SOURCES"
+CXXCOM             = "%CXX %CFLAGS %CPPDEFINES %INCPATHS -c -o %TARGET %SOURCES"
+CFILESUFFIX        = '.c'
+CPPDEFSUFFIX       = ''
+CC                 = "armcc"
+LIBSUFFIX          = '.a'
+OBJSUFFIX          = ".o"
+INCSUFFIX          = '"'
+CPPDEFPREFIX       = '-D'
+CXX                = "armcpp"
+AR                 = "armar"
+ARCOM              = "%AR --create %TARGET --via %@ %SOURCES"
+LIBPREFIX          = ''
+INCPREFIX          = '-I"'
+CXXFILESUFFIX      = '.cpp'
+RANLIB             = ""

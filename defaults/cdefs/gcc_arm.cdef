@@ -1,0 +1,22 @@
+[meta]
+TITLE              = GCC (linux)
+DESCRIPTION        = GCC compiler for linux targets.
+
+[setup]
+CCCOM              = "%CC %CFLAGS %CPPDEFINES %INCPATHS -c %SOURCES -o %TARGET"
+CXXCOM             = "%CXX %CFLAGS %CPPDEFINES %INCPATHS -c %SOURCES -o %TARGET"
+CFILESUFFIX        = '.c'
+CXXFILESUFFIX      = '.cpp'
+CC                 = "arm-linux-gcc"
+CPPDEFSUFFIX       = ''
+OBJSUFFIX          = ".o"
+INCSUFFIX          = '"'
+CPPDEFPREFIX       = '-D'
+CXX                = "arm-linux-gcc++"
+AR                 = "ar"
+RANLIB             = "ranlib"
+LIBPREFIX          = ''
+LIBSUFFIX          = ""
+INCPREFIX          = '-I"'
+CXXFILESUFFIX      = ""
+ARCOM              = ""

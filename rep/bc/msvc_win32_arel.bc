@@ -1,0 +1,17 @@
+#::::::::::::::::::::::::::::::::::::::::::::::::
+# Contexo Build Configuration
+#::::::::::::::::::::::::::::::::::::::::::::::::
+
+[meta]
+TITLE                   = Win32 Release ASCII
+DESCRIPTION             = For Win32 release targets with ASCII chars
+
+[config]
+DEBUG_BUILD             = NO
+DEBUGMODE_MEMORY		= NO
+DEBUGMODE_FILE          = NO
+CHAR_ENCODING           = ASCII
+BYTE_ORDER              = LITTLE_ENDIAN
+CDEF                    = msvc.cdef
+CFLAGS                  = /W4 
+PREP_DEFINES            = WIN32

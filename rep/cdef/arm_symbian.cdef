@@ -1,0 +1,22 @@
+[meta]
+TITLE              = ARM Symbian
+DESCRIPTION        = ARM compiler for Symbian (arm-none-symbianelf-XXXX)
+
+[setup]
+CCCOM              = "%CC %CFLAGS %CPPDEFINES %INCPATHS -c %SOURCES -o %TARGET"
+CXXCOM             = "%CXX %CFLAGS %CPPDEFINES %INCPATHS -c %SOURCES -o %TARGET"
+CFILESUFFIX        = '.c'
+CXXFILESUFFIX      = ".cpp"
+CC                 = "arm-none-symbianelf-gcc"
+CPPDEFSUFFIX       = ''
+OBJSUFFIX          = ".o"
+INCSUFFIX          = '"'
+CPPDEFPREFIX       = '-D'
+CXX                = "arm-none-symbianelf-g++"
+AR                 = "arm-none-symbianelf-ar"
+RANLIB             = "arm-none-symbianelf-ranlib"
+LIBPREFIX          = ''
+LIBSUFFIX          = ".a"
+INCPREFIX          = '-I"'
+CXXFILESUFFIX      = ""
+ARCOM              = "%AR r %TARGET %SOURCES"

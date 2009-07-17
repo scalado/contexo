@@ -1,0 +1,7 @@
+build/
+.ropeproject/
+.eric4project/
+contexo.e4p
+*.pyc
+*~
+private/

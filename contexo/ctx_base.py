@@ -20,7 +20,7 @@ from platform.ctx_platform import *
 from ctx_common import *
 from ctx_log import *
 import ctx_depmgr
-import md5
+import hashlib
 import time
 
 #------------------------------------------------------------------------------
@@ -47,7 +47,7 @@ class CTXBuildParams:
 
     #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     def makeChecksum( self ):
-        md = md5.new()
+        md = hashlib.md5()
 
         for item in self.prepDefines:
             md.update( str(item) )
@@ -468,7 +468,7 @@ class CTXCompiler:
 
 #------------------------------------------------------------------------------
 def mergeChecksums( checksumList ):
-    md = md5.new()
+    md = hashlib.md5()
     for c in assureList(checksumList):
         md.update( c )
     return md.hexdigest()

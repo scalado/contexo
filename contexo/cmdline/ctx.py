@@ -299,6 +299,7 @@ def cmd_buildmod(args):
     cview   = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=bool(args.repo_validation) )
     modules = expand_list_files(cview, args.modules)
     bc      = getBuildConfiguration( cview )
+    
     depmgr  = CTXDepMgr( modules, cview.getItemPaths('modules'), args.tests )
     session = ctx_base.CTXBuildSession( bc )
     session.setDependencyManager( depmgr )

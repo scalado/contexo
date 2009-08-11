@@ -103,6 +103,7 @@ class CTXRepository:
     def addPath(self, path_section, path):
         ctxAssert( path_section in REPO_PATH_SECTIONS, "Unknown path section '%s'"%(path_section) )
         path = path.lstrip('\\/ ')
+        
         self.relative_paths[path_section].append( path )
         infoMessage( "Path '%s' added to section '%s' in repository '%s'"%(path, path_section, self.getID()), 2, self.msgSender )
 
@@ -114,10 +115,9 @@ class CTXRepository:
         ctxAssert( self.access_policy != None, "No access policy was set for repository '%s'"%self.getID() )
         ctxAssert( self.view_root != None, "No view root path was set for repository '%s'"%self.getID() )
 
-
         full_paths = set()
         
-        if   self.access_policy == AP_PREFER_REMOTE_ACCESS and self.isVersionControlled() == False:
+        if self.access_policy == AP_PREFER_REMOTE_ACCESS and self.isVersionControlled() == False:
             for path in self.relative_paths[path_section]:
                 full_paths.add( os.path.join(self.getHref(), path) )
 
@@ -168,7 +168,7 @@ class CTXRepository:
         if len(self.getHref()) == 0:
             self.href = self.getAbsLocalPath()
 
-        self.addPath( 'modules', self.getAbsLocalPath() )
+       # self.addPath( 'modules', self.getAbsLocalPath() )
         
                 
     #--------------------------------------------------------------------------

@@ -2,7 +2,7 @@
 import os
 import sys
 import re
-import md5
+import hashlib
 import cPickle
 
 from stat import *
@@ -91,7 +91,7 @@ def getPath( src_file, pathList ):
 
 #------------------------------------------------------------------------------
 def getMD5( buf ):
-    md = md5.new()
+    md = hashlib.md5()
     md.update( buf )
     return md.hexdigest()
 
@@ -210,38 +210,40 @@ def updatePath ( inputFile, inputFilePathDict, pathList ):
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
-def makeCacheId( searchPaths ):
-    from ctx_cmod import isContexoCodeModule
 
-    m = md5.new()
-    if type(searchPaths) != list:
-        searchPaths = [searchPaths,]
+def makeSearchPathId( searchPath ):
+    m = hashlib.md5()
+    m.update( searchPath )
+    os.path.getmtime( searchPath )
+    return m.hexdigest()
+    
+def makeSearchPathFilename( searchPath ):
+    return "%s.dat" % makeSearchPathId( searchPath )
+    
+def cacheCodeModulePaths( searchPath, codeModulePaths ):
+    filename = makeSearchPathFilename( searchPath )
+    
+    userDir = getUserTempDir()
+    if os.path.exists( userDir ):
+        p = os.path.join( userDir, filename )
+        f = file( p, "wb" )
+        cPickle.dump( codeModulePaths, f, cPickle.HIGHEST_PROTOCOL )
+        f.close()
 
-    for path in searchPaths:
-
-        # Include module root in md5
-        m.update( path )
-
-        # Include each valid code module in md5. This is nessesary to detect
-        # added or changed code modules.
-        if not os.path.exists(path) or not os.path.isdir(path):
-            userErrorExit( "Unable to locate module path: %s"%(path), "ctx_depmgr.py" )
-                        
-        subdirs = os.listdir( path )
-        for subdir in subdirs:
-            candidateModule = os.path.join( path, subdir )
-            if( isContexoCodeModule( candidateModule )):
-                # Note: we only include name of dir in md5. Its root path
-                # is already added.
-                m.update( subdir )
-
-    return "%s"%m.hexdigest()
-
-#------------------------------------------------------------------------------
-def makeCacheIdFilename( cacheId ):
-    return "%s.dat"%cacheId
-
-global_path_cache = dict()
+def getCachedCodeModulePaths( searchPath ):
+    filename = makeSearchPathFilename( searchPath )
+    
+    codeModulePaths = list()
+    
+    userDir = getUserTempDir()
+    if os.path.exists( userDir ):
+        p = os.path.join( userDir, filename )
+        if os.path.exists( p ):
+            f = file( p, "rb" )
+            codeModulePaths = cPickle.load( f )
+            f.close()
+            
+    return codeModulePaths
 
 #------------------------------------------------------------------------------
 #def clearCachedPathLists(searchPaths):
@@ -260,43 +262,8 @@ global_path_cache = dict()
 #        os.remove( p )
 
 #------------------------------------------------------------------------------
-def cachePathList( pathList, searchPaths ):
-    global global_path_cache
 
-    # make sure we're storing a list
-    if type(pathList) == str:
-        pathList = [pathList,]
 
-    cacheId = makeCacheId(searchPaths)
-    global_path_cache[cacheId] = pathList
-
-    userDir = getUserTempDir()
-    if os.path.exists( userDir ):
-        p = os.path.join( userDir, makeCacheIdFilename(cacheId) )
-        f = file( p, "wb" )
-        cPickle.dump( pathList, f, cPickle.HIGHEST_PROTOCOL )
-        f.close()
-
-#------------------------------------------------------------------------------
-def getCachedPathList( searchPaths ):
-    global global_path_cache
-    pathList = list()
-
-    cacheId = makeCacheId(searchPaths)
-
-    if global_path_cache.has_key(cacheId):
-        return global_path_cache[cacheId]
-    else:
-        userDir = getUserTempDir()
-        if os.path.exists( userDir ):
-            p = os.path.join( userDir, makeCacheIdFilename(cacheId) )
-            if os.path.exists( p ):
-                f = file( p, "rb" )
-                pathList = cPickle.load( f )
-                f.close()
-                global_path_cache[cacheId] = pathList
-
-    return pathList
 
 #------------------------------------------------------------------------------
 # Finds all possible dependency locations (include directories) within the
@@ -310,26 +277,30 @@ def getCachedPathList( searchPaths ):
 # beyond the first level.
 #
 #------------------------------------------------------------------------------
-def findAllDependencyLocations( searchPaths ):
+
+def finAllCodeModuleLocations( searchPaths ):
     from ctx_cmod import isContexoCodeModule, CTXRawCodeModule
-    pathList = getCachedPathList(searchPaths)
-
-    if len(pathList) == 0:
-
-        if type(searchPaths) != list:
-            searcPaths = [searchPaths,]
-
-        for path in searchPaths:
-            modCands = os.listdir( path )
-            for cand in modCands:
+    
+    searchPaths = assureList ( searchPaths )
+    
+    pathList = list ()
+    for path in searchPaths:
+        codeModulePaths = getCachedCodeModulePaths( path )
+        
+        if len(codeModulePaths) == 0:
+            pathCandidates = os.listdir( path )
+            for cand in pathCandidates:
                 candPath = os.path.join( path, cand )
                 if isContexoCodeModule( candPath ) == True:
                     mod = CTXRawCodeModule(candPath)
-                    pathList.append( mod.getPubHeaderDir() )
-
-    cachePathList(pathList, searchPaths)
+                    codeModulePaths.append( mod.getPubHeaderDir() )
+            cacheCodeModulePaths( path, codeModulePaths )
+            
+        pathList.extend( codeModulePaths )
 
     return pathList
+
+
 
 # These are explicit indexes for accessing the tuple indexes in depHash.
 INC_FILELIST        = 0
@@ -432,7 +403,9 @@ class CTXDepMgr: # The dependency manager class.
         # Add private header dir of the current module to path list.
         # Also add external dependency paths if any.
         #
-        pathList  = self.depPaths
+        pathList  = assureList ( self.depPaths )
+        
+        pathList += assureList ( cmod.getPubHeaderDir() )
         pathList += assureList ( cmod.getPrivHeaderDir() )
         pathList += assureList ( cmod.getSourceDir () )
 
@@ -482,7 +455,7 @@ class CTXDepMgr: # The dependency manager class.
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
 
     def makeDepHashPickleFilename( self ):
-        pickleFilenameMD5 = md5.new()
+        pickleFilenameMD5 = hashlib.md5()
 
         for path in self.depRoots:
             pickleFilenameMD5.update( path )
@@ -549,11 +522,7 @@ class CTXDepMgr: # The dependency manager class.
     def addDependSearchPaths( self, paths ):
         if len(paths) != 0:
             self.depRoots += assureList( paths )
-            #
-            # Assemble all possible dependency locations from the given depend
-            # paths.
-            #
-            self.depPaths = findAllDependencyLocations( self.depRoots )
+            self.depPaths = finAllCodeModuleLocations( self.depRoots )
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     def enableDiskCaching( self ):

@@ -165,8 +165,8 @@ def updatePath ( inputFile, inputFilePathDict, pathList ):
     return inputFilePath
 
 
-# depHash = [ src_file : ([ deps ], md5)]
-# srcPathHashDict = [ src_file : filepath ]
+
+
 
 
 #------------------------------------------------------------------------------
@@ -192,7 +192,7 @@ def updatePath ( inputFile, inputFilePathDict, pathList ):
 # first call to this function, and then it will remain unmodified throughout
 # the search.
 #
-# @param depHash
+# @param dependencies
 #
 # @param inputFilePathHash
 # Dictionary mapping source files to the complete path of where they are
@@ -300,9 +300,22 @@ def finAllCodeModuleLocations( searchPaths ):
 
     return pathList
 
+def finAllCodeModules( searchPaths ):
+    from ctx_cmod import isContexoCodeModule, CTXRawCodeModule
+    
+    searchPaths = assureList ( searchPaths )
+    
+    modules = list ()
+    for path in searchPaths:
+        pathCandidates = os.listdir( path )
+        for candidate in pathCandidates:
+            candPath = os.path.join( path, candidate )
+            if isContexoCodeModule( candPath ) == True:
+                modules.append( (candidate, candPath) )
+                
+    return modules
 
-
-# These are explicit indexes for accessing the tuple indexes in depHash.
+# These are explicit indexes for accessing the tuple indexes in dependencies.
 INC_FILELIST        = 0
 CHECKSUM            = 1
 
@@ -318,18 +331,15 @@ class CTXDepMgr: # The dependency manager class.
         self.cmods                    = dict() # Dictionary mapping mod name to raw mod.
         self.depPaths                 = list() # Paths to be used for dep. search
         self.xdepPaths                = list() # Paths to be used for xdep. search.
-        self.inputFilePathDict        = dict() # Dictionary mapping files to abs paths.
-
+        
+        self.inputFilePathDict        = dict() # { src_file : absfilepath } 
+        
         self.processed                = set () # Set containing processed files in this session.
-        self.depHash                  = dict() # Dictionary mapping files to dependencies
+        self.dependencies             = dict() # { src_file : (set( deps ), md5)}
+        self.moduleDependencies       = dict() # { module : set( d0, d1, ..., dN) }
 
         self.useDiskCaching           = True
-        self.fileRebuildList          = list() # Not sure about what is this for
-        self.modRebuildList           = list() # Not sure about what is this for
-        self.modDependFiles           = dict() # Dictionary mapping modules to dependencies.
-
-        self.modFilesDict             = dict () # Dictionary mapping module name to all the files on it.
-
+        
         self.needUpdate               = True
         self.codeModulePaths          = codeModulePaths
         self.unitTests                = unitTests
@@ -367,20 +377,20 @@ class CTXDepMgr: # The dependency manager class.
 
             #
             # Create checksum used to determine if the input file has changed
-            # from stored checksum in depHash
+            # from stored checksum in dependencies
             #
 
             if inputFile not in self.processed:
                 checksum = generateChecksum( inputFilePath, self.checksumMethod )
 
-                if inputFile in self.depHash and \
-                    self.depHash[inputFile][CHECKSUM] == checksum:
-                    incFileList = self.depHash[inputFile][INC_FILELIST]
+                if inputFile in self.dependencies and \
+                    self.dependencies[inputFile][CHECKSUM] == checksum:
+                    incFileList = self.dependencies[inputFile][INC_FILELIST]
                 else:
                     inputFileContents = getFileContents( inputFilePath )
                     incFileList = parseIncludes(inputFileContents)
 
-                    self.depHash[inputFile] = (incFileList, checksum)
+                    self.dependencies[inputFile] = (incFileList, checksum)
 
                 self.processed.add ( inputFile )
 
@@ -397,14 +407,13 @@ class CTXDepMgr: # The dependency manager class.
         from ctx_cmod import isContexoCodeModule
         from ctx_cmod import CTXCodeModule
 
-        self.modDependFiles[cmod.getName()] = set()
+        self.moduleDependencies[cmod.getName()] = set()
 
         #
         # Add private header dir of the current module to path list.
         # Also add external dependency paths if any.
         #
         pathList  = assureList ( self.depPaths )
-        
         pathList += assureList ( cmod.getPubHeaderDir() )
         pathList += assureList ( cmod.getPrivHeaderDir() )
         pathList += assureList ( cmod.getSourceDir () )
@@ -425,13 +434,8 @@ class CTXDepMgr: # The dependency manager class.
 
         self.__updateDependencies ( inputFileList, pathList )
 
-        self.fileRebuildList.extend( inputFileList )
-
-        if cmod.getName() not in self.modRebuildList:
-            self.modRebuildList.append( cmod.getName() )
-
-            for inputFile in inputFileList:
-                self.modDependFiles[cmod.getName()].update ( self.depHash[inputFile][0] )
+        for inputFile in inputFileList:
+            self.moduleDependencies[cmod.getName()].update ( self.dependencies[inputFile][0] )
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     def updateDependencyHash( self ):
@@ -439,7 +443,7 @@ class CTXDepMgr: # The dependency manager class.
         #
         # Try to load dependency dictionary from disk.
         #
-        self.depHash = self.loadDepHashFromDisk()
+        self.dependencies = self.loadDependencies()
         self.processed = set()
 
         #
@@ -449,12 +453,12 @@ class CTXDepMgr: # The dependency manager class.
         for cmod in self.cmods.itervalues():
             self.updateModuleDependencies( cmod )
 
-        self.storeDepHashToDisk()
+        self.storeDependencies()
         self.needUpdate = False
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
 
-    def makeDepHashPickleFilename( self ):
+    def makeDependenciesPickleFilename( self ):
         pickleFilenameMD5 = hashlib.md5()
 
         for path in self.depRoots:
@@ -464,27 +468,27 @@ class CTXDepMgr: # The dependency manager class.
         return pickleFilename
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
-    def loadDepHashFromDisk( self ):
-        depHash = dict ()
+    def loadDependencies( self ):
+        dependencies = dict ()
 
         storageLocation = getUserTempDir()
 
-        p = os.path.join( storageLocation, self.makeDepHashPickleFilename() )
+        p = os.path.join( storageLocation, self.makeDependenciesPickleFilename() )
         if os.path.exists( p ):
             f = file( p, "rb" )
-            depHash = cPickle.load( f )
+            dependencies = cPickle.load( f )
             f.close()
 
-        return depHash
+        return dependencies
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
-    def storeDepHashToDisk( self ):
+    def storeDependencies( self ):
         storageLocation = getUserTempDir()
 
         if os.path.exists( storageLocation ):
-            p = os.path.join( storageLocation, self.makeDepHashPickleFilename())
+            p = os.path.join( storageLocation, self.makeDependenciesPickleFilename())
             f = file( p, "wb" )
-            cPickle.dump( self.depHash, f, cPickle.HIGHEST_PROTOCOL )
+            cPickle.dump( self.dependencies, f, cPickle.HIGHEST_PROTOCOL )
             f.close()
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
@@ -548,12 +552,12 @@ class CTXDepMgr: # The dependency manager class.
 
         for incFile in includeFiles:
 
-            if incFile not in self.depHash:
+            if incFile not in self.dependencies:
                 self.__updateDependencies ( [incFile], pathList  )
-                ctxAssert ( incFile in self.depHash, "incFile= " + incFile )
+                ctxAssert ( incFile in self.dependencies, "incFile= " + incFile )
 
             if incFile not in processedFiles:
-                depIncludes = set ( self.depHash[incFile][0] )
+                depIncludes = set ( self.dependencies[incFile][0] )
                 processedFiles.add ( incFile )
                 self.__getDependentIncludes ( depIncludes, pathList, processedFiles )
 
@@ -594,8 +598,8 @@ class CTXDepMgr: # The dependency manager class.
         if self.needUpdate:
             self.updateDependencyHash()
         
-        if moduleName not in self.modDependFiles:
-            cmod = CTXCodeModule ( moduleName, self.codeModulePaths, self.unitTests)
+        if moduleName not in self.moduleDependencies:
+            cmod = CTXCodeModule ( moduleName, self.codeModulePaths, False )
             self.cmods[moduleName] = cmod
             self.updateModuleDependencies ( cmod )
 
@@ -608,6 +612,7 @@ class CTXDepMgr: # The dependency manager class.
         pathList += assureList ( cmod.getSourceDir () )
 
         return self.getIncludePaths ( filenames, pathList )
+
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
 
@@ -624,15 +629,15 @@ class CTXDepMgr: # The dependency manager class.
         return [self.inputFilePathDict[f] for f in includeFiles ]
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
-    def getDepHashChecksum( self, inputFile ):
+    def getDependenciesChecksum( self, inputFile ):
 
         if self.needUpdate:
             self.updateDependencyHash()
 
         filename = os.path.basename ( inputFile )
 
-        if filename in  self.depHash:
-            return self.depHash[filename][1]
+        if filename in  self.dependencies:
+            return self.dependencies[filename][1]
         else:
             userErrorExit( "Given input file %s is not a valid hash key"%filename, self.msgSender )
 
@@ -647,8 +652,8 @@ class CTXDepMgr: # The dependency manager class.
             self.updateDependencyHash()
 
         processed_set = set ()
-        modules = set (self.cmods.keys())
-        
+        modules = set (self.cmods.keys())  
+ 
         while modules != processed_set:
             for module in modules - processed_set:
                 incPathSet = self.getModuleIncludePaths(module)
@@ -661,6 +666,35 @@ class CTXDepMgr: # The dependency manager class.
 
         return list (modules)
 
+
+    # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
+    # Returns a closed set with all modules depending on given module.
+    #
+    # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
+    def getDependentModules( self, module ):
+        from ctx_cmod import CTXRawCodeModule, isContexoCodeModule
+        
+        modules = list ()
+        
+        if not self.cmods.has_key(module):
+            cmod = CTXRawCodeModule( module )
+            self.updateModuleDependencies( cmod )
+       
+        modulePubFiles = set(self.cmods[module].getPubHeaderFilenames())
+        
+        candidates = finAllCodeModules( self.codeModulePaths )
+        for candidate in candidates:
+            if not self.moduleDependencies.has_key( candidate[0] ):
+                if isContexoCodeModule( candidate[1] ):
+                    cmod = CTXRawCodeModule( candidate[1] )
+                    self.updateModuleDependencies( cmod )
+                    
+            dependentFiles = self.moduleDependencies[candidate[0]]
+            if not modulePubFiles.isdisjoint (dependentFiles):
+                modules.append( candidate[0] )
+                
+        return modules
+
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     def getCodeModulePaths( self ):
         return self.codeModulePaths
@@ -671,7 +705,7 @@ class CTXDepMgr: # The dependency manager class.
     #
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     def getPublicHeaders(self, module_name_list,  full_path = False):
-        # depHash = [ src_file : ([ deps ], md5, module_name )]
+        # dependencies = [ src_file : ([ deps ], md5, module_name )]
         header_set  = set ()
         for module_name in module_name_list:
             if self.cmods.has_key ( module_name ):
@@ -683,7 +717,7 @@ class CTXDepMgr: # The dependency manager class.
                     else:
                         header_set.add ( header )
 
-                    for dep_header in self.depHash[header][0]:
+                    for dep_header in self.dependencies[header][0]:
                         if (full_path):
                             header_set.add ( self.inputFilePathDict [ dep_header ] )
                         else:
@@ -711,14 +745,14 @@ class CTXDepMgr: # The dependency manager class.
     #
     def emptyCodeModules ( self ):
         self.cmods = dict ()
-        self.modDependFiles = dict()
+        self.moduleDependencies = dict()
 
-    def printDepHash( self, tableCharWidth = 80 ):
+    def printDependencies( self, tableCharWidth = 80 ):
 
         printBuffer = str()
         maxLen      = 0
 
-        for inputFile in self.depHash.keys():
+        for inputFile in self.dependencies.keys():
             inputFileName = os.path.basename(inputFile)
             if len(inputFileName) > maxLen:
                 maxLen = len(inputFileName)
@@ -726,19 +760,19 @@ class CTXDepMgr: # The dependency manager class.
         printBuffer += "-" * tableCharWidth
         printBuffer += "\n"
 
-        for inputFile in self.depHash.keys():
+        for inputFile in self.dependencies.keys():
             inputFileName = os.path.basename(inputFile)
             printBuffer += " " * (maxLen - len(inputFileName))
 
             printBuffer += "%s : "%(inputFileName)
-            for incFile in self.depHash[inputFile][0]:
+            for incFile in self.dependencies[inputFile][0]:
                 if incFile == None:
                     continue
                 printBuffer += "%s\n"%os.path.basename(incFile)
                 printBuffer += " " * maxLen
                 printBuffer += "   "
 
-            printBuffer += "CHECKSUM: %s\n\n"%self.depHash[inputFile][1]
+            printBuffer += "CHECKSUM: %s\n\n"%self.dependencies[inputFile][1]
 
 
         printBuffer += "-" * tableCharWidth

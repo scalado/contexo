@@ -116,7 +116,8 @@ def create_codemodules( main_module_name_list, dep_module_name_list,
 
     all_modules = list()
     all_modules.extend(main_module_name_list)
-    all_modules.extend(dep_module_name_list)      
+    all_modules.extend(dep_module_name_list) 
+    
     for module_name in all_modules:
         modRoot = ctx_cmod.resolveModuleLocation( module_name, 
                                                   module_search_paths )
@@ -228,7 +229,7 @@ def buildmodules( depmgr, session, modules, deps, tests, output_path, lib,
     all_modules = depmgr.getCodeModules() if deps else modules
     all_modules.sort ()
     dep_modules = set(all_modules) - set(modules)
-
+    
     ctx_modules = create_codemodules( modules, dep_modules, tests, 
                                       depmgr.getCodeModulePaths() )
 
@@ -249,8 +250,7 @@ def cmd_info(args):
     # Get Code Module Paths from view.
     #
 
-    cview = ctx_view.CTXView(args.view)
-    CODEMODULE_PATHS = cview.getAllCodeModulePaths()
+    cview = ctx_view.CTXView(args.view, ctx_view.AP_NO_REMOTE_ACCESS, False, False)
 
     #
     # Show info
@@ -258,27 +258,33 @@ def cmd_info(args):
 
     print "Contexo version: ", ctx_sysinfo.CTX_DISPLAYVERSION
     print "Using build config file: ", CTX_DEFAULT_BCONF
-    #print "Current view: ", CTX_DEFAULT_VIEW
 
     #
     # Module
     #
 
     if args.module != None:
-        depmgr = CTXDepMgr ( args.module, CODEMODULE_PATHS, args.tests )
+        depmgr = CTXDepMgr ( args.module, cview.getItemPaths('modules') )
         module_names = depmgr.getCodeModules ()
         module_names.sort ()
         if len ( module_names ) > 0:
-            print "\nDependency list:\n"
+            print "\nModules '" + args.module[0] + "' depends on:\n"
             for module in module_names:
                 print "\t",module
 
         pub_headers = depmgr.getPublicHeaders ( args.module)
         pub_headers.sort()
         if len ( pub_headers ) > 0:
-            print "\nDependent public headers:\n"
+            print "\nPublic headers '" + args.module[0] + "' depends on:\n"
             for header in pub_headers:
                 print "\t",header
+                
+        module_names = depmgr.getDependentModules( args.module[0] )
+        if len ( module_names ) > 0:
+            print "\nModules that depends on '" + args.module[0] + "':\n"
+            for module in module_names:
+                print "\t",module
+        
 #------------------------------------------------------------------------------
 def cmd_buildmod(args):
     from contexo import ctx_cmod
@@ -301,8 +307,12 @@ def cmd_buildmod(args):
     bc      = getBuildConfiguration( cview )
     
     depmgr  = CTXDepMgr( modules, cview.getItemPaths('modules'), args.tests )
+    
     session = ctx_base.CTXBuildSession( bc )
+   
     session.setDependencyManager( depmgr )
+    
+   
 
     # Register build configuration in log handler
     ctx_log.ctxlogSetBuildConfig( bc.getTitle(),
@@ -312,6 +322,7 @@ def cmd_buildmod(args):
                                   "N/A" )
 
     output_path = os.path.join( args.output, args.libdir )
+    
     buildmodules( depmgr, session, modules, args.deps, args.tests,
                   output_path, args.lib, bc.getTitle() )
 
@@ -676,18 +687,6 @@ parser = ArgumentParser( description=ctx_sysinfo.CTX_BANNER,
 
 subparsers = parser.add_subparsers ()
 
-# update parser
-#parser_update = subparsers.add_parser('update', help="check if updates are available and update accordingly" )
-#parser_update.set_defaults(func=update)
-
-# info parser
-# TODO: Implement 'info' command
-#parser_info = subparsers.add_parser('info', help="Displays useful information about the build system")
-#parser_info.set_defaults(func=info)
-#parser_info.add_argument('-m', '--module', nargs=1, help="Show info about a contexo module")
-#parser_info.add_argument('-t', action='store_true', help="Show info on both module and unit tests")
-#parser_info.add_argument('-v', '--view', help="The view to use for this operation")
-
 standard_description = dict({\
     '--bconf': "Build configuration file (*.bc/*.bconf)",\
       '--env': "One or more enviroment replacement files (*.env)",\
@@ -701,6 +700,12 @@ standard_description = dict({\
 '--repo-validation': "Validates all repositories before processing. This usually increases duration but ensures correct repository structure. Repository validation can also be done by running 'ctx view validate' as a separate step.",\
 '--no-remote-repo-access': "If specified, the system never tries to process items directly from an RSpec repository's remote location (href) even if so is possible. Normally, if a repository is accessible through regular file access, the system always tries to use it from its remote location."})
 
+# info parser
+parser_info = subparsers.add_parser('info', help="Displays information of contexo modules")
+parser_info.set_defaults(func=cmd_info)
+parser_info.add_argument('module', nargs=1, help="Module to show info for")
+#parser_info.add_argument('-t', action='store_true', help="Show info on both module and unit tests")
+parser_info.add_argument('-v', '--view', default=os.getcwd(), help=standard_description['--view'])
 
 # buildmod parser
 parser_build = subparsers.add_parser('buildmod', help="build contexo modules." )

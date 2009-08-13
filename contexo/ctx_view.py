@@ -36,7 +36,7 @@ default_access_policy = AP_PREFER_REMOTE_ACCESS
 
 #------------------------------------------------------------------------------
 class CTXView:
-    def __init__(self, view_path, access_policy, updating=False, validate=True ):
+    def __init__(self, view_path, access_policy=AP_PREFER_REMOTE_ACCESS, updating=False, validate=True ):
         self.localPath = os.path.abspath(view_path)
         self.global_paths = dict() # {section: pathlist}, where 'section' is any of SYSGLOBAL_PATH_SECTIONS
         self.rspec = None
@@ -44,13 +44,9 @@ class CTXView:
         self.updating = updating # True when the view is being updated instead of used for building
         self.msgSender = "CTXView"
         
-        infoMessage( "Using view: %s "%(self.getRoot()), 2, self.msgSender )
+        infoMessage("Using view: %s "%(self.getRoot()), 2, self.msgSender )
         
-        if self.access_policy == None:
-            self.access_policy = AP_PREFER_REMOTE_ACCESS
-            infoMessage("Defaulting to repository access policy: %s"%AP_TEXT[self.access_policy], 2, self.msgSender )
-        else:
-            infoMessage("Using repository access policy: %s"%AP_TEXT[self.access_policy], 2, self.msgSender )
+        infoMessage("Using repository access policy: %s"%AP_TEXT[self.access_policy], 2, self.msgSender )
                     
         for sec in SYSGLOBAL_PATH_SECTIONS:
             self.global_paths[sec] = list()

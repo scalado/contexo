@@ -37,17 +37,8 @@ criteriaDirs = ['contexo','doc','inc', 'src', 'test']
 
 
 #------------------------------------------------------------------------------
-# The pathlist is now an non-optional argument so that we dont need to depend on the config
-# The caller should find the pathlist in the config.
 def resolveModuleLocation( modName, pathlist ):
     tried = [modName,]
-
-    # Try resolving the module location by concatenating the given module
-    # with each path in the CONTEXO_CODEMODULE_PATHS system variable.
-#    if pathlist == None:
-#        sysConfig = getSystemConfig()
-#        pathlist  = sysConfig['CONTEXO_CODEMODULE_PATHS']
-#        pathlist.insert( 0, os.getcwd() ) # The first place we look is current wd.
 
     new_path   = str()
 
@@ -60,7 +51,6 @@ def resolveModuleLocation( modName, pathlist ):
             break
 
     if len(new_path) == 0:
-        # We can't locate the module.
         errorMessage( "Can't find module '" + modName + "'", "resolveModuleLocation")
         infoMessage( "Attempted following locations:", 0 )
         for loc in tried:
@@ -87,7 +77,6 @@ def assertValidContexoCodeModule( path, msgSender ):
 
     if not os.path.exists(path):
         userErrorExit( "Unable to locate code module '%s'"%(path), msgSender )
-
 
     for d in criteriaDirs:
         if not os.path.exists( os.path.join( path, d) ):
@@ -118,7 +107,7 @@ def getSourcesFromDir( self, srcDir ):
 # CTXCodeModule when the outline and contents of a code module needs to be
 # queried or analyzed and time.
 #
-# This class is used by CTXCodeModule.
+# This class is extended by CTXCodeModule.
 #------------------------------------------------------------------------------
 class CTXRawCodeModule:
 
@@ -372,11 +361,11 @@ class CTXCodeModule( CTXRawCodeModule ):
 
                 if xdep_val != '':
                     include_path_candidates = xdep_val
-                    include_path_candidates = include_path_candidates.split( ';' )
+                    include_path_candidates = include_path_candidates.split( os.pathsep )
                     xdep_not_found = False
 
                 if include_path_candidates == None:
-                    userErrorExit( "Cannot resolve item '%s' specified in '%s'"%( xdep_var, xdep_filepath), self.msgSender )
+                    warningMessage( "Cannot resolve item '%s' specified in '%s'"%( xdep_var, xdep_filepath), self.msgSender )
 
                 include_path_candidates = assureList( include_path_candidates )
 

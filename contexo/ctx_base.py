@@ -530,7 +530,7 @@ class CTXBuildSession:
         for incFile in includeFiles:
             ctxAssert( os.path.exists(incFile), "incFile: " + incFile )
 
-            checksum = self.depMgr.getDepHashChecksum( incFile )
+            checksum = self.depMgr.getDependenciesChecksum( incFile )
             checksumList.append( checksum )
 
         checksumList.append( buildParamsChecksum )

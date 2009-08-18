@@ -59,11 +59,7 @@ def parseIncludes ( src ):
     for i in includes:
         system_includes.append (regexp.findall (i)[0][1:-1])
 
-    # We do not want to perform dependency checks on system includes.
-    # system includes are considered static.
-    # return user_includes + system_includes
-
-    return user_includes
+    return (user_includes, system_includes)
 
 #------------------------------------------------------------------------------
 def getModulePrivHeaderDir( modulePath ):
@@ -388,7 +384,7 @@ class CTXDepMgr: # The dependency manager class.
                     incFileList = self.dependencies[inputFile][INC_FILELIST]
                 else:
                     inputFileContents = getFileContents( inputFilePath )
-                    incFileList = parseIncludes(inputFileContents)
+                    incFileList = parseIncludes(inputFileContents)[0]
 
                     self.dependencies[inputFile] = (incFileList, checksum)
 

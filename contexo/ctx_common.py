@@ -94,10 +94,7 @@ cachedConfigDict = None
 #------------------------------------------------------------------------------
 #
 #------------------------------------------------------------------------------
-def getUserDir() :
-    #if sys.platform != 'win32' :
-    #expanduser itself does the stuff with USERPROFILE and HOME on windows
-    
+def getUserDir():    
     userDir = os.path.expanduser( '~' )
     if userDir == '~':
         def valid(path) :
@@ -107,19 +104,11 @@ def getUserDir() :
         def env(name) :
             return os.environ.get( name, '' )
 
-#        userDir = env( 'USERPROFILE' )
-#        if not valid(userDir) :
-#            userDir = env( 'HOME' )
-#            if not valid(userDir) :
-#                userDir = '%s%s' % (env('HOMEDRIVE'),env('HOMEPATH'))
-#                if not valid(userDir) :
         userDir = env( 'SYSTEMDRIVE' )
         if userDir and (not userDir.endswith(u'\\')) :
             userDir += u'\\'
         if not valid(userDir) :
             userDir = u'C:\\'
-
-   # userDir = os.path.join (userDir,'.contexo' )
 
     if not os.path.exists ( userDir ):
         os.mkdir ( userDir )

@@ -5,6 +5,7 @@
 #                                                                             #
 #   Author:                                                                   #
 #   Robert Alm                                                                #
+#   License GPL v2. See LICENSE.txt.                                          #
 #   ------------                                                              #
 #                                                                             #
 #   System information constants and persistent settings                      #
@@ -19,10 +20,11 @@ CTX_VER_MAJOR           = 0
 CTX_VER_MINOR           = 4
 CTX_VER_STATE           = 'beta'
 CTX_DISPLAYVERSION      = '%d.%d %s'%(CTX_VER_MAJOR, CTX_VER_MINOR, CTX_VER_STATE)
+CTX_LICENSE             = 'licesed under GPLv2 ( http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt )'
 
 CTX_BANNER              = """
-Contexo Build System v%s 
-"""%(CTX_DISPLAYVERSION)
+Contexo Build System v%s,\n %s
+"""%(CTX_DISPLAYVERSION, CTX_LICENSE)
 
 
 

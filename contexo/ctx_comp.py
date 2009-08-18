@@ -4,7 +4,7 @@
 #   Component of Contexo Shell - (c) Scalado AB 2006                          #
 #                                                                             #
 #   Author: Robert Alm (robert.alm@scalado.com)                               #
-#                                                                             #
+#   License GPL v2. See LICENSE.txt.                                          #
 #   ------------                                                              #
 #                                                                             #
 #   Handles the COMP format.                                                  #
@@ -58,8 +58,7 @@ class COMPFile:
         self.__processCompFile()
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    #   Resolves the location of the comp file by searching in the paths given
-    #   by the system config variable CONTEXO_COMP_PATHS.
+    #   Resolves the location of the comp file by searching in the given paths 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     def __resolveCompFileLocation( self,  comp_paths ):
 
@@ -211,11 +210,7 @@ class COMPFile:
                     self.moduleCache.append( cm )
 
 
-
     def copyPublicHeaderFiles( self, dependPaths, outputPath, headerDir, nameAsSubDir ):
-
-        if nameAsSubDir and self.name != None and len(self.name) != 0:
-            outputPath = os.path.join( outputPath, self.name )
 
         libPath       = outputPath
         headerPath    = outputPath

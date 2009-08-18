@@ -1,5 +1,23 @@
 #!/usr/bin/env python
 
+###############################################################################
+#                                                                             #
+#   ctx.py                                                                    #
+#   Contexo main tool - (c) Scalado AB 2008                                   #
+#                                                                             #
+#   Author: Manuel Astudillo (manuel.astudillo@scalado.)                      #
+#   License GPL v2. See LICENSE.txt.                                          #
+#   ------------                                                              #
+#                                                                             #
+#   Handles the COMP format.                                                  #
+#                                                                             #
+#   Support:                                                                  #
+#                                                                             #
+#   20061101 - COMP format version 1                                          #
+#                                                                             #
+###############################################################################
+
+
 # coding=UTF-8
 # TODO:  Files as arguments
 import os
@@ -194,25 +212,16 @@ def export_public_module_headers ( depmgr, modules, headerPath ):
         dst = os.path.join( headerPath, os.path.basename(publicHeader) )
         infoMessage( "Exporting header: %s"%(os.path.basename(publicHeader)) )
         shutil.copyfile( src, dst )
-
-#------------------------------------------------------------------------------
-def humptydumpty_getFullPathname( header, codemodule_map ):
-    
-    if header in codemodule_map.keys():
-        return codemodule_map[header]
-    else:
-        return None
     
 #------------------------------------------------------------------------------
-def export_headers( depmgr, headers, headerDir, codemodule_map ):
+def export_headers( depmgr, headers, headerDir ):
 
     if not os.path.exists( headerDir ):
         os.makedirs( headerDir )
 
     infoMessage( "Exporting headers", 1, msgSender )
     for header in headers:
-        #src = depmgr.getFullPathname ( header )
-        src = humptydumpty_getFullPathname ( header, codemodule_map ) # workaround
+        src = depmgr.getFullPathname ( header )
         if src != None:
             dst = os.path.join( headerDir, header )
             infoMessage( "%s -> %s"%(src, dst), 2, msgSender )
@@ -234,13 +243,6 @@ def buildmodules( depmgr, session, modules, deps, tests, output_path, lib,
                                       depmgr.getCodeModulePaths() )
 
     build_libraries( ctx_modules, lib, output_path, build_dir, session )
-
-#------------------------------------------------------------------------------
-def cmd_update(args):
-    date_file = os.path.join ( ctx_common.getUserTempDir (), 'date_file.ctx' )
-    if os.path.exists ( date_file ):
-        os.remove ( date_file )
-    import ctx_update_proxy
 
 #------------------------------------------------------------------------------
 def cmd_info(args):
@@ -362,9 +364,9 @@ def cmd_buildcomp(args):
     cview       = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=bool(args.repo_validation) )
     components  = expand_list_files( cview, args.components )
     bc          = getBuildConfiguration( cview )
-    #depmgr      = CTXDepMgr ( None, cview.getItemPaths('modules'), args.tests ) # See below comments about fix
+    depmgr      = CTXDepMgr ( None, cview.getItemPaths('modules'), args.tests ) 
     session     = ctx_base.CTXBuildSession( bc )
-    #session.setDependencyManager( depmgr ) # See below comments about fix
+    session.setDependencyManager( depmgr )
     
     # Register build configuration in log handler
     ctx_log.ctxlogSetBuildConfig( bc.getTitle(),
@@ -372,13 +374,12 @@ def cmd_buildcomp(args):
                                   bc.getBuildParams().cflags,
                                   bc.getBuildParams().prepDefines,
                                   "N/A" )
-        
-    
+                                  
     # Process components
     for comp in create_components( components, cview.getItemPaths('comp') ):
         ctx_log.ctxlogBeginComponent( comp.name )
 
-        outputPath = os.path.join( args.output, comp.name )
+        outputPath = args.output
         lib_dir = os.path.join( outputPath, args.libdir )
         header_dir = os.path.join( outputPath, args.headerdir )
 
@@ -389,34 +390,15 @@ def cmd_buildcomp(args):
         for library, modules in comp.libraries.items():
             
             modules = expand_list_files( cview, modules )            
-
-            # TODO: Fix depmgr
-            # This code is what should be enough. But instead
-            # we have to create a new depmgr for each run since
-            # something is left inconsistent when simply calling add/emptyCodeModules.
             
-            #depmgr.addCodeModules( modules )
-            #buildmodules( depmgr, session,  modules,  args.deps,  args.tests,  
-            #              outputPath,  args.libdir,  library,  
-            #              session.bc.getTitle())
-            #depmgr.emptyCodeModules()
-
-            # The below code is a workaround to make unittests work for components
-
-
-            depmgr      = CTXDepMgr ( modules, cview.getItemPaths('modules'), args.tests )
-            session.setDependencyManager( depmgr )
+            depmgr.addCodeModules( modules )
+            
             buildmodules( depmgr, session,  modules,  args.deps,  args.tests,
                           lib_dir, library, session.bc.getTitle())
-                          
-            # Oh horrific
-            codemodule_map.update( depmgr.inputFilePathDict )
             
-
-        # The above fix has the side-effect that it's only the last constructed
-        # depmgr which is used for this header-export. To get around this we
-        # temporarily add an extra argument to this function (last one)
-        export_headers( depmgr, comp.publicHeaders, header_dir, codemodule_map )
+            depmgr.emptyCodeModules()
+            
+        export_headers( depmgr, comp.publicHeaders, header_dir )
     
         ctx_log.ctxlogEndComponent()
 

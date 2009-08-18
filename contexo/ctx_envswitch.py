@@ -51,11 +51,7 @@ class EnvironmentLayout:
 
     #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     def __mergeEnv( self, envDict, alwaysReplace = False ):
-        
-        if sys.platform == 'win32':
-            delimiter = ';'
-        else:
-            delimiter = ':'
+        delimiter = os.pathsep
             
         for key, value in envDict.iteritems():
             if type(value) == list:
@@ -134,16 +130,13 @@ def switchEnvironment( newEnvLayout, config, preserve = True ):
     for key in remKeys:
         del os.environ[key]
 
-    # Old switch variant:
-        #os.environ = curEnv.getEnv()
-
     # Display resulting environment on high verbose level.
     if getVerboseLevel() >= 5:
         print "---------------------------------------------------"
         print "| (ctx_envswitch.py): Environment after switch:   |"
         print "---------------------------------------------------"
         for var, val in os.environ.iteritems():
-            val = val.split( ';' )
+            val = val.split( os.pathsep )
             if type(val) == list:
                 print "%24s: %s;"%(var,val[0])
                 for v in val[1:]:

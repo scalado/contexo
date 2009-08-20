@@ -229,6 +229,9 @@ def cacheCodeModulePaths( searchPath, codeModulePaths ):
 def getCachedCodeModulePaths( searchPath ):
     filename = makeSearchPathFilename( searchPath )
     
+    if searchPath == '/Users/manuela/Dev/views/branches/caps-trunk/scb/osil/int':
+        print filename
+    
     codeModulePaths = list()
     
     userDir = getUserTempDir()
@@ -281,7 +284,8 @@ def finAllCodeModuleLocations( searchPaths ):
     
     pathList = list ()
     for path in searchPaths:
-        codeModulePaths = getCachedCodeModulePaths( path )
+        #codeModulePaths = getCachedCodeModulePaths( path )
+        codeModulePaths = []
         
         if len(codeModulePaths) == 0:
             pathCandidates = os.listdir( path )
@@ -290,7 +294,7 @@ def finAllCodeModuleLocations( searchPaths ):
                 if isContexoCodeModule( candPath ) == True:
                     mod = CTXRawCodeModule(candPath)
                     codeModulePaths.append( mod.getPubHeaderDir() )
-            cacheCodeModulePaths( path, codeModulePaths )
+           # cacheCodeModulePaths( path, codeModulePaths )
             
         pathList.extend( codeModulePaths )
 
@@ -318,14 +322,14 @@ CHECKSUM            = 1
 #------------------------------------------------------------------------------
 class CTXDepMgr: # The dependency manager class.
 #------------------------------------------------------------------------------
-    def __init__(self, codeModules = None, codeModulePaths = list(), unitTests = False ):
+    def __init__(self, codeModulePaths = list() ):
         self.msgSender                = 'CTXDepMgr'
         self.depRoots                 = list()
         self.supportedChecksumMethods = ['MTIME', 'MD5']
         self.checksumMethod           = self.supportedChecksumMethods[0]
 
         self.cmods                    = dict() # Dictionary mapping mod name to raw mod.
-        self.depPaths                 = list() # Paths to be used for dep. search
+        self.depPaths                 = set() # Paths to be used for dep. search
         self.xdepPaths                = list() # Paths to be used for xdep. search.
         
         self.inputFilePathDict        = dict() # { src_file : absfilepath } 
@@ -338,13 +342,8 @@ class CTXDepMgr: # The dependency manager class.
         
         self.needUpdate               = True
         self.codeModulePaths          = codeModulePaths
-        self.unitTests                = unitTests
 
         self.addDependSearchPaths( codeModulePaths )
-
-        if codeModules != None:
-            self.addCodeModules( codeModules, unitTests )
-            self.updateDependencyHash()
 
     def _CTXDepMgr__updateDependencies ( self, inputFileList, pathList ):
 
@@ -409,15 +408,24 @@ class CTXDepMgr: # The dependency manager class.
         # Add private header dir of the current module to path list.
         # Also add external dependency paths if any.
         #
-        pathList  = assureList ( self.depPaths )
-        pathList += assureList ( cmod.getPubHeaderDir() )
-        pathList += assureList ( cmod.getPrivHeaderDir() )
-        pathList += assureList ( cmod.getSourceDir () )
+        #pathList  = assureList ( self.depPaths )
+        #pathList += assureList ( cmod.getPubHeaderDir() )
+        #pathList += assureList ( cmod.getPrivHeaderDir() )
+        #pathList += assureList ( cmod.getSourceDir () )
+    
+        self.depPaths.update ( assureList ( cmod.getPubHeaderDir() ) )
+        self.depPaths.update ( assureList ( cmod.getPrivHeaderDir() ) )
+        self.depPaths.update ( assureList ( cmod.getSourceDir () ) )
+        
+        if cmod.buildUnitTests:
+            self.depPaths.update (assureList ( cmod.getTestDir () ) )
+
+        paths = self.depPaths;
 
         if cmod.hasExternalDependencies():
-            pathList += assureList( CTXCodeModule(cmod.modRoot).resolveExternalDeps() )
+            paths.update( assureList( CTXCodeModule(cmod.modRoot).resolveExternalDeps() ) )
 
-        if len(pathList) == 0:
+        if len(paths) == 0:
             infoMessage( "WARNING: List of dependency search paths is empty.", 2, self.msgSender )
 
         # Add all sources for this module
@@ -426,9 +434,9 @@ class CTXDepMgr: # The dependency manager class.
         # Add sources for unit tests
         if cmod.buildUnitTests:
             inputFileList.extend ( cmod.getTestSourceFilenames() )
-            pathList += assureList ( cmod.getTestDir () )
+            #pathList += assureList ( cmod.getTestDir () )
 
-        self.__updateDependencies ( inputFileList, pathList )
+        self.__updateDependencies ( inputFileList, list(paths) )
 
         for inputFile in inputFileList:
             self.moduleDependencies[cmod.getName()].update ( self.dependencies[inputFile][0] )
@@ -522,7 +530,7 @@ class CTXDepMgr: # The dependency manager class.
     def addDependSearchPaths( self, paths ):
         if len(paths) != 0:
             self.depRoots += assureList( paths )
-            self.depPaths = finAllCodeModuleLocations( self.depRoots )
+            self.depPaths.update(finAllCodeModuleLocations( self.depRoots ))
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     def enableDiskCaching( self ):
@@ -568,7 +576,7 @@ class CTXDepMgr: # The dependency manager class.
     #
     def getIncludePaths ( self, filenames, extraPaths ):
 
-        pathList = self.depPaths
+        pathList = list(self.depPaths)
         pathList.extend ( extraPaths )
 
         depIncludes = self.__getDependentIncludes ( filenames, pathList, set() )
@@ -620,9 +628,15 @@ class CTXDepMgr: # The dependency manager class.
         if self.needUpdate:
             self.updateDependencyHash()
 
-        includeFiles = self.__getDependentIncludes ( [sourceFile], self.depPaths, set() )
+        includeFiles = self.__getDependentIncludes ( [sourceFile], list(self.depPaths), set() )
 
-        return [self.inputFilePathDict[f] for f in includeFiles ]
+        deps = list()
+        for f in includeFiles:
+            if not self.inputFilePathDict.has_key(f):
+                deps.append( updatePath( f, self.inputFilePathDict, self.depPaths ) )
+            deps.append(self.inputFilePathDict[f])
+        
+        return deps
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     def getDependenciesChecksum( self, inputFile ):
@@ -729,7 +743,7 @@ class CTXDepMgr: # The dependency manager class.
     # this dependency manager.
     #
     def getFullPathname ( self, filename ):
-        if filename in self.inputFilePathDict.keys():
+        if self.inputFilePathDict.has_key(filename):
             return self.inputFilePathDict[filename]
         else:
             None

@@ -11,7 +11,6 @@ from ctx_common import *
 from ctx_cmod import *
 
 
-
 C_IDENTIFIER_REGEXP     = '[a-zA-Z_]+([a-zA-Z_]|[0-9])*'
 C_COMMENT_REGEXP        = '(/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/)|(//.*)'
 C_STRING_REGEXP         = '".*"'
@@ -229,9 +228,6 @@ def cacheCodeModulePaths( searchPath, codeModulePaths ):
 def getCachedCodeModulePaths( searchPath ):
     filename = makeSearchPathFilename( searchPath )
     
-    if searchPath == '/Users/manuela/Dev/views/branches/caps-trunk/scb/osil/int':
-        print filename
-    
     codeModulePaths = list()
     
     userDir = getUserTempDir()
@@ -265,8 +261,7 @@ def getCachedCodeModulePaths( searchPath ):
 
 
 #------------------------------------------------------------------------------
-# Finds all possible dependency locations (include directories) within the
-# paths in searchPaths.
+# Finds all possible source path locations  within the paths in searchPaths.
 #
 # For each directory found which evaluates to a valid contexo module, the
 # private and public header directories are added to location list.
@@ -277,14 +272,13 @@ def getCachedCodeModulePaths( searchPath ):
 #
 #------------------------------------------------------------------------------
 
-def finAllCodeModuleLocations( searchPaths ):
+def findAllCodeModulPaths( searchPaths ):
     from ctx_cmod import isContexoCodeModule, CTXRawCodeModule
     
     searchPaths = assureList ( searchPaths )
     
     pathList = list ()
     for path in searchPaths:
-        #codeModulePaths = getCachedCodeModulePaths( path )
         codeModulePaths = []
         
         if len(codeModulePaths) == 0:
@@ -294,8 +288,9 @@ def finAllCodeModuleLocations( searchPaths ):
                 if isContexoCodeModule( candPath ) == True:
                     mod = CTXRawCodeModule(candPath)
                     codeModulePaths.append( mod.getPubHeaderDir() )
-           # cacheCodeModulePaths( path, codeModulePaths )
-            
+                    codeModulePaths.append( mod.getPrivHeaderDir() )
+                    codeModulePaths.append( mod.getSourceDir () )
+                    codeModulePaths.append( mod.getTestDir () )
         pathList.extend( codeModulePaths )
 
     return pathList
@@ -413,9 +408,9 @@ class CTXDepMgr: # The dependency manager class.
         #pathList += assureList ( cmod.getPrivHeaderDir() )
         #pathList += assureList ( cmod.getSourceDir () )
     
-        self.depPaths.update ( assureList ( cmod.getPubHeaderDir() ) )
-        self.depPaths.update ( assureList ( cmod.getPrivHeaderDir() ) )
-        self.depPaths.update ( assureList ( cmod.getSourceDir () ) )
+        #self.depPaths.update ( assureList ( cmod.getPubHeaderDir() ) )
+        #self.depPaths.update ( assureList ( cmod.getPrivHeaderDir() ) )
+        #self.depPaths.update ( assureList ( cmod.getSourceDir () ) )
         
         if cmod.buildUnitTests:
             self.depPaths.update (assureList ( cmod.getTestDir () ) )
@@ -523,14 +518,14 @@ class CTXDepMgr: # The dependency manager class.
 
             rawmod = CTXRawCodeModule(modPath, buildUnitTests = unitTests)
             self.cmods[rawmod.getName()] = rawmod
-
+            
         self.needUpdate = True
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     def addDependSearchPaths( self, paths ):
         if len(paths) != 0:
             self.depRoots += assureList( paths )
-            self.depPaths.update(finAllCodeModuleLocations( self.depRoots ))
+            self.depPaths.update(findAllCodeModuleLocations( self.depRoots ))
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     def enableDiskCaching( self ):
@@ -574,10 +569,12 @@ class CTXDepMgr: # The dependency manager class.
     #
     # returns all paths required to find the dependent includes of filenames.
     #
-    def getIncludePaths ( self, filenames, extraPaths ):
+    def getIncludePaths ( self, filenames, extraPaths = None ):
 
         pathList = list(self.depPaths)
-        pathList.extend ( extraPaths )
+
+        if extraPaths != None:
+            pathList.extend ( extraPaths )
 
         depIncludes = self.__getDependentIncludes ( filenames, pathList, set() )
 
@@ -612,10 +609,11 @@ class CTXDepMgr: # The dependency manager class.
         filenames.update ( cmod.getPrivHeaderFilenames() )
         filenames.update ( cmod.getPubHeaderFilenames() )
 
-        pathList = assureList ( cmod.getPrivHeaderDir() )
-        pathList += assureList ( cmod.getSourceDir () )
+     #   pathList = assureList ( cmod.getPrivHeaderDir() )
+     #   pathList += assureList ( cmod.getSourceDir () )
 
-        return self.getIncludePaths ( filenames, pathList )
+       # return self.getIncludePaths ( filenames, pathList )
+        return self.getIncludePaths ( filenames, None )
 
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -

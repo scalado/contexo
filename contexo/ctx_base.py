@@ -69,32 +69,6 @@ class CTXStaticObject:
         self.filepath          = str
         self.buildParams       = CTXBuildParams()
         self.commandline       = str
-        #
-
-#------------------------------------------------------------------------------
-class CTXSourceCollection:
-
-    #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-    def __init__(self, srcFiles = list() ):
-        self.sourceFiles = list()
-        #
-
-        self.addSource( srcFiles )
-
-    #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-    def addSource( self, source ):
-        if type(source) is list:
-            self.sourceFiles += source
-        elif type(source) is str:
-            self.sourceFiles.append( source )
-        elif type(source) is unicode:
-            self.sourceFiles.append( source )
-        else:
-            userErrorExit( "'%s' is not a valid source argument"%(type(source)), 'CTXSourceCollection::addSource' )
-
-    #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-    def getSourceFiles( self ):
-        return self.sourceFiles
 
 #------------------------------------------------------------------------------
 class CTXCompiler:
@@ -511,17 +485,6 @@ class CTXBuildSession:
         return self.depMgr
 
     #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-    def getModIncludePaths( self, codeModule ):
-
-      #  if not self.depMgr.hasModule( codeModule ):
-       #     self.depMgr.addCodeModules( codeModule )
-
-        incPaths = self.depMgr.getModuleIncludePaths( codeModule )
-
-        return incPaths
-
-
-    #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     def makeStaticObjectChecksum( self, sourceFile, buildParamsChecksum ):
         checksumList = list()
 
@@ -563,13 +526,11 @@ class CTXBuildSession:
         f.close()
 
     #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-    def buildStaticObjects( self, sourceCollections, outputDir, buildParams, forceRebuild ):
+    def buildStaticObjects( self, srcFiles, outputDir, buildParams, forceRebuild ):
         objectFileList = list()
         objFileTitle = None
-
-        # Convert to list if only one collection given
-        if type(sourceCollections) != list:
-            sourceCollections = [sourceCollections,]
+        
+        srcFiles = assureList( srcFiles )
 
         joinedBuildParams = CTXBuildParams()
         joinedBuildParams.add( self.buildParams )
@@ -582,44 +543,85 @@ class CTXBuildSession:
 
         buildParamsChecksum = joinedBuildParams.makeChecksum()
 
-        for srcColl in sourceCollections:
-            srcFiles = srcColl.getSourceFiles()
-            for srcFile in srcFiles:
-                needRebuild     = True
+        for srcFile in srcFiles:
+            needRebuild     = True
 
-                objChecksum     = self.makeStaticObjectChecksum( srcFile, buildParamsChecksum )
-                objectFilename  = self.compiler.makeObjFileName( srcFile, objFileTitle )
+            objChecksum     = self.makeStaticObjectChecksum( srcFile, buildParamsChecksum )
+            objectFilename  = self.compiler.makeObjFileName( srcFile, objFileTitle )
 
-                #
-                # If rebuild detection is to be used, read the old object file checksum
-                # and see if anything has changed.
-                #
-                if forceRebuild == False:
-                    objectFilePath  = os.path.join( outputDir, objectFilename )
-                    oldChecksum     = self.readStaticObjectChecksum( objectFilePath )
-                    if oldChecksum == objChecksum:
-                        needRebuild = False
-                        infoMessage( "Reusing '%s'"%(objectFilename), 3 )
-                    else:
-                        infoMessage( "Object '%s' invalidated by checksum.\nNew: %s\nOld: %s"\
-                                     %(objectFilename, objChecksum, oldChecksum), 
-                                     4, self.msgSender )
-
+            #
+            # If rebuild detection is to be used, read the old object file checksum
+            # and see if anything has changed.
+            #
+            if forceRebuild == False:
+                objectFilePath  = os.path.join( outputDir, objectFilename )
+                oldChecksum     = self.readStaticObjectChecksum( objectFilePath )
+                if oldChecksum == objChecksum:
+                    needRebuild = False
+                    infoMessage( "Reusing '%s'"%(objectFilename), 3 )
+                else:
+                    infoMessage( "Object '%s' invalidated by checksum.\nNew: %s\nOld: %s"\
+                                    %(objectFilename, objChecksum, oldChecksum), 
+                                    4, self.msgSender )
 
                 #
                 # Rebuild if needed, and write the fresh checksum regardless.
                 #
-                if needRebuild:
-                    obj = self.compiler.staticObject( srcFile, joinedBuildParams, outputDir, objFileTitle )
-                    objectFileList.append( obj )
-                    self.writeStaticObjectChecksum( os.path.join(obj.filepath,obj.filename), objChecksum )
-                else:
-                    # Even if wee haven't built the source file we need to produce
-                    # a CTXStaticObject item to return.
-                    obj = self.compiler.wrapStaticObject( srcFile, objectFilename, outputDir, buildParams, "n/a" )
-                    objectFileList.append( obj )
+            if needRebuild:
+                obj = self.compiler.staticObject( srcFile, joinedBuildParams, outputDir, objFileTitle )
+                objectFileList.append( obj )
+                self.writeStaticObjectChecksum( os.path.join(obj.filepath,obj.filename), objChecksum )
+            else:
+                # Even if wee haven't built the source file we need to produce
+                # a CTXStaticObject item to return.
+                obj = self.compiler.wrapStaticObject( srcFile, objectFilename, outputDir, buildParams, "n/a" )
+                objectFileList.append( obj )
 
         return objectFileList
+
+    #
+    # Builds a source file and returns a CTXStaticObject.
+    #
+    def buildStaticObject( self, srcFile, outputDir, buildParams = None, forceRebuild = False ):
+        objFileTitle = None
+
+        joinedBuildParams = CTXBuildParams()
+        joinedBuildParams.incPaths.extend( self.depMgr.getIncludePaths( [srcFile] ) )
+        
+        joinedBuildParams.add( self.buildParams )
+        if buildParams != None:
+            joinedBuildParams.add( buildParams )
+
+        buildParamsChecksum = joinedBuildParams.makeChecksum()
+
+        needRebuild     = True
+        
+        srcFile = self.depMgr.getFullPathname( srcFile )
+
+        objChecksum     = self.makeStaticObjectChecksum( srcFile, buildParamsChecksum )
+        objectFilename  = self.compiler.makeObjFileName( srcFile, objFileTitle )
+
+
+        if forceRebuild == False:
+            objectFilePath  = os.path.join( outputDir, objectFilename )
+            oldChecksum     = self.readStaticObjectChecksum( objectFilePath )
+            if oldChecksum == objChecksum:
+                needRebuild = False
+                infoMessage( "Reusing '%s'"%(objectFilename), 3 )
+            else:
+                infoMessage( "Object '%s' invalidated by checksum.\nNew: %s\nOld: %s"\
+                              %(objectFilename, objChecksum, oldChecksum), 
+                              4, self.msgSender )
+
+        if needRebuild:
+            obj = self.compiler.staticObject( srcFile, joinedBuildParams, outputDir, objFileTitle )
+            self.writeStaticObjectChecksum( os.path.join(obj.filepath,obj.filename), objChecksum )
+        else:
+            obj = self.compiler.wrapStaticObject( srcFile, objectFilename, outputDir, buildParams, "n/a" )
+
+        return obj
+
+
 
     #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     def buildStaticLibrary( self, objectFiles, libraryTitle, outputDir ):

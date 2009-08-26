@@ -187,7 +187,7 @@ def build_libraries( ctx_modules, lib_name, output_path, build_dir, session ):
 
         obj_list = list()
         for mod in mods:
-            obj_list +=  mod.buildStaticObjects( session, None, build_dir )
+            obj_list +=  mod.buildStaticObjects( session, build_dir )
         
         if len(obj_list) > 0:
             session.buildStaticLibrary( obj_list, lib, output_path )

@@ -525,7 +525,7 @@ class CTXDepMgr: # The dependency manager class.
     def addDependSearchPaths( self, paths ):
         if len(paths) != 0:
             self.depRoots += assureList( paths )
-            self.depPaths.update(findAllCodeModuleLocations( self.depRoots ))
+            self.depPaths.update(findAllCodeModulPaths( self.depRoots ))
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     def enableDiskCaching( self ):

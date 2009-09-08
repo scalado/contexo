@@ -511,57 +511,40 @@ def cmd_clean(args):
 
     from contexo import ctx_cmod
     from contexo.ctx_depmgr import CTXDepMgr
+    from contexo import ctx_base
+    from contexo import ctx_envswitch
 
     #
     # Get Code Module Paths from view.
     #
 
-    cview = getViewDefinition(args.view)
-    CODEMODULE_PATHS = cview.getAllCodeModulePaths()
-
-    #
-    # Get build configuration.
-    #
-
-    bc = getBuildConfiguration (args.bconf)
-
-    #
-    # Determine all module dependencies.
-    #
-
-    exp_modules = expand_list_files( cview, args.modules )
-
-    depmgr = CTXDepMgr ( CODEMODULE_PATHS )
+    cview = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=bool(args.repo_validation) )
+    
+    exp_modules = expand_list_files(cview, args.modules)
+    bc      = getBuildConfiguration( cview )
+    
+    depmgr  = CTXDepMgr( cview.getItemPaths('modules') )
     depmgr.addCodeModules( exp_modules, args.tests )
-    if args.d:
+    
+    session = ctx_base.CTXBuildSession( bc )
+   
+    session.setDependencyManager( depmgr )
+
+    #
+    # Determine which modules to clean.
+    #
+
+    if args.deps:
         module_names = depmgr.getCodeModules ()
     else:
         module_names = exp_modules
-
-    #
-    # Create contexo modules
-    # TODO: Get the CTXCodeModules to avoid this extra CodeModule creation.
-
-    modules = list ()
-    modRoots = list ()
-    for module in exp_modules:
-        modRoot = ctx_cmod.resolveModuleLocation (module, CODEMODULE_PATHS)
-        mod = ctx_cmod.CTXCodeModule(modRoot, pathlist=None, buildUnitTests = args.tests, forceRebuild=False)
-        modules.append( mod )
-        modRoots.append ( modRoot )
-
-    for module in set(module_names) - set(exp_modules):
-        modRoot = ctx_cmod.resolveModuleLocation (module, CODEMODULE_PATHS)
-        mod = ctx_cmod.CTXCodeModule(modRoot, pathlist=None, buildUnitTests = args.tests, forceRebuild=False)
-        modules.append( mod )
-        modRoots.append ( modRoot )
-
-    depmgr.addCodeModules ( modRoots, args.tests )
+    
+    modules = depmgr.createCodeModules( set(exp_modules) | (set(module_names) - set(exp_modules) ) )
 
     print "cleaning modules:"
 
     for module in modules:
-        print module.getName()
+        print " " + module.getName()
         module.clean (bc.getTitle())
 
 #------------------------------------------------------------------------------
@@ -600,8 +583,6 @@ def cmd_view(args):
         print 'switch view: ', default_view + " -> " + new_default_view
 
         cfgFile.update()
-
-
 
     if args.i:
         # Parse rspec file
@@ -732,7 +713,7 @@ parser_clean.add_argument('modules', nargs='+', help="list of modules to clean")
 parser_clean.add_argument('-d', '--deps', action='store_true', help=standard_description['--deps'])
 parser_clean.add_argument('-b', '--bconf', help="only clean target files produced from this build configuration.")
 parser_clean.add_argument('-t', '--tests', action='store_true', help=standard_description['--tests'])
-parser_clean.add_argument('-v', '--view', help=standard_description['--view'])
+parser_clean.add_argument('-v', '--view', default=os.getcwd(), help=standard_description['--view'])
 parser_clean.add_argument('-rv', '--repo-validation', action='store_true', help=standard_description['--repo-validation'])
 parser_clean.add_argument('-nra', '--no-remote-repo-access', action='store_true', help=standard_description['--no-remote-repo-access'])
 

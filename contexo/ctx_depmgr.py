@@ -492,7 +492,6 @@ class CTXDepMgr: # The dependency manager class.
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     def addCodeModules( self, codeModulePaths, unitTests = False ):
-        from ctx_cmod import assertValidContexoCodeModule
         from ctx_cmod import CTXRawCodeModule
 
         codeModulePaths = assureList(codeModulePaths)
@@ -502,20 +501,8 @@ class CTXDepMgr: # The dependency manager class.
         #
         for mod in codeModulePaths:
 
-            modPath = mod
-
-            if not os.path.exists( modPath ):
-                for path in self.depRoots:
-                    modPath = os.path.join( path, mod )
-                    if os.path.exists( modPath ):
-                        break
-                    else:
-                        modPath = str()
-                if len(modPath) == 0:
-                    userErrorExit( "Unable to locate code module: '%s'"%mod, self.msgSender )
-
-            assertValidContexoCodeModule( modPath, self.msgSender )
-
+            modPath = self.resolveCodeModulePath( mod )
+           
             rawmod = CTXRawCodeModule(modPath, buildUnitTests = unitTests)
             self.cmods[rawmod.getName()] = rawmod
             
@@ -673,7 +660,46 @@ class CTXDepMgr: # The dependency manager class.
                 processed_set.add ( module )
 
         return list (modules)
+        
 
+    def getCodeModulesDependencies( self, input_modules ):
+        from ctx_cmod import isContexoCodeModule
+
+        if self.needUpdate:
+            self.updateDependencyHash()
+            
+        input_modules = assureList( input_modules )
+
+        processed_set = set ()
+        modules = set (input_modules)  
+ 
+        while modules != processed_set:
+            for module in modules - processed_set:
+                incPathSet = self.getModuleIncludePaths(module)
+
+                for path in incPathSet:
+                    if isContexoCodeModule ( path ):
+                        modules.add ( os.path.basename ( path ) )
+
+                processed_set.add ( module )
+
+        return list (modules - set(input_modules))
+
+    # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
+    # Returns a list of CTXCodeModule from the named list of modules.
+    #
+    # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
+    def createCodeModules( self, input_modules ):
+        from ctx_cmod import CTXCodeModule
+        
+        codeModules = list ()
+        
+        for mod in set(input_modules):
+            modPath = self.resolveCodeModulePath( mod )
+            codeModules.append( CTXCodeModule(modPath) )
+        
+        return codeModules
+    
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     # Returns a closed set with all modules depending on given module.
@@ -732,6 +758,26 @@ class CTXDepMgr: # The dependency manager class.
                             header_set.add ( dep_header )
 
         return list ( header_set )
+        
+    def resolveCodeModulePath( self, mod ):
+        from ctx_cmod import assertValidContexoCodeModule
+        
+        modPath = mod
+
+        if not os.path.exists( modPath ):
+            for path in self.depRoots:
+                modPath = os.path.join( path, mod )
+                if os.path.exists( modPath ):
+                    break
+                else:
+                    modPath = str()
+            
+            if len(modPath) == 0:
+                userErrorExit( "Unable to locate code module: '%s'"%mod, self.msgSender )
+
+        assertValidContexoCodeModule( modPath, self.msgSender )
+
+        return modPath
 
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -

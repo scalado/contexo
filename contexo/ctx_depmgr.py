@@ -689,14 +689,17 @@ class CTXDepMgr: # The dependency manager class.
     # Returns a list of CTXCodeModule from the named list of modules.
     #
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
-    def createCodeModules( self, input_modules ):
+    def createCodeModules( self, input_modules, buildTests=False, force=False ):
         from ctx_cmod import CTXCodeModule
         
         codeModules = list ()
         
         for mod in set(input_modules):
             modPath = self.resolveCodeModulePath( mod )
-            codeModules.append( CTXCodeModule(modPath) )
+            codeModules.append( CTXCodeModule(modPath,
+                                              pathlist=None, 
+                                              buildUnitTests = buildTests,
+                                              forceRebuild=force) )
         
         return codeModules
     

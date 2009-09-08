@@ -122,33 +122,6 @@ def getAccessPolicy( args ):
         
     return ap
         
-#------------------------------------------------------------------------------
-# Creates and returns a list of CTXCodeModule objects from the provided list 
-# of code module names. Unit tests are only enabled for main modules (not for 
-# dependencies) 
-#------------------------------------------------------------------------------
-def create_codemodules( main_module_name_list, dep_module_name_list, 
-                        unit_tests, module_search_paths  ):
-    
-    ctx_modules = list()
-
-    all_modules = list()
-    all_modules.extend(main_module_name_list)
-    all_modules.extend(dep_module_name_list) 
-    
-    for module_name in all_modules:
-        modRoot = ctx_cmod.resolveModuleLocation( module_name, 
-                                                  module_search_paths )
-        
-        buildTest = unit_tests and module_name in main_module_name_list
-
-        mod = ctx_cmod.CTXCodeModule( modRoot, 
-                                      pathlist=None, 
-                                      buildUnitTests = buildTest,
-                                      forceRebuild=False )
-        ctx_modules.append( mod )
-    
-    return ctx_modules
 
 #------------------------------------------------------------------------------
 # Creates and returns a list of CTXCodeModule objects from the provided list 
@@ -230,19 +203,18 @@ def export_headers( depmgr, headers, headerDir ):
             warningMessage( "Unable to locate header '%s' for export"%(header), msgSender )
 
 #------------------------------------------------------------------------------
-def buildmodules( depmgr, session, modules, deps, tests, output_path, lib, 
-                  build_dir ):
+def buildmodules( depmgr, session, modules, args, output_path, build_dir ):
     from contexo import ctx_base
     from contexo import ctx_envswitch
 
-    all_modules = depmgr.getCodeModules() if deps else modules
+    all_modules = depmgr.getCodeModules() if args.deps else modules
     all_modules.sort ()
     dep_modules = set(all_modules) - set(modules)
     
-    ctx_modules = create_codemodules( modules, dep_modules, tests, 
-                                      depmgr.getCodeModulePaths() )
+    ctx_modules = depmgr.createCodeModules( modules, args.tests, force=args.force )
+    ctx_modules.extend ( depmgr.createCodeModules( dep_modules, force=args.force ) )
 
-    build_libraries( ctx_modules, lib, output_path, build_dir, session )
+    build_libraries( ctx_modules, args.lib, output_path, build_dir, session )
 
 #------------------------------------------------------------------------------
 def cmd_info(args):
@@ -327,8 +299,7 @@ def cmd_buildmod(args):
 
     output_path = os.path.join( args.output, args.libdir )
     
-    buildmodules( depmgr, session, modules, args.deps, args.tests,
-                  output_path, args.lib, bc.getTitle() )
+    buildmodules( depmgr, session, modules, args, output_path, bc.getTitle() )
 
     header_path = os.path.join(args.output, args.headerdir )
     export_public_module_headers( depmgr, modules, header_path )
@@ -395,8 +366,9 @@ def cmd_buildcomp(args):
             
             depmgr.addCodeModules( modules, args.tests )
             
-            buildmodules( depmgr, session,  modules,  args.deps,  args.tests,
-                          lib_dir, library, session.bc.getTitle())
+            args.lib = library
+            print args
+            buildmodules( depmgr, session,  modules,  args, lib_dir, session.bc.getTitle())
             
             depmgr.emptyCodeModules()
             
@@ -466,7 +438,9 @@ def cmd_export(args):
     export_modules = depmgr.getCodeModules() if args.deps else main_modules
     export_modules.sort()
     dep_modules = set(export_modules) - set(main_modules)
-    ctx_modules = create_codemodules( main_modules, dep_modules, args.tests, cview.getItemPaths('modules') )
+    
+    ctx_modules = depmgr.createCodeModules( main_modules, args.tests )
+    ctx_modules.extend ( depmgr.createCodeModules( dep_modules ) )
     
     module_map = dict()
     for mod in ctx_modules:
@@ -664,7 +638,9 @@ standard_description = dict({\
      '--view': "The local view directory to use for this operation. If omitted, current working directory is used.",\
   '--logfile': "Name of logfile to generate. Will be created in output folder as defined by the --output option.",\
 '--repo-validation': "Validates all repositories before processing. This usually increases duration but ensures correct repository structure. Repository validation can also be done by running 'ctx view validate' as a separate step.",\
-'--no-remote-repo-access': "If specified, the system never tries to process items directly from an RSpec repository's remote location (href) even if so is possible. Normally, if a repository is accessible through regular file access, the system always tries to use it from its remote location."})
+'--no-remote-repo-access': "If specified, the system never tries to process items directly from an RSpec repository's remote location (href) even if so is possible. Normally, if a repository is accessible through regular file access, the system always tries to use it from its remote location.",\
+'--force':"Forces building all source files"})
+
 
 # info parser
 parser_info = subparsers.add_parser('info', help="Displays information of contexo modules")
@@ -689,6 +665,7 @@ parser_build.add_argument('-v', '--view', default=os.getcwd(), help=standard_des
 parser_build.add_argument('-lf', '--logfile', default=None, help=standard_description['--logfile'])
 parser_build.add_argument('-rv', '--repo-validation', action='store_true', help=standard_description['--repo-validation'])
 parser_build.add_argument('-nra', '--no-remote-repo-access', action='store_true', help=standard_description['--no-remote-repo-access'])
+parser_build.add_argument('-f', '--force', action='store_true', help=standard_description['--force'])
 
 # buildcomp parser
 parser_build = subparsers.add_parser('buildcomp', help="build contexo components.")
@@ -705,6 +682,7 @@ parser_build.add_argument('-v', '--view', default=os.getcwd(), help=standard_des
 parser_build.add_argument('-lf', '--logfile', default=None, help=standard_description['--logfile'])
 parser_build.add_argument('-rv', '--repo-validation', action='store_true', help=standard_description['--repo-validation'])
 parser_build.add_argument('-nra', '--no-remote-repo-access', action='store_true', help=standard_description['--no-remote-repo-access'])
+parser_build.add_argument('-f', '--force', action='store_true', help=standard_description['--force'])
 
 # clean parser
 parser_clean = subparsers.add_parser('clean', help="clean a module(s) ( and optionaly its dependencies)")

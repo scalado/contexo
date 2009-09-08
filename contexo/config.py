@@ -8,9 +8,11 @@ import os
 
 __name__ = 'config'
 
-NAMED_VALUE = 1
-SECTION     = 2
-VALUE_ONLY  = 3
+NAMED_VALUE     = 1
+NAMED_VALUE_ADD = 2
+NAMED_VALUE_SUB = 3
+SECTION         = 4
+VALUE_ONLY      = 5
 
 #------------------------------------------------------------------------------
 # Regular Expresion definitions
@@ -174,26 +176,20 @@ def apply_preffix ( match_object ):
 
 def parse_line( src_line, cur_section, section_dict ):
     line = src_line.strip ()
+    
+    
+    exprs = [ (add_value, NAMED_VALUE_ADD),\
+              (sub_value, NAMED_VALUE_SUB),\
+              (named_value, NAMED_VALUE) ]
 
-    # Parse add value
-    m = add_value.match (line)
-
-    if m != None:
-        name = m.group(1).strip()
-        value = parse_value ( string.join (line.split()[2:]), cur_section, section_dict )
-        return ( NAMED_VALUE, (name, value) )
-
-    # Check if it is a sub value
-    if sub_value.match (line):
-        name = line.split ()[0]
-        value = parse_value ( string.join (line.split()[2:]), cur_section, section_dict )
-        return ( NAMED_VALUE, (name, value) )
-
-    # Check if it is a named value
-    if named_value.match (line):
-        name = line.split ()[0]
-        value = parse_value ( string.join (line.split()[2:]), cur_section, section_dict )
-        return ( NAMED_VALUE, (name, value) )
+    # parse named values
+    for e in exprs:
+        m = e[0].match( line )
+        if m != None:
+            name = m.groups()[0].strip()
+            value = string.join(m.groups()[1].strip().split())
+            value = parse_value ( value, cur_section, section_dict )
+            return ( e[1], (name, value) )
 
     # Check if it is a new section
     if section.match (line):
@@ -235,7 +231,6 @@ def parse_file (filename, section_dict):
             else:
                 concat_line = 0
                 src_lines_proc.append (string.join(cur_line.split()))
-
 
     for line in src_lines_proc:
         # Include file

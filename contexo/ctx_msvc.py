@@ -4,7 +4,24 @@ from xmltools import XMLGenerator
 #import pywintypes
 import uuid
 
+def relntpath(path, start):
+    if start == None:
+        start = os.getcwd()
+    
+    pathl  = path.replace("/", "\\").split('\\')
+    startl = start.replace("/", "\\").split('\\')
+    
+    while len(pathl) and len(startl) and pathl[0] == startl[0]:
+            del pathl[0]
+            del startl[0]
+    
+    for i in range(len(startl)):
+        pathl[i] = '..'
+    
+    return "\\".join(pathl)
+        
 
+    
 
 #codeModules = listof dictionaries: { MODNAME: string, SOURCES: list(paths), PRIVHDRS: list(paths), PUBHDRS: list(paths), PRIVHDRDIR: string }
 def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib, \
@@ -78,8 +95,12 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib, \
 
     # TODO: parse flags and add correct attributes in compiler tool.
 
-    if type(incPaths) == list:
-        incPaths = ";".join(incPaths)
+    if type(incPaths) != list:
+        incPaths = split(";", incPaths)
+    
+    incPaths = [relntpath(path, vcprojPath) for path in incPaths]
+
+    incPaths = ";".join(incPaths)
 
     # Add private include directories for modules in lib
     #incPaths += ";" + ";".join(map(lambda m: m['PRIVHDRDIR'],codeModules))
@@ -117,9 +138,9 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib, \
         project.startElement ('Filter', [('Name', 'src'),('Filter','')])
         # Add all source files.
         for srcFile in mod['SOURCES']:
-            project.startElement ('File', [('RelativePath',srcFile)])
+            project.startElement ('File', [('RelativePath', relntpath(srcFile, vcprojPath))])
             project.startElement('FileConfiguration',[('Name',"".join([variant,'|',platform]))])
-            project.element('Tool',[('Name','VCCLCompilerTool'),('AdditionalIncludeDirectories',mod['PRIVHDRDIR'])])
+            project.element('Tool',[('Name','VCCLCompilerTool'),('AdditionalIncludeDirectories',relntpath(mod['PRIVHDRDIR'], vcprojPath))])
             project.endElement ('FileConfiguration')
             project.endElement ('File')
             #project.startElement ('FileConfiguration', [('Name',variant+'|Win32')])
@@ -131,7 +152,7 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib, \
         project.startElement ('Filter', [('Name', 'inc'),('Filter','')])
         # Add all private headers.
         for hdr in mod['PRIVHDRS']:
-            project.startElement ('File', [('RelativePath',hdr)])
+            project.startElement ('File', [('RelativePath',relntpath(hdr, vcprojPath))])
             project.endElement ('File')
         # End private include folder
         project.endElement ('Filter')
@@ -139,7 +160,7 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib, \
 
         # Add public headers to root.
         for hdr in mod['PUBHDRS']:
-            project.startElement ('File', [('RelativePath',hdr)])
+            project.startElement ('File', [('RelativePath',relntpath(hdr, vcprojPath))])
             project.endElement ('File')
 
         # End module folder

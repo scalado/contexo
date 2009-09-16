@@ -100,6 +100,12 @@ class CTXRepository:
         return self.rev
                 
     #--------------------------------------------------------------------------
+    def addAbsolutePath(self, path_section, path):
+        ctxAssert( path_section in REPO_PATH_SECTIONS, "Unknown path section '%s'"%(path_section) )
+        self.relative_paths[path_section].append( path )
+        infoMessage( "Path '%s' added to section '%s' in repository '%s'"%(path, path_section, self.getID()), 2, self.msgSender )
+
+    #--------------------------------------------------------------------------
     def addPath(self, path_section, path):
         ctxAssert( path_section in REPO_PATH_SECTIONS, "Unknown path section '%s'"%(path_section) )
         path = path.lstrip('\\/ ')
@@ -168,7 +174,7 @@ class CTXRepository:
         if len(self.getHref()) == 0:
             self.href = self.getAbsLocalPath()
 
-       # self.addPath( 'modules', self.getAbsLocalPath() )
+        self.addAbsolutePath( 'modules', self.getAbsLocalPath() )
         
                 
     #--------------------------------------------------------------------------

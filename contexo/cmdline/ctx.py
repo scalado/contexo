@@ -9,17 +9,12 @@
 #   License GPL v2. See LICENSE.txt.                                          #
 #   ------------                                                              #
 #                                                                             #
-#   Handles the COMP format.                                                  #
-#                                                                             #
-#   Support:                                                                  #
-#                                                                             #
-#   20061101 - COMP format version 1                                          #
 #                                                                             #
 ###############################################################################
 
 
 # coding=UTF-8
-# TODO:  Files as arguments
+
 import os
 import os.path
 import shutil
@@ -621,9 +616,10 @@ def cmd_prop(args):
 
 
 # Create Parser
-parser = ArgumentParser( description=ctx_sysinfo.CTX_BANNER, 
+parser = ArgumentParser( prog="ctx",
+                         description=ctx_sysinfo.CTX_BANNER, 
                          version=ctx_sysinfo.CTX_DISPLAYVERSION,
-                         prog="ctx" )
+                         fromfile_prefix_chars='@' )
 
 subparsers = parser.add_subparsers ()
 

@@ -15,6 +15,7 @@ import os
 import sys
 import pysvn
 from getpass import getpass
+import urllib
 
 # Mapping of state notification enums to display text.
 # Empty strings for states we don't need to report
@@ -86,11 +87,11 @@ class CTXSubversionClient():
         self.msg_list = list()
 
     #--------------------------------------------------------------------------
-    # Returns true if the given local path is a local copy of a subversion 
+    # Returns true if the given local path is a local copy of a subversion
     # repository.
     #--------------------------------------------------------------------------
     def isWorkingCopy( self, local_path ):
-        try:        
+        try:
             entry = self.client.info( local_path )
         except pysvn.ClientError, e:
             for message, code in e.args[1]:
@@ -98,15 +99,15 @@ class CTXSubversionClient():
                     return False
                 else:
                     ctxAssert( False, "Unhandled pysvn exception: (%d) %s. This code need to be updated." )
-                    
+
         return True
-        
+
     #--------------------------------------------------------------------------
     # Returns true if the given (remote) URL is a known subversion repository.
     #--------------------------------------------------------------------------
     def isRepoURL( self, url ):
         return self.client.is_url( url )
-         
+
     #--------------------------------------------------------------------------
     # Returns the subversion URL associated with the given working copy.
     #--------------------------------------------------------------------------
@@ -123,9 +124,9 @@ class CTXSubversionClient():
     def getRevisionFromWorkingCopy( self, lc_path ):
         if not os.path.exists(lc_path):
             userErrorExit( "Given path to local copy '%s' is invalid"%(lc_path), self.msgSender )
-        
+
         entry = self.client.info( lc_path )
-        
+
         if entry.revision.kind == pysvn.opt_revision_kind.head:
             return 'HEAD'
         elif entry.revision.kind == pysvn.opt_revision_kind.number:
@@ -137,11 +138,11 @@ class CTXSubversionClient():
     # Returns the revision of the given working copy
     #--------------------------------------------------------------------------
     def getRevisionFromURL( self, url ):
-        
+
         entry = self.client.info2( url )
         ctxAssert( entry[0][1]['rev'].kind == pysvn.opt_revision_kind.number, "Revision of URL is not a number" )
         return entry[0][1]['rev'].number
-        
+
     #--------------------------------------------------------------------------
     #
     #--------------------------------------------------------------------------
@@ -156,7 +157,7 @@ class CTXSubversionClient():
             rev = pysvn.Revision(pysvn.opt_revision_kind.head )
         else:
             rev = pysvn.Revision(pysvn.opt_revision_kind.number, rev )
-        
+
         try:
             self.client.update( path=lc_path, recurse=True, revision=rev )
 
@@ -167,10 +168,10 @@ class CTXSubversionClient():
                                   %(self.getURLFromWorkingCopy(lc_path)), self.msgSender )
                 else:
                     userErrorExit( "Unknown failure when updating '%s'\nPYSVN Exception:\n%s (%d)"%(lc_path, message, code), self.msgSender )
-        
-            
+
+
     #--------------------------------------------------------------------------
-    # Checks out the given revision of the remote file or folder specified by 
+    # Checks out the given revision of the remote file or folder specified by
     # 'url' to the given local directory.
     #--------------------------------------------------------------------------
     def checkout( self, url, local_directory, revision ):
@@ -179,10 +180,10 @@ class CTXSubversionClient():
         if self.isWorkingCopy( local_directory ):
             userErrorExit( "Unable to checkout '%s', given target directory '%s' is an existing working copy."\
                            %(url, local_directory), self.msgSender )
-            
+
         if not self.isRepoURL(url):
             userErrorExit( "Invalid SVN repository: '%s'"%(url), self.msgSender )
-            
+
         if revision.upper() == 'HEAD':
             rev = pysvn.Revision(pysvn.opt_revision_kind.head )
         else:
@@ -192,6 +193,8 @@ class CTXSubversionClient():
             userErrorExit( "Checkout destination '%s' is not a directory"%(local_directory), self.msgSender )
 
         try:
+            #pysvn checkout seems to have problem when spaces are not escaped but also when other characters are escaped
+            url = urllib.quote(url,  safe=',~=!@#$%^&*()+|}{:?><;[]\\/')
             self.client.checkout(url=url, path=local_directory, recurse=True, revision=rev)
         except pysvn.ClientError, e:
             for message, code in e.args[1]:
@@ -202,7 +205,7 @@ class CTXSubversionClient():
 
 
     #--------------------------------------------------------------------------
-    # Checks out the given revision of the remote file or folder specified by 
+    # Checks out the given revision of the remote file or folder specified by
     # 'url' to the given local directory.
     #--------------------------------------------------------------------------
     def export( self, url, local_directory, revision ):
@@ -210,20 +213,20 @@ class CTXSubversionClient():
 
         if not self.isRepoURL(url):
             userErrorExit( "Invalid SVN repository: '%s'"%(url), self.msgSender )
-            
+
         if revision.upper() == 'HEAD':
             rev = pysvn.Revision(pysvn.opt_revision_kind.head )
         else:
             rev = pysvn.Revision(pysvn.opt_revision_kind.number, revision )
-        
+
         if not os.path.isdir( local_directory ):
             os.makedirs( local_directory )
         elif self.isWorkingCopy( local_directory ):
             userErrorExit( "Export destination '%s' is an existing working copy"%(local_directory), self.msgSender )
-            
-            
+
+
         export_dest = os.path.join( local_directory, os.path.basename(url) )
-    
+
         try:
             self.client.export(src_url_or_path=url, dest_path=export_dest, force=False, revision=rev)
         except :
@@ -232,19 +235,19 @@ class CTXSubversionClient():
     #--------------------------------------------------------------------------
     #--------------------------------------------------------------------------
     def svn_notify_callback( self, event ):
-       
+
         msg = None
-        
+
         if event['action'] == pysvn.wc_notify_action.update_completed:
             msg = "[SVN]: Operation complete at revision %s."\
                   %( str(event['revision'].number) \
                     if event['revision'].kind == pysvn.opt_revision_kind.number \
                     else '(unknown)' )
-                    
-                    
+
+
         elif event['path'] != '' and action_text[ event['action'] ] is not None:
             msg = '[SVN]: %s %s %s'%( action_text[ event['action'] ], state_text[ event['content_state'] ], event['path'])
-        
+
         if msg is not None:
             self.msg_list.append( msg )
-            print msg            
+            print msg

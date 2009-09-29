@@ -11,8 +11,6 @@
 #                                                                             #
 #                                                                             #
 ###############################################################################
-
-
 # coding=UTF-8
 import logging
 import logging.handlers
@@ -32,13 +30,16 @@ from contexo.ctx_common import getUserTempDir,  setInfoMessageVerboseLevel, info
 from contexo.ctx_comp import ctx_log, COMPFile
 from contexo import ctx_sysinfo
 
+import locale
+locale.resetlocale() # locale.LC_ALL,  'en_US.UTF-8')
+
 msgSender           = 'ctx.py'
 logging.basicConfig(format = '%(asctime)s %(levelname)-8s %(message)s',
                                 datefmt='%H:%M:%S',
                                 level = logging.DEBUG);
 #logger = logging.getLogegr()
 #logger.
-#logging.debug('Starting...')
+logging.debug('Starting...')
 
 
 #
@@ -490,7 +491,7 @@ def cmd_freeze(args):
     parser = xml.sax.make_parser()
     fileOut = sys.stdout
     if args.output is not None:
-        fileOut = open(args.output, mode = 'wt')
+        fileOut = open(args.output)
     handler = rspecRevisionFreezer(fileOut)
     parser.setContentHandler(handler)
     parser.parse( open(args.file_to_freeze) )

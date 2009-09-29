@@ -1,4 +1,4 @@
-
+# -*- coding: utf-8 -*-
 import os.path
 from xmltools import XMLGenerator
 #import pywintypes
@@ -7,21 +7,21 @@ import uuid
 def relntpath(path, start):
     if start == None:
         start = os.getcwd()
-    
+
     pathl  = path.replace("/", "\\").split('\\')
     startl = start.replace("/", "\\").split('\\')
-    
+
     while len(pathl) and len(startl) and pathl[0] == startl[0]:
             del pathl[0]
             del startl[0]
-    
+
     for i in range(len(startl)):
         pathl[i] = '..'
-    
-    return "\\".join(pathl)
-        
 
-    
+    return "\\".join(pathl)
+
+
+
 
 #codeModules = listof dictionaries: { MODNAME: string, SOURCES: list(paths), PRIVHDRS: list(paths), PUBHDRS: list(paths), PRIVHDRDIR: string }
 def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib, \
@@ -68,26 +68,26 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib, \
         prepDefs = tmp
 
 
-    project.startElement ('VisualStudioProject', [('ProjectType','Visual C++'),
-                                                  ('Version','8,00'),
-                                                  ('Name',projectName),
-                                                      ('RootNamespace',projectName),
-                                                  ('ProjectGUID',GUID),
-                                                  ('SccProjectName',''),
-                                                  ('SccLocalPath','')])
+    project.startElement ('VisualStudioProject', {'ProjectType':'Visual C++',
+                                                  'Version':'8,00',
+                                                 'Name':projectName,
+                                                 'RootNamespace':projectName,
+                                                 'ProjectGUID':GUID,
+                                                 'SccProjectName':'',
+                                                  'SccLocalPath':''})
 
     project.startElement ('Platforms', None)
 
-    project.element ('Platform', [('Name',platform)])
+    project.element ('Platform', {'Name':platform})
     project.endElement ('Platforms')
 
     project.startElement ('Configurations', {})
-    project.startElement ('Configuration', [('Name',variant+'|' + platform),
-                                            ('OutputDirectory',"".join(['.\\',variant,"\\",projectName])),
-                                            ('IntermediateDirectory',"".join(['.\\',variant,"\\",projectName])),
-                                            ('ConfigurationType','4'),
-                                            ('UseOfMFC','0'),
-                                            ('CharacterSet','1')])
+    project.startElement ('Configuration', {'Name':variant+'|' + platform,
+                                            'OutputDirectory':"".join(['.\\',variant,"\\",projectName]),
+                                            'IntermediateDirectory':"".join(['.\\',variant,"\\",projectName]),
+                                           'ConfigurationType':'4',
+                                           'UseOfMFC':'0',
+                                            'CharacterSet':'1'})
 
     #
     # Compiler
@@ -97,7 +97,7 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib, \
 
     if type(incPaths) != list:
         incPaths = split(";", incPaths)
-    
+
     incPaths = [relntpath(path, vcprojPath) for path in incPaths]
 
     incPaths = ";".join(incPaths)
@@ -105,25 +105,25 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib, \
     # Add private include directories for modules in lib
     #incPaths += ";" + ";".join(map(lambda m: m['PRIVHDRDIR'],codeModules))
 
-    project.element ('Tool', [('Name','VCCLCompilerTool'),
-                                   ('PreprocessorDefinitions', prepDefs),
-                                   ('ObjectFile',"".join(['.\\',variant,"\\",projectName,'/'])),
-                                   ('ProgramDataBaseFileName',"".join(['.\\',variant,"\\",projectName,'/'])),
-                                   ('SuppressStartupBanner','TRUE'),
-                                   ('AdditionalOptions', cflags ),
-                                   ('AdditionalIncludeDirectories',incPaths),
-                                   ('Optimization','0'),
-                                   ('DebugInformationFormat',debugInformationFormat)])
+    project.element ('Tool', {'Name':'VCCLCompilerTool',
+                                  'PreprocessorDefinitions': prepDefs,
+                                   'ObjectFile':"".join(['.\\',variant,"\\",projectName,'/']),
+                                   'ProgramDataBaseFileName':"".join(['.\\',variant,"\\",projectName,'/']),
+                                  'SuppressStartupBanner':'TRUE',
+                                  'AdditionalOptions': cflags ,
+                                  'AdditionalIncludeDirectories':incPaths,
+                                  'Optimization':'0',
+                                   'DebugInformationFormat':debugInformationFormat})
 
-    project.element ('Tool', [('Name','VCLibrarianTool'),
-                                   ('OutputFile', '$(OutDir)/'+outLib)])
+    project.element ('Tool', {'Name':'VCLibrarianTool',
+                                   'OutputFile': '$(OutDir)/'+outLib})
 
     project.endElement ('Configuration')
     project.endElement ('Configurations')
 
     # Start module root folder.
     project.startElement ('Files')
-    project.startElement ('Filter', [('Name','Modules'), ('Filter','')])
+    project.startElement ('Filter', {'Name':'Modules', 'Filter':''})
 
 
     #NOTE:
@@ -131,25 +131,25 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib, \
     for mod in codeModules:
 
         # Start module folder (public header goes here also)
-        project.startElement ('Filter', [('Name', mod['MODNAME']),('Filter','')])
+        project.startElement ('Filter', {'Name': mod['MODNAME'],'Filter':''})
 
 
         # Start source file folder
-        project.startElement ('Filter', [('Name', 'src'),('Filter','')])
+        project.startElement ('Filter', {'Name': 'src','Filter':''})
         # Add all source files.
         for srcFile in mod['SOURCES']:
             project.startElement ('File', [('RelativePath', relntpath(srcFile, vcprojPath))])
             project.startElement('FileConfiguration',[('Name',"".join([variant,'|',platform]))])
-            project.element('Tool',[('Name','VCCLCompilerTool'),('AdditionalIncludeDirectories',relntpath(mod['PRIVHDRDIR'], vcprojPath))])
+            project.element('Tool',{'Name':'VCCLCompilerTool','AdditionalIncludeDirectories':relntpath(mod['PRIVHDRDIR'], vcprojPath)})
             project.endElement ('FileConfiguration')
             project.endElement ('File')
-            #project.startElement ('FileConfiguration', [('Name',variant+'|Win32')])
+            #project.startElement ('FileConfiguration', {'Name':variant+'|Win32'})
         # End source file folder
         project.endElement ('Filter')
 
 
         # Start private include folder
-        project.startElement ('Filter', [('Name', 'inc'),('Filter','')])
+        project.startElement ('Filter', {'Name': 'inc','Filter':''})
         # Add all private headers.
         for hdr in mod['PRIVHDRS']:
             project.startElement ('File', [('RelativePath',relntpath(hdr, vcprojPath))])
@@ -177,7 +177,6 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib, \
     vcprojFile.close ()
 
     return GUID
-
 
 
 # name:string, path:string, projects:list( dict{ PROJNAME:string PROJGUID:string, DEBUG:True/False } ), exeproject: dict{ PROJNAME:string PROJGUID:string, DEBUG:True/False }
@@ -311,27 +310,27 @@ def env2MSVS ( env, projname, srcs, variant ):
     GUID = '{28540DAA-6718-4DE8-8D55-468836F0BE71}'
 
 
-    project.startElement ('VisualStudioProject', [('ProjectType','Visual C++'),
-                                                  ('Version','7.10'),
-                                                  ('Name',projname),
-                                                  ('ProjectGUID',GUID),
-                                                  ('SccProjectName',''),
-                                                  ('SccLocalPath','')])
+    project.startElement ('VisualStudioProject', {'ProjectType':'Visual C++',
+                                                 'Version':'7.10',
+                                                 'Name':projname,
+                                                 'ProjectGUID':GUID,
+                                                 'SccProjectName':'',
+                                                  'SccLocalPath':''})
 
     project.startElement ('Platforms', None)
-    project.element ('Platform', [('Name','Win32')])
+    project.element ('Platform', {'Name':'Win32'})
 
     project.endElement ('Platforms')
 
 
     project.startElement ('Configurations', {})
 
-    project.startElement ('Configuration', [('Name',variant+'|Win32'),
-                                            ('OutputDirectory','.\\'+variant),
-                                            ('IntermediateDirectory','.\\'+variant),
-                                            ('ConfigurationType','1'),
-                                            ('UseOfMFC','0'),
-                                            ('CharacterSet','2')])
+    project.startElement ('Configuration', {'Name':variant+'|Win32',
+                                           'OutputDirectory':'.\\'+variant,
+                                           'IntermediateDirectory':'.\\'+variant,
+                                           'ConfigurationType':'1',
+                                           'UseOfMFC':'0',
+                                            'CharacterSet':'2'})
 
 
     #
@@ -345,14 +344,14 @@ def env2MSVS ( env, projname, srcs, variant ):
     # TODO: parse flags and add correct attributes in compiler tool.
     ccflags = env['CCFLAGS']
 
-    project.element ('Tool', [('Name','VCCLCompilerTool'),
-                                   ('PreprocessorDefinitions',ppdefs),
-                                   ('ObjectFile','.\\' + variant + '/'),
-                                   ('ProgramDataBaseFileName','.\\' + variant + '/'),
-                                   ('SuppressStartupBanner','TRUE'),
-                                   ('AdditionalOptions',str(ccflags)),
-                                   ('Optimization','0'),
-                                   ('DebugInformationFormat','4')])
+    project.element ('Tool', {'Name':'VCCLCompilerTool',
+                                  'PreprocessorDefinitions':ppdefs,
+                                  'ObjectFile':'.\\' + variant + '/',
+                                  'ProgramDataBaseFileName':'.\\' + variant + '/',
+                                  'SuppressStartupBanner':'TRUE',
+                                   'AdditionalOptions':str(ccflags),
+                                  'Optimization':'0',
+                                   'DebugInformationFormat':'4'})
 
 
     #
@@ -367,27 +366,27 @@ def env2MSVS ( env, projname, srcs, variant ):
         libsdir = libsdir + d + ';'
 
 
-    project.element ('Tool', [('Name','VCLinkerTool'),
-                              ('AdditionalDependencies',libs),
-                              ('SuppressStartupBanner','TRUE'),
-                              ('OutputFile','.\\' + variant + '/' + projname + '.exe'),
-                              ('AdditionalLibraryDirectories',libsdir),
-                              ('GenerateDebugInformation','TRUE')])
+    project.element ('Tool', {'Name':'VCLinkerTool',
+                             'AdditionalDependencies':libs,
+                             'SuppressStartupBanner':'TRUE',
+                             'OutputFile':'.\\' + variant + '/' + projname + '.exe',
+                             'AdditionalLibraryDirectories':libsdir,
+                              'GenerateDebugInformation':'TRUE'})
 
     project.endElement ('Configuration')
     project.endElement ('Configurations')
 
     project.startElement ('Files')
 
-    project.startElement ('Filter', [('Name','Source Files'),
-                                     ('Filter','cpp;c;cxx;rc;def;r;odl;idl;hpj;bat')])
+    project.startElement ('Filter', {'Name':'Source Files',
+                                     'Filter':'cpp;c;cxx;rc;def;r;odl;idl;hpj;bat'})
 
     srcs.sort ()
     for m in srcs:
         module = m[0]
         src_list = m[1]
 
-        project.startElement ('Filter', [('Name', module),('Filter','')])
+        project.startElement ('Filter', {'Name': module,'Filter':''})
         for s in src_list:
             incpaths = ''
             for path in s.incpaths:
@@ -397,11 +396,11 @@ def env2MSVS ( env, projname, srcs, variant ):
             for ppdef in s.ppdefs:
                 ppdefs = ppdefs + ppdef + ';'
 
-            project.startElement ('File', [('RelativePath',s.filepath)])
-            project.startElement ('FileConfiguration', [('Name',variant+'|Win32')])
-            project.element ('Tool', [('Name','VCCLCompilerTool'),
-                                  ('PreprocessorDefinitions',ppdefs),
-                                  ('AdditionalIncludeDirectories',incpaths)])
+            project.startElement ('File', {'RelativePath':s.filepath})
+            project.startElement ('FileConfiguration', {'Name':variant+'|Win32'})
+            project.element ('Tool', {'Name':'VCCLCompilerTool',
+                                 'PreprocessorDefinitions':ppdefs,
+                                  'AdditionalIncludeDirectories':incpaths})
             project.endElement ('FileConfiguration')
             project.endElement ('File')
 
@@ -422,27 +421,27 @@ def env2MSVS8 ( env, projname, path, srcs, variant ):
     project = XMLGenerator (proj_file)
 
     GUID = '{28540DAA-6718-4DE8-8D55-468836F0BE71}'
-    project.startElement ('VisualStudioProject', [('ProjectType','Visual C++'),
-                                                  ('Version','8,00'),
-                                                  ('Name',projname),
-                                                  ('ProjectGUID',GUID),
-                                                  ('SccProjectName',''),
-                                                  ('SccLocalPath','')])
+    project.startElement ('VisualStudioProject', {'ProjectType':'Visual C++',
+                                                  'Version':'8,00',
+                                                 'Name':projname,
+                                                 'ProjectGUID':GUID,
+                                                 'SccProjectName':'',
+                                                  'SccLocalPath':''})
 
     project.startElement ('Platforms', None)
-    project.element ('Platform', [('Name','Win32')])
+    project.element ('Platform', {'Name':'Win32'})
 
     project.endElement ('Platforms')
 
 
     project.startElement ('Configurations', {})
 
-    project.startElement ('Configuration', [('Name',variant+'|Win32'),
-                                            ('OutputDirectory','.\\'+variant),
-                                            ('IntermediateDirectory','.\\'+variant),
-                                            ('ConfigurationType','1'),
-                                            ('UseOfMFC','0'),
-                                            ('CharacterSet','2')])
+    project.startElement ('Configuration', {'Name':variant+'|Win32',
+                                           'OutputDirectory':'.\\'+variant,
+                                           'IntermediateDirectory':'.\\'+variant,
+                                           'ConfigurationType':'1',
+                                           'UseOfMFC':'0',
+                                            'CharacterSet':'2'})
 
 
     #
@@ -456,14 +455,14 @@ def env2MSVS8 ( env, projname, path, srcs, variant ):
     # TODO: parse flags and add correct attributes in compiler tool.
     ccflags = env['CCFLAGS']
 
-    project.element ('Tool', [('Name','VCCLCompilerTool'),
-                                   ('PreprocessorDefinitions',ppdefs),
-                                   ('ObjectFile','.\\' + variant + '/'),
-                                   ('ProgramDataBaseFileName','.\\' + variant + '/'),
-                                   ('SuppressStartupBanner','TRUE'),
-                                   ('AdditionalOptions',str(ccflags)),
-                                   ('Optimization','0'),
-                                   ('DebugInformationFormat','4')])
+    project.element ('Tool', {'Name':'VCCLCompilerTool',
+                                  'PreprocessorDefinitions':ppdefs,
+                                  'ObjectFile':'.\\' + variant + '/',
+                                  'ProgramDataBaseFileName':'.\\' + variant + '/',
+                                  'SuppressStartupBanner':'TRUE',
+                                   'AdditionalOptions':str(ccflags),
+                                  'Optimization':'0',
+                                   'DebugInformationFormat':'4'})
 
 
     #
@@ -477,27 +476,27 @@ def env2MSVS8 ( env, projname, path, srcs, variant ):
     for d in env['LIBPATH']:
         libsdir = libsdir + d + ';'
 
-    project.element ('Tool', [('Name','VCLinkerTool'),
-                              ('AdditionalDependencies',libs),
-                              ('SuppressStartupBanner','TRUE'),
-                              ('OutputFile','.\\' + variant + '/' + projname + '.exe'),
-                              ('AdditionalLibraryDirectories',libsdir),
-                              ('GenerateDebugInformation','TRUE')])
+    project.element ('Tool', {'Name':'VCLinkerTool',
+                             'AdditionalDependencies':libs,
+                             'SuppressStartupBanner':'TRUE',
+                             'OutputFile':'.\\' + variant + '/' + projname + '.exe',
+                             'AdditionalLibraryDirectories':libsdir,
+                              'GenerateDebugInformation':'TRUE'})
 
     project.endElement ('Configuration')
     project.endElement ('Configurations')
 
     project.startElement ('Files')
 
-    project.startElement ('Filter', [('Name','Source Files'),
-                                     ('Filter','cpp;c;cxx;rc;def;r;odl;idl;hpj;bat')])
+    project.startElement ('Filter', {'Name':'Source Files',
+                                     'Filter':'cpp;c;cxx;rc;def;r;odl;idl;hpj;bat'})
 
     srcs.sort ()
     for m in srcs:
         module = m[0]
         src_list = m[1]
 
-        project.startElement ('Filter', [('Name', module),('Filter','')])
+        project.startElement ('Filter', {'Name': module,'Filter':''})
         for s in src_list:
             incpaths = ''
             for path in s.incpaths:
@@ -507,11 +506,11 @@ def env2MSVS8 ( env, projname, path, srcs, variant ):
             for ppdef in s.ppdefs:
                 ppdefs = ppdefs + ppdef + ';'
 
-            project.startElement ('File', [('RelativePath',s.filepath)])
-            project.startElement ('FileConfiguration', [('Name',variant+'|Win32')])
-            project.element ('Tool', [('Name','VCCLCompilerTool'),
-                                  ('PreprocessorDefinitions',ppdefs),
-                                  ('AdditionalIncludeDirectories',incpaths)])
+            project.startElement ('File', {'RelativePath':s.filepath})
+            project.startElement ('FileConfiguration', {'Name':variant+'|Win32'})
+            project.element ('Tool', {'Name':'VCCLCompilerTool',
+                                 'PreprocessorDefinitions':ppdefs,
+                                  'AdditionalIncludeDirectories':incpaths})
             project.endElement ('FileConfiguration')
             project.endElement ('File')
 

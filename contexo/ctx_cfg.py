@@ -18,12 +18,12 @@ def expanduser_path_list( path_list ):
     exp_path_list = list()
     if type(path_list) != list:
         path_list = [path_list,]
-        
+
     for path in path_list:
         exp_path_list.append( os.path.expanduser( path ) )
-        
+
     return exp_path_list
-    
+
 
 #------------------------------------------------------------------------------
 class CFGFile:
@@ -47,9 +47,9 @@ class CFGFile:
                 print "*** Error copying file %s"%defconfig
                 print strerror
                 raise IOError
-        
+
         self.cfgFile = Config( cfgFilePath )
-    
+
     def saveAs ( self, filePath ):
         #TODO: Shouldn't filePath be stored in self.path?
         self.cfgFile.save ( filePath )

@@ -14,7 +14,8 @@
 
 
 # coding=UTF-8
-
+import logging
+import logging.handlers
 import os
 import os.path
 import shutil
@@ -32,11 +33,18 @@ from contexo.ctx_comp import ctx_log, COMPFile
 from contexo import ctx_sysinfo
 
 msgSender           = 'ctx.py'
+logging.basicConfig(format = '%(asctime)s %(levelname)-8s %(message)s',
+                                datefmt='%H:%M:%S',
+                                level = logging.DEBUG);
+#logger = logging.getLogegr()
+#logger.
+#logging.debug('Starting...')
+
 
 #
 # Get configuration.
 #
-cfgFile = ctx_cfg.CFGFile( os.path.join(ctx_common.getUserCfgDir(), 
+cfgFile = ctx_cfg.CFGFile( os.path.join(ctx_common.getUserCfgDir(),
                                         ctx_sysinfo.CTX_CONFIG_FILENAME))
 
 #legacy code: to be rewritten
@@ -59,14 +67,14 @@ def getBuildConfiguration( cview ):
             userErrorExit( "No build configuration specified.", "ctx.py" )
 
     # Uglyness:
-    # Historically the BCFile class located both the bc file and the cdef file 
-    # on its own from a provided list of search locations. We work around this 
-    # by providing only the single paths to these items which we get from the 
+    # Historically the BCFile class located both the bc file and the cdef file
+    # on its own from a provided list of search locations. We work around this
+    # by providing only the single paths to these items which we get from the
     # view (maintaining backward compatibility).
-    # Since we don't know the name of the CDEF yet, we have to violate some 
+    # Since we don't know the name of the CDEF yet, we have to violate some
     # good coding morale and extract it manually from the bc file. Some of this
     # code was copied from BCFile::__process_bc().
-    
+
     # TODO: Make this a lot more pretty if possible..
 
     bcFilePath = cview.locateItem( bcFile, 'bconf' )
@@ -81,9 +89,9 @@ def getBuildConfiguration( cview ):
     cdefFilename = section[ 'CDEF' ]
     cdefFilePath = cview.locateItem( cdefFilename, 'cdef' )
     cdefPath = os.path.dirname( cdefFilePath )
-    
-    ctxAssert( os.path.basename( cdefFilePath ).lower() == cdefFilename, "Something went wrong in our workaround.." )    
-    
+
+    ctxAssert( os.path.basename( cdefFilePath ).lower() == cdefFilename, "Something went wrong in our workaround.." )
+
     bc = ctx_bc.BCFile( bcFilename, bcPath, cdefPath, cfgFile)
 
     return bc
@@ -91,7 +99,7 @@ def getBuildConfiguration( cview ):
 #------------------------------------------------------------------------------
 # TODO: Make recursive
 def expand_list_files( view, item_list ):
-    
+
     expanded_item_list = list()
     for item in item_list:
         item = item.strip(' ')
@@ -105,23 +113,23 @@ def expand_list_files( view, item_list ):
             expanded_item_list.append(item)
 
     return expanded_item_list
-            
-    
+
+
 #------------------------------------------------------------------------------
 def getAccessPolicy( args ):
-    
+
     if args.no_remote_repo_access == True:
         ap = ctx_view.AP_NO_REMOTE_ACCESS
     else:
         ap = ctx_view.AP_PREFER_REMOTE_ACCESS
-        
+
     return ap
-        
+
 
 #------------------------------------------------------------------------------
-# Creates and returns a list of CTXCodeModule objects from the provided list 
-# of code module names. Unit tests are only enables for main modules (not for 
-# dependencies) 
+# Creates and returns a list of CTXCodeModule objects from the provided list
+# of code module names. Unit tests are only enables for main modules (not for
+# dependencies)
 #------------------------------------------------------------------------------
 def create_components( comp_filenames, component_paths ):
 
@@ -130,7 +138,7 @@ def create_components( comp_filenames, component_paths ):
     for comp_file in comp_filenames:
         comp = COMPFile( comp_file, component_paths )
         components.append( comp )
-        
+
     return components
 
 #------------------------------------------------------------------------------
@@ -149,14 +157,14 @@ def build_libraries( ctx_modules, lib_name, output_path, build_dir, session ):
     else:
         for mod in ctx_modules:
             libs[mod.getName()] = [mod,]
-    
+
     for lib, mods in libs.iteritems():
         ctx_log.ctxlogBeginLibrary( lib )
 
         obj_list = list()
         for mod in mods:
             obj_list +=  mod.buildStaticObjects( session, build_dir )
-        
+
         if len(obj_list) > 0:
             session.buildStaticLibrary( obj_list, lib, output_path )
         else:
@@ -164,13 +172,13 @@ def build_libraries( ctx_modules, lib_name, output_path, build_dir, session ):
 
         ctx_log.ctxlogEndLibrary()
 
-        
+
 #------------------------------------------------------------------------------
 def export_public_module_headers ( depmgr, modules, headerPath ):
 
     if headerPath == None:
         return
-        
+
     if not os.path.exists( headerPath ):
         os.makedirs( headerPath )
 
@@ -180,7 +188,7 @@ def export_public_module_headers ( depmgr, modules, headerPath ):
         dst = os.path.join( headerPath, os.path.basename(publicHeader) )
         infoMessage( "Exporting header: %s"%(os.path.basename(publicHeader)) )
         shutil.copyfile( src, dst )
-    
+
 #------------------------------------------------------------------------------
 def export_headers( depmgr, headers, headerDir ):
 
@@ -205,7 +213,7 @@ def buildmodules( depmgr, session, modules, args, output_path, build_dir ):
     all_modules = depmgr.getCodeModules() if args.deps else modules
     all_modules.sort ()
     dep_modules = set(all_modules) - set(modules)
-    
+
     ctx_modules = depmgr.createCodeModules( modules, args.tests, force=args.force )
     ctx_modules.extend ( depmgr.createCodeModules( dep_modules, force=args.force ) )
 
@@ -248,13 +256,13 @@ def cmd_info(args):
             print "\nPublic headers '" + args.module[0] + "' depends on:\n"
             for header in pub_headers:
                 print "\t",header
-                
+
         module_names = depmgr.getDependentModules( args.module[0] )
         if len ( module_names ) > 0:
             print "\nModules that depends on '" + args.module[0] + "':\n"
             for module in module_names:
                 print "\t",module
-        
+
 #------------------------------------------------------------------------------
 def cmd_buildmod(args):
     from contexo import ctx_cmod
@@ -275,15 +283,15 @@ def cmd_buildmod(args):
     cview   = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=bool(args.repo_validation) )
     modules = expand_list_files(cview, args.modules)
     bc      = getBuildConfiguration( cview )
-    
+
     depmgr  = CTXDepMgr( cview.getItemPaths('modules') )
     depmgr.addCodeModules( modules, args.tests )
-    
+
     session = ctx_base.CTXBuildSession( bc )
-   
+
     session.setDependencyManager( depmgr )
-    
-   
+
+
 
     # Register build configuration in log handler
     ctx_log.ctxlogSetBuildConfig( bc.getTitle(),
@@ -293,7 +301,7 @@ def cmd_buildmod(args):
                                   "N/A" )
 
     output_path = os.path.join( args.output, args.libdir )
-    
+
     buildmodules( depmgr, session, modules, args, output_path, bc.getTitle() )
 
     header_path = os.path.join(args.output, args.headerdir )
@@ -305,7 +313,7 @@ def cmd_buildmod(args):
         logpath     = os.path.normpath(os.path.dirname( logfilepath ))
         if len(logpath) and not os.path.isdir(logpath):
             os.makedirs( logpath )
-            
+
         ctx_log.ctxlogWriteToFile( logfilepath, appendToExisting=False )
 
     # Switch back to original environment
@@ -318,7 +326,7 @@ def cmd_buildcomp(args):
     from contexo import ctx_base
     from contexo import ctx_envswitch
     from contexo.ctx_depmgr import CTXDepMgr
-    
+
     # Switch to specified environment
     oldEnv = None
     if args.env != None:
@@ -327,22 +335,22 @@ def cmd_buildcomp(args):
 
     if args.logfile != None:
         ctx_log.ctxlogStart()
-    
+
     # Prepare all
     cview       = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=bool(args.repo_validation) )
     components  = expand_list_files( cview, args.components )
     bc          = getBuildConfiguration( cview )
-    depmgr      = CTXDepMgr ( cview.getItemPaths('modules') ) 
+    depmgr      = CTXDepMgr ( cview.getItemPaths('modules') )
     session     = ctx_base.CTXBuildSession( bc )
     session.setDependencyManager( depmgr )
-    
+
     # Register build configuration in log handler
     ctx_log.ctxlogSetBuildConfig( bc.getTitle(),
                                   bc.getCompiler().cdefTitle,
                                   bc.getBuildParams().cflags,
                                   bc.getBuildParams().prepDefines,
                                   "N/A" )
-                                  
+
     # Process components
     for comp in create_components( components, cview.getItemPaths('comp') ):
         ctx_log.ctxlogBeginComponent( comp.name )
@@ -353,22 +361,22 @@ def cmd_buildcomp(args):
 
         # Workaround to get header export to work
         codemodule_map = dict()
-        
+
         # Build component modules.
         for library, modules in comp.libraries.items():
-            
-            modules = expand_list_files( cview, modules )            
-            
+
+            modules = expand_list_files( cview, modules )
+
             depmgr.addCodeModules( modules, args.tests )
-            
+
             args.lib = library
             print args
             buildmodules( depmgr, session,  modules,  args, lib_dir, session.bc.getTitle())
-            
+
             depmgr.emptyCodeModules()
-            
+
         export_headers( depmgr, comp.publicHeaders, header_dir )
-    
+
         ctx_log.ctxlogEndComponent()
 
     # Write log if requested
@@ -377,11 +385,11 @@ def cmd_buildcomp(args):
         logpath     = os.path.normpath(os.path.dirname( logfilepath ))
         if len(logpath) and not os.path.isdir(logpath):
             os.makedirs( logpath )
-            
+
         ctx_log.ctxlogWriteToFile( logfilepath, appendToExisting=False )
 
 
-    # Restore environment   
+    # Restore environment
     if args.env != None:
         switchEnvironment( oldEnv, False )
 
@@ -392,7 +400,7 @@ def cmd_export(args):
     from contexo import ctx_envswitch
     from contexo.ctx_depmgr import CTXDepMgr
     from contexo.ctx_export import CTXExportData
-    
+
     envLayout = None
     oldEnv = None
     if args.env != None:
@@ -407,7 +415,7 @@ def cmd_export(args):
     session.setDependencyManager( depmgr )
 
     export_items = expand_list_files( cview, args.export_items )
-    
+
     # Make sure we have only one type of item to export
     component_export = True
     for item in export_items:
@@ -416,7 +424,7 @@ def cmd_export(args):
                 userErrorExit( "An export operation can either export a list of components OR a list of modules, not both.", msgSender)
         else:
             component_export = False
-            
+
     components   = list()
     main_modules = list() # Excluding dependency modules
     if component_export:
@@ -428,27 +436,27 @@ def cmd_export(args):
                 main_modules.extend( compmodules )
     else:
         main_modules = export_items
-           
+
     # Divert modules into main modules and dependency modules
     export_modules = depmgr.getCodeModules() if args.deps else main_modules
     export_modules.sort()
     dep_modules = set(export_modules) - set(main_modules)
-    
+
     ctx_modules = depmgr.createCodeModules( main_modules, args.tests )
     ctx_modules.extend ( depmgr.createCodeModules( dep_modules ) )
-    
+
     module_map = dict()
     for mod in ctx_modules:
         module_map[mod.getName()] = mod
-    
+
     depmgr.updateDependencyHash()
 
     # Dispatch export data to handler (through pipe)
     package = CTXExportData()
-    package.setExportData( module_map, components, None, session, depmgr, 
+    package.setExportData( module_map, components, None, session, depmgr,
                            cview, envLayout, args )
     package.dispatch()
-    
+
     # Restore environment
     if args.env != None:
         switchEnvironment( oldEnv, False )
@@ -463,10 +471,10 @@ def cmd_updateview(args):
 
     if args.checkouts_only == False:
         cview.updateRepositories()
-        
+
     if args.updates_only == False:
         cview.checkoutRepositories()
-    
+
 #------------------------------------------------------------------------------
 def cmd_validateview(args):
 
@@ -474,6 +482,18 @@ def cmd_validateview(args):
     cview = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=True )
 
     infoMessage( "Validation complete", 1, msgSender )
+
+#------------------------------------------------------------------------------
+def cmd_freeze(args):
+    import xml.sax
+    from  contexo.ctx_rspec_freeze import rspecRevisionFreezer
+    parser = xml.sax.make_parser()
+    fileOut = sys.stdout
+    if args.output is not None:
+        fileOut = open(args.output, mode = 'wt')
+    handler = rspecRevisionFreezer(fileOut)
+    parser.setContentHandler(handler)
+    parser.parse( open(args.file_to_freeze) )
 
 #------------------------------------------------------------------------------
 def cmd_clean(args):
@@ -488,15 +508,15 @@ def cmd_clean(args):
     #
 
     cview = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=bool(args.repo_validation) )
-    
+
     exp_modules = expand_list_files(cview, args.modules)
     bc      = getBuildConfiguration( cview )
-    
+
     depmgr  = CTXDepMgr( cview.getItemPaths('modules') )
     depmgr.addCodeModules( exp_modules, args.tests )
-    
+
     session = ctx_base.CTXBuildSession( bc )
-   
+
     session.setDependencyManager( depmgr )
 
     #
@@ -507,7 +527,7 @@ def cmd_clean(args):
         module_names = depmgr.getCodeModules ()
     else:
         module_names = exp_modules
-    
+
     modules = depmgr.createCodeModules( set(exp_modules) | (set(module_names) - set(exp_modules) ) )
 
     print "cleaning modules:"
@@ -617,7 +637,7 @@ def cmd_prop(args):
 
 # Create Parser
 parser = ArgumentParser( prog="ctx",
-                         description=ctx_sysinfo.CTX_BANNER, 
+                         description=ctx_sysinfo.CTX_BANNER,
                          version=ctx_sysinfo.CTX_DISPLAYVERSION,
                          fromfile_prefix_chars='@' )
 
@@ -691,7 +711,11 @@ parser_clean.add_argument('-v', '--view', default=os.getcwd(), help=standard_des
 parser_clean.add_argument('-rv', '--repo-validation', action='store_true', help=standard_description['--repo-validation'])
 parser_clean.add_argument('-nra', '--no-remote-repo-access', action='store_true', help=standard_description['--no-remote-repo-access'])
 
-
+# freeze parser
+parser_freeze = subparsers.add_parser('freeze', help="Generate a rspec with svn versions frozen in their current state (from working copy).")
+parser_freeze.set_defaults(func=cmd_freeze)
+parser_freeze.add_argument('file_to_freeze', help="rspec to freeze")
+parser_freeze.add_argument('-o', '--output',  help="file to write to (standard output is used by default)")
 
 #
 # export parser
@@ -708,11 +732,11 @@ Example, exporting to the 'msvc' plugin:
 
 ctx export my.comp -bc my.bc | msvc -pn my_vcproj_title -o out_folder
 
-Instead of building, Contexo transfers the build session data to the 
+Instead of building, Contexo transfers the build session data to the
 MSVC plugin which in turn renders a Visual Studio project from the
 information.
 
-To invoke commandline help for a certain plugin, use the help option 
+To invoke commandline help for a certain plugin, use the help option
 for both ctx and the plugin:
 
 ctx export --help | msvc --help
@@ -734,7 +758,6 @@ parser_export.add_argument('-o', '--output', default=os.getcwd(), help=standard_
 parser_export.add_argument('-rv', '--repo-validation', action='store_true', help=standard_description['--repo-validation'])
 parser_export.add_argument('-nra', '--no-remote-repo-access', action='store_true', help=standard_description['--no-remote-repo-access'])
 
-#
 #
 #
 

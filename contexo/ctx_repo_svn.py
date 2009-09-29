@@ -13,7 +13,6 @@
 from ctx_repo import *
 from ctx_common import ctxAssert, userErrorExit, infoMessage
 import ctx_svn_client
-
 from getpass import getpass
 
 #------------------------------------------------------------------------------
@@ -81,9 +80,6 @@ class CTXRepositorySVN(CTXRepository):
 
         return int(base_rev)
 
-
-    def getRevision(self):
-        return getRevisionExact(self)
     #--------------------------------------------------------------------------
     def checkValidRevision(self):
 

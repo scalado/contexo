@@ -15,29 +15,6 @@ from ctx_common import *
 
 REPO_PATH_SECTIONS = ['modules','cdef','bconf','comp', 'misc']
 
-#
-#A very thin abstraction layer for version contol
-#Originally created to have a RSC interface to implement 'freezing rspecs'
-#
-#class RepositoryClient:
-#    def __init__():
-#         pass
-#
-#    def getHref(self):
-#        return self.href
-#
-#    def getRevision(self):
-#        raise NotImplementedError
-#
-#    def isVersionControlled( self ):
-#        raise NotImplementedError
-#
-#    def checkout(self,  destination):
-#        raise NotImplementedError
-#
-#    def getRSCName(self):
-#        raise NotImplementedError
-
 #------------------------------------------------------------------------------
 class CTXRepository:
     def __init__( self, id_name, offset_path, href, rev, version_control  ):
@@ -91,8 +68,6 @@ class CTXRepository:
     def checkValid(self, updating ):
         raise NotImplementedError
 
-    def getRevision(self):
-        return None
     ##############################
     #--------------------------------------------------------------------------
 

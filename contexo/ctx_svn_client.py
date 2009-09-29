@@ -117,7 +117,7 @@ class CTXSubversionClient():
 
         entry = self.client.info( lc_path )
         #strip the %20-quotations from the url
-        return urllib.unquote( entry['url'] ) if url != None else None
+        return urllib.unquote( entry['url'] ) if entry != None else None
 
     #--------------------------------------------------------------------------
     # Returns the revision of the given working copy

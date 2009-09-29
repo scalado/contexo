@@ -116,7 +116,8 @@ class CTXSubversionClient():
             userErrorExit( "Given path to local copy '%s' is invalid"%(lc_path), self.msgSender )
 
         entry = self.client.info( lc_path )
-        return entry['url'] if entry != None else None
+        #strip the %20-quotations from the url
+        return urllib.unquote( entry['url'] ) if url != None else None
 
     #--------------------------------------------------------------------------
     # Returns the revision of the given working copy
@@ -138,7 +139,7 @@ class CTXSubversionClient():
     # Returns the revision of the given working copy
     #--------------------------------------------------------------------------
     def getRevisionFromURL( self, url ):
-
+        url = urllib.quote(url,  safe=',~=!@#$%^&*()+|}{:?><;[]\\/')
         entry = self.client.info2( url )
         ctxAssert( entry[0][1]['rev'].kind == pysvn.opt_revision_kind.number, "Revision of URL is not a number" )
         return entry[0][1]['rev'].number
@@ -193,7 +194,7 @@ class CTXSubversionClient():
             userErrorExit( "Checkout destination '%s' is not a directory"%(local_directory), self.msgSender )
 
         try:
-            #pysvn checkout seems to have problem when spaces are not escaped but also when other characters are escaped
+            #pysvn checkout seems to have a problem when spaces are not escaped but also when other characters are escaped
             url = urllib.quote(url,  safe=',~=!@#$%^&*()+|}{:?><;[]\\/')
             self.client.checkout(url=url, path=local_directory, recurse=True, revision=rev)
         except pysvn.ClientError, e:

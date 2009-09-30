@@ -69,6 +69,9 @@ class CTXRepositorySVN(CTXRepository):
 
         self.client.checkout( self.getHref(), self.getAbsLocalPath(), self.getRSpecRevision() )
 
+    def getRcs(self):
+       return 'svn'
+
     #--------------------------------------------------------------------------
     # Always returns an exact revision as a number
     # (e.g. translates HEAD into to current revision)

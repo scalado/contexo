@@ -20,26 +20,26 @@ def genTreeChecksum( root_folder, md5_checksum ):
     folder_items = os.listdir( root_folder )
 
     for item_name in folder_items:
-        
+
         md5_checksum.update( item_name )
 
         item_path = os.path.join( root_folder, item_name )
-        
+
         if os.path.isdir( item_path ):
             genTreeChecksum( item_path, md5_checksum ) # POINT OF RECURSION
         else:
             ctxAssert( os.path.isfile(item_path), "Path concatenation probably went wrong here" )
-            
+
             f = open( item_path, 'rb' )
             contents = f.read()
             f.close()
             md5_checksum.update( contents )
-                
-    return md5_checksum   
+
+    return md5_checksum
 
 #------------------------------------------------------------------------------
 # This function compares two tree structures and evaluates if they are equal
-# by checksum comparison. The checksums are generated from file/folder 
+# by checksum comparison. The checksums are generated from file/folder
 # structure and file contents. Returns True if trees are equal, else False.
 #------------------------------------------------------------------------------
 def treesAreEqual( root_folderA, root_folderB ):
@@ -48,11 +48,11 @@ def treesAreEqual( root_folderA, root_folderB ):
     md5_checksum = hashlib.md5()
     md5_checksum = genTreeChecksum( root_folderA, md5_checksum )
     checksumA = md5_checksum.hexdigest()
-    
+
     md5_checksum = hashlib.md5()
     md5_checksum = genTreeChecksum( root_folderB, md5_checksum )
     checksumB = md5_checksum.hexdigest()
-    
+
     return bool(checksumA == checksumB)
 
 
@@ -68,7 +68,7 @@ class CTXRepositoryFS(CTXRepository):
 
         if href == None:
             userErrorExit( "No HREF specified for repository '%s'. Failed to aquire HREF from local copy '%s'"\
-                           %(id_name, self.getAbsLocalPath()), self.msgSender )        
+                           %(id_name, self.getAbsLocalPath()), self.msgSender )
 
         CTXRepository.__init__( self, id_name, local_path, href, None, version_control=False )
         self.msgSender = "CTXRepositoryFS"
@@ -77,6 +77,8 @@ class CTXRepositoryFS(CTXRepository):
     def isLocal(self):
         return os.path.isdir( self.getAbsLocalPath() )
 
+    def getRcs(self):
+       return ''
     #--------------------------------------------------------------------------
     def update(self):
         import ctx_view
@@ -90,7 +92,7 @@ class CTXRepositoryFS(CTXRepository):
         elif self.getAccessPolicy() == ctx_view.AP_NO_REMOTE_ACCESS:
 
             if not treesAreEqual( self.getAbsLocalPath(), self.getHref() ):
-                
+
                 print '\n'
                 infoMessage( "Regular file repository '%s' is out of sync.\n'%s' and '%s' doesn't match. The system is unable to\nperform intelligent synchronization of non-revisioned repositories.\nDo you want to overwrite (delete and replace) the local copy '%s'\nwith the contents of the remote copy '%s'?"\
                              %(self.getID(), self.getAbsLocalPath(), self.getHref(), self.getAbsLocalPath(), self.getHref() ), 0, self.msgSender )
@@ -99,15 +101,15 @@ class CTXRepositoryFS(CTXRepository):
                 while choice not in ['yes','no']:
                     infoMessage( "Invalid choice, try again.", 0 )
                     choice = raw_input( "> yes/no: " ).lower()
-                
+
                 if   choice == 'yes':
                     infoMessage( "Updating (replacing) local copy '%s' with '%s'"\
-                                 %(self.getAbsLocalPath(), self.getHref()), 
+                                 %(self.getAbsLocalPath(), self.getHref()),
                                  1, self.msgSender )
 
                     shutil.rmtree( self.getAbsLocalPath() )
                     shutil.copytree( self.getHref(), self.getAbsLocalPath() )
-                    
+
                 elif choice == 'no':
                     infoMessage( "Skipping update of repository '%s'"%self.getID(), 2, self.msgSender )
 
@@ -115,15 +117,15 @@ class CTXRepositoryFS(CTXRepository):
                     ctxAssert( False, "Unhandled choice" )
             else:
                 infoMessage( "Repository '%s' (%s) is up to date"%(self.getID(), self.getHref()), 1, self.msgSender )
-                              
+
         else:
             ctxAssert( False, "Unhandled access policy '%d'"%self.getAccessPolicy() )
-        
+
     #--------------------------------------------------------------------------
     def checkout(self):
         import shutil
         import ctx_view
-        ctxAssert( self.isLocal() == False, 
+        ctxAssert( self.isLocal() == False,
                    "This method should not be called without first checking for an existing local copy." )
 
         if self.getAccessPolicy() == ctx_view.AP_PREFER_REMOTE_ACCESS:
@@ -132,10 +134,10 @@ class CTXRepositoryFS(CTXRepository):
 
         elif self.getAccessPolicy() == ctx_view.AP_NO_REMOTE_ACCESS:
             infoMessage( "Checking out repository '%s' (%s) to '%s'"
-                         %(self.getID(), self.getHref(), self.getAbsLocalPath()), 
+                         %(self.getID(), self.getHref(), self.getAbsLocalPath()),
                          1, self.msgSender )
             shutil.copytree( self.getHref(), self.getAbsLocalPath() )
-            
+
         else:
             ctxAssert( False, "Unhandled access policy '%d'"%self.getAccessPolicy() )
 

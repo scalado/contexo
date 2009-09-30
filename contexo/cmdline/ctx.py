@@ -487,14 +487,18 @@ def cmd_validateview(args):
 #------------------------------------------------------------------------------
 def cmd_freeze(args):
     import xml.sax
-    from  contexo.ctx_rspec_freeze import rspecRevisionFreezer
-    parser = xml.sax.make_parser()
+    #from  contexo.ctx_rspec_file_freeze import rspecFileRevisionFreezer
+
     fileOut = sys.stdout
     if args.output is not None:
-        fileOut = open(args.output)
-    handler = rspecRevisionFreezer(fileOut)
-    parser.setContentHandler(handler)
-    parser.parse( open(args.file_to_freeze) )
+        fileOut = open(args.output,  mode = 'wt')
+    cview = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=bool(args.repo_validation) )
+    cview.freeze(output=fileOut)
+#
+#    parser = xml.sax.make_parser()
+#    handler = rspecFileRevisionFreezer(fileOut)
+#    parser.setContentHandler(handler)
+#    parser.parse( open(args.file_to_freeze) )
 
 #------------------------------------------------------------------------------
 def cmd_clean(args):
@@ -715,10 +719,12 @@ parser_clean.add_argument('-nra', '--no-remote-repo-access', action='store_true'
 # freeze parser
 parser_freeze = subparsers.add_parser('freeze', help="Generate a rspec with svn versions frozen in their current state (from working copy).")
 parser_freeze.set_defaults(func=cmd_freeze)
-parser_freeze.add_argument('file_to_freeze', help="rspec to freeze")
+#parser_freeze.add_argument('--file',  help="rspec to freeze. Imports will not be frozen")
 parser_freeze.add_argument('-o', '--output',  help="file to write to (standard output is used by default)")
+parser_freeze.add_argument('-v', '--view', default=os.getcwd(), help=standard_description['--view'])
+parser_freeze.add_argument('-nra', '--no-remote-repo-access', action='store_true', help=standard_description['--no-remote-repo-access'])#
+parser_freeze.add_argument('-rv', '--repo-validation', action='store_true', help=standard_description['--repo-validation'])
 
-#
 # export parser
 #
 

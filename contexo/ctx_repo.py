@@ -22,7 +22,7 @@ class CTXRepository:
         self.href = href
         self.rev = rev
         self.offset_path = offset_path
-        self.rel_local_path = os.path.join(self.offset_path, id_name)
+        #self.rel_local_path = os.path.join(self.offset_path, id_name)
         self.abs_local_path = None
         self.relative_paths = dict() # This is path types provided via <ctx-path> items.
         self.version_control = version_control
@@ -59,6 +59,7 @@ class CTXRepository:
     def checkout(self):
         raise NotImplementedError
 
+
     # Checks if the current revision is in sync
     def checkValidRevision(self):
         raise NotImplementedError
@@ -71,43 +72,46 @@ class CTXRepository:
     ##############################
     #--------------------------------------------------------------------------
 
+    def getRcs(self):
+        raise NotImplementedError
 
     #--------------------------------------------------------------------------
     def getID(self):
         return self.id_name
 
     #--------------------------------------------------------------------------
+    def getPath(self):
+        return self.offset_path
+    #--------------------------------------------------------------------------
     def getHref(self):
         return self.href
 
     #--------------------------------------------------------------------------
-    def updateAbsLocalPath(self):
-        self.abs_local_path = os.path.join( self.view_root, self.offset_path, self.id_name )
-
-    #--------------------------------------------------------------------------
     def getAbsLocalPath(self):
         ctxAssert( self.view_root != None and len(self.view_root) > 0, "Absolute local path has not been set yet" )
-        return self.abs_local_path
+        return os.path.join( self.view_root, self.offset_path, self.id_name ) #self.abs_local_path
 
     #--------------------------------------------------------------------------
     # Returns the relative local path of the repository within the view
     #--------------------------------------------------------------------------
     def getRelLocalPath( self ):
-        return self.rel_local_path
+        return os.path.join(self.offset_path, self.id_name)
 
     #--------------------------------------------------------------------------
     def getRSpecRevision( self ):
         return self.rev
 
     #--------------------------------------------------------------------------
-    def addAbsolutePath(self, path_section, path):
-        ctxAssert( path_section in REPO_PATH_SECTIONS, "Unknown path section '%s'"%(path_section) )
-        self.relative_paths[path_section].append( path )
-        infoMessage( "Path '%s' added to section '%s' in repository '%s'"%(path, path_section, self.getID()), 2, self.msgSender )
+#    def addAbsolutePath(self, path_section, path):
+#        ctxAssert( path_section in REPO_PATH_SECTIONS, "Unknown path section '%s'"%(path_section) )
+#        self.relative_paths[path_section].append( path )
+#        infoMessage( "Path '%s' added to section '%s' in repository '%s'"%(path, path_section, self.getID()), 2, self.msgSender )
 
     #--------------------------------------------------------------------------
     def addPath(self, path_section, path):
         ctxAssert( path_section in REPO_PATH_SECTIONS, "Unknown path section '%s'"%(path_section) )
+        if os.path.isabs(path):
+            warningMessage("The absolute path %s will be treated as relative to the repository copy"%(path), self.msgSender)
         path = path.lstrip('\\/ ')
 
         self.relative_paths[path_section].append( path )
@@ -125,11 +129,11 @@ class CTXRepository:
 
         if self.access_policy == AP_PREFER_REMOTE_ACCESS and self.isVersionControlled() == False:
             for path in self.relative_paths[path_section]:
-                full_paths.add( os.path.join(self.getHref(), path) )
+                full_paths.add( os.path.join(self.getHref(), path)  )
 
         elif self.access_policy == AP_NO_REMOTE_ACCESS or self.isVersionControlled() == True:
             for path in self.relative_paths[path_section]:
-                full_paths.add( os.path.join(self.getAbsLocalPath(), path) )
+                full_paths.add( os.path.join(self.getAbsLocalPath(), path)   )
         else:
             ctxAssert( False, "Unhandled access policy" )
 
@@ -139,6 +143,9 @@ class CTXRepository:
     def getRelativePaths( self, path_section ):
         ctxAssert( path_section in REPO_PATH_SECTIONS, "Unknown path section '%s'"%(path_section) )
         return self.relative_paths[path_section]
+
+    def getAllRelativePaths( self):
+        return self.relative_paths
 
     #--------------------------------------------------------------------------
     #def getAllPaths(self):
@@ -169,12 +176,10 @@ class CTXRepository:
     #--------------------------------------------------------------------------
     def setViewRoot( self, view_root ):
         self.view_root = view_root
-        self.updateAbsLocalPath()
 
         if len(self.getHref()) == 0:
             self.href = self.getAbsLocalPath()
-
-        self.addAbsolutePath( 'modules', self.getAbsLocalPath() )
+        self.relative_paths['modules'].append('.' )
 
 
     #--------------------------------------------------------------------------
@@ -197,7 +202,7 @@ class CTXRepository:
         for path in local_paths:
             tried_locations.append( path )
             if not os.path.isdir(path):
-                tried_locations[-1] = tried_locations[-1] + " (path not found)"
+                tried_locations[-1] += " (path not found)"
             else:
                 if item in os.listdir(path):
                     candidate_locations.append( os.path.join(path, item) )

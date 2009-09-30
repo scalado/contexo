@@ -76,7 +76,7 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib, \
                                                  'SccProjectName':'',
                                                   'SccLocalPath':''})
 
-    project.startElement ('Platforms', None)
+    project.startElement ('Platforms', {})
 
     project.element ('Platform', {'Name':platform})
     project.endElement ('Platforms')
@@ -138,8 +138,8 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib, \
         project.startElement ('Filter', {'Name': 'src','Filter':''})
         # Add all source files.
         for srcFile in mod['SOURCES']:
-            project.startElement ('File', [('RelativePath', relntpath(srcFile, vcprojPath))])
-            project.startElement('FileConfiguration',[('Name',"".join([variant,'|',platform]))])
+            project.startElement ('File', {'RelativePath': relntpath(srcFile, vcprojPath)})
+            project.startElement('FileConfiguration',{'Name':"".join([variant,'|',platform])})
             project.element('Tool',{'Name':'VCCLCompilerTool','AdditionalIncludeDirectories':relntpath(mod['PRIVHDRDIR'], vcprojPath)})
             project.endElement ('FileConfiguration')
             project.endElement ('File')
@@ -152,7 +152,7 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib, \
         project.startElement ('Filter', {'Name': 'inc','Filter':''})
         # Add all private headers.
         for hdr in mod['PRIVHDRS']:
-            project.startElement ('File', [('RelativePath',relntpath(hdr, vcprojPath))])
+            project.startElement ('File', {'RelativePath':relntpath(hdr, vcprojPath)})
             project.endElement ('File')
         # End private include folder
         project.endElement ('Filter')
@@ -160,7 +160,7 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib, \
 
         # Add public headers to root.
         for hdr in mod['PUBHDRS']:
-            project.startElement ('File', [('RelativePath',relntpath(hdr, vcprojPath))])
+            project.startElement ('File', {'RelativePath':relntpath(hdr, vcprojPath)} )
             project.endElement ('File')
 
         # End module folder

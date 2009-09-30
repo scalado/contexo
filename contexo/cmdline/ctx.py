@@ -32,7 +32,8 @@ from contexo import ctx_sysinfo
 
 import locale
 try:
-    locale.resetlocale() # locale.LC_ALL,  'en_US.UTF-8') #this fail on windows, but doesn't disturb much
+    #this fails on windows, but it doesn't matter much
+    locale.resetlocale() # locale.LC_ALL,  'en_US.UTF-8')
 except:
     pass
 

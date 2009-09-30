@@ -13,7 +13,7 @@ class XMLGenerator:
         #output.write ('<?xml version="1.0" encoding = "Windows-1252"?>\n')
 
     def startElement (self, tag, attributes = {}):
-        self.xmlgenerator.startElement(tag,  AttributesImpl(attributes))
+        self.xmlgenerator.startElement(tag,  attributes)
 #        self.output.write ('<'+tag)
 #        if attributes != None:
 #            self.output.write ('\n')
@@ -26,7 +26,7 @@ class XMLGenerator:
 #        self.output.write('</'+tag+'>\n')
 
     def element (self, tag, attributes = {}):
-        self.startElement(self, tag, attributes)
+        self.startElement(tag, attributes)
         self.endElement(tag)
 #        self.output.write ('<'+tag)
 #        if attributes != None:

@@ -111,7 +111,7 @@ class CTXRepository:
     def addPath(self, path_section, path):
         ctxAssert( path_section in REPO_PATH_SECTIONS, "Unknown path section '%s'"%(path_section) )
         if os.path.isabs(path):
-            warningMessage("The absolute path %s will be treated as relative to the repository copy"%(path), self.msgSender)
+            warningMessage("The absolute path %s will be treated as relative to the repository copy"%(path),  self.msgSender)
         path = path.lstrip('\\/ ')
 
         self.relative_paths[path_section].append( path )

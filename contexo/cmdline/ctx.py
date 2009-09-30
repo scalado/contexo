@@ -31,7 +31,10 @@ from contexo.ctx_comp import ctx_log, COMPFile
 from contexo import ctx_sysinfo
 
 import locale
-locale.resetlocale() # locale.LC_ALL,  'en_US.UTF-8')
+try:
+    locale.resetlocale() # locale.LC_ALL,  'en_US.UTF-8') #this fail on windows, but doesn't disturb much
+except:
+    pass
 
 msgSender           = 'ctx.py'
 logging.basicConfig(format = '%(asctime)s %(levelname)-8s %(message)s',

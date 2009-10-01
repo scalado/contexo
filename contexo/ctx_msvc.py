@@ -166,7 +166,7 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib, \
 
         # Add public headers to root.
         for hdr in mod['PUBHDRS']:
-            project.characters('header:%s vcprojPath: %s'%(hdr, vcprojPath))
+            #project.characters('header:%s vcprojPath: %s'%(hdr, vcprojPath))
             project.startElement ('File', {'RelativePath':relntpath(hdr, vcprojPath)} )
             project.endElement ('File')
 

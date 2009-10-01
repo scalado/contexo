@@ -39,7 +39,7 @@ class XMLGenerator:
         self.xmlgenerator.characters('\n')
 
 
-    def message (self, msg):
+    def characters(self, msg):
         self.xmlgenerator.characters(multiplystring('\t', self.level))
         self.xmlgenerator.characters(msg)
         self.xmlgenerator.characters('\n')

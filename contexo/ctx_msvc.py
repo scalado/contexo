@@ -5,20 +5,24 @@ from xmltools import XMLGenerator
 import uuid
 
 def relntpath(path, start):
-    if start == None:
-        start = os.getcwd()
+    import ntpath #the windows version of os.path
+    return ntpath.relpath(path,  start)
 
-    pathl  = path.replace("/", "\\").split('\\')
-    startl = start.replace("/", "\\").split('\\')
-
-    while len(pathl) and len(startl) and pathl[0] == startl[0]:
-            del pathl[0]
-            del startl[0]
-
-    for i in range(len(startl)):
-        pathl[i] = '..'
-
-    return "\\".join(pathl)
+#    if start == None:
+#        start = os.getcwd()
+#
+#    pathl  = path.replace("/", "\\").split('\\')
+#    startl = start.replace("/", "\\").split('\\')
+#
+#    while len(pathl) and len(startl) and pathl[0] == startl[0]:
+#            print "removing "+pathl[0]
+#            del pathl[0]
+#            del startl[0]
+#    print "now pathl: %s"%(pathl[0])
+#    for i in range(len(startl)):
+#        pathl.insert(i, '..')
+#
+#    return "\\".join(pathl)
 
 
 
@@ -29,7 +33,7 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib, \
                     fileTitle = None ):
 
     vcprojFilePath = str()
-
+    vcprojPath = os.path.abspath(vcprojPath)
     if fileTitle == None:
         fileTitle = projectName
 
@@ -152,14 +156,17 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib, \
         project.startElement ('Filter', {'Name': 'inc','Filter':''})
         # Add all private headers.
         for hdr in mod['PRIVHDRS']:
-            project.startElement ('File', {'RelativePath':relntpath(hdr, vcprojPath)})
-            project.endElement ('File')
+
+            project.element ('File', {'RelativePath':relntpath(hdr, vcprojPath)})
+
+
         # End private include folder
         project.endElement ('Filter')
 
 
         # Add public headers to root.
         for hdr in mod['PUBHDRS']:
+            project.characters('header:%s vcprojPath: %s'%(hdr, vcprojPath))
             project.startElement ('File', {'RelativePath':relntpath(hdr, vcprojPath)} )
             project.endElement ('File')
 

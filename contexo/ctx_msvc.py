@@ -13,6 +13,17 @@ def relntpath(path, start):
         start = os.getcwd()
     path = ntpath.normpath(path)
     start = ntpath.normpath(start)
+
+    (drivep,  tailp) = ntpath.splitdrive(path)
+    (drives,  tails) = ntpath.splitdrive(start)
+    #if one of the paths has no drive letter, treat both of them so
+    if (drivep == '' or drives == ''):
+        path = tailp
+        start = tails
+    elif(drivep != drives):
+        #ntpath.relpath returns error if drive letters differ, but we wont
+        return path
+
     pathl  = path.replace("/", "\\").split('\\')
     startl = start.replace("/", "\\").split('\\')
     print "path: %s, start:%s"%(path, start )
@@ -21,9 +32,9 @@ def relntpath(path, start):
             del pathl[0]
             del startl[0]
     for i in range(len(startl)):
-        pathl.insert(i, '..')
+        pathl.insert(0, '..')
 
-    return "\\".join(pathl)
+    return ntpath.join('.',  *pathl)
 
 
 

@@ -5,24 +5,24 @@ from xmltools import XMLGenerator
 import uuid
 
 def relntpath(path, start):
-    import ntpath #the windows version of os.path
-    return ntpath.relpath(path,  start)
+ #   import ntpath #the windows version of os.path #available in python 2.6
+#    return ntpath.relpath(path,  start)
 
-#    if start == None:
-#        start = os.getcwd()
-#
-#    pathl  = path.replace("/", "\\").split('\\')
-#    startl = start.replace("/", "\\").split('\\')
-#
-#    while len(pathl) and len(startl) and pathl[0] == startl[0]:
-#            print "removing "+pathl[0]
-#            del pathl[0]
-#            del startl[0]
-#    print "now pathl: %s"%(pathl[0])
-#    for i in range(len(startl)):
-#        pathl.insert(i, '..')
-#
-#    return "\\".join(pathl)
+    if start == None:
+        start = os.getcwd()
+
+    pathl  = path.replace("/", "\\").split('\\')
+    startl = start.replace("/", "\\").split('\\')
+
+    while len(pathl) and len(startl) and pathl[0] == startl[0]:
+            print "removing "+pathl[0]
+            del pathl[0]
+            del startl[0]
+    print "now pathl: %s"%(pathl[0])
+    for i in range(len(startl)):
+        pathl.insert(i, '..')
+
+    return "\\".join(pathl)
 
 
 

@@ -35,11 +35,13 @@ def ctxExit( exitcode ):
 #------------------------------------------------------------------------------
 #
 #------------------------------------------------------------------------------
-def errorMessage(errstr):
+def errorMessage(errstr,  filename = None,  lineno = None ):
     import ctx_log
 
-    lineno = inspect.currentframe().f_back.f_lineno
-    filename = inspect.currentframe().f_back.f_code.co_filename
+    if lineno == None:
+        lineno = inspect.currentframe().f_back.f_lineno
+    if filename == None:
+        filename = inspect.currentframe().f_back.f_code.co_filename
     msg = " (%s:%d):  %s\n"%(filename,  lineno, errstr)
     logging.error( msg )
 
@@ -65,8 +67,12 @@ def warningMessage(warningstr):
 #------------------------------------------------------------------------------
 #
 #------------------------------------------------------------------------------
-def userErrorExit( errStr, sender = None ):
-    errorMessage(errStr)
+def userErrorExit( errStr ):
+
+    lineno = inspect.currentframe().f_back.f_lineno
+    filename = inspect.currentframe().f_back.f_code.co_filename
+
+    errorMessage(errStr,  filename,  lineno)
     ctxExit( 1 )
 
 #------------------------------------------------------------------------------

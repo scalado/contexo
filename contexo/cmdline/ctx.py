@@ -96,7 +96,7 @@ def getBuildConfiguration( cview ):
     cdefFilePath = cview.locateItem( cdefFilename, 'cdef' )
     cdefPath = os.path.dirname( cdefFilePath )
 
-    ctxAssert( os.path.basename( cdefFilePath ).lower() == cdefFilename, "Something went wrong in our workaround.." )
+    ctxAssert( os.path.basename( os.path.normcase(cdefFilePath) ) == os.path.normcase(cdefFilename), "Something went wrong in our workaround.." )
 
     bc = ctx_bc.BCFile( bcFilename, bcPath, cdefPath, cfgFile)
 

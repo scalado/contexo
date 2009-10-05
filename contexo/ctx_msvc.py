@@ -1,24 +1,25 @@
 # -*- coding: utf-8 -*-
-import os.path
+#import os.path
+import ntpath
 from xmltools import XMLGenerator
 #import pywintypes
 import uuid
 
 def relntpath(path, start):
- #   import ntpath #the windows version of os.path #available in python 2.6
+    import ntpath #the windows version of os.path #available in python 2.6
 #    return ntpath.relpath(path,  start)
 
     if start == None:
         start = os.getcwd()
-
+    path = ntpath.normpath(path)
+    start = ntpath.normpath(start)
     pathl  = path.replace("/", "\\").split('\\')
     startl = start.replace("/", "\\").split('\\')
-
+    print "path: %s, start:%s"%(path, start )
     while len(pathl) and len(startl) and pathl[0] == startl[0]:
             print "removing "+pathl[0]
             del pathl[0]
             del startl[0]
-    print "now pathl: %s"%(pathl[0])
     for i in range(len(startl)):
         pathl.insert(i, '..')
 
@@ -31,7 +32,7 @@ def relntpath(path, start):
 def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib, \
                     debug, incPaths, vcprojPath, platform = 'Win32', \
                     fileTitle = None ):
-
+    import os.path
     vcprojFilePath = str()
     vcprojPath = os.path.abspath(vcprojPath)
     if fileTitle == None:

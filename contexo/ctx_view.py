@@ -44,9 +44,9 @@ class CTXView:
         self.updating = updating # True when the view is being updated instead of used for building
         self.msgSender = "CTXView"
 
-        infoMessage("Using view: %s "%(self.getRoot()), 2, self.msgSender )
+        infoMessage("Using view: %s "%(self.getRoot()), 2)
 
-        infoMessage("Using repository access policy: %s"%AP_TEXT[self.access_policy], 2, self.msgSender )
+        infoMessage("Using repository access policy: %s"%AP_TEXT[self.access_policy], 2)
 
         for sec in SYSGLOBAL_PATH_SECTIONS:
             self.global_paths[sec] = list()
@@ -58,7 +58,7 @@ class CTXView:
         if validate:
             self.validateRepositories()
         else:
-            infoMessage("Skipping repository validation", 2, self.msgSender );
+            infoMessage("Skipping repository validation", 2);
 
     #--------------------------------------------------------------------------
     def set_global_config( self ):
@@ -102,7 +102,7 @@ class CTXView:
             return
 
         for repo in self.getRSpec().getRepositories():
-            infoMessage( "Validating repository '%s'"%(repo.getID()), 1, self.msgSender )
+            infoMessage("Validating repository '%s'"%(repo.getID()), 1)
             if not repo.checkValid( self.updating ):
                 all_valid = False
 
@@ -126,7 +126,7 @@ class CTXView:
                 rspec_path_list.append( os.path.join(self.getRoot(), f ) )
 
         if len(rspec_path_list) != 0:
-            infoMessage( "RSpecs detected in view: \n   %s"%("\n   ".join(rspec_path_list)), 2, self.msgSender )
+            infoMessage("RSpecs detected in view: \n   %s"%("\n   ".join(rspec_path_list)), 2)
 
         # Determine the import relationship between the RSpecs
         if len(rspec_path_list):
@@ -159,11 +159,11 @@ class CTXView:
             if len(candidate_rspecs) != 1:
                 userErrorExit( "RSpec selection is ambiguous. Only one RSpec is allowed in a view. If multiple RSpecs exist, at least one of them must directly or indirectly import the others", self.msgSender )
             else:
-                infoMessage( "Using RSpec: '%s'"%(candidate_rspecs[0].getFilename()), 2, self.msgSender )
+                infoMessage("Using RSpec: '%s'"%(candidate_rspecs[0].getFilename()), 2)
                 self.setRSpec( candidate_rspecs[0] )
 
         else:
-            infoMessage( "No RSpec found in view", 2, self.msgSender )
+            infoMessage("No RSpec found in view", 2)
 
     #--------------------------------------------------------------------------
     def setRSpec( self, _rspec ):
@@ -180,7 +180,7 @@ class CTXView:
     #--------------------------------------------------------------------------
     def addGlobalPath(self, path, path_section):
         ctxAssert( path_section in SYSGLOBAL_PATH_SECTIONS, "Unknown global path section '%s'"%(path_section) )
-        infoMessage( "System global path '%s' added to section '%s' in view"%(path, path_section), 2, self.msgSender )
+        infoMessage("System global path '%s' added to section '%s' in view"%(path, path_section), 2)
         self.global_paths[path_section].append( path )
 
     #--------------------------------------------------------------------------
@@ -195,8 +195,8 @@ class CTXView:
         else:
             item_paths = self.getGlobalPaths(path_section)
 
-        infoMessage( "Item paths in section '%s' returned from view:\n  %s"\
-                     %(path_section, "\n  ".join(item_paths)), 3, self.msgSender )
+        infoMessage("Item paths in section '%s' returned from view:\n  %s"\
+                     %(path_section, "\n  ".join(item_paths)), 3)
 
         return item_paths
 
@@ -238,7 +238,7 @@ class CTXView:
                     tried_locations.extend( repo_tried )
 
             if len(candidate_locations) == 1:
-                infoMessage( "Located '%s' at '%s'"%(item, candidate_locations[0]), 2, self.msgSender )
+                infoMessage("Located '%s' at '%s'"%(item, candidate_locations[0]), 2)
                 return candidate_locations[0]
             elif len(candidate_locations) > 1:
                 userErrorExit( "Multiple occurances of '%s' was found. Unable to determine which one to use: \n   %s"\
@@ -247,11 +247,11 @@ class CTXView:
         # Item not present in any repository, be clear to the user..
         if self.getRSpec() != None:
             if self.getAccessPolicy() == AP_NO_REMOTE_ACCESS:
-                infoMessage( "Item '%s' was not found in RSpec repositories.\nNote that the system is set to search for repository items in the local view only (%s).\nTrying system global locations."%(item, AP_FLAGS[self.getAccessPolicy()]), 2, self.msgSender )
+                infoMessage("Item '%s' was not found in RSpec repositories.\nNote that the system is set to search for repository items in the local view only (%s).\nTrying system global locations."%(item, AP_FLAGS[self.getAccessPolicy()]), 2)
             elif self.getAccessPolicy() == AP_PREFER_REMOTE_ACCESS:
-                infoMessage( "Item '%s' was not found in RSpec repositories.\nNote that the system is set to search for repository items at the repository source location only (%s).\nTrying system global locations."%(item, AP_FLAGS[self.getAccessPolicy()]), 2, self.msgSender )
+                infoMessage("Item '%s' was not found in RSpec repositories.\nNote that the system is set to search for repository items at the repository source location only (%s).\nTrying system global locations."%(item, AP_FLAGS[self.getAccessPolicy()]), 2)
             else:
-                infoMessage( "Item '%s' was not found in RSpec repositories.\nTrying system global locations."%(item), 2, self.msgSender )
+                infoMessage("Item '%s' was not found in RSpec repositories.\nTrying system global locations."%(item), 2)
 
         for path_section in path_sections:
             # File was not found in RSpec repositories, look in view
@@ -263,10 +263,10 @@ class CTXView:
                             candidate_locations.append( os.path.join(path, item) )
                     else:
                         tried_locations[-1] = tried_locations[-1] + " (path not found)"
-                        warningMessage( "System global path '%s' doesn't exist"%(path), self.msgSender )
+                        warningMessage("System global path '%s' doesn't exist"%(path))
 
             if len(candidate_locations) == 1:
-                infoMessage( "Located '%s' at '%s'"%(item, candidate_locations[0]), 2, self.msgSender )
+                infoMessage("Located '%s' at '%s'"%(item, candidate_locations[0]), 2)
                 return candidate_locations[0]
             elif len(candidate_locations) > 1:
                 userErrorExit( "Multiple occurances of '%s' was found. Unable to determin which one to use: \n   %s"\

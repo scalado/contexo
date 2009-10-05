@@ -166,8 +166,8 @@ class CTXSubversionClient():
         except pysvn.ClientError, e:
             for message, code in e.args[1]:
                 if code in [ERR_HOST_UNRESOLVED,]:
-                    errorMessage( "Unable to resolve host '%s'. Proceeding.. "\
-                                  %(self.getURLFromWorkingCopy(lc_path)), self.msgSender )
+                    errorMessage("Unable to resolve host '%s'. Proceeding.. "\
+                                  %(self.getURLFromWorkingCopy(lc_path)))
                 else:
                     userErrorExit( "Unknown failure when updating '%s'\nPYSVN Exception:\n%s (%d)"%(lc_path, message, code), self.msgSender )
 
@@ -201,7 +201,7 @@ class CTXSubversionClient():
         except pysvn.ClientError, e:
             for message, code in e.args[1]:
                 if code in [ERR_HOST_UNRESOLVED,]:
-                    errorMessage( "Unable to resolve host '%s'. Proceeding.. "%(url), self.msgSender )
+                    errorMessage("Unable to resolve host '%s'. Proceeding.. "%(url))
                 else:
                     userErrorExit( "Unknown failure when checking out '%s'\nPYSVN Exception:\n%s (%d)"%(url, message, code), self.msgSender )
 

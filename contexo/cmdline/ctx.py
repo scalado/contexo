@@ -38,6 +38,7 @@ except:
     pass
 
 msgSender           = 'ctx.py'
+#logging.basicConfig(format = '%(asctime)s %(levelname)-8s %(filename)s %(lineno)s %(message)s',
 logging.basicConfig(format = '%(asctime)s %(levelname)-8s %(message)s',
                                 datefmt='%H:%M:%S',
                                 level = logging.DEBUG);
@@ -66,7 +67,7 @@ def getBuildConfiguration( cview ):
         bcFile = args.bconf
     else:
         if CTX_DEFAULT_BCONF != None:
-            infoMessage( "Using default build configuration '%s'"%(CTX_DEFAULT_BCONF), 2, msgSender )
+            infoMessage("Using default build configuration '%s'"%(CTX_DEFAULT_BCONF), 2)
             bcFile = CTX_DEFAULT_BCONF
         else:
             userErrorExit( "No build configuration specified.", "ctx.py" )
@@ -109,7 +110,7 @@ def expand_list_files( view, item_list ):
     for item in item_list:
         item = item.strip(' ')
         if item.startswith('@'):
-            infoMessage( "Expanding list file '%s'"%item, 2, msgSender )
+            infoMessage("Expanding list file '%s'"%item, 2)
             item = item.lstrip('@')
             list_file = view.locateItem( item, ctx_view.REPO_PATH_SECTIONS )
             list_file_items = ctx_common.readLstFile( list_file )
@@ -173,7 +174,7 @@ def build_libraries( ctx_modules, lib_name, output_path, build_dir, session ):
         if len(obj_list) > 0:
             session.buildStaticLibrary( obj_list, lib, output_path )
         else:
-            warningMessage( "No object files to create library '%s'"%(lib) )
+            warningMessage("No object files to create library '%s'"%(lib))
 
         ctx_log.ctxlogEndLibrary()
 
@@ -191,7 +192,7 @@ def export_public_module_headers ( depmgr, modules, headerPath ):
     for publicHeader in publicHeaders:
         src = publicHeader
         dst = os.path.join( headerPath, os.path.basename(publicHeader) )
-        infoMessage( "Exporting header: %s"%(os.path.basename(publicHeader)) )
+        infoMessage("Exporting header: %s"%(os.path.basename(publicHeader)))
         shutil.copyfile( src, dst )
 
 #------------------------------------------------------------------------------
@@ -200,15 +201,15 @@ def export_headers( depmgr, headers, headerDir ):
     if not os.path.exists( headerDir ):
         os.makedirs( headerDir )
 
-    infoMessage( "Exporting headers", 1, msgSender )
+    infoMessage("Exporting headers", 1)
     for header in headers:
         src = depmgr.getFullPathname ( header )
         if src != None:
             dst = os.path.join( headerDir, header )
-            infoMessage( "%s -> %s"%(src, dst), 2, msgSender )
+            infoMessage("%s -> %s"%(src, dst), 2)
             shutil.copyfile( src, dst )
         else:
-            warningMessage( "Unable to locate header '%s' for export"%(header), msgSender )
+            warningMessage("Unable to locate header '%s' for export"%(header))
 
 #------------------------------------------------------------------------------
 def buildmodules( depmgr, session, modules, args, output_path, build_dir ):
@@ -486,7 +487,7 @@ def cmd_validateview(args):
     # The view will validate itself in the constructor
     cview = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=True )
 
-    infoMessage( "Validation complete", 1, msgSender )
+    infoMessage("Validation complete", 1)
 
 #------------------------------------------------------------------------------
 def cmd_freeze(args):

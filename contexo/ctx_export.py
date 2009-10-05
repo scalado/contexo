@@ -84,7 +84,7 @@ class CTXExportData:
         export_dump = pickle.dumps( self.export_data )
         package = '%s%d$'%(export_header, len(export_dump))
         
-        infoMessage( "Dispatching package to 'stdout'", 2, self.msgSender )
+        infoMessage("Dispatching package to 'stdout'", 2)
         
         sys.stdout.write( package )
         sys.stdout.write( export_dump )
@@ -112,7 +112,7 @@ class CTXExportData:
         
         if i == -1:
             print data_buffer #Most likely errors from main system
-            infoMessage( "\n********** Export handler entry point **********\n\n", 2)
+            infoMessage("\n********** Export handler entry point **********\n\n", 2)
             userErrorExit( "Unable to receive export package. Export header not found.\nThis is commonly the consequence of a terminal error raised by Contexo.", 
                            self.msgSender )
             
@@ -141,7 +141,7 @@ class CTXExportData:
         print data_buffer[ 0 : package_start - header_len ]
         print data_buffer[ package_end : -1 ]
 
-        infoMessage( "\n********** Export handler entry point **********\n\n", 2)
+        infoMessage("\n********** Export handler entry point **********\n\n", 2)
         
         #
         #  Unpickle

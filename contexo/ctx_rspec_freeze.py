@@ -64,7 +64,7 @@ class RspecFreezer():
                 curr_rev = self.svnclient.getRevisionFromWorkingCopy(repo_path)
             else:
                 curr_rev = self.svnclient.getRevisionFromWorkingCopy(repo_path)
-                warningMessage( '%s: Overwriting strict revision nr %d with %d'%(id, int(rev),  curr_rev),   self.msgSender )
+                warningMessage('%s: Overwriting strict revision nr %d with %d'%(id, int(rev),  curr_rev))
             self.xmlgenerator.characters("\t")
             self.xmlgenerator.startElement('ctx-repo',  attrs = {'id':id,'rcs':rcs, 'href': href,  'rev': str(curr_rev),  'path':path })
             self.xmlgenerator.characters("\n")

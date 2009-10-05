@@ -19,7 +19,9 @@ import linecache
 import compiler
 import re
 import config
-
+import logging
+import inspect
+import os.path
 cleanupFuncStack    = list()
 globalVerboseLevel  = 1
 
@@ -33,14 +35,12 @@ def ctxExit( exitcode ):
 #------------------------------------------------------------------------------
 #
 #------------------------------------------------------------------------------
-def errorMessage( errstr, sender = None ):
+def errorMessage(errstr):
     import ctx_log
-    import logging
-    if sender != None:
-        msg = "\n*** Error (%s):  %s\n"%(sender, errstr)
-    else:
-        msg = "\n*** Error:  %s\n"%(errstr)
 
+    lineno = inspect.currentframe().f_back.f_lineno
+    filename = inspect.currentframe().f_back.f_code.co_filename
+    msg = " (%s:%d):  %s\n"%(filename,  lineno, errstr)
     logging.error( msg )
 
     # Include error messages in logfile
@@ -49,14 +49,12 @@ def errorMessage( errstr, sender = None ):
 #------------------------------------------------------------------------------
 #
 #------------------------------------------------------------------------------
-def warningMessage( warningstr, sender = None ):
+def warningMessage(warningstr):
     import ctx_log
-    import logging
-    if sender != None:
-        msg = "\n*CONTEXO WARNING* (%s):  %s\n"%(sender, warningstr)
-    else:
-        msg = "\n*CONTEXO WARNING* :  %s\n"%(warningstr)
 
+    lineno = inspect.currentframe().f_back.f_lineno
+    filename = inspect.currentframe().f_back.f_code.co_filename
+    msg = " (%s:%d):  %s\n"%(os.path.basename(filename),  lineno, warningstr)
     logging.warning(msg)
 
 
@@ -68,23 +66,21 @@ def warningMessage( warningstr, sender = None ):
 #
 #------------------------------------------------------------------------------
 def userErrorExit( errStr, sender = None ):
-    errorMessage( errStr, sender )
+    errorMessage(errStr)
     ctxExit( 1 )
 
 #------------------------------------------------------------------------------
-def infoMessage( msg, msgVerboseLevel=0, sender = None ):
+def infoMessage(msg, msgVerboseLevel=0):
     import ctx_log
-    import logging
+
     global globalVerboseLevel
 
     if globalVerboseLevel == 0 or globalVerboseLevel < msgVerboseLevel:
         return
 
-    if sender != None:
-        msg = "(%s): %s"%(sender, msg)
-    else:
-        msg = "%s"%(msg)
-
+    lineno = inspect.currentframe().f_back.f_lineno
+    filename = inspect.currentframe().f_back.f_code.co_filename
+    msg = " (%s:%d):  %s\n"%(os.path.basename(filename),   lineno, msg)
     logging.info(msg)
 
     # Include info messages in log when verbose level is higher than standard
@@ -294,10 +290,10 @@ def expandLstFilesInList( theList, msgSender, searchPaths ):
                     tried.append( testLoc )
 
             if len(lstFilePath) == 0:
-                errorMessage( "Cannot find lstfile '%s'."%( item ), msgSender )
-                infoMessage( "Attempted following locations:", 0 )
+                errorMessage("Cannot find lstfile '%s'."%( item ))
+                infoMessage("Attempted following locations:", 0)
                 for loc in tried:
-                    infoMessage( "-> \t%s"%loc, 0 )
+                    infoMessage("-> \t%s"%loc, 0)
                 ctxExit(1)
 
             lstList = readLstFile( lstFilePath )

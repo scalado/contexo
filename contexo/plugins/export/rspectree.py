@@ -29,13 +29,13 @@ def cmd_parse( args ):
     if sys.platform != 'win32':
         userErrorExit("The RSpec Tree plugin is currently only supported on Windows")
 
-    infoMessage( "Receiving export data from Contexo...", 1, msgSender )
+    infoMessage("Receiving export data from Contexo...", 1)
     package = CTXExportData()
     package.receive() # Reads pickled export data from stdin
     
-    infoMessage( "Received export data:", 4, msgSender )
+    infoMessage("Received export data:", 4)
     for item in package.export_data.keys():
-        infoMessage( "%s: %s"%(item, str(package.export_data[item])), 4 ) 
+        infoMessage("%s: %s"%(item, str(package.export_data[item])), 4) 
 
     if len(package.export_data['RSPEC'].keys()) == 0:
         userErrorExit( "No RSpec received for export. Make sure a valid RSpec file is located in the view when exporting.", msgSender )

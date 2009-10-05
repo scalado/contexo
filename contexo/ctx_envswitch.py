@@ -78,7 +78,7 @@ class EnvironmentLayout:
                 if self.envFilePaths[n] == None:
                     userErrorExit( "Cannot find ENV file '%s'"%path, self.msgSender )
                 else:
-                    infoMessage( "Including env file '%s'"%(self.envFilePaths[n]), 1, self.msgSender )
+                    infoMessage("Including env file '%s'"%(self.envFilePaths[n]), 1)
 
     #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     def getEnv( self ):

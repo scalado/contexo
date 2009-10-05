@@ -7,7 +7,7 @@ if os.environ.has_key ("CONTEXO_ROOT"):
     update = join ( join ( join ( contexo_root, "system"), "core"),"ctx_update.py")
     execfile (update)
 else:
-    errorMessage ("Error: CONTEXO_ROOT is not defined", "ctx_update")
+    errorMessage("Error: CONTEXO_ROOT is not defined")
 
 
 

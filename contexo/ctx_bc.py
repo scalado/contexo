@@ -84,10 +84,10 @@ class BCFile:
         
         for pathCandidate in bcFilePaths:
             candidate = os.path.join( pathCandidate, bcFilename )
-            infoMessage( "Trying BC: %s"%(candidate), 2, self.msgSender )
+            infoMessage("Trying BC: %s"%(candidate), 2)
             if os.path.exists( candidate ):
                 self.path = candidate
-                infoMessage( "Using BC: %s"%( self.path ), 1, self.msgSender )
+                infoMessage("Using BC: %s"%( self.path ), 1)
                 return
             else:
                 tried.append( candidate )
@@ -127,7 +127,7 @@ class BCFile:
         elif self.byteOrder == 'BIG_ENDIAN':
             self.buildParams.prepDefines.append('BYTE_ORDER_BIG_ENDIAN')
         else:
-            errorMessage("Invalid byte order: %s"%self.byteOrder, self.msgSender )
+            errorMessage("Invalid byte order: %s"%self.byteOrder)
             ctxExit(1)
 
         # Update char encoding
@@ -139,7 +139,7 @@ class BCFile:
             self.buildParams.prepDefines.append( '_UNICODE' )
             self.buildParams.prepDefines.append( 'UNICODE' )
         else:
-            errorMessage("Unknown character encoding: %s"%self.charEncoding, self.msgSender )
+            errorMessage("Unknown character encoding: %s"%self.charEncoding)
             ctxExit(1)
 
 
@@ -225,16 +225,16 @@ class BCFile:
             cdefPaths.extend( configCDefPaths )
              
         if section.has_key( 'CDEF_PATH' ):
-            warningMessage( "BC/BConf section 'CDEF_PATH' is deprecated and may produce unexpected results when working with views and RSpecs", self.msgSender )
+            warningMessage("BC/BConf section 'CDEF_PATH' is deprecated and may produce unexpected results when working with views and RSpecs")
             cdefPaths.append( section['CDEF_PATH'] )
             
         tried_cdefs = list()
         for pathCandidate in cdefPaths:
             candidate = os.path.join( pathCandidate, self.cdef )
-            infoMessage( "Trying CDEF: %s"%(candidate), 2, self.msgSender )
+            infoMessage("Trying CDEF: %s"%(candidate), 2)
             if os.path.exists( candidate ):
                 self.cdefPath = pathCandidate                
-                infoMessage( "Using CDEF: %s"%( candidate ), 1, self.msgSender )
+                infoMessage("Using CDEF: %s"%( candidate ), 1)
                 break
             else:
                 tried_cdefs.append( candidate )

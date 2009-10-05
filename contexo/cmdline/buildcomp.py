@@ -218,4 +218,4 @@ ctx_envswitch.switchEnvironment( oldEnv, False )
 envRestore = None
 cleanupFuncStack.remove( jitCleanup )
 
-ctx_common.infoMessage( "Build duration: %.3f seconds"%(time.clock() - timer), 1, msgSender )
+ctx_common.infoMessage("Build duration: %.3f seconds"%(time.clock() - timer), 1)

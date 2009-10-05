@@ -102,10 +102,10 @@ class COMPFile:
         # If we reach this point we have tried everything we can and failed.
         #
 
-        errorMessage( "COMP file '%s' not found."%self.path, self.msgSender )
-        infoMessage( "Attempted following locations:", 0 )
+        errorMessage("COMP file '%s' not found."%self.path)
+        infoMessage("Attempted following locations:", 0)
         for loc in tried:
-            infoMessage( '  %s'%loc, 0 )
+            infoMessage('  %s'%loc, 0)
         ctxExit( 1 )
 
 
@@ -139,7 +139,7 @@ class COMPFile:
         if cfg.has_section( cur_section ):
             compsec_general  = cfg.get_section( cur_section  )
         else:
-            errorMessage( "Missing mandatory COMP section: %s"%cur_section, 'COMPFile' )
+            errorMessage("Missing mandatory COMP section: %s"%cur_section)
             ctxExit(1)
 
         cur_section = 'libraries'

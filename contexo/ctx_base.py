@@ -148,20 +148,20 @@ class CTXCompiler:
 
         for key, value in self.cdef.iteritems():
             if key not in cdefKeys:
-                warningMessage( "Ignoring unrecognized CDEF option '%s', found in '%s'"%(key, cdefPath), self.msgSender )
+                warningMessage("Ignoring unrecognized CDEF option '%s', found in '%s'"%(key, cdefPath))
 
         #
         # Do logic error checks.
         #
 
         if self.cdef['CCCOM'].find( '%CC' ) == -1:
-            warningMessage( "CDEF field 'CC' not found in field 'CCCOM'",   self.msgSender )
+            warningMessage("CDEF field 'CC' not found in field 'CCCOM'")
 
         if self.cdef['CXXCOM'].find( '%CXX' ) == -1:
-            warningMessage( "CDEF field 'CXX' not found in field 'CXXCOM'", self.msgSender )
+            warningMessage("CDEF field 'CXX' not found in field 'CXXCOM'")
 
         if self.cdef['ARCOM'].find( '%AR' ) == -1:
-            warningMessage( "CDEF field 'AR' not found in field 'ARCOM'",   self.msgSender )
+            warningMessage("CDEF field 'AR' not found in field 'ARCOM'")
 
 
     #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -198,9 +198,9 @@ class CTXCompiler:
         ctxAssert( toolPath == None or os.path.isfile(toolPath), "Internal error here.." )
         
         if toolPath == None:
-            warningMessage( "Unresolved tool: '%s'"%(cdefItem), self.msgSender )
+            warningMessage("Unresolved tool: '%s'"%(cdefItem))
         else:
-            infoMessage( "Tool defined by '%s' resolved at '%s'"%(cdefItem, toolPath), 3, self.msgSender )
+            infoMessage("Tool defined by '%s' resolved at '%s'"%(cdefItem, toolPath), 3)
 
     #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     def prepareCommandFile( self, commandline ):
@@ -558,11 +558,10 @@ class CTXBuildSession:
                 oldChecksum     = self.readStaticObjectChecksum( objectFilePath )
                 if oldChecksum == objChecksum:
                     needRebuild = False
-                    infoMessage( "Reusing '%s'"%(objectFilename), 3 )
+                    infoMessage("Reusing '%s'"%(objectFilename), 3)
                 else:
-                    infoMessage( "Object '%s' invalidated by checksum.\nNew: %s\nOld: %s"\
-                                    %(objectFilename, objChecksum, oldChecksum), 
-                                    4, self.msgSender )
+                    infoMessage("Object '%s' invalidated by checksum.\nNew: %s\nOld: %s"\
+                                    %(objectFilename, objChecksum, oldChecksum), 4)
 
                 #
                 # Rebuild if needed, and write the fresh checksum regardless.
@@ -607,11 +606,10 @@ class CTXBuildSession:
             oldChecksum     = self.readStaticObjectChecksum( objectFilePath )
             if oldChecksum == objChecksum:
                 needRebuild = False
-                infoMessage( "Reusing '%s'"%(objectFilename), 3 )
+                infoMessage("Reusing '%s'"%(objectFilename), 3)
             else:
-                infoMessage( "Object '%s' invalidated by checksum.\nNew: %s\nOld: %s"\
-                              %(objectFilename, objChecksum, oldChecksum), 
-                              4, self.msgSender )
+                infoMessage("Object '%s' invalidated by checksum.\nNew: %s\nOld: %s"\
+                              %(objectFilename, objChecksum, oldChecksum), 4)
 
         if needRebuild:
             obj = self.compiler.staticObject( srcFile, joinedBuildParams, outputDir, objFileTitle )
@@ -630,5 +628,5 @@ class CTXBuildSession:
 
     #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     def buildExecutable( self ):
-        infoMessage( "WARNING: 'CTXBuildSession::buildExecutable' is not implemented yet.", 0, self.msgSender )
+        infoMessage("WARNING: 'CTXBuildSession::buildExecutable' is not implemented yet.", 0)
         pass

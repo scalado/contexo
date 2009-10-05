@@ -81,7 +81,7 @@ class rspecXmlHandler(ContentHandler):
                 
             rev = attrs.get('rev', None )
             if rcs != None and rev == None:
-                warningMessage( "<ctx-import>: No revision specified for import in RSpec '%s'. Assuming 'HEAD'"%(self.rspecFile.getFilename()), self.msgSender ) 
+                warningMessage("<ctx-import>: No revision specified for import in RSpec '%s'. Assuming 'HEAD'"%(self.rspecFile.getFilename())) 
                 rev = 'HEAD'                
 
             # Prepare locator object and add import to current RSpec
@@ -133,7 +133,7 @@ class rspecXmlHandler(ContentHandler):
 
         # .....................................................................
         else:
-            warningMessage( "Ignoring unknown element '<%s>' in RSpec '%s'.\nThis might be a normal compatibility issue."%(name, self.rspecFile.filename), self.msgSender ) 
+            warningMessage("Ignoring unknown element '<%s>' in RSpec '%s'.\nThis might be a normal compatibility issue."%(name, self.rspecFile.filename)) 
 
         self.parent_element.push( name )
 
@@ -154,7 +154,7 @@ class rspecXmlHandler(ContentHandler):
         #depending on what is the current state,
         #put the character in the correct bin
         def characters (self, ch):
-            warningMessage( "Ignoring character data '%s' found in element '%s'"%(ch, self.parent_element.peek()), self.msgSender ) 
+            warningMessage("Ignoring character data '%s' found in element '%s'"%(ch, self.parent_element.peek())) 
 
 #------------------------------------------------------------------------------
 class RSpecFileLocator:
@@ -176,8 +176,8 @@ class RSpecFileLocator:
                 
         if self.rcs == None:
 
-            infoMessage( "No RCS specified for RSpec '%s', attempting regular file access"\
-                         %(self.getHref()), 2, self.msgSender )
+            infoMessage("No RCS specified for RSpec '%s', attempting regular file access"\
+                         %(self.getHref()), 2)
 
             if not os.path.exists(self.href):
                 userErrorExit( "RSpec unreachable with regular file access: \n  %s"%(self.href), self.msgSender )
@@ -190,8 +190,8 @@ class RSpecFileLocator:
             rspec_name = os.path.basename(self.getHref())
             temp_rspec = os.path.join( temp_dir, rspec_name )
 
-            infoMessage( "Downloading (svn-exporting) RSpec from '%s' to '%s' using RCS '%s'"\
-                         %(str(self.getHref()), str(temp_rspec), str(self.rcs)), 1, self.msgSender )
+            infoMessage("Downloading (svn-exporting) RSpec from '%s' to '%s' using RCS '%s'"\
+                         %(str(self.getHref()), str(temp_rspec), str(self.rcs)), 1)
             
             if os.path.exists(temp_rspec):
                 os.remove( temp_rspec )
@@ -209,8 +209,8 @@ class RSpecFileLocator:
                 userErrorExit( "Unsupported RCS: %s"%(self.rcs), self.msgSender )
 
             
-        infoMessage( "RSpec local access path resolved to: %s"\
-                     %(local_access_path), 2, self.msgSender )
+        infoMessage("RSpec local access path resolved to: %s"\
+                     %(local_access_path), 2)
 
         return local_access_path
         
@@ -364,8 +364,8 @@ class RSpecFile:
                 if r.getID() not in existing_repo_ids:
                     self.addRepository( r )
                 else:
-                    infoMessage( "Repository '%s' in '%s' overridden by repository '%s' in '%s'"\
-                                 %(r.getID(), rspec.rspecFileLocator.getHref(), r.getID(), self.rspecFileLocator.getHref()), 1, self.msgSender )
+                    infoMessage("Repository '%s' in '%s' overridden by repository '%s' in '%s'"\
+                                 %(r.getID(), rspec.rspecFileLocator.getHref(), r.getID(), self.rspecFileLocator.getHref()), 1)
                     
         # All imports processed, so they can be discarded. 
         # COMMENTED OUT, it's probably useful to have the structure intact for later analysis

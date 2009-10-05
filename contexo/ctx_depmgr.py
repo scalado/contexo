@@ -360,7 +360,7 @@ class CTXDepMgr: # The dependency manager class.
                 inputFilePath = getPath ( inputFile, pathList )
 
             if inputFilePath == None:
-                infoMessage( "WARNING: Dependency manager cannot locate input file: %s"%inputFile, 2 )
+                infoMessage("WARNING: Dependency manager cannot locate input file: %s"%inputFile, 2)
                 return
 
             self.inputFilePathDict[inputFile] = inputFilePath
@@ -421,7 +421,7 @@ class CTXDepMgr: # The dependency manager class.
             paths.update( assureList( CTXCodeModule(cmod.modRoot).resolveExternalDeps() ) )
 
         if len(paths) == 0:
-            infoMessage( "WARNING: List of dependency search paths is empty.", 2, self.msgSender )
+            infoMessage("WARNING: List of dependency search paths is empty.", 2)
 
         # Add all sources for this module
         inputFileList = cmod.getSourceFilenames()

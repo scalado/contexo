@@ -36,13 +36,13 @@ class CTXRepository:
         for sec in REPO_PATH_SECTIONS:
             self.relative_paths[sec] = list()
 
-        infoMessage( "\n", 2 )
-        infoMessage( "Repository added:\n   %s\n"\
+        infoMessage("\n", 2)
+        infoMessage("Repository added:\n   %s\n"\
                      %("\n   ".join(   ["                ID: " + str(self.getID()), \
                                         "              HREF: " + str(self.getHref()), \
                                         "        Local path: " + str(self.getRelLocalPath()), \
                                         "    RSpec revision: " + str(self.rev), \
-                                        "Version controlled: %s"%( "Yes" if self.version_control else "No" ) ] )), 2, self.msgSender )
+                                        "Version controlled: %s"%( "Yes" if self.version_control else "No" ) ] )), 2)
 
 
     #--------------------------------------------------------------------------
@@ -111,11 +111,11 @@ class CTXRepository:
     def addPath(self, path_section, path):
         ctxAssert( path_section in REPO_PATH_SECTIONS, "Unknown path section '%s'"%(path_section) )
         if os.path.isabs(path):
-            warningMessage("The absolute path %s will be treated as relative to the repository copy"%(path),  self.msgSender)
+            warningMessage("The absolute path %s will be treated as relative to the repository copy"%(path))
         path = path.lstrip('\\/ ')
 
         self.relative_paths[path_section].append( path )
-        infoMessage( "Path '%s' added to section '%s' in repository '%s'"%(path, path_section, self.getID()), 2, self.msgSender )
+        infoMessage("Path '%s' added to section '%s' in repository '%s'"%(path, path_section, self.getID()), 2)
 
     #--------------------------------------------------------------------------
     def getFullPaths( self, path_section ):
@@ -166,8 +166,8 @@ class CTXRepository:
         self.access_policy = access_policy
 
         if not self.isVersionControlled() and self.access_policy == AP_PREFER_REMOTE_ACCESS:
-            infoMessage( "Repository '%s' will be used (built and/or accessed) from its remote source location '%s'.\n(Use option '%s' to force the system to access this repository from the local view)"\
-                         %(self.getID(), self.getHref(), AP_FLAGS[AP_NO_REMOTE_ACCESS] ), 2, self.msgSender )
+            infoMessage("Repository '%s' will be used (built and/or accessed) from its remote source location '%s'.\n(Use option '%s' to force the system to access this repository from the local view)"\
+                         %(self.getID(), self.getHref(), AP_FLAGS[AP_NO_REMOTE_ACCESS] ), 2)
 
     #--------------------------------------------------------------------------
     def getAccessPolicy(self):
@@ -221,7 +221,7 @@ class CTXRepository:
                     if item in os.listdir(path):
                         candidate_locations.append( os.path.join(path, item) )
                 else:
-                    warningMessage( "Repository path '%s' doesn't exist"%(path), self.msgSender )
+                    warningMessage("Repository path '%s' doesn't exist"%(path))
 
 
         return (candidate_locations, tried_locations)

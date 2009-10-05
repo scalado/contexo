@@ -17,9 +17,9 @@ from contexo.ctx_common import infoMessage
 
 def executeCommandline( commandline ):
     if os.name == 'nt':
-        infoMessage( "Executing: %s"%commandline, 5, 'ctx_platform' )
+        infoMessage("Executing: %s"%commandline, 5)
     else:
-        infoMessage( "Executing: %s"%commandline, 5, 'ctx_platform' )
+        infoMessage("Executing: %s"%commandline, 5)
     return os.system( commandline )
 
 def shortenPathIfPossible( longPath ):

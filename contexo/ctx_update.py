@@ -148,7 +148,7 @@ def update_to_release ( svn_client, release, contexo_root ):
 
     cur_rel = get_current_version ( contexo_root )
 
-    infoMessage ("Updating " + cur_rel + " to release: " + release[0], 0, "ctx_update") 
+    infoMessage("Updating " + cur_rel + " to release: " + release[0], 0) 
     
     update_dir = os.path.join (contexo_root, "update" )
     
@@ -180,7 +180,7 @@ def update_to_release ( svn_client, release, contexo_root ):
     execfile ( "post_update.py" )
 
 def update_tool():
-    infoMessage ("Running contexo update tool (c) Scalado 2007", 0, "ctx_update")
+    infoMessage("Running contexo update tool (c) Scalado 2007", 0)
 
     try:
         contexo_root = os.path.abspath(getContexoRoot ())
@@ -209,16 +209,16 @@ def update_tool():
                     update_to_release ( svn_client, item, contexo_root )
 
                 cur_rel = get_current_version ( contexo_root )
-                infoMessage ("Contexo is up-to-date. Current installed version is: " + cur_rel, 0, "ctx_update") 
+                infoMessage("Contexo is up-to-date. Current installed version is: " + cur_rel, 0) 
     
                 update = True
     
         cur_rel = get_current_version ( contexo_root )
-        infoMessage ("Contexo is up-to-date. Current installed version is: " + cur_rel, 0, "ctx_update") 
+        infoMessage("Contexo is up-to-date. Current installed version is: " + cur_rel, 0) 
     
         return update
     except:
-        infoMessage ("Contexo failed to be updated...")
+        infoMessage("Contexo failed to be updated...")
         return False
     
 if is_time_to_update ( 1 ):

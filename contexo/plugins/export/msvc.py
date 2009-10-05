@@ -56,13 +56,13 @@ def allComponentModules( component_list ):
 #------------------------------------------------------------------------------
 def cmd_parse( args ):
 
-    infoMessage( "Receiving export data from Contexo...", 1, msgSender )
+    infoMessage("Receiving export data from Contexo...", 1)
     package = CTXExportData()
     package.receive() # Reads pickled export data from stdin
     
-    infoMessage( "Received export data:", 4, msgSender )
+    infoMessage("Received export data:", 4)
     for item in package.export_data.keys():
-        infoMessage( "%s: %s"%(item, str(package.export_data[item])), 4 ) 
+        infoMessage("%s: %s"%(item, str(package.export_data[item])), 4) 
     
     # Retrieve build config from session
     bc_file =  package.export_data['SESSION'].getBCFile()
@@ -118,13 +118,13 @@ def cmd_parse( args ):
     #Exporting components
     
         if args.mirror_components == True and args.project_name != None:
-            warningMessage( "Ignoring option --project-name (-pn) when option --mirror-components (-mc) is used", msgSender )
+            warningMessage("Ignoring option --project-name (-pn) when option --mirror-components (-mc) is used")
             args.project_name = None    
     else:
     # Exporting modules
         
         if args.mirror_components == True:
-            warningMessage( "Ignoring option --mirror-components (-mc) when exporting modules", msgSender )    
+            warningMessage("Ignoring option --mirror-components (-mc) when exporting modules")    
             args.mirror_components = False
 
         if package.export_data['MODULES'] == None:
@@ -216,7 +216,7 @@ def cmd_parse( args ):
     #
     # The End
     #
-    infoMessage( "Export done.", 1, msgSender )
+    infoMessage("Export done.", 1)
 
     
 ##### ENTRY POINT #############################################################

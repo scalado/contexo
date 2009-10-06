@@ -67,7 +67,7 @@ def warningMessage(warningstr):
 #------------------------------------------------------------------------------
 #
 #------------------------------------------------------------------------------
-def userErrorExit( errStr ):
+def userErrorExit(errStr):
 
     lineno = inspect.currentframe().f_back.f_lineno
     filename = inspect.currentframe().f_back.f_code.co_filename
@@ -404,7 +404,7 @@ def expandOptionFile( optFile ):
     expandedOptions = str()
 
     if not os.path.exists( optFile ):
-        userErrorExit( "Cannot find option file '%s'"%optFile )
+        userErrorExit("Cannot find option file '%s'"%optFile)
 
     file = open( optFile, "r" )
     for line in file.readlines():

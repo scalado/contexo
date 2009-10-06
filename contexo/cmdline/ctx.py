@@ -70,7 +70,7 @@ def getBuildConfiguration( cview ):
             infoMessage("Using default build configuration '%s'"%(CTX_DEFAULT_BCONF), 2)
             bcFile = CTX_DEFAULT_BCONF
         else:
-            userErrorExit( "No build configuration specified.", "ctx.py" )
+            userErrorExit("No build configuration specified.")
 
     # Uglyness:
     # Historically the BCFile class located both the bc file and the cdef file
@@ -90,7 +90,7 @@ def getBuildConfiguration( cview ):
     bcDict = config.Config( bcFilePath )
     section = bcDict.get_section( 'config'  )
     if not section.has_key( 'CDEF' ):
-        userErrorExit( "Mandatory BC option 'CDEF' is missing.", 'ctx.py on behalf of BCFile' )
+        userErrorExit("Mandatory BC option 'CDEF' is missing.")
 
     cdefFilename = section[ 'CDEF' ]
     cdefFilePath = cview.locateItem( cdefFilename, 'cdef' )
@@ -427,7 +427,7 @@ def cmd_export(args):
     for item in export_items:
         if item.endswith( '.comp' ):
             if component_export == False:
-                userErrorExit( "An export operation can either export a list of components OR a list of modules, not both.", msgSender)
+                userErrorExit("An export operation can either export a list of components OR a list of modules, not both.")
         else:
             component_export = False
 
@@ -471,7 +471,7 @@ def cmd_export(args):
 def cmd_updateview(args):
 
     if args.updates_only == True and args.checkouts_only == True:
-        userErrorExit( "Options '--updates_only' and '--checkouts-only' are mutually exclusive.", msgSender )
+        userErrorExit("Options '--updates_only' and '--checkouts-only' are mutually exclusive.")
 
     cview = ctx_view.CTXView( args.view, getAccessPolicy(args), updating=True, validate=True )
 

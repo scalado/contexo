@@ -80,7 +80,7 @@ def getPath( src_file, pathList ):
         if os.path.exists(src_path):
             return src_path
 
-    userErrorExit( "'%s' cannot be resolved in current path list: \n  %s"%( src_file, "  \n".join(pathList)))
+    userErrorExit("'%s' cannot be resolved in current path list: \n  %s"%( src_file, "  \n".join(pathList)))
 
     return None
 
@@ -525,7 +525,7 @@ class CTXDepMgr: # The dependency manager class.
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     def setChecksumMethod( self, method ):
         if method not in self.supportedChecksumMethods:
-            userErrorExit( "Unsupported checksum method: '%s'"%method, self.msgSender )
+            userErrorExit("Unsupported checksum method: '%s'"%method)
 
         self.checksumMethod = method
         self.needUpdate = True
@@ -634,7 +634,7 @@ class CTXDepMgr: # The dependency manager class.
         if filename in  self.dependencies:
             return self.dependencies[filename][1]
         else:
-            userErrorExit( "Given input file %s is not a valid hash key"%filename, self.msgSender )
+            userErrorExit("Given input file %s is not a valid hash key"%filename)
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     # Returns a closed set with all the dependent modules.
@@ -776,7 +776,7 @@ class CTXDepMgr: # The dependency manager class.
                     modPath = str()
             
             if len(modPath) == 0:
-                userErrorExit( "Unable to locate code module: '%s'"%mod, self.msgSender )
+                userErrorExit("Unable to locate code module: '%s'"%mod)
 
         assertValidContexoCodeModule( modPath, self.msgSender )
 

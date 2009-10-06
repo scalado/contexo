@@ -43,7 +43,7 @@ class EnvironmentLayout:
             for path in self.envFilePaths:
                 cfg = Config( path )
                 if not cfg.has_section( 'env' ):
-                    userErrorExit( "Missing mandatory section '%s'"%('env'), self.msgSender )
+                    userErrorExit("Missing mandatory section '%s'"%('env'))
 
                 envDict = cfg.get_section( 'env'  )
                 self.__mergeEnv( envDict )
@@ -76,7 +76,7 @@ class EnvironmentLayout:
                     else:
                         self.envFilePaths[n] = path
                 if self.envFilePaths[n] == None:
-                    userErrorExit( "Cannot find ENV file '%s'"%path, self.msgSender )
+                    userErrorExit("Cannot find ENV file '%s'"%path)
                 else:
                     infoMessage("Including env file '%s'"%(self.envFilePaths[n]), 1)
 
@@ -87,7 +87,7 @@ class EnvironmentLayout:
     #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     def getVar( self, var ):
         if not self.env.has_key( var ):
-            userErrorExit( "Cannot find variable '%s'"%var, self.msgSender )
+            userErrorExit("Cannot find variable '%s'"%var)
         return self.env[var]
 
     #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::

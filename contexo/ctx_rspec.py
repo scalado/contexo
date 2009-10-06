@@ -41,7 +41,7 @@ def createRepoFromRCS( rcs, id, path, href, rev ):
     elif rcs == None:
         return CTXRepositoryFS( id, path, href, rev )
     else:
-        userErrorExit( "Unsupported RCS for repository '%s'"%(id), 'repoFactory' )
+        userErrorExit("Unsupported RCS for repository '%s'"%(id))
         
 #------------------------------------------------------------------------------
 class rspecXmlHandler(ContentHandler):
@@ -59,13 +59,13 @@ class rspecXmlHandler(ContentHandler):
         # .....................................................................
         if name == 'ctx-rspec':
             if self.parent_element.peek() != None:
-                userErrorExit( "'<ctx-rspec>' can only be used as root element", self.msgSender )
+                userErrorExit("'<ctx-rspec>' can only be used as root element")
 
         # .....................................................................
         elif name == 'ctx-import':
             # Make sure this element is used in correct context
             if self.parent_element.peek() != 'ctx-rspec':
-                userErrorExit( "'%s' elements can only be used within '%s' elements"%(name, 'ctx-rspec'), self.msgSender )
+                userErrorExit("'%s' elements can only be used within '%s' elements"%(name, 'ctx-rspec'))
 
             #
             # Digest import and check for errors/inconsistencies
@@ -73,11 +73,11 @@ class rspecXmlHandler(ContentHandler):
 
             href = attrs.get('href', None)
             if href == None:
-                userErrorExit( "<ctx-import>: Missing mandatory attribute '%s' in RSpec '%s'"%('href', self.rspecFile.getFilename()), self.msgSender )
+                userErrorExit("<ctx-import>: Missing mandatory attribute '%s' in RSpec '%s'"%('href', self.rspecFile.getFilename()))
 
             rcs = attrs.get('rcs', None)
             if rcs == None and attrs.has_key('rev'):
-                userErrorExit( "<ctx-import>: Revision ('rev') specified without specifying 'rcs' in RSpec '%s'"%(self.rspecFile.getFilename()), self.msgSender )    
+                userErrorExit("<ctx-import>: Revision ('rev') specified without specifying 'rcs' in RSpec '%s'"%(self.rspecFile.getFilename()))    
                 
             rev = attrs.get('rev', None )
             if rcs != None and rev == None:
@@ -93,12 +93,12 @@ class rspecXmlHandler(ContentHandler):
 
             # Make sure this element is used in correct context
             if self.parent_element.peek() != 'ctx-rspec':
-                userErrorExit( "'%s' elements can only be used within '%s' elements"%(name, 'ctx-rspec'), self.msgSender )
+                userErrorExit("'%s' elements can only be used within '%s' elements"%(name, 'ctx-rspec'))
 
             # Make sure 'id' attribute is unique within RSpec
             if attrs.has_key('id'):
                 if attrs.get('id') in self.id_list:
-                    userErrorExit( "Multiple occurances of id '%s' in '%s'"%(attrs.get('id'), self.rspecFile.getFilename()), self.msgSender )
+                    userErrorExit("Multiple occurances of id '%s' in '%s'"%(attrs.get('id'), self.rspecFile.getFilename()))
                 else:    
                     self.id_list.append(attrs.get('id'))
             
@@ -114,7 +114,7 @@ class rspecXmlHandler(ContentHandler):
             
            # Make sure this element is used in correct context
             if self.parent_element.peek() not in ['ctx-repo',]:
-                userErrorExit( "'<%s>' elements cannot be used within '<%s>' elements"%(name, self.parent_element.peek()), self.msgSender )
+                userErrorExit("'<%s>' elements cannot be used within '<%s>' elements"%(name, self.parent_element.peek()))
 
             #
             # Assure presence of mandatory attributes            
@@ -122,11 +122,11 @@ class rspecXmlHandler(ContentHandler):
             
             attribute = 'type'
             if not attrs.has_key(attribute):
-                userErrorExit( "Missing mandatory attribute '%s' in element '<%s>'"%(attribute, name), self.msgSender )
+                userErrorExit("Missing mandatory attribute '%s' in element '<%s>'"%(attribute, name))
 
             attribute = 'spec'
             if not attrs.has_key(attribute):
-                userErrorExit( "Missing mandatory attribute '%s' in element '<%s>'"%(attribute, name), self.msgSender )
+                userErrorExit("Missing mandatory attribute '%s' in element '<%s>'"%(attribute, name))
             
             ctx_path_type = attrs.get( 'type' ).lower()
             self.current_repo.addPath( ctx_path_type, attrs.get('spec') )
@@ -180,7 +180,7 @@ class RSpecFileLocator:
                          %(self.getHref()), 2)
 
             if not os.path.exists(self.href):
-                userErrorExit( "RSpec unreachable with regular file access: \n  %s"%(self.href), self.msgSender )
+                userErrorExit("RSpec unreachable with regular file access: \n  %s"%(self.href))
         
             local_access_path = self.getHref()
             
@@ -206,7 +206,7 @@ class RSpecFileLocator:
                 #git = ctx_git_client.CTXGitClient()
                 
             else:
-                userErrorExit( "Unsupported RCS: %s"%(self.rcs), self.msgSender )
+                userErrorExit("Unsupported RCS: %s"%(self.rcs))
 
             
         infoMessage("RSpec local access path resolved to: %s"\

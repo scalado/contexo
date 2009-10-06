@@ -38,7 +38,7 @@ def cmd_parse( args ):
         infoMessage("%s: %s"%(item, str(package.export_data[item])), 4) 
 
     if len(package.export_data['RSPEC'].keys()) == 0:
-        userErrorExit( "No RSpec received for export. Make sure a valid RSpec file is located in the view when exporting.", msgSender )
+        userErrorExit("No RSpec received for export. Make sure a valid RSpec file is located in the view when exporting.")
         
     root_rspec = package.export_data['RSPEC'].keys()[0]
     filename = os.path.join( args.output, root_rspec + '.dot' )

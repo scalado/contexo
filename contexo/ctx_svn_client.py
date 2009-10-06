@@ -114,7 +114,7 @@ class CTXSubversionClient():
     #--------------------------------------------------------------------------
     def getURLFromWorkingCopy( self, lc_path ):
         if not os.path.exists(lc_path):
-            userErrorExit( "Given path to local copy '%s' is invalid"%(lc_path), self.msgSender )
+            userErrorExit("Given path to local copy '%s' is invalid"%(lc_path))
 
         entry = self.client.info( lc_path )
         #strip the %20-quotations from the url
@@ -125,7 +125,7 @@ class CTXSubversionClient():
     #--------------------------------------------------------------------------
     def getRevisionFromWorkingCopy( self, lc_path ):
         if not os.path.exists(lc_path):
-            userErrorExit( "Given path to local copy '%s' is invalid"%(lc_path), self.msgSender )
+            userErrorExit("Given path to local copy '%s' is invalid"%(lc_path))
 
         entry = self.client.info( lc_path )
 
@@ -152,8 +152,8 @@ class CTXSubversionClient():
         self.resetClient()
 
         if not self.isWorkingCopy( lc_path ):
-            userErrorExit( "Unable to update '%s'. Not a valid working copy."\
-                           %(lc_path), self.msgSender )
+            userErrorExit("Unable to update '%s'. Not a valid working copy."\
+                           %(lc_path))
 
         if rev.upper() == 'HEAD':
             rev = pysvn.Revision(pysvn.opt_revision_kind.head )
@@ -169,7 +169,7 @@ class CTXSubversionClient():
                     errorMessage("Unable to resolve host '%s'. Proceeding.. "\
                                   %(self.getURLFromWorkingCopy(lc_path)))
                 else:
-                    userErrorExit( "Unknown failure when updating '%s'\nPYSVN Exception:\n%s (%d)"%(lc_path, message, code), self.msgSender )
+                    userErrorExit("Unknown failure when updating '%s'\nPYSVN Exception:\n%s (%d)"%(lc_path, message, code))
 
 
     #--------------------------------------------------------------------------
@@ -180,11 +180,11 @@ class CTXSubversionClient():
         self.resetClient()
 
         if self.isWorkingCopy( local_directory ):
-            userErrorExit( "Unable to checkout '%s', given target directory '%s' is an existing working copy."\
-                           %(url, local_directory), self.msgSender )
+            userErrorExit("Unable to checkout '%s', given target directory '%s' is an existing working copy."\
+                           %(url, local_directory))
 
         if not self.isRepoURL(url):
-            userErrorExit( "Invalid SVN repository: '%s'"%(url), self.msgSender )
+            userErrorExit("Invalid SVN repository: '%s'"%(url))
 
         if revision.upper() == 'HEAD':
             rev = pysvn.Revision(pysvn.opt_revision_kind.head )
@@ -192,7 +192,7 @@ class CTXSubversionClient():
             rev = pysvn.Revision(pysvn.opt_revision_kind.number, revision )
 
         if not os.path.isdir(local_directory):
-            userErrorExit( "Checkout destination '%s' is not a directory"%(local_directory), self.msgSender )
+            userErrorExit("Checkout destination '%s' is not a directory"%(local_directory))
 
         try:
             #pysvn checkout seems to have a problem when spaces are not escaped but also when other characters are escaped
@@ -203,7 +203,7 @@ class CTXSubversionClient():
                 if code in [ERR_HOST_UNRESOLVED,]:
                     errorMessage("Unable to resolve host '%s'. Proceeding.. "%(url))
                 else:
-                    userErrorExit( "Unknown failure when checking out '%s'\nPYSVN Exception:\n%s (%d)"%(url, message, code), self.msgSender )
+                    userErrorExit("Unknown failure when checking out '%s'\nPYSVN Exception:\n%s (%d)"%(url, message, code))
 
 
     #--------------------------------------------------------------------------
@@ -214,7 +214,7 @@ class CTXSubversionClient():
         self.resetClient()
 
         if not self.isRepoURL(url):
-            userErrorExit( "Invalid SVN repository: '%s'"%(url), self.msgSender )
+            userErrorExit("Invalid SVN repository: '%s'"%(url))
 
         if revision.upper() == 'HEAD':
             rev = pysvn.Revision(pysvn.opt_revision_kind.head )
@@ -224,7 +224,7 @@ class CTXSubversionClient():
         if not os.path.isdir( local_directory ):
             os.makedirs( local_directory )
         elif self.isWorkingCopy( local_directory ):
-            userErrorExit( "Export destination '%s' is an existing working copy"%(local_directory), self.msgSender )
+            userErrorExit("Export destination '%s' is an existing working copy"%(local_directory))
 
 
         export_dest = os.path.join( local_directory, os.path.basename(url) )
@@ -232,7 +232,7 @@ class CTXSubversionClient():
         try:
             self.client.export(src_url_or_path=url, dest_path=export_dest, force=False, revision=rev)
         except :
-            userErrorExit( "Exception caught from pysvn: \n%s"%(sys.exc_value), self.msgSender )
+            userErrorExit("Exception caught from pysvn: \n%s"%(sys.exc_value))
 
     #--------------------------------------------------------------------------
     #--------------------------------------------------------------------------

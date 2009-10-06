@@ -97,13 +97,13 @@ class BCFile:
         #
         
         if not os.path.exists(self.path):
-            userErrorExit( "BC file '%s' not found."%(bcFilename), self.msgSender )
+            userErrorExit("BC file '%s' not found."%(bcFilename))
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - - -
     def __assert_correct_type( self, option, value, allowed_types ):
         option_type = type(value)
         if option_type not in allowed_types:
-            userErrorExit( "Option '%s' has illegal type (%s)"%(option, option_type), self.msgSender)
+            userErrorExit("Option '%s' has illegal type (%s)"%(option, option_type))
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - - -
     def __updateBuildParams( self ):
@@ -190,7 +190,7 @@ class BCFile:
                 self.bcTitle = bcsec_meta[ option_name ]
                 for char in illegal_title_chars:
                     if self.bcTitle.find(char) != -1:
-                        userErrorExit( "Illegal character '%s' found in BC title '%s'"%(char,self.bcTitle), self.msgSender )
+                        userErrorExit("Illegal character '%s' found in BC title '%s'"%(char,self.bcTitle))
 
                 self.bcTitle = self.bcTitle.replace( ' ', '_' )
 
@@ -204,7 +204,7 @@ class BCFile:
 
         section = bcsec_config
         if len(section) == 0:
-            userErrorExit( "Mandatory BC section '%s' is missing."%('config'), self.msgSender)
+            userErrorExit("Mandatory BC section '%s' is missing."%('config'))
 
         #
         # Compiler definition
@@ -213,7 +213,7 @@ class BCFile:
         option_name = 'CDEF'
 
         if not section.has_key( option_name ):
-            userErrorExit( "Mandatory BC option '%s' is missing."%option_name, self.msgSender )
+            userErrorExit("Mandatory BC option '%s' is missing."%option_name)
 
         self.cdef = section[ option_name ]
 
@@ -240,7 +240,7 @@ class BCFile:
                 tried_cdefs.append( candidate )
 
         if not os.path.exists( os.path.join( self.cdefPath, self.cdef) ):
-            userErrorExit( "CDEF file '%s' not found. Attempted following locations:\n  %s"%(self.cdef, string.join(tried_cdefs, '\n  ')), self.msgSender )
+            userErrorExit("CDEF file '%s' not found. Attempted following locations:\n  %s"%(self.cdef, string.join(tried_cdefs, '\n  ')))
 
 
         # Notes:
@@ -255,10 +255,10 @@ class BCFile:
         if not section.has_key( 'DEBUG_BUILD' ):
 
             if section.has_key( 'DEBUGMODE_MEMORY' ):
-                userErrorExit( "Option '%s' requires option '%s' to be set."%('DEBUGMODE_MEMORY', 'DEBUG_BUILD'), self.msgSender )
+                userErrorExit("Option '%s' requires option '%s' to be set."%('DEBUGMODE_MEMORY', 'DEBUG_BUILD'))
 
             if section.has_key( 'DEBUGMODE_FILE' ):
-                userErrorExit( "Option '%s' requires option '%s' to be set."%('DEBUGMODE_FILE', 'DEBUG_BUILD'), self.msgSender )
+                userErrorExit("Option '%s' requires option '%s' to be set."%('DEBUGMODE_FILE', 'DEBUG_BUILD'))
 
             section[ 'DEBUG_BUILD'      ]   = False
             section[ 'DEBUGMODE_MEMORY' ]   = False
@@ -291,7 +291,7 @@ class BCFile:
         option_name = 'CHAR_ENCODING'
 
         if not section.has_key( option_name ):
-            userErrorExit( "Mandatory BC option '%s' is missing."%option_name, self.msgSender )
+            userErrorExit("Mandatory BC option '%s' is missing."%option_name)
 
         self.charEncoding = section[ option_name ]
 
@@ -305,10 +305,10 @@ class BCFile:
         option_name = 'BYTE_ORDER'
 
         if not section.has_key( option_name ):
-            userErrorExit( "Mandatory BC option '%s' is missing."%option_name, self.msgSender )
+            userErrorExit("Mandatory BC option '%s' is missing."%option_name)
 
         if section[option_name] != 'LITTLE_ENDIAN' and section[option_name] != 'BIG_ENDIAN':
-            userErrorExit( "BC option '%s' must be set to either 'LITTLE_ENDIAN' or 'BIG_ENDIAN'"%option_name, self.msgSender )
+            userErrorExit("BC option '%s' must be set to either 'LITTLE_ENDIAN' or 'BIG_ENDIAN'"%option_name)
 
         self.byteOrder = section[ option_name ]
 

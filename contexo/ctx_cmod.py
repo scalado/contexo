@@ -76,11 +76,11 @@ def isContexoCodeModule( path ):
 def assertValidContexoCodeModule( path, msgSender ):
 
     if not os.path.exists(path):
-        userErrorExit( "Unable to locate code module '%s'"%(path), msgSender )
+        userErrorExit("Unable to locate code module '%s'"%(path))
 
     for d in criteriaDirs:
         if not os.path.exists( os.path.join( path, d) ):
-            userErrorExit( "'%s' was found but is not a valid Contexo code module"%(path), msgSender )
+            userErrorExit("'%s' was found but is not a valid Contexo code module"%(path))
 
 
 def getSourcesFromDir( self, srcDir ):
@@ -291,7 +291,7 @@ class CTXCodeModule( CTXRawCodeModule ):
                     cand = cand.rstrip('\\')
 
                     if not os.path.exists( cand ):
-                        userErrorExit( "Cannot find dependency location '%s' resolved from '%s'."%(cand, xdep_var), self.msgSender )
+                        userErrorExit("Cannot find dependency location '%s' resolved from '%s'."%(cand, xdep_var))
 
                     #cand = '\"' + cand + '\"'
                     include_paths.append( cand )

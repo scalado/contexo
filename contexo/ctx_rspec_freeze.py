@@ -69,7 +69,7 @@ class RspecFreezer():
             self.xmlgenerator.startElement('ctx-repo',  attrs = {'id':id,'rcs':rcs, 'href': href,  'rev': str(curr_rev),  'path':path })
             self.xmlgenerator.characters("\n")
         else:
-            userErrorExit("Currently only supporting freeze for svn-repos",  self.msgSender)
+            userErrorExit("Currently only supporting freeze for svn-repos")
         paths = repo.getAllRelativePaths()
         for path_type in paths:
             for  path_spec in paths[path_type]:

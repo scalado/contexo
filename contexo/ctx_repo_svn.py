@@ -26,8 +26,8 @@ class CTXRepositorySVN(CTXRepository):
             href = self.client.getURLFromWorkingCopy( self.path )
 
         if href == None:
-            userErrorExit( "No HREF specified for repository '%s'. Failed to aquire HREF from local copy '%s'"\
-                           %(id_name, self.path), self.msgSender )
+            userErrorExit("No HREF specified for repository '%s'. Failed to aquire HREF from local copy '%s'"\
+                           %(id_name, self.path))
 
         CTXRepository.__init__( self, id_name, local_path, href, rev, version_control=True )
         self.msgSender = "CTXRepositorySVN"

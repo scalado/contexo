@@ -107,7 +107,7 @@ class CTXView:
                 all_valid = False
 
         if all_valid == False:
-            userErrorExit( "Validation failed.", self.msgSender )
+            userErrorExit("Validation failed.")
 
     #--------------------------------------------------------------------------
     def process_rspecs( self ):
@@ -157,7 +157,7 @@ class CTXView:
             # the others. Both these cases are terminal errors since we have no logic
             # way of selecting one of the candidates.
             if len(candidate_rspecs) != 1:
-                userErrorExit( "RSpec selection is ambiguous. Only one RSpec is allowed in a view. If multiple RSpecs exist, at least one of them must directly or indirectly import the others", self.msgSender )
+                userErrorExit("RSpec selection is ambiguous. Only one RSpec is allowed in a view. If multiple RSpecs exist, at least one of them must directly or indirectly import the others")
             else:
                 infoMessage("Using RSpec: '%s'"%(candidate_rspecs[0].getFilename()), 2)
                 self.setRSpec( candidate_rspecs[0] )
@@ -241,8 +241,8 @@ class CTXView:
                 infoMessage("Located '%s' at '%s'"%(item, candidate_locations[0]), 2)
                 return candidate_locations[0]
             elif len(candidate_locations) > 1:
-                userErrorExit( "Multiple occurances of '%s' was found. Unable to determine which one to use: \n   %s"\
-                               %(item, "\n   ".join(candidate_locations)), self.msgSender )
+                userErrorExit("Multiple occurances of '%s' was found. Unable to determine which one to use: \n   %s"\
+                               %(item, "\n   ".join(candidate_locations)))
 
         # Item not present in any repository, be clear to the user..
         if self.getRSpec() != None:
@@ -269,12 +269,12 @@ class CTXView:
                 infoMessage("Located '%s' at '%s'"%(item, candidate_locations[0]), 2)
                 return candidate_locations[0]
             elif len(candidate_locations) > 1:
-                userErrorExit( "Multiple occurances of '%s' was found. Unable to determin which one to use: \n   %s"\
-                               %(item, "\n   ".join(candidate_locations)), self.msgSender )
+                userErrorExit("Multiple occurances of '%s' was found. Unable to determin which one to use: \n   %s"\
+                               %(item, "\n   ".join(candidate_locations)))
 
 
-        userErrorExit( "Unable to locate file '%s'. Attempted the following locations: \n   %s"\
-                       %(item, "\n   ".join(tried_locations)), self.msgSender )
+        userErrorExit("Unable to locate file '%s'. Attempted the following locations: \n   %s"\
+                       %(item, "\n   ".join(tried_locations)))
 
     #--------------------------------------------------------------------------
     def getRoot( self ):

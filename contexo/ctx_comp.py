@@ -187,7 +187,7 @@ class COMPFile:
         # Handle libraries section specially
 
         if len(compsec_libraries) == 0:
-            userErrorExit( "No library entries given in component definition.", self.msgSender )
+            userErrorExit("No library entries given in component definition.")
 
         libdict = compsec_libraries
 
@@ -273,7 +273,7 @@ class COMPFile:
 
         for publicHeader in self.publicHeaders:
             if publicHeader not in publicHeaderMap.keys():
-                userErrorExit( "Can't find public header '%s' for export."%publicHeader, self.msgSender )
+                userErrorExit("Can't find public header '%s' for export."%publicHeader)
 
             src = publicHeaderMap[publicHeader]
             dst = os.path.join( headerPath, publicHeader )

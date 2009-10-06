@@ -97,7 +97,7 @@ options = digestCommandline( sys.argv[1:], True, knownOptions )
 
 for opt in ['--comp', '--bc']:
     if opt not in options.keys():
-        ctx_common.userErrorExit( "Missing mandatory option: '%s'"%opt, msgSender )
+        ctx_common.userErrorExit("Missing mandatory option: '%s'"%opt)
 
 #
 # Assign default values to omitted options
@@ -118,7 +118,7 @@ if not options.has_key( '--sh' ):
 
 for opt in ['--comp','--bc','--sl','--sh','--o', '--env']:
     if options.has_key( opt ) and len(options[opt]) == 0:
-        ctx_common.userErrorExit( "Missing arguments to option '%s'"%opt )
+        ctx_common.userErrorExit("Missing arguments to option '%s'"%opt)
 
 #
 # Prepare all build parameters from the digested commandline

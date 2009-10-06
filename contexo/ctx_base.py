@@ -88,7 +88,7 @@ class CTXCompiler:
 
         self.cdefPath = os.path.abspath( cdefPath )
         if not os.path.exists( self.cdefPath ):
-            userErrorExit( "Compiler definition '%s' not found."%self.cdefPath, self.msgSender )
+            userErrorExit("Compiler definition '%s' not found."%self.cdefPath)
 
         cdef_config = config.Config( self.cdefPath )
 
@@ -140,7 +140,7 @@ class CTXCompiler:
         mandatory = "CCCOM AR ARCOM ARCOM_METHOD CC ECHO_SOURCES CFILESUFFIX OBJSUFFIX CPPDEFPREFIX CPPDEFSUFFIX INCPREFIX INCSUFFIX LIBPREFIX LIBSUFFIX".split()
         for key in mandatory:
             if not self.cdef.has_key( key ):
-                userErrorExit( "Missing mandatory CDEF option '%s'"%key, self.msgSender )
+                userErrorExit("Missing mandatory CDEF option '%s'"%key)
 
         #
         # Check for unknown options (typos or backward compatibility issues)
@@ -214,7 +214,7 @@ class CTXCompiler:
             return commandline
         elif commandline.find( marker, ix + len(marker) ) != -1:
             # Multiple (nested) commandfiles is currently not supported.
-            userErrorExit( "Multiple '%s' symbols in ARCOM field is currently not supported.\n    File: %s"%(marker, self.cdefPath), self.msgSender )
+            userErrorExit("Multiple '%s' symbols in ARCOM field is currently not supported.\n    File: %s"%(marker, self.cdefPath))
 
 
 
@@ -328,7 +328,7 @@ class CTXCompiler:
 
         for var in ['%CFLAGS', '%CPPDEFINES', '%INCPATHS', '%SOURCES']:
             if cmdline.find( var ) == -1:
-                userErrorExit( "'%s' variable not found in commandline mask"%( var ), self.msgSender )
+                userErrorExit("'%s' variable not found in commandline mask"%( var ))
 
         # Expand all commandline mask variables to the corresponding items we prepared.
 
@@ -360,7 +360,7 @@ class CTXCompiler:
     #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     def staticObject( self, sourceFile, buildParams, outputDir, objFileTitle = None ):
         if not os.path.exists( sourceFile ):
-            userErrorExit( "Sourcefile not found: %s"%sourceFile, self.msgSender )
+            userErrorExit("Sourcefile not found: %s"%sourceFile)
 
         if self.cdef['ECHO_SOURCES'] == True:
             print os.path.basename( sourceFile )
@@ -370,7 +370,7 @@ class CTXCompiler:
 
         ret = executeCommandline( commandline )
         if ret != 0:
-            userErrorExit( "\nFailed to create static object '%s'\nCompiler return code: %d"%(objFileName, ret), self.msgSender )
+            userErrorExit("\nFailed to create static object '%s'\nCompiler return code: %d"%(objFileName, ret))
 
         obj = self.wrapStaticObject( sourceFile, objFileName, outputDir, buildParams, commandline )
 
@@ -416,15 +416,15 @@ class CTXCompiler:
                 commandline = self.makeStaticLibraryCommandline( [objectFile,], libraryTitle, outputDir )
                 ret = executeCommandline( commandline )
                 if ret != 0:
-                    userErrorExit( "\nFailed to append '%s' to static library '%s'\nar return code: %d"%(objectFile.filename, libPath, ret), self.msgSender )
+                    userErrorExit("\nFailed to append '%s' to static library '%s'\nar return code: %d"%(objectFile.filename, libPath, ret))
 
         elif self.cdef['ARCOM_METHOD'].upper() == 'REPLACE':
             commandline = self.makeStaticLibraryCommandline( objectFiles, libraryTitle, outputDir )
             ret = executeCommandline( commandline )
             if ret != 0:
-                userErrorExit( "\nFailed to create static library '%s'\nar return code: %d"%(libPath, ret), self.msgSender )
+                userErrorExit("\nFailed to create static library '%s'\nar return code: %d"%(libPath, ret))
         else:
-            userErrorExit( "Unsupported value '%s' for CDEF option 'ARCOM_METHOD'"%( self.cdef['ARCOM_METHOD'] ), self.msgSender )
+            userErrorExit("Unsupported value '%s' for CDEF option 'ARCOM_METHOD'"%( self.cdef['ARCOM_METHOD'] ))
 
         # Handle RANLIB if the CDEF defines it.
         if self.cdef.has_key( 'RANLIB' ) and len(self.cdef['RANLIB']) != 0:

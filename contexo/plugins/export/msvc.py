@@ -84,21 +84,21 @@ def cmd_parse( args ):
             if contexo.ctx_cmod.isContexoCodeModule( path ):
                 rawMod = contexo.ctx_cmod.CTXRawCodeModule(path)
                 incPaths.append( path )
-                
+
                 # Only include private headers for projects containing the specified module
                 #incPaths.append( os.path.join(rawMod.getRootPath(), rawMod.getPrivHeaderDir()) )
-                
+
                 modTags.append( 'COMPILING_MOD_' + string.upper( rawMod.getName() ) )
 
     #
-    # Collect additional include paths    
+    # Collect additional include paths
     #
-    
+
     user_includepaths = list()
     if args.additional_includes != None:
         filename = args.additional_includes
-        if not os.path.exists( filename ):
-            userErrorExit( "Cannot find option file '%s'"%filename, msgSender )
+        if not os.path.isfile( filename ):
+            userErrorExit("Cannot find option file '%s'"%filename)
         file = open( filename, "r" )
         for line in file.readlines():
             line = line.strip( " \n\r" )

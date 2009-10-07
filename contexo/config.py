@@ -17,9 +17,9 @@ VALUE_ONLY      = 5
 #------------------------------------------------------------------------------
 # Regular Expresion definitions
 #------------------------------------------------------------------------------
-named_value_regexp = '(.+)=(.+)'
-add_value_regexp =  '(.+)\+=(.+)'
-sub_value_regexp =  '(.+)\-=(.+)'
+named_value_regexp = '([^=]+)=(.+)'
+add_value_regexp =  '([^=]+)\+=(.+)'
+sub_value_regexp =  '([^=]+)\-=(.+)'
 
 section_regexp = '\[.+\]'
 
@@ -176,8 +176,8 @@ def apply_preffix ( match_object ):
 
 def parse_line( src_line, cur_section, section_dict ):
     line = src_line.strip ()
-    
-    
+
+
     exprs = [ (add_value, NAMED_VALUE_ADD),\
               (sub_value, NAMED_VALUE_SUB),\
               (named_value, NAMED_VALUE) ]

@@ -492,6 +492,7 @@ def cmd_validateview(args):
 #------------------------------------------------------------------------------
 def cmd_freeze(args):
     import xml.sax
+    import sys
     #from  contexo.ctx_rspec_file_freeze import rspecFileRevisionFreezer
 
     fileOut = sys.stdout

@@ -8,8 +8,7 @@ import cPickle
 from stat import *
 
 from ctx_common import *
-from ctx_cmod import *
-
+import ctx_cmod
 
 C_IDENTIFIER_REGEXP     = '[a-zA-Z_]+([a-zA-Z_]|[0-9])*'
 C_COMMENT_REGEXP        = '(/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/)|(//.*)'
@@ -747,24 +746,27 @@ class CTXDepMgr: # The dependency manager class.
                             header_set.add ( dep_header )
 
         return list ( header_set )
-        
+
     def resolveCodeModulePath( self, mod ):
-        from ctx_cmod import assertValidContexoCodeModule
-        
+        import ctx_cmod
+
         modPath = mod
 
-        if not os.path.exists( modPath ):
-            for path in self.depRoots:
-                modPath = os.path.join( path, mod )
-                if os.path.exists( modPath ):
+        #if not os.path.exists( modPath ):
+        for path in self.depRoots:
+            modPath = os.path.join( path, mod )
+            if os.path.exists( modPath ):
+                if ctx_cmod.isContexoCodeModule(modPath):
                     break
                 else:
-                    modPath = str()
-            
-            if len(modPath) == 0:
-                userErrorExit("Unable to locate code module: '%s'"%mod)
+                    infoMessage( "Directory %s is not a valid contexo module, ignoring"%modPath,  3  )
+            else:
+                modPath = str()
 
-        assertValidContexoCodeModule( modPath, self.msgSender )
+        if len(modPath) == 0:
+            userErrorExit("Unable to locate code module: '%s'"%mod)
+
+        ctx_cmod.assertValidContexoCodeModule( modPath, self.msgSender )
 
         return modPath
 

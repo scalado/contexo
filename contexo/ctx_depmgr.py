@@ -210,13 +210,13 @@ def makeSearchPathId( searchPath ):
     m.update( searchPath )
     os.path.getmtime( searchPath )
     return m.hexdigest()
-    
+
 def makeSearchPathFilename( searchPath ):
     return "%s.dat" % makeSearchPathId( searchPath )
-    
+
 def cacheCodeModulePaths( searchPath, codeModulePaths ):
     filename = makeSearchPathFilename( searchPath )
-    
+
     userDir = getUserTempDir()
     if os.path.exists( userDir ):
         p = os.path.join( userDir, filename )
@@ -226,9 +226,9 @@ def cacheCodeModulePaths( searchPath, codeModulePaths ):
 
 def getCachedCodeModulePaths( searchPath ):
     filename = makeSearchPathFilename( searchPath )
-    
+
     codeModulePaths = list()
-    
+
     userDir = getUserTempDir()
     if os.path.exists( userDir ):
         p = os.path.join( userDir, filename )
@@ -236,7 +236,7 @@ def getCachedCodeModulePaths( searchPath ):
             f = file( p, "rb" )
             codeModulePaths = cPickle.load( f )
             f.close()
-            
+
     return codeModulePaths
 
 #------------------------------------------------------------------------------
@@ -273,13 +273,13 @@ def getCachedCodeModulePaths( searchPath ):
 
 def findAllCodeModulPaths( searchPaths ):
     from ctx_cmod import isContexoCodeModule, CTXRawCodeModule
-    
+
     searchPaths = assureList ( searchPaths )
-    
+
     pathList = list ()
     for path in searchPaths:
         codeModulePaths = []
-        
+
         if len(codeModulePaths) == 0:
             pathCandidates = os.listdir( path )
             for cand in pathCandidates:
@@ -296,9 +296,9 @@ def findAllCodeModulPaths( searchPaths ):
 
 def finAllCodeModules( searchPaths ):
     from ctx_cmod import isContexoCodeModule, CTXRawCodeModule
-    
+
     searchPaths = assureList ( searchPaths )
-    
+
     modules = list ()
     for path in searchPaths:
         pathCandidates = os.listdir( path )
@@ -306,7 +306,7 @@ def finAllCodeModules( searchPaths ):
             candPath = os.path.join( path, candidate )
             if isContexoCodeModule( candPath ) == True:
                 modules.append( (candidate, candPath) )
-                
+
     return modules
 
 # These are explicit indexes for accessing the tuple indexes in dependencies.
@@ -406,11 +406,11 @@ class CTXDepMgr: # The dependency manager class.
         #pathList += assureList ( cmod.getPubHeaderDir() )
         #pathList += assureList ( cmod.getPrivHeaderDir() )
         #pathList += assureList ( cmod.getSourceDir () )
-    
+
         #self.depPaths.update ( assureList ( cmod.getPubHeaderDir() ) )
         #self.depPaths.update ( assureList ( cmod.getPrivHeaderDir() ) )
         #self.depPaths.update ( assureList ( cmod.getSourceDir () ) )
-        
+
         if cmod.buildUnitTests:
             self.depPaths.update (assureList ( cmod.getTestDir () ) )
 
@@ -502,10 +502,10 @@ class CTXDepMgr: # The dependency manager class.
         for mod in codeModulePaths:
 
             modPath = self.resolveCodeModulePath( mod )
-           
+
             rawmod = CTXRawCodeModule(modPath, buildUnitTests = unitTests)
             self.cmods[rawmod.getName()] = rawmod
-            
+
         self.needUpdate = True
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
@@ -586,7 +586,7 @@ class CTXDepMgr: # The dependency manager class.
 
         if self.needUpdate:
             self.updateDependencyHash()
-        
+
         if moduleName not in self.moduleDependencies:
             cmod = CTXCodeModule ( moduleName, self.codeModulePaths, False )
             self.cmods[moduleName] = cmod
@@ -621,7 +621,7 @@ class CTXDepMgr: # The dependency manager class.
             if not self.inputFilePathDict.has_key(f):
                 deps.append( updatePath( f, self.inputFilePathDict, self.depPaths ) )
             deps.append(self.inputFilePathDict[f])
-        
+
         return deps
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -

@@ -171,7 +171,7 @@ class CTXCompiler:
             return
         else:
             self.validatedTools.append( cdefItem )
-            
+
 
         if sys.platform == 'win32':
             delimiter = ';'
@@ -194,9 +194,9 @@ class CTXCompiler:
                         toolPath = None
             else:
                 toolPath = None
-                
+
         ctxAssert( toolPath == None or os.path.isfile(toolPath), "Internal error here.." )
-        
+
         if toolPath == None:
             warningMessage("Unresolved tool: '%s'"%(cdefItem))
         else:
@@ -529,7 +529,7 @@ class CTXBuildSession:
     def buildStaticObjects( self, srcFiles, outputDir, buildParams, forceRebuild ):
         objectFileList = list()
         objFileTitle = None
-        
+
         srcFiles = assureList( srcFiles )
 
         joinedBuildParams = CTXBuildParams()
@@ -586,7 +586,7 @@ class CTXBuildSession:
 
         joinedBuildParams = CTXBuildParams()
         joinedBuildParams.incPaths.extend( self.depMgr.getIncludePaths( [srcFile] ) )
-        
+
         joinedBuildParams.add( self.buildParams )
         if buildParams != None:
             joinedBuildParams.add( buildParams )
@@ -594,7 +594,7 @@ class CTXBuildSession:
         buildParamsChecksum = joinedBuildParams.makeChecksum()
 
         needRebuild     = True
-        
+
         srcFile = self.depMgr.getFullPathname( srcFile )
 
         objChecksum     = self.makeStaticObjectChecksum( srcFile, buildParamsChecksum )

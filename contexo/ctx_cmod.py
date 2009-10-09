@@ -248,7 +248,7 @@ class CTXCodeModule( CTXRawCodeModule ):
         self.moduleTag     = 'COMPILING_MOD_' + string.upper( self.getName() )
         self.buildParams.prepDefines.append( self.moduleTag )
 
-   
+
 
     #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     def resolveExternalDeps( self ):
@@ -314,7 +314,7 @@ class CTXCodeModule( CTXRawCodeModule ):
         ctx_log.ctxlogBeginCodeModule( self.getName() )
 
         infoMessage("Building module '%s'"%(self.getName()), 2)
-        
+
         buildParams = ctx_base.CTXBuildParams()
         buildParams.add( self.buildParams )
 
@@ -333,15 +333,15 @@ class CTXCodeModule( CTXRawCodeModule ):
             outputDir = os.path.join( outputDir, buildDir )
             if not os.path.exists( outputDir ):
                 os.makedirs( outputDir )
-                
+
         #
         # Build sources for this module.
         #
-        
+
         srcFiles = self.getSourceFilenames()
         if self.buildUnitTests:
             srcFiles.extend( self.getTestSourceFilenames() )
-        
+
         objlist = []
         for src in srcFiles:
             obj = session.buildStaticObject( src, outputDir, buildParams, self.rebuildAll )

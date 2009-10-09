@@ -85,7 +85,7 @@ def assertValidContexoCodeModule( path, msgSender ):
 
 def getSourcesFromDir( self, srcDir ):
     srcList = list ()
-    ctxAssert( os.path.exists(srcDir), 'Directory was assumed to exist' )
+    ctxAssert( os.path.exists(srcDir), 'Directory %s was assumed to exist%(srcDir)' )
     source_extensions = [ '.c', '.cpp']
 
     # Collect all source files.
@@ -192,7 +192,7 @@ class CTXRawCodeModule:
             header_extensions = [ '.h',]
             # Determine the path to the private header directory of the module.
             pubHdrDir = self.getPubHeaderDir()
-            ctxAssert( os.path.exists(pubHdrDir), 'Directory was assumed to exist' )
+            ctxAssert( os.path.exists(pubHdrDir), 'Directory %s was assumed to exist'%(pubHdrDir) )
             # Collect all source files.
             dirlist = os.listdir( pubHdrDir )
             for file in dirlist:

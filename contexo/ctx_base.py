@@ -458,14 +458,14 @@ class CTXBuildSession:
         self.preloadModules = list()
         self.depMgr         = None #ctx_depmgr.CTXDepMgr()
         #self.sysVars        = getSystemConfig()
-        self.msgSender      = 'CTXBuildSession'
+        #self.msgSender      = 'CTXBuildSession'
 
         self.setBuildParams( bc.getBuildParams() )
 
     #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     def getBCFile( self ):
         return self.bc
-        
+
     #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     def setBuildParams( self, buildParams ):
         self.buildParams = buildParams

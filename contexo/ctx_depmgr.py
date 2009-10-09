@@ -326,15 +326,15 @@ class CTXDepMgr: # The dependency manager class.
         self.cmods                    = dict() # Dictionary mapping mod name to raw mod.
         self.depPaths                 = set() # Paths to be used for dep. search
         self.xdepPaths                = list() # Paths to be used for xdep. search.
-        
-        self.inputFilePathDict        = dict() # { src_file : absfilepath } 
-        
+
+        self.inputFilePathDict        = dict() # { src_file : absfilepath }
+
         self.processed                = set () # Set containing processed files in this session.
-        self.dependencies             = dict() # { src_file : (set( deps ), md5)}
-        self.moduleDependencies       = dict() # { module : set( d0, d1, ..., dN) }
+        self.dependencies             = dict() # { src_file : (set( dep_headers ), md5)} (all files)
+        self.moduleDependencies       = dict() # { module : set( dep_headers ) } (for a module)
 
         self.useDiskCaching           = True
-        
+
         self.needUpdate               = True
         self.codeModulePaths          = codeModulePaths
 
@@ -433,6 +433,7 @@ class CTXDepMgr: # The dependency manager class.
 
         self.__updateDependencies ( inputFileList, list(paths) )
 
+        #copy dependencies for module's sourcefiles from the global dependency dictionary
         for inputFile in inputFileList:
             self.moduleDependencies[cmod.getName()].update ( self.dependencies[inputFile][0] )
 
@@ -563,6 +564,7 @@ class CTXDepMgr: # The dependency manager class.
         if extraPaths != None:
             pathList.extend ( extraPaths )
 
+        #get the includes that 'filenames' depend on i.e. ( the includes files in the filenames list include )
         depIncludes = self.__getDependentIncludes ( filenames, pathList, set() )
 
         includePaths = set ()
@@ -637,24 +639,24 @@ class CTXDepMgr: # The dependency manager class.
             userErrorExit("Given input file %s is not a valid hash key"%filename)
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
-    # Returns a closed set with all the dependent modules.
+    # Returns a closed set with all the modules that self.cmods depends on
     #
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
+        import ctx_cmod
     def getCodeModules( self ):
-        from ctx_cmod import isContexoCodeModule
 
         if self.needUpdate:
             self.updateDependencyHash()
 
         processed_set = set ()
-        modules = set (self.cmods.keys())  
- 
+        modules = set ( self.cmods.keys() )
+
         while modules != processed_set:
             for module in modules - processed_set:
                 incPathSet = self.getModuleIncludePaths(module)
 
                 for path in incPathSet:
-                    if isContexoCodeModule ( path ):
+                    if ctx_mod.isContexoCodeModule ( path ): #WARNING: assuming public headers lie in the root of a module
                         modules.add ( os.path.basename ( path ) )
 
                 processed_set.add ( module )

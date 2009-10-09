@@ -269,7 +269,7 @@ class CTXView:
                 infoMessage("Located '%s' at '%s'"%(item, candidate_locations[0]), 2)
                 return candidate_locations[0]
             elif len(candidate_locations) > 1:
-                userErrorExit("Multiple occurances of '%s' was found. Unable to determin which one to use: \n   %s"\
+                userErrorExit("Multiple occurances of '%s' was found. Unable to determine which one to use: \n   %s"\
                                %(item, "\n   ".join(candidate_locations)))
 
 

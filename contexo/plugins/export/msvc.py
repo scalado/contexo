@@ -97,11 +97,13 @@ def cmd_parse( args ):
     user_includepaths = list()
     if args.additional_includes != None:
         filename = args.additional_includes
-        if not os.path.isfile( filename ):
+        if os.path.isdir( filename ):
+            userErrorExit("The 'additional includes' option should be used with a file that lists the additional include paths. %s is a directory"%filename)
+        elif not os.path.isfile( filename ):
             userErrorExit("Cannot find option file '%s'"%filename)
         file = open( filename, "r" )
         for line in file.readlines():
-            line = line.strip( " \n\r" )
+            line = line.strip()
             user_includepaths += line.split(";")
         file.close()
         user_includepaths = filter(lambda x: x.strip(" ") != '',user_includepaths)
@@ -128,7 +130,7 @@ def cmd_parse( args ):
             args.mirror_components = False
 
         if package.export_data['MODULES'] == None:
-            userErrorExit("No components or modules specified for export.")
+            userErrorExit( "No components or modules specified for export.")
 
 
     project_name = args.project_name

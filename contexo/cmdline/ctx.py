@@ -58,6 +58,8 @@ setInfoMessageVerboseLevel( int(cfgFile.getVerboseLevel()) )
 
 CTX_DEFAULT_BCONF = cfgFile.getDefaultBConf().strip(" '")
 
+#TODO: make args not global in ctx.py
+
 #------------------------------------------------------------------------------
 def getBuildConfiguration( cview ):
     from contexo import ctx_bc
@@ -216,7 +218,7 @@ def buildmodules( depmgr, session, modules, args, output_path, build_dir ):
     from contexo import ctx_base
     from contexo import ctx_envswitch
 
-    all_modules = depmgr.getCodeModules() if args.deps else modules
+    all_modules = depmgr.getCodeModulesWithDependencies() if args.deps else modules
     all_modules.sort ()
     dep_modules = set(all_modules) - set(modules)
 
@@ -249,7 +251,7 @@ def cmd_info(args):
     if args.module != None:
         depmgr = CTXDepMgr ( cview.getItemPaths('modules') )
         depmgr.addCodeModules( args.module )
-        module_names = depmgr.getCodeModules ()
+        module_names = depmgr.getCodeModulesWithDependencies ()
         module_names.sort ()
         if len ( module_names ) > 0:
             print "\nModules '" + args.module[0] + "' depends on:\n"
@@ -265,7 +267,7 @@ def cmd_info(args):
 
         module_names = depmgr.getDependentModules( args.module[0] )
         if len ( module_names ) > 0:
-            print "\nModules that depends on '" + args.module[0] + "':\n"
+            print "\nModule(s) that depend(s) on '" + args.module[0] + "':\n"
             for module in module_names:
                 print "\t",module
 
@@ -444,7 +446,7 @@ def cmd_export(args):
         main_modules = export_items
 
     # Divert modules into main modules and dependency modules
-    export_modules = depmgr.getCodeModules() if args.deps else main_modules
+    export_modules = depmgr.getCodeModulesWithDependencies() if args.deps else main_modules
     export_modules.sort()
     dep_modules = set(export_modules) - set(main_modules)
 
@@ -535,7 +537,7 @@ def cmd_clean(args):
     #
 
     if args.deps:
-        module_names = depmgr.getCodeModules ()
+        module_names = depmgr.getCodeModulesWithDependencies ()
     else:
         module_names = exp_modules
 

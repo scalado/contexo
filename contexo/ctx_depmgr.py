@@ -73,7 +73,7 @@ def getModuleSourceDir( modulePath ):
     return CTXRawCodeModule(modulePath).getSourceDir()
 
 #------------------------------------------------------------------------------
-def getPath( src_file, pathList ):
+def findFileInPathList( src_file, pathList ):
 
     for path in pathList:
         src_path = os.path.join( path, src_file)
@@ -134,7 +134,7 @@ def appendPath ( incFilePathDict, pathList, includeFile ):
     if includeFile in incFilePathDict:
         absPath = incFilePathDict[includeFile]
     else:
-        absPath = getPath( includeFile, pathList )
+        absPath = findFileInPathList( includeFile, pathList )
 
     ctxAssert ( absPath != None )
     ctxAssert ( os.path.exists ( absPath ), "Path does not exist")
@@ -155,7 +155,7 @@ def checkPath ( incFilePathDict, pathList, includePath ):
         return appendPath ( incFilePathDict, pathList, os.path.basename (includePath) )
 
 def updatePath ( inputFile, inputFilePathDict, pathList ):
-    inputFilePath = getPath ( inputFile, pathList )
+    inputFilePath = findFileInPathList ( inputFile, pathList )
     inputFilePathDict[inputFile] = inputFilePath
     return inputFilePath
 
@@ -355,9 +355,9 @@ class CTXDepMgr: # The dependency manager class.
             if inputFile in self.inputFilePathDict:
                 inputFilePath = self.inputFilePathDict[inputFile]
                 if not os.path.exists ( inputFilePath ):
-                    inputFilePath = getPath ( inputFile, pathList )
+                    inputFilePath = findFileInPathList ( inputFile, pathList )
             else:
-                inputFilePath = getPath ( inputFile, pathList )
+                inputFilePath = findFileInPathList ( inputFile, pathList )
 
             if inputFilePath == None:
                 infoMessage("WARNING: Dependency manager cannot locate input file: %s"%inputFile, 2)
@@ -535,7 +535,7 @@ class CTXDepMgr: # The dependency manager class.
     #
     # Returns all include filenames that the input files depend on.
     #
-    def _CTXDepMgr__getDependentIncludes ( self, includeFiles, pathList, processedFiles ):
+    def _CTXDepMgr__getDependentIncludes ( self, includeFiles, pathList, processedFiles = set()):
 
         for incFile in includeFiles:
 
@@ -565,7 +565,7 @@ class CTXDepMgr: # The dependency manager class.
             pathList.extend ( extraPaths )
 
         #get the includes that 'filenames' depend on i.e. ( the includes files in the filenames list include )
-        depIncludes = self.__getDependentIncludes ( filenames, pathList, set() )
+        depIncludes = self.__getDependentIncludes ( filenames, pathList )
 
         includePaths = set ()
         for f in depIncludes:
@@ -642,8 +642,8 @@ class CTXDepMgr: # The dependency manager class.
     # Returns a closed set with all the modules that self.cmods depends on
     #
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
+    def getCodeModulesWithDependencies( self ):
         import ctx_cmod
-    def getCodeModules( self ):
 
         if self.needUpdate:
             self.updateDependencyHash()
@@ -662,30 +662,14 @@ class CTXDepMgr: # The dependency manager class.
                 processed_set.add ( module )
 
         return list (modules)
-        
+
 
     def getCodeModulesDependencies( self, input_modules ):
-        from ctx_cmod import isContexoCodeModule
 
-        if self.needUpdate:
-            self.updateDependencyHash()
-            
         input_modules = assureList( input_modules )
+        codeModules = self.getCodeModulesWithDependencies()
 
-        processed_set = set ()
-        modules = set (input_modules)  
- 
-        while modules != processed_set:
-            for module in modules - processed_set:
-                incPathSet = self.getModuleIncludePaths(module)
-
-                for path in incPathSet:
-                    if isContexoCodeModule ( path ):
-                        modules.add ( os.path.basename ( path ) )
-
-                processed_set.add ( module )
-
-        return list (modules - set(input_modules))
+        return list (codeModules- set(input_modules))
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     # Returns a list of CTXCodeModule from the named list of modules.
@@ -693,18 +677,18 @@ class CTXDepMgr: # The dependency manager class.
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     def createCodeModules( self, input_modules, buildTests=False, force=False ):
         from ctx_cmod import CTXCodeModule
-        
+
         codeModules = list ()
-        
+
         for mod in set(input_modules):
             modPath = self.resolveCodeModulePath( mod )
             codeModules.append( CTXCodeModule(modPath,
-                                              pathlist=None, 
+                                              pathlist=None,
                                               buildUnitTests = buildTests,
                                               forceRebuild=force) )
-        
+
         return codeModules
-    
+
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     # Returns a closed set with all modules depending on given module.
@@ -712,26 +696,26 @@ class CTXDepMgr: # The dependency manager class.
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     def getDependentModules( self, module ):
         from ctx_cmod import CTXRawCodeModule, isContexoCodeModule
-        
+
         modules = list ()
-        
+
         if not self.cmods.has_key(module):
             cmod = CTXRawCodeModule( module )
             self.updateModuleDependencies( cmod )
-       
+
         modulePubFiles = set(self.cmods[module].getPubHeaderFilenames())
-        
+
         candidates = finAllCodeModules( self.codeModulePaths )
         for candidate in candidates:
             if not self.moduleDependencies.has_key( candidate[0] ):
                 if isContexoCodeModule( candidate[1] ):
                     cmod = CTXRawCodeModule( candidate[1] )
                     self.updateModuleDependencies( cmod )
-                    
+
             dependentFiles = self.moduleDependencies[candidate[0]]
             if not modulePubFiles.isdisjoint (dependentFiles):
                 modules.append( candidate[0] )
-                
+
         return modules
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -

@@ -424,7 +424,7 @@ class CTXDepMgr: # The dependency manager class.
 
         # Add all sources for this module
         inputFileList = cmod.getSourceFilenames()
-
+        inputFileList.extend ( cmod.getPubHeaderFilenames() )
         # Add sources for unit tests
         if cmod.buildUnitTests:
             inputFileList.extend ( cmod.getTestSourceFilenames() )

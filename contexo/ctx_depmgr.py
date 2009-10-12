@@ -655,7 +655,7 @@ class CTXDepMgr: # The dependency manager class.
                 incPathSet = self.getModuleIncludePaths(module)
 
                 for path in incPathSet:
-                    if ctx_mod.isContexoCodeModule ( path ): #WARNING: assuming public headers lie in the root of a module
+                    if ctx_cmod.isContexoCodeModule ( path ): #WARNING: assuming public headers lie in the root of a module
                         modules.add ( os.path.basename ( path ) )
 
                 processed_set.add ( module )

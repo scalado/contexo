@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-#import os.path
+
+import os.path
 import ntpath
 from xmltools import XMLGenerator
 #import pywintypes

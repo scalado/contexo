@@ -534,19 +534,35 @@ class CTXDepMgr: # The dependency manager class.
     #
     # Returns all include filenames that the input files depend on.
     #
-    def _CTXDepMgr__getDependentIncludes ( self, includeFiles, pathList, processedFiles = set()):
+#    def _CTXDepMgr__getDependentIncludes ( self, includeFiles, pathList, processedFiles= set()):
+#
+#        for incFile in includeFiles:
+#
+#            if incFile not in self.dependencies:
+#                self.__updateDependencies ( [incFile], pathList  )
+#                ctxAssert ( incFile in self.dependencies, "incFile= " + incFile )
+#
+#            if incFile not in processedFiles:
+#                depIncludes = set ( self.dependencies[incFile][0] )
+#                processedFiles.add ( incFile )
+#                self.__getDependentIncludes ( depIncludes, pathList, processedFiles )
+#
+#        return processedFiles
 
-        for incFile in includeFiles:
+    def _CTXDepMgr__getDependentIncludes ( self, includeFiles, pathList):
+        processedFiles = set()
 
-            if incFile not in self.dependencies:
-                self.__updateDependencies ( [incFile], pathList  )
-                ctxAssert ( incFile in self.dependencies, "incFile= " + incFile )
+        def enclosedRecursion(includeFiles):
+            for incFile in includeFiles:
+                if incFile not in self.dependencies:
+                    self.__updateDependencies ( [incFile], pathList  )
+                    ctxAssert ( incFile in self.dependencies, "incFile= " + incFile )
+                if incFile not in processedFiles:
+                    depIncludes = set ( self.dependencies[incFile][0] )
+                    processedFiles.add ( incFile )
+                    enclosedRecursion ( depIncludes )
 
-            if incFile not in processedFiles:
-                depIncludes = set ( self.dependencies[incFile][0] )
-                processedFiles.add ( incFile )
-                self.__getDependentIncludes ( depIncludes, pathList, processedFiles )
-
+        enclosedRecursion(includeFiles)
         return processedFiles
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
@@ -614,7 +630,7 @@ class CTXDepMgr: # The dependency manager class.
         if self.needUpdate:
             self.updateDependencyHash()
 
-        includeFiles = self.__getDependentIncludes ( [sourceFile], list(self.depPaths), set() )
+        includeFiles = self.__getDependentIncludes ( [sourceFile], list(self.depPaths))
 
         deps = list()
         for f in includeFiles:

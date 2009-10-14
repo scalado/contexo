@@ -218,6 +218,8 @@ def buildmodules( depmgr, session, modules, args, output_path, build_dir ):
     from contexo import ctx_base
     from contexo import ctx_envswitch
 
+    depmgr.updateDependencyHash()
+
     all_modules = depmgr.getCodeModulesWithDependencies() if args.deps else modules
     all_modules.sort ()
     dep_modules = set(all_modules) - set(modules)

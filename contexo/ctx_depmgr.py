@@ -509,6 +509,7 @@ class CTXDepMgr: # The dependency manager class.
         self.needUpdate = True
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
+    #set up the list of paths which are interesting for the dep search. It is the view root and all the code module roots.
     def addDependSearchPaths( self, paths ):
         if len(paths) != 0:
             self.depRoots += assureList( paths )

@@ -1,9 +1,9 @@
 #! /usr/bin/env python
-
 import sys
 from argparse import ArgumentParser
-from contexo.ctx_export import *
-from contexo.ctx_common import *
+import contexo.ctx_export as ctx_export
+from contexo.ctx_common import infoMessage, userErrorExit, warningMessage
+import os
 import contexo.ctx_bc
 import contexo.ctx_cmod
 import contexo.ctx_msvc
@@ -55,9 +55,9 @@ def allComponentModules( component_list ):
 
 #------------------------------------------------------------------------------
 def cmd_parse( args ):
-
+    import string
     infoMessage("Receiving export data from Contexo...", 1)
-    package = CTXExportData()
+    package = ctx_export.CTXExportData()
     package.receive() # Reads pickled export data from stdin
 
     infoMessage("Received export data:", 4)

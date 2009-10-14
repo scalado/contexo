@@ -27,9 +27,9 @@ def relntpath(path, start):
 
     pathl  = path.replace("/", "\\").split('\\')
     startl = start.replace("/", "\\").split('\\')
-    print "path: %s, start:%s"%(path, start )
+    #print "path: %s, start:%s"%(path, start )
     while len(pathl) and len(startl) and pathl[0] == startl[0]:
-            print "removing "+pathl[0]
+            #print "removing "+pathl[0]
             del pathl[0]
             del startl[0]
     for i in range(len(startl)):

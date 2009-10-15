@@ -191,6 +191,9 @@ class CTXRawCodeModule:
                         self.privHeaders.append(file)
         return self.privHeaders
 
+    def getPrivHeaderAbsolutePaths(self):
+        import functools
+        return map ( functools.partial( os.path.join,  self.getPrivHeaderDir() ),  self.getPrivHeaderFilenames() )
     #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     def getPubHeaderFilenames(self):
         # update if list is empty.
@@ -209,6 +212,9 @@ class CTXRawCodeModule:
                         self.pubHeaders.append(file)
         return self.pubHeaders
 
+    def getPubHeaderAbsolutePaths(self):
+        import functools
+        return map ( functools.partial( os.path.join,  self.getPubHeaderDir() ),  self.getPubHeaderFilenames() )
     #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     def getContexoDir( self ):
         return os.path.join( self.modRoot, contexo_dirname )

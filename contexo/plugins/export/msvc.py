@@ -25,20 +25,12 @@ def create_module_mapping_from_module_list( ctx_module_list ):
 
         rawMod = mod #ctx_cmod.CTXRawCodeModule( mod )
 
-        srcNames = rawMod.getSourceFilenames()
-        for srcName in srcNames:
-            srcFiles.append( os.path.join( rawMod.getSourceDir(), srcName ) )
+        srcs = rawMod.getSourceAbsolutePaths()
+        privHdrs= rawMod.getPrivHeaderAbsolutePaths()
+        pubHdrs = rawMod.getPubHeaderAbsolutePaths()
+        testSrcs = rawMod.getTestSourceAbsolutePaths()
 
-        privHdrNames = rawMod.getPrivHeaderFilenames()
-        for privHdrName in privHdrNames:
-            privHdrs.append( os.path.join( rawMod.getPrivHeaderDir(), privHdrName ) )
-
-        pubHdrNames = rawMod.getPubHeaderFilenames()
-        for pubHdrName in pubHdrNames:
-            pubHdrs.append( os.path.join( rawMod.getPubHeaderDir(), pubHdrName ) )
-
-
-        modDict = { 'MODNAME': rawMod.getName(), 'SOURCES': srcFiles, 'PRIVHDRS': privHdrs, 'PUBHDRS': pubHdrs, 'PRIVHDRDIR': rawMod.getPrivHeaderDir() }
+        modDict = { 'MODNAME': rawMod.getName(), 'SOURCES': srcs, 'PRIVHDRS': privHdrs, 'PUBHDRS': pubHdrs, 'PRIVHDRDIR': rawMod.getPrivHeaderDir(),  'TESTSOURCES':testSrcs ,  'TESTDIR':rawMod.getTestDir()}
         code_module_map.append( modDict )
 
     return code_module_map
@@ -69,6 +61,8 @@ def cmd_parse( args ):
     build_params = bc_file.getBuildParams()
 
     debugmode = bool( not args.release )
+
+    tests = package.export_data['TESTS']
 
     #
     # Add module paths/repositories as include directories
@@ -179,7 +173,7 @@ def cmd_parse( args ):
                                                                        build_params.prepDefines + modTags,
                                                                        proj['MODULELIST'],
                                                                        proj['LIBNAME'] + '.lib',
-                                                                       debugmode,
+                                                                       debugmode, tests,
                                                                        incPaths,
                                                                        args.output,
                                                                        args.platform,

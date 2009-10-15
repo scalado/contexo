@@ -771,7 +771,6 @@ parser_export.add_argument('-e', '--env', help=standard_description['--env'])
 parser_export.add_argument('-v', '--view', default=os.getcwd(), help=standard_description['--view'])
 parser_export.add_argument('-d', '--deps', action='store_true', help=standard_description['--deps'])
 parser_export.add_argument('-t', '--tests', action='store_true', help=standard_description['--tests'])
-parser_export.add_argument('-o', '--output', default=os.getcwd(), help=standard_description['--output'])
 parser_export.add_argument('-rv', '--repo-validation', action='store_true', help=standard_description['--repo-validation'])
 parser_export.add_argument('-nra', '--no-remote-repo-access', action='store_true', help=standard_description['--no-remote-repo-access'])
 

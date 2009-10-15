@@ -129,7 +129,7 @@ class CTXRawCodeModule:
         self.privHeaders    = list()
         self.msgSender      = 'CTXRawCodeModule'
         self.buildUnitTests = buildUnitTests
-
+        assert(os.path.isabs(moduleRoot))
         if not os.path.exists(moduleRoot):
             self.modRoot = resolveModuleLocation( moduleRoot, pathlist )
         else:
@@ -156,14 +156,21 @@ class CTXRawCodeModule:
         if len(self.srcFiles) == 0:
             srcDir = self.getSourceDir()
             self.srcFiles = getSourcesFromDir( self, srcDir )
-
         return self.srcFiles
+
+    def getSourceAbsolutePaths(self):
+        import functools
+        #functional magic - bind an argument to join and map this bound function to filenames
+        return map ( functools.partial( os.path.join,  self.getSourceDir() ),  self.getSourceFilenames() )
+
+    def getTestSourceAbsolutePaths(self):
+        import functools
+        return map ( functools.partial( os.path.join,  self.getTestDir() ),  self.getTestSourceFilenames() )
 
     def getTestSourceFilenames(self):
         if len(self.testSrcFiles) == 0:
             srcDir = self.getTestDir()
             self.testSrcFiles = getSourcesFromDir( self, srcDir )
-
         return self.testSrcFiles
 
     #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -338,9 +345,9 @@ class CTXCodeModule( CTXRawCodeModule ):
         # Build sources for this module.
         #
 
-        srcFiles = self.getSourceFilenames()
+        srcFiles = self.getSourceAbsolutePaths()
         if self.buildUnitTests:
-            srcFiles.extend( self.getTestSourceFilenames() )
+            srcFiles.extend( self.getTestSourceAbsolutePaths() )
 
         objlist = []
         for src in srcFiles:

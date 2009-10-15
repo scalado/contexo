@@ -350,20 +350,21 @@ class CTXDepMgr: # The dependency manager class.
             # Resolve full path to the given input file. First try to locate it in
             # our path dictionary, otherwise we search it using the pathList.
             #
-
-            if inputFile in self.inputFilePathDict:
-                inputFilePath = self.inputFilePathDict[inputFile]
-                if not os.path.exists ( inputFilePath ):
+            if not os.path.isabs(inputFile):
+                if inputFile in self.inputFilePathDict:
+                    inputFilePath = self.inputFilePathDict[inputFile]
+                    if not os.path.exists ( inputFilePath ):
+                        inputFilePath = findFileInPathList ( inputFile, pathList )
+                else:
                     inputFilePath = findFileInPathList ( inputFile, pathList )
+
+                if inputFilePath == None:
+                    infoMessage("WARNING: Dependency manager cannot locate input file: %s"%inputFile, 2)
+                    return
+
+                self.inputFilePathDict[inputFile] = inputFilePath
             else:
-                inputFilePath = findFileInPathList ( inputFile, pathList )
-
-            if inputFilePath == None:
-                infoMessage("WARNING: Dependency manager cannot locate input file: %s"%inputFile, 2)
-                return
-
-            self.inputFilePathDict[inputFile] = inputFilePath
-
+                inputFilePath = inputFile
             #
             # Create checksum used to determine if the input file has changed
             # from stored checksum in dependencies
@@ -423,11 +424,11 @@ class CTXDepMgr: # The dependency manager class.
             infoMessage("WARNING: List of dependency search paths is empty.", 2)
 
         # Add all sources for this module
-        inputFileList = cmod.getSourceFilenames()
+        inputFileList = cmod.getSourceAbsolutePaths() #getSourceFilenames()
         inputFileList.extend ( cmod.getPubHeaderFilenames() )
         # Add sources for unit tests
         if cmod.buildUnitTests:
-            inputFileList.extend ( cmod.getTestSourceFilenames() )
+            inputFileList.extend ( cmod.getTestSourceAbsolutePaths() )#getTestSourceFilenames() )
             #pathList += assureList ( cmod.getTestDir () )
 
         self.__updateDependencies ( inputFileList, list(paths) )
@@ -610,7 +611,7 @@ class CTXDepMgr: # The dependency manager class.
             self.updateModuleDependencies ( cmod )
 
         cmod = self.cmods[moduleName]
-        filenames = set(cmod.getSourceFilenames())
+        filenames = set(cmod.getSourceAbsolutePaths())
         filenames.update ( cmod.getPrivHeaderFilenames() )
         filenames.update ( cmod.getPubHeaderFilenames() )
 
@@ -665,19 +666,19 @@ class CTXDepMgr: # The dependency manager class.
             self.updateDependencyHash()
 
         processed_set = set ()
-        modules = set ( self.cmods.keys() )
+        moduleRoots = set ( map(lambda mod: mod.modRoot,  self.cmods.values() ))
 
-        while modules != processed_set:
-            for module in modules - processed_set:
-                incPathSet = self.getModuleIncludePaths(module)
+        while moduleRoots != processed_set:
+            for moduleRoot in moduleRoots - processed_set:
+                incPathSet = self.getModuleIncludePaths(moduleRoot)
 
                 for path in incPathSet:
                     if ctx_cmod.isContexoCodeModule ( path ): #WARNING: assuming public headers lie in the root of a module
-                        modules.add ( os.path.basename ( path ) )
+                        moduleRoots.add (  path  )
 
-                processed_set.add ( module )
+                processed_set.add ( moduleRoot )
 
-        return list (modules)
+        return list (moduleRoots)
 
 
     def getCodeModulesDependencies( self, input_modules ):

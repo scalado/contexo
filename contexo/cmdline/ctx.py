@@ -61,7 +61,7 @@ CTX_DEFAULT_BCONF = cfgFile.getDefaultBConf().strip(" '")
 #TODO: make args not global in ctx.py
 
 #------------------------------------------------------------------------------
-def getBuildConfiguration( cview ):
+def getBuildConfiguration( cview ,  args):
     from contexo import ctx_bc
     from contexo import config
 
@@ -292,7 +292,7 @@ def cmd_buildmod(args):
     # Prepare all
     cview   = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=bool(args.repo_validation) )
     modules = expand_list_files(cview, args.modules)
-    bc      = getBuildConfiguration( cview )
+    bc      = getBuildConfiguration( cview,  args )
 
     depmgr  = CTXDepMgr( cview.getItemPaths('modules') )
     depmgr.addCodeModules( modules, args.tests )
@@ -349,7 +349,7 @@ def cmd_buildcomp(args):
     # Prepare all
     cview       = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=bool(args.repo_validation) )
     components  = expand_list_files( cview, args.components )
-    bc          = getBuildConfiguration( cview )
+    bc          = getBuildConfiguration( cview,  args )
     depmgr      = CTXDepMgr ( cview.getItemPaths('modules') )
     session     = ctx_base.CTXBuildSession( bc )
     session.setDependencyManager( depmgr )
@@ -419,7 +419,7 @@ def cmd_export(args):
 
     # Prepare all
     cview   = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=bool(args.repo_validation) )
-    bc      = getBuildConfiguration( cview )
+    bc      = getBuildConfiguration( cview,  args )
     depmgr  = CTXDepMgr ( cview.getItemPaths('modules') )
     session = ctx_base.CTXBuildSession( bc )
     session.setDependencyManager( depmgr )
@@ -463,7 +463,7 @@ def cmd_export(args):
 
     # Dispatch export data to handler (through pipe)
     package = CTXExportData()
-    package.setExportData( module_map, components, None, session, depmgr,
+    package.setExportData( module_map, components, args.tests, session, depmgr,
                            cview, envLayout, args )
     package.dispatch()
 
@@ -525,7 +525,7 @@ def cmd_clean(args):
     cview = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=bool(args.repo_validation) )
 
     exp_modules = expand_list_files(cview, args.modules)
-    bc      = getBuildConfiguration( cview )
+    bc      = getBuildConfiguration( cview,  args )
 
     depmgr  = CTXDepMgr( cview.getItemPaths('modules') )
     depmgr.addCodeModules( exp_modules, args.tests )
@@ -795,5 +795,5 @@ parser_view_validate.add_argument('-nra', '--no-remote-repo-access', action='sto
 ###############################################################################
 
 # Parse cmdline
-args = parser.parse_args()
-args.func(args)
+argsa=parser.parse_args()
+argsa.func(argsa)

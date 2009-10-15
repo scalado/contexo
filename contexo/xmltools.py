@@ -3,7 +3,7 @@ from xml.sax import saxutils
 from xml.sax.saxutils import XMLGenerator
 from xml.sax.xmlreader import AttributesImpl
 
-#pretty formating xml
+#pretty formatting xml
 
 class XMLGenerator:
     def __init__(self, output):

@@ -680,13 +680,13 @@ class CTXDepMgr: # The dependency manager class.
 
         return list (moduleRoots)
 
-
-    def getCodeModulesDependencies( self, input_modules ):
-
-        input_modules = assureList( input_modules )
-        codeModules = self.getCodeModulesWithDependencies()
-
-        return list (codeModules- set(input_modules))
+#
+#    def getCodeModulesDependencies( self, input_modules ):
+#
+#        input_modules = assureList( input_modules )
+#        codeModules = self.getCodeModulesWithDependencies()
+#
+#        return list (codeModules- set(input_modules))
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     # Returns a list of CTXCodeModule from the named list of modules.

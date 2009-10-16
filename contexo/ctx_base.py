@@ -488,7 +488,7 @@ class CTXBuildSession:
     def makeStaticObjectChecksum( self, sourceFile, buildParamsChecksum ):
         checksumList = list()
 
-        includeFiles = self.depMgr.getDependencies( os.path.basename (sourceFile) )
+        includeFiles = self.depMgr.getDependencies( sourceFile )
 
         for incFile in includeFiles:
             ctxAssert( os.path.exists(incFile), "incFile: " + incFile )

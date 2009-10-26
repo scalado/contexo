@@ -100,7 +100,7 @@ cachedConfigDict = None
 #------------------------------------------------------------------------------
 def getUserDir():
     userDir = os.path.expanduser( '~' )
-    if userDir == '~':
+    if userDir == '~' or not os.path.exists ( userDir ):
         def valid(path) :
             if path and os.path.isdir(path) :
                 return True
@@ -113,9 +113,8 @@ def getUserDir():
             userDir += u'\\'
         if not valid(userDir) :
             userDir = u'C:\\'
-
-    if not os.path.exists ( userDir ):
-        os.mkdir ( userDir )
+        if not valid(userDir):
+            userErrorExit('Could not find an apprioriate user directory')
 
     return str(userDir)
 

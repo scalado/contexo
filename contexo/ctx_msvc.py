@@ -549,7 +549,7 @@ def update_vcproj8(filename,parameters):
     try:
         from xml.etree import cElementTree as ET
     except:
-        userErrorExit("You need Python 2.5 to call update_vcproj8","ctx_msvc2.py")
+        userErrorExit("You need Python 2.5 to call update_vcproj8")
 
     tree = ET.parse(filename)
     root = tree.getroot()
@@ -575,7 +575,7 @@ def get_info_vcproj8(filename):
     try:
         from xml.etree import cElementTree as ET
     except:
-        userErrorExit("You need Python 2.5 to call get_info_vcproj8","ctx_msvc2.py")
+        userErrorExit("You need Python 2.5 to call get_info_vcproj8")
     tree = ET.parse(filename)
     root = tree.getroot()
 

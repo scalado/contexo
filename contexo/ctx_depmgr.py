@@ -73,14 +73,13 @@ def getModuleSourceDir( modulePath ):
 
 #------------------------------------------------------------------------------
 def findFileInPathList( src_file, pathList ):
-
-    for path in pathList:
-        src_path = os.path.join( path, src_file)
-        if os.path.exists(src_path):
-            return src_path
-
-    userErrorExit("'%s' cannot be resolved in current path list: \n  %s"%( src_file, "  \n".join(pathList)))
-
+    if src_file and pathList:
+        for path in pathList:
+            src_path = os.path.join( path, src_file)
+            if os.path.exists(src_path):
+                return src_path
+        errorMessage("'%s' cannot be resolved in current path list."%( src_file) )
+        infoMessage("%s"%"\n".join(pathList), msgVerboseLevel=5)
     return None
 
 #------------------------------------------------------------------------------
@@ -316,7 +315,8 @@ CHECKSUM            = 1
 #------------------------------------------------------------------------------
 class CTXDepMgr: # The dependency manager class.
 #------------------------------------------------------------------------------
-    def __init__(self, codeModulePaths = list() ):
+    def __init__(self, codeModulePaths = list(),  tolerateMissingHeaders = False):
+        self.tolerateMissingHeaders = tolerateMissingHeaders
         self.msgSender                = 'CTXDepMgr'
         self.depRoots                 = list()
         self.supportedChecksumMethods = ['MTIME', 'MD5']
@@ -339,7 +339,7 @@ class CTXDepMgr: # The dependency manager class.
 
         self.addDependSearchPaths( codeModulePaths )
 
-    def _CTXDepMgr__updateDependencies ( self, inputFileList, pathList ):
+    def _CTXDepMgr__updateDependencies ( self, inputFileList, pathList):
 
         inputFilePath       = str()
         incFileList         = list()
@@ -353,7 +353,12 @@ class CTXDepMgr: # The dependency manager class.
             #
             inputFilePath = self.locate(inputFile,  pathList)
             if inputFilePath == None:
-                infoMessage("WARNING: Dependency manager cannot locate input file: %s"%inputFile, 2)
+                dependings = self.findFilesDependingOn(inputFile)
+                assert(dependings)
+                if ( self.tolerateMissingHeaders):
+                    warningMessage("Dependency manager cannot locate input file: %s (from %s)"%(inputFile, "".join(dependings) ))
+                else:
+                    userErrorExit("Dependency manager cannot locate input file: %s (from %s)"%(inputFile, "".join(dependings) ))
                 continue #return
 
             #
@@ -428,12 +433,21 @@ class CTXDepMgr: # The dependency manager class.
         for inputFile in inputFileList:
             self.moduleDependencies[cmod.getName()].update ( self.dependencies[self.locate(inputFile)][0] )
 
-    # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    def findFilesDependingOn(self,  header):
+        ret = list()
+        for file in self.dependencies.keys():
+            if header in self.dependencies[file][0]:
+                ret.append(file)
+        return ret
+
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     def locate(self,  file,  pathList=None):
-        if file not in self.inputFilePathDict or not os.path.exists(self.inputFilePathDict[file]):
-            if pathList ==None:
+        if file not in self.inputFilePathDict or not self.inputFilePathDict[file] or not os.path.exists(self.inputFilePathDict[file]) :
+            filefromlist = findFileInPathList ( file, pathList )
+            if filefromlist==None:
                 return None
-            self.inputFilePathDict[file] = findFileInPathList ( file, pathList )
+            self.inputFilePathDict[file] = filefromlist
         return self.inputFilePathDict[file]
 
 
@@ -560,8 +574,9 @@ class CTXDepMgr: # The dependency manager class.
                     self.__updateDependencies ( [incFile], pathList  )
                     ctxAssert ( incFile in self.dependencies, "incFile= " + incFile )
                 if incFile not in processedFiles:
+                    import functools
                     depIncludes = set ( self.dependencies[incFile][0] )
-                    fullpathIncludes = map( self.locate,  depIncludes)
+                    fullpathIncludes = [ s for s in map( self.locate,  depIncludes) if s != None ]
                     processedFiles.add ( incFile )
                     enclosedRecursion ( fullpathIncludes )
 

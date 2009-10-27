@@ -294,7 +294,7 @@ def cmd_buildmod(args):
     modules = expand_list_files(cview, args.modules)
     bc      = getBuildConfiguration( cview,  args )
 
-    depmgr  = CTXDepMgr( cview.getItemPaths('modules') )
+    depmgr  = CTXDepMgr( cview.getItemPaths('modules'),  args.tolerate_missing_headers )
     depmgr.addCodeModules( modules, args.tests )
 
     session = ctx_base.CTXBuildSession( bc )
@@ -350,7 +350,7 @@ def cmd_buildcomp(args):
     cview       = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=bool(args.repo_validation) )
     components  = expand_list_files( cview, args.components )
     bc          = getBuildConfiguration( cview,  args )
-    depmgr      = CTXDepMgr ( cview.getItemPaths('modules') )
+    depmgr      = CTXDepMgr ( cview.getItemPaths('modules') ,  args.tolerate-missing-headers)
     session     = ctx_base.CTXBuildSession( bc )
     session.setDependencyManager( depmgr )
 
@@ -420,7 +420,7 @@ def cmd_export(args):
     # Prepare all
     cview   = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=bool(args.repo_validation) )
     bc      = getBuildConfiguration( cview,  args )
-    depmgr  = CTXDepMgr ( cview.getItemPaths('modules') )
+    depmgr  = CTXDepMgr ( cview.getItemPaths('modules'),  args.tolerate_missing_headers )
     session = ctx_base.CTXBuildSession( bc )
     session.setDependencyManager( depmgr )
 
@@ -527,7 +527,7 @@ def cmd_clean(args):
     exp_modules = expand_list_files(cview, args.modules)
     bc      = getBuildConfiguration( cview,  args )
 
-    depmgr  = CTXDepMgr( cview.getItemPaths('modules') )
+    depmgr  = CTXDepMgr( cview.getItemPaths('modules') ,  args.tolerate_missing_headers)
     depmgr.addCodeModules( exp_modules, args.tests )
 
     session = ctx_base.CTXBuildSession( bc )
@@ -670,7 +670,8 @@ standard_description = dict({\
   '--logfile': "Name of logfile to generate. Will be created in output folder as defined by the --output option.",\
 '--repo-validation': "Validates all repositories before processing. This usually increases duration but ensures correct repository structure. Repository validation can also be done by running 'ctx view validate' as a separate step.",\
 '--no-remote-repo-access': "If specified, the system never tries to process items directly from an RSpec repository's remote location (href) even if so is possible. Normally, if a repository is accessible through regular file access, the system always tries to use it from its remote location.",\
-'--force':"Forces building all source files"})
+'--force':"Forces building all source files", \
+'--tolerate-missing-headers':"print a message about missing headers and go on (usefull until contexo can deal with #ifdef blah\ #include)"})
 
 
 # info parser
@@ -679,6 +680,7 @@ parser_info.set_defaults(func=cmd_info)
 parser_info.add_argument('module', nargs=1, help="Module to show info for")
 #parser_info.add_argument('-t', action='store_true', help="Show info on both module and unit tests")
 parser_info.add_argument('-v', '--view', default=os.getcwd(), help=standard_description['--view'])
+#parser_build.add_argument('--tolerate-missing-headers',  action='store_true',  help = standard_description['--tolerate-missing-headers'])
 
 # buildmod parser
 parser_build = subparsers.add_parser('buildmod', help="build contexo modules." )
@@ -697,6 +699,7 @@ parser_build.add_argument('-lf', '--logfile', default=None, help=standard_descri
 parser_build.add_argument('-rv', '--repo-validation', action='store_true', help=standard_description['--repo-validation'])
 parser_build.add_argument('-nra', '--no-remote-repo-access', action='store_true', help=standard_description['--no-remote-repo-access'])
 parser_build.add_argument('-f', '--force', action='store_true', help=standard_description['--force'])
+parser_build.add_argument('--tolerate-missing-headers',  action='store_true',  help = standard_description['--tolerate-missing-headers'])
 
 # buildcomp parser
 parser_build = subparsers.add_parser('buildcomp', help="build contexo components.")
@@ -714,6 +717,7 @@ parser_build.add_argument('-lf', '--logfile', default=None, help=standard_descri
 parser_build.add_argument('-rv', '--repo-validation', action='store_true', help=standard_description['--repo-validation'])
 parser_build.add_argument('-nra', '--no-remote-repo-access', action='store_true', help=standard_description['--no-remote-repo-access'])
 parser_build.add_argument('-f', '--force', action='store_true', help=standard_description['--force'])
+parser_build.add_argument('--tolerate-missing-headers',  action='store_true',  help = standard_description['--tolerate-missing-headers'])
 
 # clean parser
 parser_clean = subparsers.add_parser('clean', help="clean a module(s) ( and optionaly its dependencies)")
@@ -725,6 +729,7 @@ parser_clean.add_argument('-t', '--tests', action='store_true', help=standard_de
 parser_clean.add_argument('-v', '--view', default=os.getcwd(), help=standard_description['--view'])
 parser_clean.add_argument('-rv', '--repo-validation', action='store_true', help=standard_description['--repo-validation'])
 parser_clean.add_argument('-nra', '--no-remote-repo-access', action='store_true', help=standard_description['--no-remote-repo-access'])
+parser_clean.add_argument('--tolerate-missing-headers',  action='store_true',  help = standard_description['--tolerate-missing-headers'])
 
 # freeze parser
 parser_freeze = subparsers.add_parser('freeze', help="Generate a rspec with svn versions frozen in their current state (from working copy).")
@@ -734,6 +739,7 @@ parser_freeze.add_argument('-o', '--output',  help="file to write to (standard o
 parser_freeze.add_argument('-v', '--view', default=os.getcwd(), help=standard_description['--view'])
 parser_freeze.add_argument('-nra', '--no-remote-repo-access', action='store_true', help=standard_description['--no-remote-repo-access'])#
 parser_freeze.add_argument('-rv', '--repo-validation', action='store_true', help=standard_description['--repo-validation'])
+#parser_build.add_argument('--tolerate-missing-headers',  action='store_true',  help = standard_description['--tolerate-missing-headers'])
 
 # export parser
 #
@@ -773,6 +779,7 @@ parser_export.add_argument('-d', '--deps', action='store_true', help=standard_de
 parser_export.add_argument('-t', '--tests', action='store_true', help=standard_description['--tests'])
 parser_export.add_argument('-rv', '--repo-validation', action='store_true', help=standard_description['--repo-validation'])
 parser_export.add_argument('-nra', '--no-remote-repo-access', action='store_true', help=standard_description['--no-remote-repo-access'])
+parser_export.add_argument('--tolerate-missing-headers',  action='store_true',  help = standard_description['--tolerate-missing-headers'])
 
 #
 #

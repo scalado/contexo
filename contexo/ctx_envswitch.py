@@ -22,7 +22,7 @@ from ctx_common import *
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 class EnvironmentLayout:
     #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-    def __init__( self, config,  envFiles=None ):
+    def __init__( self, config = None,  envFiles=None ):
         self.envFilePaths = envFiles
         self.env = dict()
         self.msgSender = 'EnvironmentLayout'
@@ -31,13 +31,14 @@ class EnvironmentLayout:
             for key, value in os.environ.iteritems():
                 self.env[key] = value
         else:
-
+            assert  (config != None)
             if type(self.envFilePaths) != list:
                 self.envFilePaths = [self.envFilePaths,]
 
             #sysEnvPaths = config.getEnvPaths()
             sysEnvPaths = list()
             sysEnvPaths.extend(config.getEnvPaths())
+
             self.__resolveENVFileLocations(sysEnvPaths)
 
             for path in self.envFilePaths:
@@ -52,7 +53,7 @@ class EnvironmentLayout:
     #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     def __mergeEnv( self, envDict, alwaysReplace = False ):
         delimiter = os.pathsep
-            
+
         for key, value in envDict.iteritems():
             if type(value) == list:
                 value = delimiter.join( value )
@@ -102,15 +103,15 @@ class EnvironmentLayout:
                 del self.env[key]
 
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-def switchEnvironment( newEnvLayout, config, preserve = True ):
+def switchEnvironment( newEnvLayout, preserve = True ):
 
     # Create a backup of the existing environment.
-    oldEnv = EnvironmentLayout(config)
+    oldEnv = EnvironmentLayout()
 
     # Clone the existing environment and replace all
     # items defined by the given layout.
 
-    curEnv = EnvironmentLayout(config)
+    curEnv = EnvironmentLayout()
     curEnv.merge( newEnvLayout, True )
     if preserve == False:
         # Remove items not included in the layout that was passed

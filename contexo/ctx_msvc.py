@@ -167,7 +167,6 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib, \
         if do_tests:
             # Add test folder.
             project.startElement ('Filter', {'Name': 'tests','Filter':''})
-
             for src in mod['TESTSOURCES']:
                 #project.characters('testsource:%s vcprojPath: %s'%(src, vcprojPath))
                 project.startElement ('File', {'RelativePath':relntpath(src, vcprojPath)} )
@@ -175,8 +174,7 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib, \
                 project.element('Tool',{'Name':'VCCLCompilerTool','AdditionalIncludeDirectories':relntpath(mod['PRIVHDRDIR'], vcprojPath)})
                 project.endElement ('FileConfiguration')
                 project.endElement ('File')
-
-        project.endElement ('Filter')
+            project.endElement ('Filter')
 
         # Start private include folder
         project.startElement ('Filter', {'Name': 'inc','Filter':''})

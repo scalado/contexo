@@ -350,7 +350,7 @@ def cmd_buildcomp(args):
     cview       = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=bool(args.repo_validation) )
     components  = expand_list_files( cview, args.components )
     bc          = getBuildConfiguration( cview,  args )
-    depmgr      = CTXDepMgr ( cview.getItemPaths('modules') ,  args.tolerate-missing-headers)
+    depmgr      = CTXDepMgr ( cview.getItemPaths('modules') ,  args.tolerate_missing_headers)
     session     = ctx_base.CTXBuildSession( bc )
     session.setDependencyManager( depmgr )
 

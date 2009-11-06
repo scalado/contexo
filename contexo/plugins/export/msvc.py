@@ -104,6 +104,27 @@ def cmd_parse( args ):
         incPaths += user_includepaths
 
     #
+    # Collect additional library paths
+    #
+
+    libPaths = list()
+    user_librarypaths = list()
+    if args.additional_libdir != None:
+        filename = args.additional_libdir
+        if os.path.isdir( filename ):
+            userErrorExit("The 'additional libdir' option should be used with a file that lists the additional include paths. %s is a directory"%filename)
+        elif not os.path.isfile( filename ):
+            userErrorExit("Cannot find option file '%s'"%filename)
+        file = open( filename, "r" )
+        for line in file.readlines():
+            line = line.strip()
+            user_librarypaths += line.split(";")
+        file.close()
+        user_librarypaths = filter(lambda x: x.strip(" ") != '',user_librarypaths)
+        libPaths += user_librarypaths
+
+
+    #
     # Determin if we're exporting components or modules, and do some related
     # sanity checks
     #
@@ -194,6 +215,11 @@ def cmd_parse( args ):
                                  "KEY":"AdditionalIncludeDirectories",
                                "VALUE":";".join(incPaths) }))
 
+        attrs.append(   dict({ "DEBUG":debugmode,
+                                "TOOL":"VCLinkerTool",
+                                 "KEY":"AdditionalLibraryDirectories",
+                               "VALUE":";".join(libPaths) }))
+        
         contexo.ctx_msvc.update_vcproj8(external_vcproj['FILENAME'],attrs)
 
     #
@@ -260,6 +286,11 @@ parser.add_argument('-ev', '--external-vcproj', default=None,
 parser.add_argument('-ai', '--additional-includes', default=None,
  help="""Path to a file with include paths to append to the include directories
  of all VS projects generated. The paths in the file can be separated by line
+ or by semicolon.""")
+
+parser.add_argument('-al', '--additional_libdir', default=None,
+ help="""Path to a file with library paths to append to the additional library directories
+ of the modified external-vcproj. The paths in the file can be separated by line
  or by semicolon.""")
 
 parser.add_argument('-pl', '--platform', default='Win32',

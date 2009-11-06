@@ -41,9 +41,10 @@ def relntpath(path, start):
 
 
 #codeModules = listof dictionaries: { MODNAME: string, SOURCES: list(paths), PRIVHDRS: list(paths), PUBHDRS: list(paths), PRIVHDRDIR: string, TESTSOURCES:list }
-def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib, \
-                    debug, do_tests,  incPaths, vcprojPath, platform = 'Win32', \
-                    fileTitle = None ):
+def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib, 
+                    debug, do_tests,  incPaths, vcprojPath, platform = 'Win32', 
+                    fileTitle = None, configType = 'lib'):
+
     import os.path
     vcprojFilePath = str()
     vcprojPath = os.path.abspath(vcprojPath)
@@ -56,6 +57,18 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib, \
 
     #GUID            = str(pywintypes.CreateGuid())
     GUID            = "".join(["{",str(uuid.uuid3(uuid.NAMESPACE_URL,"make_libvcproj8" + projectName)).upper(),"}"])
+
+    #
+    # Determine exe/lib
+    #
+    if configType == 'lib':
+        configurationTypeNbr = '4'
+    elif configType == 'exe':
+        configurationTypeNbr = '1'
+    else:
+        print "Erroneous config type. Using 'lib'"
+        configType = 'lib'
+        configurationTypeNbr = '4'
 
     #
     # Determine debug/release
@@ -102,7 +115,7 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib, \
     project.startElement ('Configuration', {'Name':variant+'|' + platform,
                                             'OutputDirectory':"".join(['.\\',variant,"\\",projectName]),
                                             'IntermediateDirectory':"".join(['.\\',variant,"\\",projectName]),
-                                           'ConfigurationType':'4',
+                                           'ConfigurationType':configurationTypeNbr,
                                            'UseOfMFC':'0',
                                             'CharacterSet':'1'})
 

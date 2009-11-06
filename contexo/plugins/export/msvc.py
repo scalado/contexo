@@ -190,7 +190,6 @@ def cmd_parse( args ):
     if not os.path.exists( args.output ):
         os.makedirs( args.output )
 
-
     guidDict = dict()
     for proj in vcprojList:
         guidDict[proj['PROJNAME']] = contexo.ctx_msvc.make_libvcproj8( proj['PROJNAME'],
@@ -202,7 +201,8 @@ def cmd_parse( args ):
                                                                        incPaths,
                                                                        args.output,
                                                                        args.platform,
-                                                                       proj['PROJNAME'])
+                                                                       proj['PROJNAME'],
+                                                                       args.configuration_type )
 
     #
     # Handle external project if specified
@@ -292,7 +292,7 @@ parser.add_argument('-ai', '--additional-includes', default=None,
  of all VS projects generated. The paths in the file can be separated by line
  or by semicolon.""")
 
-parser.add_argument('-al', '--additional_libdir', default=None,
+parser.add_argument('-al', '--additional-libdir', default=None,
  help="""Directory or path to a file with library paths to append to the additional library directories
  of the modified external-vcproj. The paths in the file can be separated by line
  or by semicolon.""")
@@ -305,6 +305,11 @@ parser.add_argument('-pl', '--platform', default='Win32',
 
 parser.add_argument('-o', '--output', default=os.getcwd(),
  help="The output directory for the export.")
+
+parser.add_argument('-ct', '--configuration-type', default='lib',
+ help="""Type of project, whether the project generates a lib or an exe. Default value is 'lib'.
+Accepted values 'exe' or 'lib'.
+""")
 
 #parser.add_argument('-ld','--libdir', default="", help=standard_description['--libdir'])
 #parser.add_argument('-l', '--lib', help="if the build operation results in a single library, this option sets its name")

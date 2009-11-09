@@ -127,6 +127,24 @@ def cmd_parse( args ):
 
         libPaths += user_librarypaths
 
+    # Additional dependencies
+    libNames = list()
+    user_libnames = list()
+    if args.additional_dependencies != None:
+        filename = args.additional_dependencies
+        if os.path.isdir( filename ):
+            userErrorExit("Cannot use a directory as additional dependencies '%s'"%filename )
+        elif not os.path.isfile( filename ):
+            userErrorExit("Cannot find option file for additional dependencies '%s'"%filename )
+        else:
+            file = open( filename, "r" )
+            for line in file.readlines():
+                line = line.strip()
+                user_libnames += line.split(";")
+            file.close()
+            user_libnames = filter(lambda x: x.strip(" ") != '',user_libnames)
+
+        libNames += user_libnames
 
     #
     # Determin if we're exporting components or modules, and do some related
@@ -202,7 +220,9 @@ def cmd_parse( args ):
                                                                        args.output,
                                                                        args.platform,
                                                                        proj['PROJNAME'],
-                                                                       args.configuration_type )
+                                                                       args.configuration_type,
+                                                                       libNames,
+                                                                       libPaths )
 
     #
     # Handle external project if specified
@@ -296,6 +316,11 @@ parser.add_argument('-al', '--additional-libdir', default=None,
  help="""Directory or path to a file with library paths to append to the additional library directories
  of the modified external-vcproj. The paths in the file can be separated by line
  or by semicolon.""")
+
+parser.add_argument('-ad', '--additional-dependencies', default=None,
+ help="""Path to a file with a list of libraries to add to the project's additional dependencies.
+Only applicable if the configuration type is 'exe'.
+The library names can be separated by line or semicolon.""")
 
 parser.add_argument('-pl', '--platform', default='Win32',
  help="""If specified, the resulting VS projects will use

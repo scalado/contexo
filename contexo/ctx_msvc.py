@@ -40,10 +40,14 @@ def relntpath(path, start):
 
 
 
+
 #codeModules = listof dictionaries: { MODNAME: string, SOURCES: list(paths), PRIVHDRS: list(paths), PUBHDRS: list(paths), PRIVHDRDIR: string, TESTSOURCES:list }
 def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib, 
                     debug, do_tests,  incPaths, vcprojPath, platform = 'Win32', 
-                    fileTitle = None, configType = 'lib'):
+                    fileTitle = None, configType = 'lib',
+                     additionalDependencies = None,
+                     additionalLibraryDirectories = None):
+
 
     import os.path
     vcprojFilePath = str()
@@ -124,7 +128,6 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib,
     #
 
     # TODO: parse flags and add correct attributes in compiler tool.
-
     if type(incPaths) != list:
         incPaths = split(";", incPaths)
 
@@ -145,8 +148,21 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib,
                                   'Optimization':'0',
                                    'DebugInformationFormat':debugInformationFormat})
 
-    project.element ('Tool', {'Name':'VCLibrarianTool',
+    if configType == 'lib':
+        project.element ('Tool', {'Name':'VCLibrarianTool',
                                    'OutputFile': '$(OutDir)/'+outLib})
+    elif configType == 'exe':
+        additionalDependencies = " ".join(additionalDependencies)
+        additionalLibraryDirectories = " ".join(additionalLibraryDirectories)
+        project.element ('Tool', {'Name':'VCLinkerTool',
+                                  'GenerateDebugInformation':'TRUE',
+                                  'TargetMachine':'1',
+                                  'AdditionalDependencies':additionalDependencies,
+                                  'AdditionalLibraryDirectories':additionalLibraryDirectories})
+        project.element ('Tool', {'Name':'VCManifestTool'})
+        project.element ('Tool', {'Name':'VCAppVerifierTool'})
+        project.element ('Tool', {'Name':'VCWebDeploymentTool'})        
+
 
     project.endElement ('Configuration')
     project.endElement ('Configurations')

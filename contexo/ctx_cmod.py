@@ -66,7 +66,7 @@ def isContexoCodeModule( path ):
         return False
 
     for d in criteriaDirs:
-        if not os.path.exists( os.path.join( path, d) ):
+        if not os.path.isdir( os.path.join( path, d) ):
             return False
 
     return True
@@ -115,7 +115,7 @@ class CTXRawCodeModule:
     # Initializes the object with all aspects of the code module. If the
     # moduleRoot argument can't be located as it is, the constructor assumes
     # that it specifies the pure name of the module and then tries to locate
-    # the path to it by querying the system configuration.
+    # the path to it by querying the system configuration. - NOT TRUE
     #
     # The constructor aborts execution with an error if the path doesn't
     # qualify as a code module when passing it to isContexoCodeModule().
@@ -194,6 +194,7 @@ class CTXRawCodeModule:
     def getPrivHeaderAbsolutePaths(self):
         import functools
         return map ( functools.partial( os.path.join,  self.getPrivHeaderDir() ),  self.getPrivHeaderFilenames() )
+
     #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     def getPubHeaderFilenames(self):
         # update if list is empty.

@@ -422,7 +422,7 @@ class CTXCompiler:
             commandline = self.makeStaticLibraryCommandline( objectFiles, libraryTitle, outputDir )
             ret = executeCommandline( commandline )
             if ret != 0:
-                userErrorExit("\nFailed to create static library '%s'\nar return code: %d"%(libPath, ret))
+                userErrorExit("\nFailed to create static library '%s'\nar command line:\n%s\nar return code: %d"%(libPath, commandline,  ret))
         else:
             userErrorExit("Unsupported value '%s' for CDEF option 'ARCOM_METHOD'"%( self.cdef['ARCOM_METHOD'] ))
 

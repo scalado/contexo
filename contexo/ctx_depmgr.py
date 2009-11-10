@@ -457,7 +457,7 @@ class CTXDepMgr: # The dependency manager class.
         #
         # Try to load dependency dictionary from disk.
         #
-        #self.dependencies = self.loadDependencies()
+        self.dependencies = self.loadDependencies()
         self.processed = set()
 
         #

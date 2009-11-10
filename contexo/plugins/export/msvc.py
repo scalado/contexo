@@ -85,46 +85,33 @@ def cmd_parse( args ):
                 modTags.append( 'COMPILING_MOD_' + string.upper( rawMod.getName() ) )
 
     #
-    # Collect additional include paths
+    # Collect additional include paths and additional library paths
     #
 
-    user_includepaths = list()
+    def getPathsFromOption(option):
+        user_paths = list()
+        if os.path.isdir( option ):
+            user_paths.append(option)
+        elif not os.path.isfile( option ):
+            userErrorExit("Cannot find option file or directory'%s'"%option)
+        else:
+            file = open( option, "r" )
+            for line in file.readlines():
+                line = line.strip()
+                user_paths += line.split(";")
+            file.close()
+            user_paths = filter(lambda x: x.strip(" ") != '',user_paths)
+        return user_paths
+
     if args.additional_includes != None:
         filename = args.additional_includes
-        if os.path.isdir( filename ):
-            user_includepaths.append(filename)
-        elif not os.path.isfile( filename ):
-            userErrorExit("Cannot find option file or directory '%s'"%filename)
-        else:
-            file = open( filename, "r" )
-            for line in file.readlines():
-                line = line.strip()
-                user_includepaths += line.split(";")
-            file.close()
-            user_includepaths = filter(lambda x: x.strip(" ") != '',user_includepaths)
-            
+        user_includepaths = getPathsFromOption(filename)
         incPaths += user_includepaths
 
-    #
-    # Collect additional library paths
-    #
-
     libPaths = list()
-    user_librarypaths = list()
     if args.additional_libdir != None:
         filename = args.additional_libdir
-        if os.path.isdir( filename ):
-            user_librarypaths.append(filename)
-        elif not os.path.isfile( filename ):
-            userErrorExit("Cannot find option file or directory '%s'"%filename)
-        else:
-            file = open( filename, "r" )
-            for line in file.readlines():
-                line = line.strip()
-                user_librarypaths += line.split(";")
-            file.close()
-            user_librarypaths = filter(lambda x: x.strip(" ") != '',user_librarypaths)
-
+        user_librarypaths = getPathsFromOption(filename)
         libPaths += user_librarypaths
 
     # Additional dependencies
@@ -132,17 +119,7 @@ def cmd_parse( args ):
     user_libnames = list()
     if args.additional_dependencies != None:
         filename = args.additional_dependencies
-        if os.path.isdir( filename ):
-            userErrorExit("Cannot use a directory as additional dependencies '%s'"%filename )
-        elif not os.path.isfile( filename ):
-            userErrorExit("Cannot find option file for additional dependencies '%s'"%filename )
-        else:
-            file = open( filename, "r" )
-            for line in file.readlines():
-                line = line.strip()
-                user_libnames += line.split(";")
-            file.close()
-            user_libnames = filter(lambda x: x.strip(" ") != '',user_libnames)
+        user_libnames = getPathsFromOption(filename)
 
         libNames += user_libnames
 
@@ -243,7 +220,7 @@ def cmd_parse( args ):
                                 "TOOL":"VCLinkerTool",
                                  "KEY":"AdditionalLibraryDirectories",
                                "VALUE":";".join(libPaths) }))
-        
+
         contexo.ctx_msvc.update_vcproj8(external_vcproj['FILENAME'],attrs)
 
     #

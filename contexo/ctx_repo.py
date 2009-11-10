@@ -129,7 +129,7 @@ class CTXRepository:
 
         if self.access_policy == AP_PREFER_REMOTE_ACCESS and self.isVersionControlled() == False:
             for path in self.relative_paths[path_section]:
-                full_paths.add( os.path.join(self.getHref(), path)  )
+                full_paths.add( os.path.join( os.path.abspath( self.getHref() ), path)  )
 
         elif self.access_policy == AP_NO_REMOTE_ACCESS or self.isVersionControlled() == True:
             for path in self.relative_paths[path_section]:

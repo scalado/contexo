@@ -362,7 +362,8 @@ def cmd_buildcomp(args):
                                   "N/A" )
 
     # Process components
-    for comp in create_components( components, cview.getItemPaths('comp') ):
+    components = create_components( components, cview.getItemPaths('comp') )
+    for comp in components:
         ctx_log.ctxlogBeginComponent( comp.name )
 
         outputPath = args.output

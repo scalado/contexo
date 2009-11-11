@@ -114,7 +114,7 @@ class CTXRepository:
             warningMessage("The absolute path %s will be treated as relative to the repository copy"%(path))
         path = path.lstrip('\\/ ')
 
-        self.relative_paths[path_section].append( path )
+        self.relative_paths[path_section].append( os.path.normpath(path) )
         infoMessage("Path '%s' added to section '%s' in repository '%s'"%(path, path_section, self.getID()), 2)
 
     #--------------------------------------------------------------------------
@@ -129,11 +129,11 @@ class CTXRepository:
 
         if self.access_policy == AP_PREFER_REMOTE_ACCESS and self.isVersionControlled() == False:
             for path in self.relative_paths[path_section]:
-                full_paths.add( os.path.join( os.path.abspath( self.getHref() ), path)  )
+                full_paths.add( os.path.normpath( os.path.join( os.path.abspath( self.getHref() ), path) ) )
 
         elif self.access_policy == AP_NO_REMOTE_ACCESS or self.isVersionControlled() == True:
             for path in self.relative_paths[path_section]:
-                full_paths.add( os.path.join(self.getAbsLocalPath(), path)   )
+                full_paths.add( os.path.normpath( os.path.join( self.getAbsLocalPath() , path   ) ) )
         else:
             ctxAssert( False, "Unhandled access policy" )
 

@@ -129,7 +129,8 @@ class CTXRawCodeModule:
         self.privHeaders    = list()
         self.msgSender      = 'CTXRawCodeModule'
         self.buildUnitTests = buildUnitTests
-        assert(os.path.isabs(moduleRoot))
+        assert( os.path.isabs(moduleRoot) )
+        moduleRoot = os.path.normpath(moduleRoot)
         if not os.path.exists(moduleRoot):
             self.modRoot = resolveModuleLocation( moduleRoot, pathlist )
         else:

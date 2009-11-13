@@ -44,14 +44,15 @@ logging.basicConfig(format = '%(asctime)s %(levelname)-8s %(message)s',
                                 level = logging.DEBUG);
 #logger = logging.getLogegr()
 #logger.
-logging.debug('Starting...')
+#logging.debug('Starting...')
 
 
 #
 # Get configuration.
 #
-cfgFile = ctx_cfg.CFGFile( os.path.join(ctx_common.getUserCfgDir(),
-                                        ctx_sysinfo.CTX_CONFIG_FILENAME))
+contexo_config_path = os.path.join( ctx_common.getUserCfgDir(), ctx_sysinfo.CTX_CONFIG_FILENAME )
+infoMessage("Using config file '%s'"%contexo_config_path,  1)
+cfgFile = ctx_cfg.CFGFile( contexo_config_path )
 
 #legacy code: to be rewritten
 setInfoMessageVerboseLevel( int(cfgFile.getVerboseLevel()) )

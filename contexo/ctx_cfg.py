@@ -39,8 +39,9 @@ class CFGFile:
 
         #Copy default config into the user's directory if needed
         if not os.path.exists(cfgFilePath):
-
+            import ctx_common
             defconfig = os.path.join( os.path.dirname(__file__), os.path.normpath('defaults/contexo.cfg')  )
+            ctx_common.infoMessage("Copying config from '%s' to '%s'"%(defconfig,  cfgFilePath),  1)
             try:
                 shutil.copy( defconfig,  cfgFilePath )
             except IOError, (errno, strerror):

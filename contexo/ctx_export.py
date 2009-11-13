@@ -16,9 +16,9 @@ import os
 
 export_header = "$EXPORT_PACKAGE$"
 
-CONTEXO_CFG_FILE    = 'contexo.cfg'
-cfgFile = ctx_cfg.CFGFile (os.path.join( getUserCfgDir(), CONTEXO_CFG_FILE ))
-setInfoMessageVerboseLevel( int(cfgFile.getVerboseLevel()) )
+#CONTEXO_CFG_FILE    = 'contexo.cfg'
+#cfgFile = ctx_cfg.CFGFile (os.path.join( getUserCfgDir(), CONTEXO_CFG_FILE ))
+#setInfoMessageVerboseLevel( int(cfgFile.getVerboseLevel()) )
 
 #------------------------------------------------------------------------------
 class CTXExportData:

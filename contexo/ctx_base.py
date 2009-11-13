@@ -192,6 +192,8 @@ class CTXCompiler:
                     toolPath += tool_ext
                     if not os.path.isfile( toolPath ):
                         toolPath = None
+                    else:
+                        break
             else:
                 toolPath = None
 
@@ -199,8 +201,10 @@ class CTXCompiler:
 
         if toolPath == None:
             warningMessage("Unresolved tool: '%s'"%(cdefItem))
+            print 'searched:'
+            print cands
         else:
-            infoMessage("Tool defined by '%s' resolved at '%s'"%(cdefItem, toolPath), 3)
+            infoMessage("Tool defined by '%s' resolved at '%s'"%(cdefItem, toolPath), 2)
 
     #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     def prepareCommandFile( self, commandline ):

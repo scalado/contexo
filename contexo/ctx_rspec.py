@@ -177,7 +177,7 @@ class RSpecFileLocator:
         if self.rcs == None:
 
             infoMessage("No RCS specified for RSpec '%s', attempting regular file access"\
-                         %(self.getHref()), 2)
+                         %(self.getHref()), 4)
 
             if not os.path.exists(self.href):
                 userErrorExit("RSpec unreachable with regular file access: \n  %s"%(self.href))
@@ -210,7 +210,7 @@ class RSpecFileLocator:
 
             
         infoMessage("RSpec local access path resolved to: %s"\
-                     %(local_access_path), 2)
+                     %(local_access_path), 4)
 
         return local_access_path
         

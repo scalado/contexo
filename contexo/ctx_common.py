@@ -99,6 +99,9 @@ cachedConfigDict = None
 #
 #------------------------------------------------------------------------------
 def getUserDir():
+    import os
+    if 'CONTEXO_HOME_DIR' in os.environ:
+        return os.environ['CONTEXO_HOME_DIR']
     userDir = os.path.expanduser( '~' )
     if userDir == '~' or not os.path.exists ( userDir ):
         def valid(path) :
@@ -130,6 +133,9 @@ def getUserTempDir():
 
 #------------------------------------------------------------------------------
 def getUserCfgDir():
+    import os
+    if 'CONTEXO_CONFIG_DIR' in os.environ:
+        return os.environ['CONTEXO_CONFIG_DIR']
     userDir = getUserDir()
     cfgDir = os.path.join ( userDir, ".contexo" )
 

@@ -7,11 +7,18 @@ import os
 import contexo.ctx_bc
 import contexo.ctx_cmod
 import contexo.ctx_msvc
+import contexo.ctx_cfg as ctx_cfg
+import contexo.ctx_common as ctx_common
+import contexo.ctx_sysinfo as ctx_sysinfo
 
 msgSender = 'MSVC Export'
 
 default_projname = "MSVC_EXPORT"
 
+contexo_config_path = os.path.join( ctx_common.getUserCfgDir(), ctx_sysinfo.CTX_CONFIG_FILENAME )
+infoMessage("Using config file '%s'"%contexo_config_path,  1)
+cfgFile = ctx_cfg.CFGFile( contexo_config_path)
+ctx_common.setInfoMessageVerboseLevel( int(cfgFile.getVerboseLevel()) )
 
 #------------------------------------------------------------------------------
 def create_module_mapping_from_module_list( ctx_module_list ):

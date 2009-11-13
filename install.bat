@@ -1,2 +1,2 @@
-setup.py install
+setup.py -q install
 

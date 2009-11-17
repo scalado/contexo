@@ -42,8 +42,8 @@ def relntpath(path, start):
 
 
 #codeModules = listof dictionaries: { MODNAME: string, SOURCES: list(paths), PRIVHDRS: list(paths), PUBHDRS: list(paths), PRIVHDRDIR: string, TESTSOURCES:list }
-def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib, 
-                    debug, do_tests,  incPaths, vcprojPath, platform = 'Win32', 
+def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib,
+                    debug, do_tests,  incPaths, vcprojPath, platform = 'Win32',
                     fileTitle = None, configType = 'lib',
                      additionalDependencies = None,
                      additionalLibraryDirectories = None):
@@ -144,48 +144,44 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib,
                                    'DebugInformationFormat':debugInformationFormat}
 
     # Parse flags and add correct attributes in compiler tool.
-    mycflags = cflags[:]
-    
+    mycflags = cflags
     if type(mycflags) != list:
             mycflags = mycflags.split(' ')
 
-    for opts in mycflags[:]:
-        x = 0
-        if opts == '/Zi':
-            compilerTool['DebugInformationFormat'] = '3'
-        elif opts == '/ZI':
-            compilerTool['DebugInformationFormat'] = '4'
-        elif opts == '/W4':
-            compilerTool['WarningLevel'] = '4'
-        elif opts == '/W3':
-            compilerTool['WarningLevel'] = '3'
-        elif opts == '/W2':
-            compilerTool['WarningLevel'] = '2'
-        elif opts == '/W1':
-            compilerTool['WarningLevel'] = '1'
-        elif opts == '/W0':
-            compilerTool['WarningLevel'] = '0'
-        elif opts == '/Od':
-            compilerTool['Optimization'] = '0'
-        elif opts == '/O1':
-            compilerTool['Optimization'] = '1'
-        elif opts == '/O2':
-            compilerTool['Optimization'] = '2'
-        else:
-            x = 1
-        
-        if x == 0:
-            mycflags.remove( opts )
+
+
+    vcproj_opts_map = {
+                    '/Zi':('DebugInformationFormat', '3'),
+                    '/ZI':('DebugInformationFormat', '4'),
+                    '/W4':('WarningLevel', '4'),
+                    '/W3':('WarningLevel', '3'),
+                    '/W2':('WarningLevel', '2'),
+                    '/W1':('WarningLevel', '1'),
+                    '/W0':('WarningLevel', '0'),
+                    '/Od':('Optimization', '0'),
+                    '/O1':('Optimization', '1'),
+                    '/O2':('Optimization', '2')}
+
+    # digest, analyse and remove options
+    for opt in mycflags:
+        try:
+            (optionname,  numvalue) = vcproj_opts_map[opt]
+            compilerTool[ optionname ] = numvalue
+            mycflags.remove(opt)
+            print 'Digested %s'%opt
+        except KeyError:
+            print 'Passing %s'%opt
+            pass
 
     # Write the rest of the options as AdditionalOptions
     mycflags = " ".join(mycflags)
     compilerTool['AdditionalOptions'] = mycflags;
-    
+
     # Write compilerTool to project
     project.element ('Tool',  compilerTool)
 
     #
-    # Linker
+    # Archiver
     #
 
     if configType == 'lib':
@@ -201,7 +197,7 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib,
                                   'AdditionalLibraryDirectories':additionalLibraryDirectories})
         project.element ('Tool', {'Name':'VCManifestTool'})
         project.element ('Tool', {'Name':'VCAppVerifierTool'})
-        project.element ('Tool', {'Name':'VCWebDeploymentTool'})        
+        project.element ('Tool', {'Name':'VCWebDeploymentTool'})
 
 
     project.endElement ('Configuration')

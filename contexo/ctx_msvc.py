@@ -127,7 +127,6 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib,
     # Compiler
     #
 
-    # TODO: parse flags and add correct attributes in compiler tool.
     if type(incPaths) != list:
         incPaths = split(";", incPaths)
 
@@ -135,18 +134,59 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib,
 
     incPaths = ";".join(incPaths)
 
-    # Add private include directories for modules in lib
-    #incPaths += ";" + ";".join(map(lambda m: m['PRIVHDRDIR'],codeModules))
-
-    project.element ('Tool', {'Name':'VCCLCompilerTool',
+    compilerTool = {'Name':'VCCLCompilerTool',
                                   'PreprocessorDefinitions': prepDefs,
                                    'ObjectFile':"".join(['.\\',variant,"\\",projectName,'/']),
                                    'ProgramDataBaseFileName':"".join(['.\\',variant,"\\",projectName,'/']),
                                   'SuppressStartupBanner':'TRUE',
-                                  'AdditionalOptions': cflags ,
                                   'AdditionalIncludeDirectories':incPaths,
                                   'Optimization':'0',
-                                   'DebugInformationFormat':debugInformationFormat})
+                                   'DebugInformationFormat':debugInformationFormat}
+
+    # Parse flags and add correct attributes in compiler tool.
+    mycflags = cflags[:]
+    
+    if type(mycflags) != list:
+            mycflags = mycflags.split(' ')
+
+    for opts in mycflags[:]:
+        x = 0
+        if opts == '/Zi':
+            compilerTool['DebugInformationFormat'] = '3'
+        elif opts == '/ZI':
+            compilerTool['DebugInformationFormat'] = '4'
+        elif opts == '/W4':
+            compilerTool['WarningLevel'] = '4'
+        elif opts == '/W3':
+            compilerTool['WarningLevel'] = '3'
+        elif opts == '/W2':
+            compilerTool['WarningLevel'] = '2'
+        elif opts == '/W1':
+            compilerTool['WarningLevel'] = '1'
+        elif opts == '/W0':
+            compilerTool['WarningLevel'] = '0'
+        elif opts == '/Od':
+            compilerTool['Optimization'] = '0'
+        elif opts == '/O1':
+            compilerTool['Optimization'] = '1'
+        elif opts == '/O2':
+            compilerTool['Optimization'] = '2'
+        else:
+            x = 1
+        
+        if x == 0:
+            mycflags.remove( opts )
+
+    # Write the rest of the options as AdditionalOptions
+    mycflags = " ".join(mycflags)
+    compilerTool['AdditionalOptions'] = mycflags;
+    
+    # Write compilerTool to project
+    project.element ('Tool',  compilerTool)
+
+    #
+    # Linker
+    #
 
     if configType == 'lib':
         project.element ('Tool', {'Name':'VCLibrarianTool',

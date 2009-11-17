@@ -37,6 +37,10 @@ class CTXBuildParams:
 
         # \member { incPaths }
         self.incPaths        = list()
+
+        self.ldDirs = list()
+        self.ldLibs = list()
+        self.ldFlags = str()
         #
 
     #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -44,6 +48,9 @@ class CTXBuildParams:
         self.prepDefines.extend(  addParams.prepDefines )
         self.cflags = "%s %s"%(self.cflags, addParams.cflags)
         self.incPaths.extend(     addParams.incPaths )
+        self.ldDirs.extend(addParams.ldDirs)
+        self.ldLibs.extend(addParams.ldLibs)
+        self.ldFlags = "%s %s"%(self.ldFlags,  addParams.ldFlags)
 
     #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     def makeChecksum( self ):
@@ -55,6 +62,13 @@ class CTXBuildParams:
         for item in self.incPaths:
             md.update( str(item) )
 
+        for item in self.ldDirs:
+            md.update( str(item) )
+
+        for item in self.ldLibs:
+            md.update( str(item) )
+
+        md.update( self.ldFlags )
         md.update( self.cflags )
 
         return md.hexdigest()
@@ -108,7 +122,7 @@ class CTXCompiler:
 
         self.cdef = cdef_config.get_section( 'setup' )
 
-        cdefKeys = "CCCOM CXXCOM AR ARCOM ARCOM_METHOD CC CXX ECHO_SOURCES CFILESUFFIX CXXFILESUFFIX OBJSUFFIX CPPDEFPREFIX CPPDEFSUFFIX INCPREFIX INCSUFFIX LIBPREFIX LIBSUFFIX RANLIB".split()
+        cdefKeys = "LDCOM LD LDDIR LDLIB LDDIRPREFIX LDDIRSUFFIX LDLIBPREFIX CCCOM CXXCOM AR ARCOM ARCOM_METHOD CC CXX ECHO_SOURCES CFILESUFFIX CXXFILESUFFIX OBJSUFFIX CPPDEFPREFIX CPPDEFSUFFIX INCPREFIX INCSUFFIX LIBPREFIX LIBSUFFIX RANLIB".split()
         for key in cdefKeys:
             if self.cdef.has_key(key) and type(self.cdef[key]) is str:
                 # strip quotation. Note that we only strip the outer quotations.
@@ -525,58 +539,109 @@ class CTXBuildSession:
         oldChecksum = f.write(checksum)
         f.close()
 
-    #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-    def buildStaticObjects( self, srcFiles, outputDir, buildParams, forceRebuild ):
-        objectFileList = list()
-        objFileTitle = None
+    def linkExecutable(self,  libs,  outputDir,  session,  exeFilename):
+        #libs
+        lddirs_cmdline = str()
+        buildParams = self.buildParams
+        buildParams.ldDirs
 
-        srcFiles = assureList( srcFiles )
+        for ldpath in buildParams.ldDirs:
+            ldpath_dec = " %s%s%s"%( self.compiler.cdef['LDDIRSPREFIX'], ldpath, self.compiler.cdef['LDDIRSUFFIX'] )
+            lddirs_cmdline += ldpath_dec
 
-        joinedBuildParams = CTXBuildParams()
-        joinedBuildParams.add( self.buildParams )
-        if buildParams != None:
-            joinedBuildParams.add( buildParams )
+        ldlibs_cmdline = str()
+        for lib in buildParams.ldLibs:
+            ldpath_dec = " %s%s"%( self.compiler.cdef['LDLIBPREFIX'], lib )
+            ldlibs_cmdline += ldpath_dec
 
-        #
-        # Build
-        #
+        exefile_cmdline = os.path.join( outputDir, exeFilename )
 
-        buildParamsChecksum = joinedBuildParams.makeChecksum()
+        objfiles_cmdline = str()
+        for libName in libs.keys():
+            libFile = "%s%s%s"%( self.compiler.cdef['LIBPREFIX'], libName, self.compiler.cdef['LIBSUFFIX'] )
+            libPath = os.path.join( outputDir, libFile )
+            objfiles_cmdline += " %s"%libPath
 
-        for srcFile in srcFiles:
-            needRebuild     = True
+        # Expand all commandline mask variables to the corresponding items we prepared.
+        cmdline = self.compiler.cdef['LDCOM']
+        # Require all mandatory variables in commandline mask
 
-            objChecksum     = self.makeStaticObjectChecksum( srcFile, buildParamsChecksum )
-            objectFilename  = self.compiler.makeObjFileName( srcFile, objFileTitle )
+        for var in ['%LD', '%SOURCES']:
+            if cmdline.find( var ) == -1:
+                userErrorExit("'%s' variable not found in commandline mask"%( var ))
+#TODO: replace is pritive. It will blindly replace each n first occurances
+        cmdline = cmdline.replace( '%LD'          ,   self.compiler.cdef['LD']  , 1   )
+        #cmdline = cmdline.replace( '%CXX'         ,   self.cdef['CXX']    )
+        cmdline = cmdline.replace( '%LDDIRS'    ,   lddirs_cmdline    )
+        cmdline = cmdline.replace( '%LDLIBS'    ,     ldlibs_cmdline  )
+        cmdline = cmdline.replace( '%SOURCES'     ,   objfiles_cmdline     )
+       # cmdline = cmdline.replace( '%TARGETDIR'   ,   outputDir           )
+       # cmdline = cmdline.replace( '%TARGETFILE'  ,   objFilename         )
+        cmdline = cmdline.replace( '%TARGET'      ,   exefile_cmdline     )
 
-            #
-            # If rebuild detection is to be used, read the old object file checksum
-            # and see if anything has changed.
-            #
-            if forceRebuild == False:
-                objectFilePath  = os.path.join( outputDir, objectFilename )
-                oldChecksum     = self.readStaticObjectChecksum( objectFilePath )
-                if oldChecksum == objChecksum:
-                    needRebuild = False
-                    infoMessage("Reusing '%s'"%(objectFilename), 3)
-                else:
-                    infoMessage("Object '%s' invalidated by checksum.\nNew: %s\nOld: %s"\
-                                    %(objectFilename, objChecksum, oldChecksum), 4)
+        tool = 'LD' #'CXX' if cplusplus else 'CC'
+        print 'from ' + os.getcwd() + ' executing: ' + cmdline
+        ret = executeCommandline( cmdline )
+        if ret != 0:
+            userErrorExit("\nFailed to create static object '%s'\nCompiler return code: %d"%(objFileName, ret))
 
-                #
-                # Rebuild if needed, and write the fresh checksum regardless.
-                #
-            if needRebuild:
-                obj = self.compiler.staticObject( srcFile, joinedBuildParams, outputDir, objFileTitle )
-                objectFileList.append( obj )
-                self.writeStaticObjectChecksum( os.path.join(obj.filepath,obj.filename), objChecksum )
-            else:
-                # Even if wee haven't built the source file we need to produce
-                # a CTXStaticObject item to return.
-                obj = self.compiler.wrapStaticObject( srcFile, objectFilename, outputDir, buildParams, "n/a" )
-                objectFileList.append( obj )
+        #self.validateTool( 'LD' )
 
-        return objectFileList
+        pass
+
+
+#    #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+#    def buildStaticObjects( self, srcFiles, outputDir, buildParams, forceRebuild ):
+#        objectFileList = list()
+#        objFileTitle = None
+#
+#        srcFiles = assureList( srcFiles )
+#
+#        joinedBuildParams = CTXBuildParams()
+#        joinedBuildParams.add( self.buildParams )
+#        if buildParams != None:
+#            joinedBuildParams.add( buildParams )
+#
+#        #
+#        # Build
+#        #
+#
+#        buildParamsChecksum = joinedBuildParams.makeChecksum()
+#
+#        for srcFile in srcFiles:
+#            needRebuild     = True
+#
+#            objChecksum     = self.makeStaticObjectChecksum( srcFile, buildParamsChecksum )
+#            objectFilename  = self.compiler.makeObjFileName( srcFile, objFileTitle )
+#
+#            #
+#            # If rebuild detectiobuildStaticObjectsn is to be used, read the old object file checksum
+#            # and see if anything has changed.
+#            #
+#            if forceRebuild == False:
+#                objectFilePath  = os.path.join( outputDir, objectFilename )
+#                oldChecksum     = self.readStaticObjectChecksum( objectFilePath )
+#                if oldChecksum == objChecksum:
+#                    needRebuild = False
+#                    infoMessage("Reusing '%s'"%(objectFilename), 3)
+#                else:
+#                    infoMessage("Object '%s' invalidated by checksum.\nNew: %s\nOld: %s"\
+#                                    %(objectFilename, objChecksum, oldChecksum), 4)
+#
+#                #
+#                # Rebuild if needed, and write the fresh checksum regardless.
+#                #
+#            if needRebuild:
+#                obj = self.compiler.staticObject( srcFile, joinedBuildParams, outputDir, objFileTitle )
+#                objectFileList.append( obj )
+#                self.writeStaticObjectChecksum( os.path.join(obj.filepath,obj.filename), objChecksum )
+#            else:
+#                # Even if wee haven't built the source file we need to produce
+#                # a CTXStaticObject item to return.
+#                obj = self.compiler.wrapStaticObject( srcFile, objectFilename, outputDir, buildParams, "n/a" )
+#                objectFileList.append( obj )
+#
+#        return objectFileList
 
     #
     # Builds a source file and returns a CTXStaticObject.

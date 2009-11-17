@@ -815,7 +815,7 @@ class CTXDepMgr: # The dependency manager class.
         if self.inputFilePathDict.has_key(filename):
             return self.inputFilePathDict[filename]
         else:
-            None
+            return None
 
     #
     # This function empty the code module set.

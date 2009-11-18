@@ -539,8 +539,8 @@ class CTXBuildSession:
         oldChecksum = f.write(checksum)
         f.close()
 
-    def linkExecutable(self,  libs,  outputDir,  session,  exeFilename):
-        #libs
+    def linkExecutable(self,  objects,  outputDir,  session,  exeFilename):
+        #objects
         lddirs_cmdline = str()
         buildParams = self.buildParams
         buildParams.ldDirs
@@ -557,10 +557,11 @@ class CTXBuildSession:
         exefile_cmdline = os.path.join( outputDir, exeFilename )
 
         objfiles_cmdline = str()
-        for libName in libs.keys():
-            libFile = "%s%s%s"%( self.compiler.cdef['LIBPREFIX'], libName, self.compiler.cdef['LIBSUFFIX'] )
-            libPath = os.path.join( outputDir, libFile )
-            objfiles_cmdline += " %s"%libPath
+        for object in objects:
+            #libFile = "%s%s%s"%( self.compiler.cdef['LIBPREFIX'], object, self.compiler.cdef['LIBSUFFIX'] )
+            #libPath = os.path.join( outputDir, libFile )
+            #objfiles_cmdline += " %s"%libPath
+            objfiles_cmdline += " %s"%( os.path.join( object.filepath,  object.filename ) )
 
         # Expand all commandline mask variables to the corresponding items we prepared.
         cmdline = self.compiler.cdef['LDCOM']

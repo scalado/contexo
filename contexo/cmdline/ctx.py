@@ -166,6 +166,7 @@ def build_libraries( ctx_modules, lib_name, output_path, build_dir, session ):
         for mod in ctx_modules:
             libs[mod.getName()] = [mod,]
 
+    all_objects = list()
     for lib, mods in libs.iteritems():
         ctx_log.ctxlogBeginLibrary( lib )
 
@@ -178,8 +179,10 @@ def build_libraries( ctx_modules, lib_name, output_path, build_dir, session ):
         else:
             warningMessage("No object files to create library '%s'"%(lib))
 
+        all_objects+= obj_list
+
         ctx_log.ctxlogEndLibrary()
-    return libs
+    return all_objects
 
 #------------------------------------------------------------------------------
 def export_public_module_headers ( depmgr, modules, headerPath ):
@@ -227,9 +230,9 @@ def buildmodules( depmgr, session, modules, args, output_path, build_dir,  execu
     ctx_modules = depmgr.createCodeModules( modules, args.tests, force=args.force )
     ctx_modules.extend ( depmgr.createCodeModules( dep_modules, force=args.force ) )
 
-    libs = build_libraries( ctx_modules, libraryName, output_path, build_dir, session )
+    objs = build_libraries( ctx_modules, libraryName, output_path, build_dir, session )
     if executableName:
-        session.linkExecutable(libs,  output_path, session,  executableName)
+        session.linkExecutable(objs,  output_path, session,  executableName)
 
 #------------------------------------------------------------------------------
 def cmd_info(args):

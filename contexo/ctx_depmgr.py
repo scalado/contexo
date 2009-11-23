@@ -574,7 +574,6 @@ class CTXDepMgr: # The dependency manager class.
                     self.__updateDependencies ( [incFile], pathList  )
                     ctxAssert ( incFile in self.dependencies, "incFile= " + incFile )
                 if incFile not in processedFiles:
-                    import functools
                     depIncludes = set ( self.dependencies[incFile][0] )
                     fullpathIncludes = [ s for s in map( self.locate,  depIncludes) if s != None ]
                     processedFiles.add ( incFile )
@@ -600,19 +599,19 @@ class CTXDepMgr: # The dependency manager class.
         #get the includes that 'filenames' depend on i.e. ( the includes files in the filenames list include )
         depIncludes = self.__getDependentIncludes ( filenames, pathList )
 
-        includePaths = set ()
-        for f in depIncludes:
-            if f not in self.inputFilePathDict:
-                incPath = updatePath ( f, self.inputFilePathDict, pathList )
-            elif not os.path.exists (self.inputFilePathDict[f]):
-                incPath = updatePath ( f, self.inputFilePathDict, pathList )
-            else:
-                incPath = self.inputFilePathDict[f]
+#        includePaths = set ()
+#        for f in depIncludes:
+#            if f not in self.inputFilePathDict:
+#                incPath = updatePath ( f, self.inputFilePathDict, pathList )
+#            elif not os.path.exists (self.inputFilePathDict[f]):
+#                incPath = updatePath ( f, self.inputFilePathDict, pathList )
+#            else:
+#                incPath = self.inputFilePathDict[f]
 
 
-            includePaths.add ( os.path.dirname (incPath) )
+            #includePaths.add ( os.path.dirname (incPath) )
 
-        return list ( includePaths )
+        return list ( map(os.path.dirname,  depIncludes) )
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     def getModuleIncludePaths( self, moduleName ):
@@ -650,13 +649,13 @@ class CTXDepMgr: # The dependency manager class.
 
         includeFiles = self.__getDependentIncludes ( [sourceFile], list(self.depPaths))
 
-        deps = list()
-        for f in includeFiles:
-            if not self.inputFilePathDict.has_key(f):
-                deps.append( updatePath( f, self.inputFilePathDict, self.depPaths ) )
-            deps.append(self.inputFilePathDict[f])
+        #deps = list()
+        #for f in includeFiles:
+        #    if not self.inputFilePathDict.has_key(f):
+        #        deps.append( updatePath( f, self.inputFilePathDict, self.depPaths ) )
+        #    deps.append(self.inputFilePathDict[f])
 
-        return deps
+        return includeFiles
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     def getDependenciesChecksum( self, inputFile ):
@@ -768,8 +767,9 @@ class CTXDepMgr: # The dependency manager class.
                 pubHeaders = self.cmods[ module_name ].getPubHeaderAbsolutePaths()
 
                 for header in pubHeaders:
-                    if full_path:
+                    if full_path and not os.path.isabs(header):
                         header_set.add(self.inputFilePathDict [ header ])
+                        assert(False)
                     else:
                         header_set.add ( header )
 

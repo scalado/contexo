@@ -213,7 +213,8 @@ def export_headers( depmgr, headers, headerDir ):
         if src != None:
             dst = os.path.join( headerDir, header )
             infoMessage("%s -> %s"%(src, dst), 2)
-            shutil.copyfile( src, dst )
+            if not os.path.abspath(dst) == os.path.abspath(src):
+                shutil.copyfile( src, dst )
         else:
             warningMessage("Unable to locate header '%s' for export"%(header))
 

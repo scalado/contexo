@@ -314,7 +314,7 @@ class CTXCodeModule( CTXRawCodeModule ):
 
         return include_paths
 
-    #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+    #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: unused
     def addBuildParams( self, buildParams ):
         self.buildParams.add( buildParams )
 

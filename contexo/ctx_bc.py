@@ -51,10 +51,10 @@ class BCFile:
         cdefPaths = assureList( cdefPaths )
 
         self.__resolveBCFileLocation( bcFilename, cfgFile, bcFilePaths )
-        self.__process_bc( self.path, cfgFile, cdefPaths )
+        self.__process_bc( self.path, cfgFile, cdefPaths ) #TODO: __process_bc needs to be run before __updateBuildParams
         self.__updateBuildParams()
         self.compiler = CTXCompiler( os.path.join( self.cdefPath, self.cdef ) )
-        
+
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     #   Resolves the location of the BC file by searching in the paths given
     #   by the system config variable CONTEXO_BC_PATHS.
@@ -74,14 +74,14 @@ class BCFile:
         # Try at each of the candidate locations provided to the constructor, then
         # try at calling location and last in config variable.
         #
-        
+
         bcFilePaths.append( os.getcwd() )
 
         configBCPaths = cfgFile.getBConfPaths()
         if type(configBCPaths) != list:
             configBCPaths = [configBCPaths,]
         bcFilePaths.extend( configBCPaths )
-        
+
         for pathCandidate in bcFilePaths:
             candidate = os.path.join( pathCandidate, bcFilename )
             infoMessage("Trying BC: %s"%(candidate), 2)
@@ -95,7 +95,7 @@ class BCFile:
         #
         # If we reach this point we have tried everything we can and failed.
         #
-        
+
         if not os.path.exists(self.path):
             userErrorExit("BC file '%s' not found."%(bcFilename))
 
@@ -223,17 +223,17 @@ class BCFile:
 
         if len(cfgFile.getCDefPaths()) != 0:
             cdefPaths.extend( configCDefPaths )
-             
+
         if section.has_key( 'CDEF_PATH' ):
             warningMessage("BC/BConf section 'CDEF_PATH' is deprecated and may produce unexpected results when working with views and RSpecs")
             cdefPaths.append( section['CDEF_PATH'] )
-            
+
         tried_cdefs = list()
         for pathCandidate in cdefPaths:
             candidate = os.path.join( pathCandidate, self.cdef )
             infoMessage("Trying CDEF: %s"%(candidate), 2)
             if os.path.exists( candidate ):
-                self.cdefPath = pathCandidate                
+                self.cdefPath = pathCandidate
                 infoMessage("Using CDEF: %s"%( candidate ), 1)
                 break
             else:

@@ -1,6 +1,6 @@
 [meta]
 TITLE              = GCC (standard)
-DESCRIPTION        = Standard GCC compiler definition using gcc, g++, ar and ranlib. 
+DESCRIPTION        = Standard GCC compiler definition using gcc, g++, ar and ranlib.
 
 [setup]
 CCCOM              = "%CC %CFLAGS %CPPDEFINES %INCPATHS -c %SOURCES -o %TARGET"
@@ -24,5 +24,5 @@ LD                 = "gcc"
 LDDIRSUFFIX        = '"'
 LDDIRSPREFIX       = '-L"'
 LDLIBPREFIX        = '-l'
-LDCOM              = "%LD --static %LDDIRS %LDLIBS -o %TARGET %SOURCES"
-ECHO_SOURCES	   = YES
+LDCOM              = "%LD --static %LDDIRS %LDLIBS -o %TARGET @%@ %SOURCES"
+ECHO_SOURCES       = YES

@@ -73,6 +73,41 @@ class CTXBuildParams:
 
         return md.hexdigest()
 
+#:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+def prepareCommandFile( commandline,  commandfileName ):
+
+    marker = '%@'
+
+    ix = commandline.find( marker )
+
+    if ix == -1:
+        # No commandfile specified.
+        return commandline
+    elif commandline.find( marker, ix + len(marker) ) != -1:
+        # Multiple (nested) commandfiles is currently not supported.
+        userErrorExit("Multiple '%s' symbols in ARCOM field is currently not supported.\n    File: %s"%(marker, self.cdefPath))
+
+    #cmdfilename = time.strftime("%y%H%M%S.txt", time.localtime())
+    cmdfilename = commandfileName
+
+    # Extract the contents for the commandfile from commandline (everything superceeding the %@ symbol)
+    sep = "\"\n\"" # CURRENTLY A HACK FOR IAR!
+    cmdfile_contents = '"' + sep.join (commandline[ix+2:].split()) + sep;
+    cmdfile_contents = cmdfile_contents.rstrip('"') # Remove the trailing quote
+
+    # Exclude the contents we extracted from the commandline.
+    commandline = commandline[0:ix+len(marker)]
+
+    # Replace the %@ symbol with the commandfile's name
+    commandline = commandline.replace( marker, cmdfilename )
+
+    # write commandfile
+    cmdfile = open( cmdfilename, 'w' )
+    cmdfile.write(cmdfile_contents)
+    cmdfile.close()
+
+    return commandline
+
 
 
 #------------------------------------------------------------------------------
@@ -215,47 +250,6 @@ class CTXCompiler:
             warningMessage("Unresolved tool: '%s'"%(cdefItem))
         else:
             infoMessage("Tool defined by '%s' resolved at '%s'"%(cdefItem, toolPath), 3)
-
-    #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-    def prepareCommandFile( self, commandline ):
-
-        marker = '%@'
-
-        ix = commandline.find( marker )
-
-        if ix == -1:
-            # No commandfile specified.
-            return commandline
-        elif commandline.find( marker, ix + len(marker) ) != -1:
-            # Multiple (nested) commandfiles is currently not supported.
-            userErrorExit("Multiple '%s' symbols in ARCOM field is currently not supported.\n    File: %s"%(marker, self.cdefPath))
-
-
-
-        #cmdfilename = time.strftime("%y%H%M%S.txt", time.localtime())
-        cmdfilename = self.stdCommandfileName
-
-        # Extract the contents for the commandfile from commandline (everything superceeding the %@ symbol)
-        sep = "\"\n\"" # CURRENTLY A HACK FOR IAR!
-        cmdfile_contents = '"' + sep.join (commandline[ix+2:].split()) + sep;
-        cmdfile_contents = cmdfile_contents.rstrip('"') # Remove the trailing quote
-
-
-        # Exclude the contents we extracted from the commandline.
-        commandline = commandline[0:ix+len(marker)]
-
-        # Replace the %@ symbol with the commandfile's name
-        commandline = commandline.replace( marker, cmdfilename )
-
-        # write commandfile
-        cmdfile = open( cmdfilename, 'w' )
-        cmdfile.write(cmdfile_contents)
-        cmdfile.close()
-
-        # signal that we have generated at least one commandfile which should be removed later on.
-        self.usingCommandfile = True
-
-        return commandline
 
 
     #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -412,7 +406,7 @@ class CTXCompiler:
 
         self.validateTool( 'AR' )
 
-        cmdline = self.prepareCommandFile( cmdline )
+        cmdline = prepareCommandFile( cmdline,  self.stdCommandfileName )
 
         return cmdline
 
@@ -582,10 +576,13 @@ class CTXBuildSession:
 
         tool = 'LD' #'CXX' if cplusplus else 'CC'
         print 'from ' + os.getcwd() + ' executing: ' + cmdline
+        linkCommandFileName = 'linkCmdFileName096848hf434qas.file'
+        cmdline = prepareCommandFile( cmdline,  linkCommandFileName )
         ret = executeCommandline( cmdline )
         if ret != 0:
             userErrorExit("\nFailed to create static object '%s'\nCompiler return code: %d"%(objFileName, ret))
-
+        if os.path.exists(linkCommandFileName):
+            os.remove(linkCommandFileName)
         #self.validateTool( 'LD' )
 
         pass

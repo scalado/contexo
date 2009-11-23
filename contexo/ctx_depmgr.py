@@ -768,10 +768,10 @@ class CTXDepMgr: # The dependency manager class.
                 pubHeaders = self.cmods[ module_name ].getPubHeaderAbsolutePaths()
 
                 for header in pubHeaders:
-                    if full_path:
-                        header_set.add(self.inputFilePathDict [ header ])
-                    else:
-                        header_set.add ( header )
+                    #if full_path:
+                        #header_set.add(self.inputFilePathDict [ header ])
+                    #else:
+                    header_set.add ( header )
 
                     for dep_header in self.dependencies[header][0]:
                         if (full_path):

@@ -217,7 +217,7 @@ def export_headers( depmgr, headers, headerDir ):
             warningMessage("Unable to locate header '%s' for export"%(header))
 
 #------------------------------------------------------------------------------
-def buildmodules( depmgr, session, modules, args, output_path, build_dir,  executableName = None,  libraryName = None ):
+def buildmodules( depmgr, session, modules, args, output_path, build_dir,  libraryName = None ):
     from contexo import ctx_base
     from contexo import ctx_envswitch
 
@@ -231,8 +231,7 @@ def buildmodules( depmgr, session, modules, args, output_path, build_dir,  execu
     ctx_modules.extend ( depmgr.createCodeModules( dep_modules, force=args.force ) )
 
     objs = build_libraries( ctx_modules, libraryName, output_path, build_dir, session )
-    if executableName:
-        session.linkExecutable(objs,  output_path, session,  executableName)
+    return objs
 
 #------------------------------------------------------------------------------
 def cmd_info(args):
@@ -458,6 +457,7 @@ def cmd_build(args):
     # Process components
     if component_build:
         components = create_components( items, cview.getItemPaths('comp') )
+        objs = list()
         for comp in components:
             ctx_log.ctxlogBeginComponent( comp.name )
 
@@ -470,10 +470,13 @@ def cmd_build(args):
                 depmgr.addCodeModules( modules, args.tests )
                 args.library_name = library
                 print args
-                buildmodules( depmgr, session,  modules,  args, bin_dir, session.bc.getTitle(),  args.executable_name,  args.library_name)
+                objs += buildmodules( depmgr, session,  modules,  args, bin_dir, session.bc.getTitle(),  args.library_name)
                 depmgr.emptyCodeModules()
             export_headers( depmgr, comp.publicHeaders, header_dir )
             ctx_log.ctxlogEndComponent()
+
+    if args.executable_name:
+            session.linkExecutable(objs, bin_dir, args.executable_name)
 
     #Process modules
     else:

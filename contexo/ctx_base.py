@@ -533,14 +533,14 @@ class CTXBuildSession:
         oldChecksum = f.write(checksum)
         f.close()
 
-    def linkExecutable(self,  objects,  outputDir,  session,  exeFilename):
+    def linkExecutable(self,  objects,  outputDir,   exeFilename):
         #objects
         lddirs_cmdline = str()
         buildParams = self.buildParams
         buildParams.ldDirs
 
         for ldpath in buildParams.ldDirs:
-            ldpath_dec = " %s%s%s"%( self.compiler.cdef['LDDIRSPREFIX'], ldpath, self.compiler.cdef['LDDIRSUFFIX'] )
+            ldpath_dec = " %s%s%s"%( self.compiler.cdef['LDDIRPREFIX'], ldpath, self.compiler.cdef['LDDIRSUFFIX'] )
             lddirs_cmdline += ldpath_dec
 
         ldlibs_cmdline = str()
@@ -575,12 +575,12 @@ class CTXBuildSession:
         cmdline = cmdline.replace( '%TARGET'      ,   exefile_cmdline     )
 
         tool = 'LD' #'CXX' if cplusplus else 'CC'
-        print 'from ' + os.getcwd() + ' executing: ' + cmdline
+        infoMessage('from ' + os.getcwd() + ' executing: ' + cmdline,  6)
         linkCommandFileName = 'linkCmdFileName096848hf434qas.file'
         cmdline = prepareCommandFile( cmdline,  linkCommandFileName )
         ret = executeCommandline( cmdline )
         if ret != 0:
-            userErrorExit("\nFailed to create static object '%s'\nCompiler return code: %d"%(objFileName, ret))
+            userErrorExit("\nFailed to link: '%s'\nCompiler return code: %d"%(cmdline, ret))
         if os.path.exists(linkCommandFileName):
             os.remove(linkCommandFileName)
         #self.validateTool( 'LD' )
@@ -690,6 +690,3 @@ class CTXBuildSession:
         return ret
 
     #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-    def buildExecutable( self ):
-        infoMessage("WARNING: 'CTXBuildSession::buildExecutable' is not implemented yet.", 0)
-        pass

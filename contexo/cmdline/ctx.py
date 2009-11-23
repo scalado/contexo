@@ -471,6 +471,11 @@ def cmd_build(args):
                 args.library_name = library
                 print args
                 objs += buildmodules( depmgr, session,  modules,  args, bin_dir, session.bc.getTitle(),  args.library_name)
+                
+                if (args.all_headers):
+                    header_path = os.path.join(args.output, args.headerdir )
+                    export_public_module_headers( depmgr, modules, header_path )
+                
                 depmgr.emptyCodeModules()
             export_headers( depmgr, comp.publicHeaders, header_dir )
             ctx_log.ctxlogEndComponent()
@@ -816,7 +821,6 @@ parser_build.add_argument('-rv', '--repo-validation', action='store_true', help=
 parser_build.add_argument('-nra', '--no-remote-repo-access', action='store_true', help=standard_description['--no-remote-repo-access'])
 parser_build.add_argument('-f', '--force', action='store_true', help=standard_description['--force'])
 parser_build.add_argument('--tolerate-missing-headers',  action='store_true',  help = standard_description['--tolerate-missing-headers'])
-parser_build.add_argument('-exe', '--link-executable',  action='store_true',  help = 'link the elements into a single executable')
 
 
 # build parser
@@ -841,6 +845,7 @@ parser_build.add_argument('-lib', '--library-name', help="(modules) build a sing
 parser_build.add_argument('-L',  '--libdirs', nargs='*',  default = [],  help = "(linking) directories to search for libs")
 parser_build.add_argument('-l',  '--libs', nargs='*',  default = [],  help = "(linking) libraries to link in")
 parser_build.add_argument('-I',  '--incdirs', nargs='*',  default = [],  help = "additional include paths")
+parser_build.add_argument('--all-headers', action='store_true', help = "export all public headers")
 
 # clean parser
 parser_clean = subparsers.add_parser('clean', help="clean a module(s) ( and optionaly its dependencies)")

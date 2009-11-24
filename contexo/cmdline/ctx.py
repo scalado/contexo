@@ -459,6 +459,7 @@ def cmd_build(args):
 
     # Process components
     if component_build:
+        infoMessage("building components",  6)
         components = create_components( items, cview.getItemPaths('comp') )
         objs = list()
         for comp in components:
@@ -483,6 +484,7 @@ def cmd_build(args):
 
     #Process modules
     else:
+        infoMessage("building modules",  6)
         depmgr.addCodeModules( items, args.tests )
         buildmodules( depmgr, session, items, args, outputPath, bc.getTitle(),  args.executable_name,  libraryName=args.library_name)
         export_public_module_headers( depmgr, items, header_dir )

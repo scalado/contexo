@@ -79,7 +79,7 @@ def findFileInPathList( src_file, pathList ):
             if os.path.exists(src_path):
                 return src_path
         errorMessage("'%s' cannot be resolved in current path list."%( src_file) )
-        infoMessage("%s"%"\n".join(pathList), msgVerboseLevel=5)
+        infoMessage("%s"%"\n".join(pathList), msgVerboseLevel=8)
     return None
 
 #------------------------------------------------------------------------------
@@ -611,12 +611,18 @@ class CTXDepMgr: # The dependency manager class.
 
             #includePaths.add ( os.path.dirname (incPath) )
 
-        return list ( map(os.path.dirname,  depIncludes) )
+        ret = set ( map(os.path.dirname,  depIncludes) )
+        #infoMessage("pathList: %s"%", ".join(pathList), 6 )
+        #infoMessage("getIncludePaths: %s"%", ".join(ret), 6 )
+        #import pdb
+        #pdb.set_trace()
+        return ret
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     def getModuleIncludePaths( self, moduleName ):
         from ctx_cmod import CTXCodeModule
-
+        #import pdb
+        #pdb.set_trace()
         if self.needUpdate:
             self.updateDependencyHash()
 
@@ -634,7 +640,10 @@ class CTXDepMgr: # The dependency manager class.
      #   pathList += assureList ( cmod.getSourceDir () )
 
        # return self.getIncludePaths ( filenames, pathList )
-        return self.getIncludePaths ( filenames, None )
+        ret = self.getIncludePaths ( filenames, None )
+#   print "getModuleIncludePaths: "
+#   print ret
+        return ret
 
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -

@@ -311,7 +311,7 @@ class CTXCodeModule( CTXRawCodeModule ):
                     #cand = '\"' + cand + '\"'
                     include_paths.append( cand )
         else:
-            infoMessage("Module %s has no external depenencies."%self.getName(), 4)
+            infoMessage("Module %s has no external depenencies."%self.getName(), 5)
 
         return include_paths
 

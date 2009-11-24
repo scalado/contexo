@@ -356,9 +356,9 @@ class CTXDepMgr: # The dependency manager class.
                 dependings = self.findFilesDependingOn(inputFile)
                 assert(dependings)
                 if ( self.tolerateMissingHeaders):
-                    warningMessage("Dependency manager cannot locate input file: %s (from %s)"%(inputFile, "".join(dependings) ))
+                    warningMessage("Dependency manager cannot locate input file: %s (from %s)"%(inputFile, ",".join(dependings) ))
                 else:
-                    userErrorExit("Dependency manager cannot locate input file: %s (from %s)"%(inputFile, "".join(dependings) ))
+                    userErrorExit("Dependency manager cannot locate input file: %s (from %s)"%(inputFile, ",".join(dependings) ))
                 continue #return
 
             #

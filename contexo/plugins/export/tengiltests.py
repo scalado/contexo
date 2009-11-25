@@ -79,18 +79,19 @@ def cmd_parse( args ):
     input_names = list ( args.input_names )
 
     #init the dict with input_names and empty lists
-    allNames = dict(zip(input_names, [[] for i in range(len(input_names))] ))
-
+    allNames = dict( zip(input_names, [[] for i in range(len(input_names))] ) )
 
     for module in module_dicts:
-        import contexo.ctx_cparser as ctx_cparser
-        sources = module['SOURCES']
-        for name in input_names:
+
+        sources = module['SOURCES'] + module['TESTSOURCES']
+        print 'Analysing %s in %s'%( map(os.path.basename,  sources),  module['MODNAME'] )
+        def readNames(name):
+            from contexo.ctx_cparser import parseTengilTests
             #Get a list of lists of testnames. One list of names for each source file.
-            lista = map( lambda sourcefile: ctx_cparser.parseTengilTests( getFileContents(sourcefile),  name),   sources )
+            lista = map( lambda sourcefile: parseTengilTests( getFileContents(sourcefile),  name),   sources )
             #squash the list of lists into a simple list
             allNames[name] += reduce(lambda l1,l2: l1 + l2,  lista)
-
+        map(readNames,  input_names)
 
 
     output_names = input_names if len(args.output_names) == 0 else list(args.output_names)
@@ -99,18 +100,14 @@ def cmd_parse( args ):
     nameMap = dict(zip(input_names,  output_names))
 
     outputfile = open( args.output ,'wb' )
-    outputfile.write('#ifndef __%s__\n#define __%s__\n'%(args.output, args.output) )
 
     def writeName( (inname,  outname) ):
         def writeCall( arg ):
-            outputfile.write( '    %s(%s);\n'%( outname,  arg ) )
-            print ( '    %s(%s);'%( outname,  arg ) )
+            outputfile.write( '%s(%s)\n'%( outname,  arg ) )
+            print ( '   %s(%s)'%( outname,  arg ) )
         map(writeCall,  allNames[inname])
-        #outputfile.write( '%s(%s);\n'%(nameMap[name],  ', '.join(allNames[name])))
-        #print '%s(%s);\n'%(nameMap[name],  ', '.join(allNames[name]))
     map(writeName,  nameMap.items() )
 
-    outputfile.write('#endif\n')
     outputfile.close()
 
 

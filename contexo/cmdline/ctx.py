@@ -481,7 +481,7 @@ def cmd_build(args):
     #Process modules
     else:
         depmgr.addCodeModules( items, args.tests )
-        buildmodules( depmgr, session, items, args, outputPath, bc.getTitle(),  args.executable_name,  libraryName=args.library_name)
+        buildmodules( depmgr, session, items, args, outputPath, bc.getTitle(),  libraryName=args.library_name)
         export_public_module_headers( depmgr, items, header_dir )
 
     # Write log if requested

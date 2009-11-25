@@ -76,190 +76,42 @@ def cmd_parse( args ):
         contents = f.read()
         f.close()
         return contents
+    input_names = list ( args.input_names )
 
-    testcaseNames = list()
-    import pdb
+    #init the dict with input_names and empty lists
+    allNames = dict(zip(input_names, [[] for i in range(len(input_names))] ))
+
+
     for module in module_dicts:
         import contexo.ctx_cparser as ctx_cparser
         sources = module['SOURCES']
+        for name in input_names:
+            #Get a list of lists of testnames. One list of names for each source file.
+            lista = map( lambda sourcefile: ctx_cparser.parseTengilTests( getFileContents(sourcefile),  name),   sources )
+            #squash the list of lists into a simple list
+            allNames[name] += reduce(lambda l1,l2: l1 + l2,  lista)
 
-        #Get a list of lists of testnames. One list of names for each source file.
-        lista = map( lambda filename: ctx_cparser.parseTengilTests( getFileContents(filename),  'TESTCASE'),   sources )
 
-        #squash the list of lists into a simple list
-        testcaseNames += reduce(lambda l1,l2: l1 + l2,  lista)
-    print testcaseNames
-#
-#    #
-#    # Add module paths/repositories as include directories
-#    #
-#
-#    modTags     = list()
-#    incPaths    = list()
-#    depRoots    = package.export_data['PATHS']['MODULES']
-#    for depRoot in depRoots:
-#        incPathCandidates = os.listdir( depRoot )
-#        for cand in incPathCandidates:
-#            path = os.path.join(depRoot, cand)
-#            if contexo.ctx_cmod.isContexoCodeModule( path ):
-#                rawMod = contexo.ctx_cmod.CTXRawCodeModule(path)
-#                incPaths.append( path )
-#
-#                # Only include private headers for projects containing the specified module
-#                #incPaths.append( os.path.join(rawMod.getRootPath(), rawMod.getPrivHeaderDir()) )
-#
-#                modTags.append( 'COMPILING_MOD_' + string.upper( rawMod.getName() ) )
-#
-#    #
-#    # Collect additional include paths and additional library paths
-#    #
-#
-#    def getPathsFromOption(option):
-#        user_paths = list()
-#        if os.path.isdir( option ):
-#            user_paths.append(option)
-#        elif not os.path.isfile( option ):
-#            userErrorExit("Cannot find option file or directory'%s'"%option)
-#        else:
-#            file = open( option, "r" )
-#            for line in file.readlines():
-#                line = line.strip()
-#                user_paths += line.split(";")
-#            file.close()
-#            user_paths = filter(lambda x: x.strip(" ") != '',user_paths)
-#        return user_paths
-#
-#    if args.additional_includes != None:
-#        filename = args.additional_includes
-#        user_includepaths = getPathsFromOption(filename)
-#        incPaths += user_includepaths
-#
-#    libPaths = list()
-#    if args.additional_libdir != None:
-#        filename = args.additional_libdir
-#        user_librarypaths = getPathsFromOption(filename)
-#        libPaths += user_librarypaths
-#
-#    # Additional dependencies
-#    libNames = list()
-#    user_libnames = list()
-#    if args.additional_dependencies != None:
-#        filename = args.additional_dependencies
-#        user_libnames = getPathsFromOption(filename)
-#
-#        libNames += user_libnames
-#
-#    #
-#    # Determin if we're exporting components or modules, and do some related
-#    # sanity checks
-#    #
-#
-#    comp_export = bool( package.export_data['COMPONENTS'] != None )
-#
-#    if comp_export:
-#    #Exporting components
-#
-#        if args.mirror_components == True and args.project_name != None:
-#            warningMessage("Ignoring option --project-name (-pn) when option --mirror-components (-mc) is used")
-#            args.project_name = None
-#    else:
-#    # Exporting modules
-#
-#        if args.mirror_components == True:
-#            warningMessage("Ignoring option --mirror-components (-mc) when exporting modules")
-#            args.mirror_components = False
-#
-#        if package.export_data['MODULES'] == None:
-#            userErrorExit( "No components or modules specified for export.")
-#
-#
-#    project_name = args.project_name
-#    if project_name == None and args.mirror_components == False:
-#        project_name = default_projname
-#
-#
-#    # strip vcproj extension if user included it.
-#    if project_name != None and project_name[ -7: ].lower() == '.vcproj':
-#        project_name = project_name[0:-7]
-#
-#
-#    #
-#    # If exporting components and the user specified --mirror-components we
-#    # create one vcproj per component library, otherwise we create one large
-#    # library of all code modules.
-#    #
-#
-#    vcprojList = list() # list of dict['PROJNAME':string, 'LIBNAME':string, 'MODULELIST':listof( see doc of make_libvcproj7 ) ]
-#
-#    # Regardless if we export components or modules, all modules are located in export_data['MODULES']
-#    module_map = create_module_mapping_from_module_list( package.export_data['MODULES'].values() )
-#
-#    if comp_export and args.mirror_components:
-#        for comp in package.export_data['COMPONENTS']:
-#            for library, modules in comp.libraries.iteritems():
-#                lib_modules = [ mod for mod in module_map if mod['MODNAME'] in modules  ]
-#                vcprojList.append( { 'PROJNAME': library, 'LIBNAME': library, 'MODULELIST': lib_modules } )
-#
-#    else: # Module export OR component export without mirroring component structure
-#        vcprojList.append( {'PROJNAME': project_name, 'LIBNAME': project_name, 'MODULELIST': module_map } )
-#
-#
-#    #
-#    # Generate the projects
-#    #
-#
-#    if not os.path.exists( args.output ):
-#        os.makedirs( args.output )
-#
-#    guidDict = dict()
-#    for proj in vcprojList:
-#        guidDict[proj['PROJNAME']] = contexo.ctx_msvc.make_libvcproj8( proj['PROJNAME'],
-#                                                                       build_params.cflags,
-#                                                                       build_params.prepDefines + modTags,
-#                                                                       proj['MODULELIST'],
-#                                                                       proj['LIBNAME'] + '.lib',
-#                                                                       debugmode, tests,
-#                                                                       incPaths,
-#                                                                       args.output,
-#                                                                       args.platform,
-#                                                                       proj['PROJNAME'],
-#                                                                       args.configuration_type,
-#                                                                       libNames,
-#                                                                       libPaths )
-#
-#    #
-#    # Handle external project if specified
-#    #
-#
-#    external_vcproj = None
-#
-#    if args.external_vcproj != None:
-#        external_vcproj = contexo.ctx_msvc.get_info_vcproj8( os.path.abspath( args.external_vcproj ) )
-#        external_vcproj['DEBUG'] = debugmode
-#        attrs = list()
-#        attrs.append(   dict({ "DEBUG":debugmode,
-#                                "TOOL":"VCCLCompilerTool",
-#                                 "KEY":"AdditionalIncludeDirectories",
-#                               "VALUE":";".join(incPaths) }))
-#
-#        attrs.append(   dict({ "DEBUG":debugmode,
-#                                "TOOL":"VCLinkerTool",
-#                                 "KEY":"AdditionalLibraryDirectories",
-#                               "VALUE":";".join(libPaths) }))
-#
-#        contexo.ctx_msvc.update_vcproj8(external_vcproj['FILENAME'],attrs)
-#
-#    #
-#    # Create solution if specified
-#    #
-#
-#    if args.solution != None:
-#
-#        slnProjects = list()
-#        for proj in vcprojList:
-#            slnProjects.append( { 'PROJNAME': proj['PROJNAME'], 'PROJGUID': guidDict[proj['PROJNAME']], 'DEBUG': debugmode } )
-#
-#        contexo.ctx_msvc.make_solution8( args.solution, args.output, slnProjects, external_vcproj, args.platform )
+
+    output_names = input_names if len(args.output_names) == 0 else list(args.output_names)
+    if len(output_names) != len(input_names):
+        userErrorExit("output names should map 1:1 to input names")
+    nameMap = dict(zip(input_names,  output_names))
+
+    outputfile = open( args.output ,'wb' )
+    outputfile.write('#ifndef __%s__\n#define __%s__\n'%(args.output, args.output) )
+
+    def writeName( (inname,  outname) ):
+        def writeCall( arg ):
+            outputfile.write( '    %s(%s);\n'%( outname,  arg ) )
+            print ( '    %s(%s);'%( outname,  arg ) )
+        map(writeCall,  allNames[inname])
+        #outputfile.write( '%s(%s);\n'%(nameMap[name],  ', '.join(allNames[name])))
+        #print '%s(%s);\n'%(nameMap[name],  ', '.join(allNames[name]))
+    map(writeName,  nameMap.items() )
+
+    outputfile.write('#endif\n')
+    outputfile.close()
 
 
     #
@@ -276,14 +128,14 @@ parser = ArgumentParser( description="""tengil testcase parser""",
 
 parser.set_defaults(func=cmd_parse)
 
-parser.add_argument('-pl', '--platform', default='Win32',
- help="""If specified, the resulting VS projects will use
- the specified platform. Default is "Win32". Note that this option does not affect
- any settings introduced by the build configuration specified with the -b or
- --bconf option.""")
+parser.add_argument('-in', '--input-names', nargs = '+',
+ help="""names of the calls or macros to find""")
+
+parser.add_argument('-on', '--output-names', default='',  nargs = '*',
+ help="""names of the calls to generate""")
 
 parser.add_argument('-o', '--output', default=os.getcwd(),
- help="The output directory for the export.")
+ help="The path to the output file.")
 
 
 

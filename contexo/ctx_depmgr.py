@@ -1,7 +1,6 @@
 
 import os
 import sys
-import re
 import hashlib
 import cPickle
 
@@ -10,54 +9,7 @@ from stat import *
 from ctx_common import *
 import ctx_cmod
 
-C_IDENTIFIER_REGEXP     = '[a-zA-Z_]+([a-zA-Z_]|[0-9])*'
-C_COMMENT_REGEXP        = '(/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/)|(//.*)'
-C_STRING_REGEXP         = '".*"'
-C_USER_INCLUDE_REGEXP   = '#include\s*"\S*"'
-C_SYSTEM_INCLUDE_REGEXP = '#include\s*<\S*>'
-C_SYS_INC_FILE_REGEXP   = '<.*>'
-C_SEPARATORS            = '[%&\^\|#><\+\-&!;{},=\(\)\[\]\:\.!~\*/\?]'
-
-regexp_identifier = re.compile (C_IDENTIFIER_REGEXP)
-
-#------------------------------------------------------------------------------
-def is_C_identifier ( token ):
-    if regexp_identifier.match (token):
-        return 1
-    else:
-        return 0
-
-#------------------------------------------------------------------------------
-def purge_comments ( src ):
-    return re.sub( C_COMMENT_REGEXP,'', src )
-
-
-#------------------------------------------------------------------------------
-def purge_strings ( src ):
-    return re.sub (C_STRING_REGEXP,'', src)
-
-#------------------------------------------------------------------------------
-def parseIncludes ( src ):
-
-    src = purge_comments( src )
-
-    purged_src = purge_strings (src)
-
-    includes = re.findall  (C_USER_INCLUDE_REGEXP, src)
-
-    user_includes = []
-    regexp = re.compile (C_STRING_REGEXP)
-    for i in includes:
-        user_includes.append (regexp.findall (i)[0][1:-1])
-
-    includes = re.findall (C_SYSTEM_INCLUDE_REGEXP, src)
-
-    system_includes = []
-    regexp = re.compile ( C_SYS_INC_FILE_REGEXP)
-    for i in includes:
-        system_includes.append (regexp.findall (i)[0][1:-1])
-
-    return (user_includes, system_includes)
+import ctx_cparser
 
 #------------------------------------------------------------------------------
 def getModulePrivHeaderDir( modulePath ):
@@ -365,6 +317,7 @@ class CTXDepMgr: # The dependency manager class.
             # Create checksum used to determine if the input file has changed
             # from stored checksum in dependencies
             #
+
             assert(os.path.isabs(inputFile) or not inputFile.endswith('.c') )
             if inputFilePath not in self.processed:
                 checksum = generateChecksum( inputFilePath, self.checksumMethod )
@@ -374,11 +327,14 @@ class CTXDepMgr: # The dependency manager class.
                     incFileList = self.dependencies[inputFilePath][INC_FILELIST]
                 else:
                     inputFileContents = getFileContents( inputFilePath )
-                    incFileList = parseIncludes(inputFileContents)[0]
+                    incFileList = ctx_cparser.parseIncludes(inputFileContents)[0]
+
 
                     self.dependencies[inputFilePath] = (incFileList, checksum)
 
                 self.processed.add ( inputFilePath )
+
+            inputFileContents = getFileContents( inputFilePath )
 
             #
             # We now have a list of the files on which our input file depend on,

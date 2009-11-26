@@ -90,7 +90,7 @@ def cmd_parse( args ):
             #Get a list of lists of testnames. One list of names for each source file.
             lista = map( lambda sourcefile: parseTengilTests( getFileContents(sourcefile),  name),   sources )
             #squash the list of lists into a simple list
-            allNames[name] += reduce(lambda l1,l2: l1 + l2,  lista)
+            allNames[name] += reduce( lambda l1,l2: l1 + l2,  lista, [])
         map(readNames,  input_names)
 
 

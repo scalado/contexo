@@ -456,12 +456,12 @@ def cmd_build(args):
     outputPath = args.output
     bin_dir = os.path.join( outputPath, args.bindir )
     header_dir = os.path.join( outputPath, args.headerdir )
-
+    objs = list()
     # Process components
     if component_build:
         infoMessage("building components",  6)
         components = create_components( items, cview.getItemPaths('comp') )
-        objs = list()
+
         for comp in components:
             ctx_log.ctxlogBeginComponent( comp.name )
 
@@ -479,15 +479,15 @@ def cmd_build(args):
             export_headers( depmgr, comp.publicHeaders, header_dir )
             ctx_log.ctxlogEndComponent()
 
-    if args.executable_name:
-            session.linkExecutable(objs, bin_dir, args.executable_name)
-
     #Process modules
     else:
         infoMessage("building modules",  6)
         depmgr.addCodeModules( items, args.tests )
-        buildmodules( depmgr, session, items, args, outputPath, bc.getTitle(),  libraryName=args.library_name)
+        objs += buildmodules( depmgr, session, items, args, outputPath, bc.getTitle(),  libraryName=args.library_name)
         export_public_module_headers( depmgr, items, header_dir )
+
+    if args.executable_name:
+            session.linkExecutable(objs, bin_dir, args.executable_name)
 
     # Write log if requested
     if args.logfile != None:

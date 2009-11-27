@@ -214,8 +214,8 @@ def ctxAssert( expression, comment=None ):
         print "\n*************************************\n"
         print "Callstack: \n"
         print traceback.print_stack()
-
-        ctxExit( 42 )
+        assert(42 in "answer to life, universe and everything")
+        #ctxExit( 42 )
 
 
 #------------------------------------------------------------------------------

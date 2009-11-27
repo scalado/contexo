@@ -16,38 +16,38 @@ import os
 
 export_header = "$EXPORT_PACKAGE$"
 
-CONTEXO_CFG_FILE    = 'contexo.cfg'
-cfgFile = ctx_cfg.CFGFile (os.path.join( getUserCfgDir(), CONTEXO_CFG_FILE ))
-setInfoMessageVerboseLevel( int(cfgFile.getVerboseLevel()) )
+#CONTEXO_CFG_FILE    = 'contexo.cfg'
+#cfgFile = ctx_cfg.CFGFile (os.path.join( getUserCfgDir(), CONTEXO_CFG_FILE ))
+#setInfoMessageVerboseLevel( int(cfgFile.getVerboseLevel()) )
 
 #------------------------------------------------------------------------------
 class CTXExportData:
     def __init__( self ):
-        
+
         self.msgSender = 'CTXExportData'
         self.export_data = dict()
-    
+
     #--------------------------------------------------------------------------
     # Sets all export data items. Any existing data is truncated.
     #--------------------------------------------------------------------------
-    def setExportData( self, modules, components, test_modules, build_session, 
+    def setExportData( self, modules, components, do_tests, build_session,
                        dependency_manager, view, env, cmdline_options ):
-    
+
         from ctx_repo import REPO_PATH_SECTIONS
-        
+
         self.export_data = dict()
         self.export_data['MODULES']       = modules if modules != None and len(modules) else list()
         self.export_data['COMPONENTS']    = components if components != None and len(components) else None
-        self.export_data['TESTS']         = test_modules
+        self.export_data['TESTS']         = do_tests
         self.export_data['SESSION']       = build_session
         self.export_data['DEPMGR']        = dependency_manager
         self.export_data['ENV']           = env
-        self.export_data['OUTPUT_DIR']    = cmdline_options.output
+        #self.export_data['OUTPUT_DIR']    = cmdline_options.output
 
         self.export_data['PATHS']         = dict()
         for section in REPO_PATH_SECTIONS:
             self.export_data['PATHS'][section.upper()] = view.getItemPaths(section)
-            
+
         # TODO: RSpecFile can't be pickled for some reason. When it has been solved,
         # remove this code and simply pass the RSpecFile object to the client plugin.
         # Note that existing plugins then have to be updated.

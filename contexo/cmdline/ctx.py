@@ -44,14 +44,15 @@ logging.basicConfig(format = '%(asctime)s %(levelname)-8s %(message)s',
                                 level = logging.DEBUG);
 #logger = logging.getLogegr()
 #logger.
-logging.debug('Starting...')
+#logging.debug('Starting...')
 
 
 #
 # Get configuration.
 #
-cfgFile = ctx_cfg.CFGFile( os.path.join(ctx_common.getUserCfgDir(),
-                                        ctx_sysinfo.CTX_CONFIG_FILENAME))
+contexo_config_path = os.path.join( ctx_common.getUserCfgDir(), ctx_sysinfo.CTX_CONFIG_FILENAME )
+infoMessage("Using config file '%s'"%contexo_config_path,  1)
+cfgFile = ctx_cfg.CFGFile( contexo_config_path )
 
 #legacy code: to be rewritten
 setInfoMessageVerboseLevel( int(cfgFile.getVerboseLevel()) )
@@ -61,7 +62,7 @@ CTX_DEFAULT_BCONF = cfgFile.getDefaultBConf().strip(" '")
 #TODO: make args not global in ctx.py
 
 #------------------------------------------------------------------------------
-def getBuildConfiguration( cview ):
+def getBuildConfiguration( cview ,  args):
     from contexo import ctx_bc
     from contexo import config
 
@@ -166,6 +167,7 @@ def build_libraries( ctx_modules, lib_name, output_path, build_dir, session ):
         for mod in ctx_modules:
             libs[mod.getName()] = [mod,]
 
+    all_objects = list()
     for lib, mods in libs.iteritems():
         ctx_log.ctxlogBeginLibrary( lib )
 
@@ -178,8 +180,10 @@ def build_libraries( ctx_modules, lib_name, output_path, build_dir, session ):
         else:
             warningMessage("No object files to create library '%s'"%(lib))
 
-        ctx_log.ctxlogEndLibrary()
+        all_objects+= obj_list
 
+        ctx_log.ctxlogEndLibrary()
+    return all_objects
 
 #------------------------------------------------------------------------------
 def export_public_module_headers ( depmgr, modules, headerPath ):
@@ -214,7 +218,7 @@ def export_headers( depmgr, headers, headerDir ):
             warningMessage("Unable to locate header '%s' for export"%(header))
 
 #------------------------------------------------------------------------------
-def buildmodules( depmgr, session, modules, args, output_path, build_dir ):
+def buildmodules( depmgr, session, modules, args, output_path, build_dir,  libraryName = None ):
     from contexo import ctx_base
     from contexo import ctx_envswitch
 
@@ -227,7 +231,8 @@ def buildmodules( depmgr, session, modules, args, output_path, build_dir ):
     ctx_modules = depmgr.createCodeModules( modules, args.tests, force=args.force )
     ctx_modules.extend ( depmgr.createCodeModules( dep_modules, force=args.force ) )
 
-    build_libraries( ctx_modules, args.lib, output_path, build_dir, session )
+    objs = build_libraries( ctx_modules, libraryName, output_path, build_dir, session )
+    return objs
 
 #------------------------------------------------------------------------------
 def cmd_info(args):
@@ -292,9 +297,9 @@ def cmd_buildmod(args):
     # Prepare all
     cview   = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=bool(args.repo_validation) )
     modules = expand_list_files(cview, args.modules)
-    bc      = getBuildConfiguration( cview )
+    bc      = getBuildConfiguration( cview,  args )
 
-    depmgr  = CTXDepMgr( cview.getItemPaths('modules') )
+    depmgr  = CTXDepMgr( cview.getItemPaths('modules'),  args.tolerate_missing_headers )
     depmgr.addCodeModules( modules, args.tests )
 
     session = ctx_base.CTXBuildSession( bc )
@@ -312,7 +317,7 @@ def cmd_buildmod(args):
 
     output_path = os.path.join( args.output, args.libdir )
 
-    buildmodules( depmgr, session, modules, args, output_path, bc.getTitle() )
+    buildmodules( depmgr, session, modules, args, output_path, bc.getTitle(),  args.link_executable ,  libraryName = args.lib)
 
     header_path = os.path.join(args.output, args.headerdir )
     export_public_module_headers( depmgr, modules, header_path )
@@ -349,8 +354,9 @@ def cmd_buildcomp(args):
     # Prepare all
     cview       = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=bool(args.repo_validation) )
     components  = expand_list_files( cview, args.components )
-    bc          = getBuildConfiguration( cview )
-    depmgr      = CTXDepMgr ( cview.getItemPaths('modules') )
+
+    bc          = getBuildConfiguration( cview,  args )
+    depmgr      = CTXDepMgr ( cview.getItemPaths('modules') ,  args.tolerate_missing_headers)
     session     = ctx_base.CTXBuildSession( bc )
     session.setDependencyManager( depmgr )
 
@@ -381,7 +387,7 @@ def cmd_buildcomp(args):
 
             args.lib = library
             print args
-            buildmodules( depmgr, session,  modules,  args, lib_dir, session.bc.getTitle())
+            buildmodules( depmgr, session,  modules,  args, lib_dir, session.bc.getTitle(),  libraryName = args.lib)
 
             depmgr.emptyCodeModules()
 
@@ -403,6 +409,102 @@ def cmd_buildcomp(args):
     if args.env != None:
         switchEnvironment( oldEnv, False )
 
+
+def cmd_build(args):
+    from contexo import ctx_cmod
+    from contexo import ctx_base
+    from contexo import ctx_envswitch
+    from contexo.ctx_depmgr import CTXDepMgr
+    from contexo.ctx_export import CTXExportData
+
+    envLayout = None
+    oldEnv = None
+    if args.env != None:
+        envLayout = EnvironmentLayout( cfgFile,  args.env )
+        oldEnv    = switchEnvironment( envLayout, True )
+
+    # Prepare all
+    cview   = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=bool(args.repo_validation) )
+    bc      = getBuildConfiguration( cview,  args )
+    bc.buildParams.incPaths.extend(     args.incdirs ) #TODO: accessing 'private' data?
+    bc.buildParams.ldDirs.extend(args.libdirs)
+    bc.buildParams.ldLibs.extend(args.libs)
+    depmgr  = CTXDepMgr ( cview.getItemPaths('modules'),  args.tolerate_missing_headers )
+    session = ctx_base.CTXBuildSession( bc )
+    session.setDependencyManager( depmgr )
+
+    items = expand_list_files( cview, args.items )
+
+    # Make sure we have only one type of item to export
+    #TODO:make a more robust recognition than file extention for .comp
+    component_build = True
+    for item in items:
+        if item.endswith( '.comp' ):
+            if component_build == False:
+                userErrorExit("The operation can either work on a list of components OR a list of modules, not both.")
+        else:
+            component_build = False
+
+   # Register build configuration in log handler
+    ctx_log.ctxlogSetBuildConfig( bc.getTitle(),
+                                  bc.getCompiler().cdefTitle,
+                                  bc.getBuildParams().cflags,
+                                  bc.getBuildParams().prepDefines,
+                                  "N/A" )
+    outputPath = args.output
+    bin_dir = os.path.join( outputPath, args.bindir )
+    header_dir = os.path.join( outputPath, args.headerdir )
+
+    # Process components
+    if component_build:
+        components = create_components( items, cview.getItemPaths('comp') )
+        objs = list()
+        for comp in components:
+            ctx_log.ctxlogBeginComponent( comp.name )
+
+            # Workaround to get header export to work
+            codemodule_map = dict()
+
+            # Build component modules.
+            for library, modules in comp.libraries.items():
+                modules = expand_list_files( cview, modules )
+                depmgr.addCodeModules( modules, args.tests )
+                args.library_name = library
+                print args
+                objs += buildmodules( depmgr, session,  modules,  args, bin_dir, session.bc.getTitle(),  args.library_name)
+                
+                if (args.all_headers):
+                    header_path = os.path.join(args.output, args.headerdir )
+                    export_public_module_headers( depmgr, modules, header_path )
+                
+                depmgr.emptyCodeModules()
+            export_headers( depmgr, comp.publicHeaders, header_dir )
+            ctx_log.ctxlogEndComponent()
+
+    if args.executable_name:
+            session.linkExecutable(objs, bin_dir, args.executable_name)
+
+    #Process modules
+    else:
+        depmgr.addCodeModules( items, args.tests )
+        buildmodules( depmgr, session, items, args, outputPath, bc.getTitle(),  args.executable_name,  libraryName=args.library_name)
+        export_public_module_headers( depmgr, items, header_dir )
+
+    # Write log if requested
+    if args.logfile != None:
+        logfilepath = os.path.join( args.output, args.logfile )
+        logpath     = os.path.normpath(os.path.dirname( logfilepath ))
+        if len(logpath) and not os.path.isdir(logpath):
+            os.makedirs( logpath )
+
+        ctx_log.ctxlogWriteToFile( logfilepath, appendToExisting=False )
+
+
+    # Restore environment
+    if args.env != None:
+        switchEnvironment( oldEnv, False )
+
+
 #------------------------------------------------------------------------------
 def cmd_export(args):
     from contexo import ctx_cmod
@@ -419,8 +521,8 @@ def cmd_export(args):
 
     # Prepare all
     cview   = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=bool(args.repo_validation) )
-    bc      = getBuildConfiguration( cview )
-    depmgr  = CTXDepMgr ( cview.getItemPaths('modules') )
+    bc      = getBuildConfiguration( cview,  args )
+    depmgr  = CTXDepMgr ( cview.getItemPaths('modules'),  args.tolerate_missing_headers )
     session = ctx_base.CTXBuildSession( bc )
     session.setDependencyManager( depmgr )
 
@@ -463,7 +565,7 @@ def cmd_export(args):
 
     # Dispatch export data to handler (through pipe)
     package = CTXExportData()
-    package.setExportData( module_map, components, None, session, depmgr,
+    package.setExportData( module_map, components, args.tests, session, depmgr,
                            cview, envLayout, args )
     package.dispatch()
 
@@ -525,9 +627,9 @@ def cmd_clean(args):
     cview = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=bool(args.repo_validation) )
 
     exp_modules = expand_list_files(cview, args.modules)
-    bc      = getBuildConfiguration( cview )
+    bc      = getBuildConfiguration( cview,  args )
 
-    depmgr  = CTXDepMgr( cview.getItemPaths('modules') )
+    depmgr  = CTXDepMgr( cview.getItemPaths('modules') ,  args.tolerate_missing_headers)
     depmgr.addCodeModules( exp_modules, args.tests )
 
     session = ctx_base.CTXBuildSession( bc )
@@ -662,7 +764,7 @@ standard_description = dict({\
     '--bconf': "Build configuration file (*.bc/*.bconf)",\
       '--env': "One or more enviroment replacement files (*.env)",\
    '--output': "The location (path) in which to place output files",\
-   '--libdir': "Relative directory within '--output' in which to place built library files. Will be created if not already present.",\
+   '--libdir': "Relative directory within '--output' in which to place built binaries. Will be created if not already present.",\
 '--headerdir': "Directory name within '--output' in which to place exported header files. Will be created if not already present.",\
      '--deps': "If specified, all dependencies (modules) are processed as well.",\
     '--tests': "If specified, the unit tests for each processed code module are included as well.",\
@@ -670,7 +772,8 @@ standard_description = dict({\
   '--logfile': "Name of logfile to generate. Will be created in output folder as defined by the --output option.",\
 '--repo-validation': "Validates all repositories before processing. This usually increases duration but ensures correct repository structure. Repository validation can also be done by running 'ctx view validate' as a separate step.",\
 '--no-remote-repo-access': "If specified, the system never tries to process items directly from an RSpec repository's remote location (href) even if so is possible. Normally, if a repository is accessible through regular file access, the system always tries to use it from its remote location.",\
-'--force':"Forces building all source files"})
+'--force':"Forces building all source files", \
+'--tolerate-missing-headers':"print a message about missing headers and go on, relying on the pre processor to resolve the problem"})
 
 
 # info parser
@@ -679,6 +782,7 @@ parser_info.set_defaults(func=cmd_info)
 parser_info.add_argument('module', nargs=1, help="Module to show info for")
 #parser_info.add_argument('-t', action='store_true', help="Show info on both module and unit tests")
 parser_info.add_argument('-v', '--view', default=os.getcwd(), help=standard_description['--view'])
+#parser_build.add_argument('--tolerate-missing-headers',  action='store_true',  help = standard_description['--tolerate-missing-headers'])
 
 # buildmod parser
 parser_build = subparsers.add_parser('buildmod', help="build contexo modules." )
@@ -697,6 +801,9 @@ parser_build.add_argument('-lf', '--logfile', default=None, help=standard_descri
 parser_build.add_argument('-rv', '--repo-validation', action='store_true', help=standard_description['--repo-validation'])
 parser_build.add_argument('-nra', '--no-remote-repo-access', action='store_true', help=standard_description['--no-remote-repo-access'])
 parser_build.add_argument('-f', '--force', action='store_true', help=standard_description['--force'])
+parser_build.add_argument('--tolerate-missing-headers',  action='store_true',  help = standard_description['--tolerate-missing-headers'])
+parser_build.add_argument('-exe', '--link-executable',  action='store_true',  help = 'link the elements into a single executable')
+
 
 # buildcomp parser
 parser_build = subparsers.add_parser('buildcomp', help="build contexo components.")
@@ -714,6 +821,32 @@ parser_build.add_argument('-lf', '--logfile', default=None, help=standard_descri
 parser_build.add_argument('-rv', '--repo-validation', action='store_true', help=standard_description['--repo-validation'])
 parser_build.add_argument('-nra', '--no-remote-repo-access', action='store_true', help=standard_description['--no-remote-repo-access'])
 parser_build.add_argument('-f', '--force', action='store_true', help=standard_description['--force'])
+parser_build.add_argument('--tolerate-missing-headers',  action='store_true',  help = standard_description['--tolerate-missing-headers'])
+
+
+# build parser
+parser_build = subparsers.add_parser('build', help="build contexo components or modules, linking them into an executable..")
+parser_build.set_defaults(func=cmd_build)
+parser_build.add_argument('items', nargs='+', help="list of components to build")
+parser_build.add_argument('-b', '--bconf', help=standard_description['--bconf'])
+parser_build.add_argument('-e', '--env', help=standard_description['--env'])
+parser_build.add_argument('-o', '--output', default=os.getcwd(), help=standard_description['--output'])
+parser_build.add_argument('-bd','--bindir', default="", help=standard_description['--libdir'])
+parser_build.add_argument('-hd','--headerdir', default="", help=standard_description['--headerdir'])
+parser_build.add_argument('-d', '--deps', action='store_true', help=standard_description['--deps'])
+parser_build.add_argument('-t', '--tests', action='store_true', help=standard_description['--tests'])
+parser_build.add_argument('-v', '--view', default=os.getcwd(), help=standard_description['--view'])
+parser_build.add_argument('-lf', '--logfile', default=None, help=standard_description['--logfile'])
+parser_build.add_argument('-rv', '--repo-validation', action='store_true', help=standard_description['--repo-validation'])
+parser_build.add_argument('-nra', '--no-remote-repo-access', action='store_true', help=standard_description['--no-remote-repo-access'])
+parser_build.add_argument('-f', '--force', action='store_true', help=standard_description['--force'])
+parser_build.add_argument('--tolerate-missing-headers',  action='store_true',  help = standard_description['--tolerate-missing-headers'])
+parser_build.add_argument('-exe', '--executable-name',  help = 'link the elements into a single executable')
+parser_build.add_argument('-lib', '--library-name', help="(modules) build a single library, with the given name")
+parser_build.add_argument('-L',  '--libdirs', nargs='*',  default = [],  help = "(linking) directories to search for libs")
+parser_build.add_argument('-l',  '--libs', nargs='*',  default = [],  help = "(linking) libraries to link in")
+parser_build.add_argument('-I',  '--incdirs', nargs='*',  default = [],  help = "additional include paths")
+parser_build.add_argument('--all-headers', action='store_true', help = "export all public headers")
 
 # clean parser
 parser_clean = subparsers.add_parser('clean', help="clean a module(s) ( and optionaly its dependencies)")
@@ -725,6 +858,7 @@ parser_clean.add_argument('-t', '--tests', action='store_true', help=standard_de
 parser_clean.add_argument('-v', '--view', default=os.getcwd(), help=standard_description['--view'])
 parser_clean.add_argument('-rv', '--repo-validation', action='store_true', help=standard_description['--repo-validation'])
 parser_clean.add_argument('-nra', '--no-remote-repo-access', action='store_true', help=standard_description['--no-remote-repo-access'])
+parser_clean.add_argument('--tolerate-missing-headers',  action='store_true',  help = standard_description['--tolerate-missing-headers'])
 
 # freeze parser
 parser_freeze = subparsers.add_parser('freeze', help="Generate a rspec with svn versions frozen in their current state (from working copy).")
@@ -734,6 +868,7 @@ parser_freeze.add_argument('-o', '--output',  help="file to write to (standard o
 parser_freeze.add_argument('-v', '--view', default=os.getcwd(), help=standard_description['--view'])
 parser_freeze.add_argument('-nra', '--no-remote-repo-access', action='store_true', help=standard_description['--no-remote-repo-access'])#
 parser_freeze.add_argument('-rv', '--repo-validation', action='store_true', help=standard_description['--repo-validation'])
+#parser_build.add_argument('--tolerate-missing-headers',  action='store_true',  help = standard_description['--tolerate-missing-headers'])
 
 # export parser
 #
@@ -771,9 +906,9 @@ parser_export.add_argument('-e', '--env', help=standard_description['--env'])
 parser_export.add_argument('-v', '--view', default=os.getcwd(), help=standard_description['--view'])
 parser_export.add_argument('-d', '--deps', action='store_true', help=standard_description['--deps'])
 parser_export.add_argument('-t', '--tests', action='store_true', help=standard_description['--tests'])
-parser_export.add_argument('-o', '--output', default=os.getcwd(), help=standard_description['--output'])
 parser_export.add_argument('-rv', '--repo-validation', action='store_true', help=standard_description['--repo-validation'])
 parser_export.add_argument('-nra', '--no-remote-repo-access', action='store_true', help=standard_description['--no-remote-repo-access'])
+parser_export.add_argument('--tolerate-missing-headers',  action='store_true',  help = standard_description['--tolerate-missing-headers'])
 
 #
 #
@@ -796,5 +931,5 @@ parser_view_validate.add_argument('-nra', '--no-remote-repo-access', action='sto
 ###############################################################################
 
 # Parse cmdline
-args = parser.parse_args()
-args.func(args)
+argsa=parser.parse_args()
+argsa.func(argsa)

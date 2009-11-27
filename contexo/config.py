@@ -285,7 +285,8 @@ class Config:
 
     def __init__(self, filename = None):
         self.section_dict = {'default': dict(), 'var': get_environment ()}
-
+        if filename:
+            self.section_dict['default']['CONFIG_DIR'] = os.path.dirname(filename)
         if filename != None:
             self.merge_config ( filename )
 

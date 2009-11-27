@@ -66,7 +66,7 @@ def isContexoCodeModule( path ):
         return False
 
     for d in criteriaDirs:
-        if not os.path.exists( os.path.join( path, d) ):
+        if not os.path.isdir( os.path.join( path, d) ):
             return False
 
     return True
@@ -115,7 +115,7 @@ class CTXRawCodeModule:
     # Initializes the object with all aspects of the code module. If the
     # moduleRoot argument can't be located as it is, the constructor assumes
     # that it specifies the pure name of the module and then tries to locate
-    # the path to it by querying the system configuration.
+    # the path to it by querying the system configuration. - NOT TRUE
     #
     # The constructor aborts execution with an error if the path doesn't
     # qualify as a code module when passing it to isContexoCodeModule().
@@ -129,7 +129,7 @@ class CTXRawCodeModule:
         self.privHeaders    = list()
         self.msgSender      = 'CTXRawCodeModule'
         self.buildUnitTests = buildUnitTests
-
+        assert(os.path.isabs(moduleRoot))
         if not os.path.exists(moduleRoot):
             self.modRoot = resolveModuleLocation( moduleRoot, pathlist )
         else:
@@ -156,14 +156,21 @@ class CTXRawCodeModule:
         if len(self.srcFiles) == 0:
             srcDir = self.getSourceDir()
             self.srcFiles = getSourcesFromDir( self, srcDir )
-
         return self.srcFiles
+
+    def getSourceAbsolutePaths(self):
+        import functools
+        #functional magic - bind an argument to join and map this bound function to filenames
+        return map ( functools.partial( os.path.join,  self.getSourceDir() ),  self.getSourceFilenames() )
+
+    def getTestSourceAbsolutePaths(self):
+        import functools
+        return map ( functools.partial( os.path.join,  self.getTestDir() ),  self.getTestSourceFilenames() )
 
     def getTestSourceFilenames(self):
         if len(self.testSrcFiles) == 0:
             srcDir = self.getTestDir()
             self.testSrcFiles = getSourcesFromDir( self, srcDir )
-
         return self.testSrcFiles
 
     #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -184,6 +191,10 @@ class CTXRawCodeModule:
                         self.privHeaders.append(file)
         return self.privHeaders
 
+    def getPrivHeaderAbsolutePaths(self):
+        import functools
+        return map ( functools.partial( os.path.join,  self.getPrivHeaderDir() ),  self.getPrivHeaderFilenames() )
+
     #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     def getPubHeaderFilenames(self):
         # update if list is empty.
@@ -202,6 +213,9 @@ class CTXRawCodeModule:
                         self.pubHeaders.append(file)
         return self.pubHeaders
 
+    def getPubHeaderAbsolutePaths(self):
+        import functools
+        return map ( functools.partial( os.path.join,  self.getPubHeaderDir() ),  self.getPubHeaderFilenames() )
     #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     def getContexoDir( self ):
         return os.path.join( self.modRoot, contexo_dirname )
@@ -300,7 +314,7 @@ class CTXCodeModule( CTXRawCodeModule ):
 
         return include_paths
 
-    #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+    #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: unused
     def addBuildParams( self, buildParams ):
         self.buildParams.add( buildParams )
 
@@ -338,9 +352,9 @@ class CTXCodeModule( CTXRawCodeModule ):
         # Build sources for this module.
         #
 
-        srcFiles = self.getSourceFilenames()
+        srcFiles = self.getSourceAbsolutePaths()
         if self.buildUnitTests:
-            srcFiles.extend( self.getTestSourceFilenames() )
+            srcFiles.extend( self.getTestSourceAbsolutePaths() )
 
         objlist = []
         for src in srcFiles:

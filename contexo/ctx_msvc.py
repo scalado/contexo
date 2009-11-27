@@ -40,9 +40,9 @@ def relntpath(path, start):
 
 
 
-#codeModules = listof dictionaries: { MODNAME: string, SOURCES: list(paths), PRIVHDRS: list(paths), PUBHDRS: list(paths), PRIVHDRDIR: string }
+#codeModules = listof dictionaries: { MODNAME: string, SOURCES: list(paths), PRIVHDRS: list(paths), PUBHDRS: list(paths), PRIVHDRDIR: string, TESTSOURCES:list }
 def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib, \
-                    debug, incPaths, vcprojPath, platform = 'Win32', \
+                    debug, do_tests,  incPaths, vcprojPath, platform = 'Win32', \
                     fileTitle = None ):
     import os.path
     vcprojFilePath = str()
@@ -144,7 +144,7 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib, \
 
 
     #NOTE:
-    #codeModules = listof dictionaries: { MODNAME: string, SOURCES: list(paths), PRIVHDRS: list(paths), PUBHDRS: list(paths) }
+    #codeModules = listof dictionaries: { MODNAME: string, SOURCES: list(paths), PRIVHDRS: list(paths), PUBHDRS: list(paths), TESTSOURCES }
     for mod in codeModules:
 
         # Start module folder (public header goes here also)
@@ -164,6 +164,17 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib, \
         # End source file folder
         project.endElement ('Filter')
 
+        if do_tests:
+            # Add test folder.
+            project.startElement ('Filter', {'Name': 'tests','Filter':''})
+            for src in mod['TESTSOURCES']:
+                #project.characters('testsource:%s vcprojPath: %s'%(src, vcprojPath))
+                project.startElement ('File', {'RelativePath':relntpath(src, vcprojPath)} )
+                project.startElement('FileConfiguration',{'Name':"".join([variant,'|',platform])})
+                project.element('Tool',{'Name':'VCCLCompilerTool','AdditionalIncludeDirectories':relntpath(mod['PRIVHDRDIR'], vcprojPath)})
+                project.endElement ('FileConfiguration')
+                project.endElement ('File')
+            project.endElement ('Filter')
 
         # Start private include folder
         project.startElement ('Filter', {'Name': 'inc','Filter':''})

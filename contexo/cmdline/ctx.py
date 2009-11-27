@@ -475,11 +475,11 @@ def cmd_build(args):
                 args.library_name = library
                 print args
                 objs += buildmodules( depmgr, session,  modules,  args, bin_dir, session.bc.getTitle(),  args.library_name)
-                
+
                 if (args.all_headers):
                     header_path = os.path.join(args.output, args.headerdir )
                     export_public_module_headers( depmgr, modules, header_path )
-                
+
                 depmgr.emptyCodeModules()
             export_headers( depmgr, comp.publicHeaders, header_dir )
             ctx_log.ctxlogEndComponent()
@@ -606,9 +606,9 @@ def cmd_freeze(args):
     #from  contexo.ctx_rspec_file_freeze import rspecFileRevisionFreezer
 
     fileOut = sys.stdout
+    cview = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=bool(args.repo_validation) )
     if args.output is not None:
         fileOut = open(args.output,  mode = 'wt')
-    cview = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=bool(args.repo_validation) )
     cview.freeze(output=fileOut)
 #
 #    parser = xml.sax.make_parser()

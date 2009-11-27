@@ -33,16 +33,16 @@ class LIFOStack( list ):
 
 #------------------------------------------------------------------------------
 def createRepoFromRCS( rcs, id, path, href, rev ):
-    
+
     rcs = rcs.lower() if rcs != None else None
-    
+
     if rcs == 'svn':
         return CTXRepositorySVN( id, path, href, rev )
     elif rcs == None:
         return CTXRepositoryFS( id, path, href, rev )
     else:
         userErrorExit("Unsupported RCS for repository '%s'"%(id))
-        
+
 #------------------------------------------------------------------------------
 class rspecXmlHandler(ContentHandler):
     def __init__ (self, rspecFile):
@@ -55,7 +55,7 @@ class rspecXmlHandler(ContentHandler):
 
     #--------------------------------------------------------------------------
     def startElement(self, name, attrs):
-    
+
         # .....................................................................
         if name == 'ctx-rspec':
             if self.parent_element.peek() != None:
@@ -77,17 +77,17 @@ class rspecXmlHandler(ContentHandler):
 
             rcs = attrs.get('rcs', None)
             if rcs == None and attrs.has_key('rev'):
-                userErrorExit("<ctx-import>: Revision ('rev') specified without specifying 'rcs' in RSpec '%s'"%(self.rspecFile.getFilename()))    
-                
+                userErrorExit("<ctx-import>: Revision ('rev') specified without specifying 'rcs' in RSpec '%s'"%(self.rspecFile.getFilename()))
+
             rev = attrs.get('rev', None )
             if rcs != None and rev == None:
-                warningMessage("<ctx-import>: No revision specified for import in RSpec '%s'. Assuming 'HEAD'"%(self.rspecFile.getFilename())) 
-                rev = 'HEAD'                
+                warningMessage("<ctx-import>: No revision specified for import in RSpec '%s'. Assuming 'HEAD'"%(self.rspecFile.getFilename()))
+                rev = 'HEAD'
 
             # Prepare locator object and add import to current RSpec
             rspecFileLocator = RSpecFileLocator( rcs, href, rev )
-            self.rspecFile.addImport( rspecFileLocator ) # POINT OF RECURSION 
-        
+            self.rspecFile.addImport( rspecFileLocator ) # POINT OF RECURSION
+
         # .....................................................................
         elif name == 'ctx-repo':
 
@@ -99,27 +99,27 @@ class rspecXmlHandler(ContentHandler):
             if attrs.has_key('id'):
                 if attrs.get('id') in self.id_list:
                     userErrorExit("Multiple occurances of id '%s' in '%s'"%(attrs.get('id'), self.rspecFile.getFilename()))
-                else:    
+                else:
                     self.id_list.append(attrs.get('id'))
-            
-            self.current_repo = createRepoFromRCS( attrs.get('rcs', None), 
-                                                   attrs.get('id', ""), 
-                                                   attrs.get('path', ""), 
-                                                   attrs.get('href', ""), 
-                                                   attrs.get('rev', "") ) 
+
+            self.current_repo = createRepoFromRCS( attrs.get('rcs', None),
+                                                   attrs.get('id', ""),
+                                                   attrs.get('path', ""),
+                                                   attrs.get('href', ""),
+                                                   attrs.get('rev', "") )
             self.rspecFile.addRepository ( self.current_repo )
 
         # .....................................................................
         elif name == 'ctx-path':
-            
+
            # Make sure this element is used in correct context
             if self.parent_element.peek() not in ['ctx-repo',]:
                 userErrorExit("'<%s>' elements cannot be used within '<%s>' elements"%(name, self.parent_element.peek()))
 
             #
-            # Assure presence of mandatory attributes            
+            # Assure presence of mandatory attributes
             #
-            
+
             attribute = 'type'
             if not attrs.has_key(attribute):
                 userErrorExit("Missing mandatory attribute '%s' in element '<%s>'"%(attribute, name))
@@ -127,13 +127,13 @@ class rspecXmlHandler(ContentHandler):
             attribute = 'spec'
             if not attrs.has_key(attribute):
                 userErrorExit("Missing mandatory attribute '%s' in element '<%s>'"%(attribute, name))
-            
+
             ctx_path_type = attrs.get( 'type' ).lower()
             self.current_repo.addPath( ctx_path_type, attrs.get('spec') )
 
         # .....................................................................
         else:
-            warningMessage("Ignoring unknown element '<%s>' in RSpec '%s'.\nThis might be a normal compatibility issue."%(name, self.rspecFile.filename)) 
+            warningMessage("Ignoring unknown element '<%s>' in RSpec '%s'.\nThis might be a normal compatibility issue."%(name, self.rspecFile.getFilename()))
 
         self.parent_element.push( name )
 
@@ -154,7 +154,7 @@ class rspecXmlHandler(ContentHandler):
         #depending on what is the current state,
         #put the character in the correct bin
         def characters (self, ch):
-            warningMessage("Ignoring character data '%s' found in element '%s'"%(ch, self.parent_element.peek())) 
+            warningMessage("Ignoring character data '%s' found in element '%s'"%(ch, self.parent_element.peek()))
 
 #------------------------------------------------------------------------------
 class RSpecFileLocator:
@@ -163,17 +163,17 @@ class RSpecFileLocator:
         self.href = _href
         self.revision = _revision
         self.msgSender = 'RSpecFileLocator'
-        
-        
+
+
     #--------------------------------------------------------------------------
-    # Returns a guaranteed local path to the RSpec file. The returned path might 
+    # Returns a guaranteed local path to the RSpec file. The returned path might
     # be temporary and should not be stored for later access. The path is
     # guaranteed to be available during the entire build session.
     #--------------------------------------------------------------------------
     def getLocalAccessPath(self):
 
         local_access_path = None
-                
+
         if self.rcs == None:
 
             infoMessage("No RCS specified for RSpec '%s', attempting regular file access"\
@@ -181,9 +181,9 @@ class RSpecFileLocator:
 
             if not os.path.exists(self.href):
                 userErrorExit("RSpec unreachable with regular file access: \n  %s"%(self.href))
-        
+
             local_access_path = self.getHref()
-            
+
         else:
 
             temp_dir = getUserTempDir()
@@ -192,28 +192,28 @@ class RSpecFileLocator:
 
             infoMessage("Downloading (svn-exporting) RSpec from '%s' to '%s' using RCS '%s'"\
                          %(str(self.getHref()), str(temp_rspec), str(self.rcs)), 1)
-            
+
             if os.path.exists(temp_rspec):
                 os.remove( temp_rspec )
-            
+
             if self.rcs == 'svn':
 
                 svn = ctx_svn_client.CTXSubversionClient()
                 svn.export( self.getHref(), temp_dir, self.revision )
                 local_access_path = temp_rspec
-                
+
             #elif self.rcs == 'git':
                 #git = ctx_git_client.CTXGitClient()
-                
+
             else:
                 userErrorExit("Unsupported RCS: %s"%(self.rcs))
 
-            
+
         infoMessage("RSpec local access path resolved to: %s"\
                      %(local_access_path), 4)
 
         return local_access_path
-        
+
     #--------------------------------------------------------------------------
     def getHref(self):
         return str(self.href)
@@ -227,25 +227,25 @@ class RSpecFile:
         self.view               = view
         self.msgSender          = 'RSpecFile'
         #---
-        
+
         if type(rspec_file) is str:
             self.rspecFileLocator = RSpecFileLocator( _rcs=None, _href=rspec_file, _revision=None )
         else:
             self.rspecFileLocator = rspec_file
 
-        
+
         localPath = self.rspecFileLocator.getLocalAccessPath()
-        
+
         parser = make_parser()
         handler = rspecXmlHandler(self)
         parser.setContentHandler(handler)
         parser.parse( open(localPath) ) # POINT OF RECURSION
-        
+
         if parent == None:
-        
+
             if getVerboseLevel() > 1:
                 self.printRSpecHierarchy()
-                
+
             # This is the root RSpec. At this point all imported RSpecs
             # has been processed recursively and we now have a tree of
             # RSpecFile objects, starting with this one.
@@ -253,7 +253,7 @@ class RSpecFile:
             # Now we need to traverse the tree and flatten all RSpecs into
             # one, also applying rules for override and presedence.
             self.processImports() # POINT OF RECURSION
-            
+
         #self.filename = os.path.basename(rspecFilename) ??
 
     #--------------------------------------------------------------------------
@@ -267,7 +267,7 @@ class RSpecFile:
     #--------------------------------------------------------------------------
     def addImport( self, rspecFileLocator ):
         self.imports.append( RSpecFile(rspecFileLocator, self, self.view) )
-        
+
     #--------------------------------------------------------------------------
     # Returns all imports as a list of RSpecFile objects.
     #--------------------------------------------------------------------------
@@ -279,11 +279,11 @@ class RSpecFile:
     #--------------------------------------------------------------------------
     def getImportPaths( self, recursive = True ):
         import_paths = list()
-        
+
         for rspec in self.getImports():
             if recursive:
                 import_paths.extend( rspec.getImportPaths(recursive) ) # POINT OF RECURSION
-                
+
             import_paths.append( rspec.getFilePath() )
 
         return import_paths
@@ -293,15 +293,15 @@ class RSpecFile:
     #--------------------------------------------------------------------------
     def getImportFilenames( self, recursive = True ):
         import_filenames = list()
-        
+
         for rspec in self.getImports():
             if recursive:
                 import_filenames.extend( rspec.getImportFilenames(recursive) ) # POINT OF RECURSION
-                
+
             import_filenames.append( rspec.getFilename() )
 
         return import_filenames
-        
+
     #--------------------------------------------------------------------------
     def addRepository(self, repository):
         self.repositories[repository.id_name] = repository
@@ -318,13 +318,13 @@ class RSpecFile:
         paths = list()
         for repo in self.getRepositories():
             paths.extend( repo.getFullPaths( path_section ) )
-            
+
         return paths
-        
+
     #--------------------------------------------------------------------------
     def getAccessPolicy( self ):
         self.view.getAccessPolicy()
-        
+
     #--------------------------------------------------------------------------
     def delRepository(self, name):
         if not name in self.repositories:
@@ -340,7 +340,7 @@ class RSpecFile:
         #   by the successing import. This rule is implied by the iteration
         #   order of the imports list.
         #
-        # - Repositories from an imported RSpec are overriden/discarded by any 
+        # - Repositories from an imported RSpec are overriden/discarded by any
         #   repository in the importing RSpec, if they share the same ID. IDs
         #   are case insensitive.
         #
@@ -349,7 +349,7 @@ class RSpecFile:
         #
 
         for rspec in self.imports:
-        
+
             # First let the imported rspec process its own imports.
             rspec.processImports() # POINT OF RECURSION
 
@@ -366,34 +366,34 @@ class RSpecFile:
                 else:
                     infoMessage("Repository '%s' in '%s' overridden by repository '%s' in '%s'"\
                                  %(r.getID(), rspec.rspecFileLocator.getHref(), r.getID(), self.rspecFileLocator.getHref()), 1)
-                    
-        # All imports processed, so they can be discarded. 
+
+        # All imports processed, so they can be discarded.
         # COMMENTED OUT, it's probably useful to have the structure intact for later analysis
-        # self.imports = list() 
-        
+        # self.imports = list()
+
     #--------------------------------------------------------------------------
     def printRSpecHierarchy(self, level=0):
-        
+        import sys
         if level == 0:
-            print "\n--- RSpec hierarchy -----------------\n"
-            
-        print '   '*level,
-        print '[ctx-rspec: ' + self.rspecFileLocator.getHref() + ']'
-        
+            sys.stderr.write( "\n--- RSpec hierarchy -----------------\n");
+
+        sys.stderr.write( '   '*level,); sys.stderr.write('\n')
+        sys.stderr.write( '[ctx-rspec: ' + self.rspecFileLocator.getHref() + ']'); sys.stderr.write('\n')
+
         for r in self.getRepositories():
-            print '   '*level,
-            print ' ',
-            print '[ctx-repo: ' + r.getID() + ']'
+            sys.stderr.write( '   '*level,);
+            sys.stderr.write( ' ',);
+            sys.stderr.write( '[ctx-repo: ' + r.getID() + ']'); sys.stderr.write('\n')
             for section in REPO_PATH_SECTIONS:
                 for p in r.getFullPaths( section ):
-                    print '   '*level,
-                    print '   ',
-                    print "[ctx-path type='%s': %s]"%(section, p)
-            
-        print '\n'
+                    sys.stderr.write( '   '*level,);
+                    sys.stderr.write( '   ',);
+                    sys.stderr.write( "[ctx-path type='%s': %s]"%(section, p)); sys.stderr.write('\n')
+
+        sys.stderr.write( '\n');
 
         for i in self.imports:
             i.printRSpecHierarchy( level + 1 ) # POINT OF RECURSION
-            
+
         if level == 0:
-            print "\n------------------------------------"
+            sys.stderr.write( "\n------------------------------------"); sys.stderr.write('\n')

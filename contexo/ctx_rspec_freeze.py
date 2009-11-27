@@ -64,7 +64,8 @@ class RspecFreezer():
                 curr_rev = self.svnclient.getRevisionFromWorkingCopy(repo_path)
             else:
                 curr_rev = self.svnclient.getRevisionFromWorkingCopy(repo_path)
-                warningMessage('%s: Overwriting strict revision nr %d with %d'%(id, int(rev),  curr_rev))
+                if str(curr_rev) != rev:
+                    warningMessage('%s: Overwriting strict revision nr %d with %d'%(id, int(rev),  curr_rev))
             self.xmlgenerator.characters("\t")
             self.xmlgenerator.startElement('ctx-repo',  attrs = {'id':id,'rcs':rcs, 'href': href,  'rev': str(curr_rev),  'path':path })
             self.xmlgenerator.characters("\n")
@@ -74,9 +75,9 @@ class RspecFreezer():
         for path_type in paths:
             for  path_spec in paths[path_type]:
                 self.xmlgenerator.characters("\t\t")
-                self.xmlgenerator.startElement('ctx_path',  attrs = {'type':path_type,  'spec':path_spec})
-                self.xmlgenerator.endElement('ctx_path')
+                self.xmlgenerator.startElement('ctx-path',  attrs = {'type':path_type,  'spec':path_spec})
+                self.xmlgenerator.endElement('ctx-path')
                 self.xmlgenerator.characters("\n")
         self.xmlgenerator.characters("\t")
-        self.xmlgenerator.endElement('ctx_repo')
+        self.xmlgenerator.endElement('ctx-repo')
         self.xmlgenerator.characters("\n\n")

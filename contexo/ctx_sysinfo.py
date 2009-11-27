@@ -17,20 +17,18 @@
 #
 
 CTX_VER_MAJOR           = 0
-CTX_VER_MINOR          = 6
-CTX_VER_STATE           = 'devel'
-CTX_DISPLAYVERSION      = '%d.%d %s'%(CTX_VER_MAJOR, CTX_VER_MINOR, CTX_VER_STATE)
+CTX_VER_MINOR_1       = 6
+CTX_VER_MINOR_2      = 99
+CTX_VER_STATE           = ' (0.7.0 prerelease)'
+CTX_DISPLAYVERSION      = '%d.%d.%d %s'%(CTX_VER_MAJOR, CTX_VER_MINOR_1, CTX_VER_MINOR_2, CTX_VER_STATE)
 CTX_LICENSE             = 'licesed under GPLv2 ( http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt )'
 
 CTX_BANNER              = """
 Contexo Build System v%s,\n %s
 """%(CTX_DISPLAYVERSION, CTX_LICENSE)
 
-
-
 #
 #### Configuration
 #
-
 
 CTX_CONFIG_FILENAME     = 'contexo.cfg'

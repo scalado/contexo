@@ -92,23 +92,43 @@ def cmd_parse( args ):
                 modTags.append( 'COMPILING_MOD_' + string.upper( rawMod.getName() ) )
 
     #
-    # Collect additional include paths
+    # Collect additional include paths and additional library paths
     #
 
-    user_includepaths = list()
+    def getPathsFromOption(option):
+        user_paths = list()
+        if os.path.isdir( option ):
+            user_paths.append(option)
+        elif not os.path.isfile( option ):
+            userErrorExit("Cannot find option file or directory'%s'"%option)
+        else:
+            file = open( option, "r" )
+            for line in file.readlines():
+                line = line.strip()
+                user_paths += line.split(";")
+            file.close()
+            user_paths = filter(lambda x: x.strip(" ") != '',user_paths)
+        return user_paths
+
     if args.additional_includes != None:
         filename = args.additional_includes
-        if os.path.isdir( filename ):
-            userErrorExit("The 'additional includes' option should be used with a file that lists the additional include paths. %s is a directory"%filename)
-        elif not os.path.isfile( filename ):
-            userErrorExit("Cannot find option file '%s'"%filename)
-        file = open( filename, "r" )
-        for line in file.readlines():
-            line = line.strip()
-            user_includepaths += line.split(";")
-        file.close()
-        user_includepaths = filter(lambda x: x.strip(" ") != '',user_includepaths)
+        user_includepaths = getPathsFromOption(filename)
         incPaths += user_includepaths
+
+    libPaths = list()
+    if args.additional_libdir != None:
+        filename = args.additional_libdir
+        user_librarypaths = getPathsFromOption(filename)
+        libPaths += user_librarypaths
+
+    # Additional dependencies
+    libNames = list()
+    user_libnames = list()
+    if args.additional_dependencies != None:
+        filename = args.additional_dependencies
+        user_libnames = getPathsFromOption(filename)
+
+        libNames += user_libnames
 
     #
     # Determin if we're exporting components or modules, and do some related
@@ -172,7 +192,6 @@ def cmd_parse( args ):
     if not os.path.exists( args.output ):
         os.makedirs( args.output )
 
-
     guidDict = dict()
     for proj in vcprojList:
         guidDict[proj['PROJNAME']] = contexo.ctx_msvc.make_libvcproj8( proj['PROJNAME'],
@@ -184,7 +203,10 @@ def cmd_parse( args ):
                                                                        incPaths,
                                                                        args.output,
                                                                        args.platform,
-                                                                       proj['PROJNAME'])
+                                                                       proj['PROJNAME'],
+                                                                       args.configuration_type,
+                                                                       libNames,
+                                                                       libPaths )
 
     #
     # Handle external project if specified
@@ -200,6 +222,11 @@ def cmd_parse( args ):
                                 "TOOL":"VCCLCompilerTool",
                                  "KEY":"AdditionalIncludeDirectories",
                                "VALUE":";".join(incPaths) }))
+
+        attrs.append(   dict({ "DEBUG":debugmode,
+                                "TOOL":"VCLinkerTool",
+                                 "KEY":"AdditionalLibraryDirectories",
+                               "VALUE":";".join(libPaths) }))
 
         contexo.ctx_msvc.update_vcproj8(external_vcproj['FILENAME'],attrs)
 
@@ -265,9 +292,19 @@ parser.add_argument('-ev', '--external-vcproj', default=None,
  generated in the export.""")
 
 parser.add_argument('-ai', '--additional-includes', default=None,
- help="""Path to a file with include paths to append to the include directories
+ help="""Directory, or path to a file with include paths to append to the include directories
  of all VS projects generated. The paths in the file can be separated by line
  or by semicolon.""")
+
+parser.add_argument('-al', '--additional-libdir', default=None,
+ help="""Directory or path to a file with library paths to append to the additional library directories
+ of the modified external-vcproj. The paths in the file can be separated by line
+ or by semicolon.""")
+
+parser.add_argument('-ad', '--additional-dependencies', default=None,
+ help="""Path to a file with a list of libraries to add to the project's additional dependencies.
+Only applicable if the configuration type is 'exe'.
+The library names can be separated by line or semicolon.""")
 
 parser.add_argument('-pl', '--platform', default='Win32',
  help="""If specified, the resulting VS projects will use
@@ -277,6 +314,11 @@ parser.add_argument('-pl', '--platform', default='Win32',
 
 parser.add_argument('-o', '--output', default=os.getcwd(),
  help="The output directory for the export.")
+
+parser.add_argument('-ct', '--configuration-type', default='lib',
+ help="""Type of project, whether the project generates a lib or an exe. Default value is 'lib'.
+Accepted values 'exe' or 'lib'.
+""")
 
 #parser.add_argument('-ld','--libdir', default="", help=standard_description['--libdir'])
 #parser.add_argument('-l', '--lib', help="if the build operation results in a single library, this option sets its name")

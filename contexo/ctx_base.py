@@ -657,6 +657,7 @@ class CTXBuildSession:
         joinedBuildParams.add( self.buildParams )
         if buildParams != None:
             joinedBuildParams.add( buildParams )
+        infoMessage("Joined include paths: %s"%(", ".join(joinedBuildParams.incPaths)), 7)
 
         buildParamsChecksum = joinedBuildParams.makeChecksum()
 

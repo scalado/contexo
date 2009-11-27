@@ -40,10 +40,15 @@ def relntpath(path, start):
 
 
 
+
 #codeModules = listof dictionaries: { MODNAME: string, SOURCES: list(paths), PRIVHDRS: list(paths), PUBHDRS: list(paths), PRIVHDRDIR: string, TESTSOURCES:list }
-def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib, \
-                    debug, do_tests,  incPaths, vcprojPath, platform = 'Win32', \
-                    fileTitle = None ):
+def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib,
+                    debug, do_tests,  incPaths, vcprojPath, platform = 'Win32',
+                    fileTitle = None, configType = 'lib',
+                     additionalDependencies = None,
+                     additionalLibraryDirectories = None):
+
+
     import os.path
     vcprojFilePath = str()
     vcprojPath = os.path.abspath(vcprojPath)
@@ -56,6 +61,18 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib, \
 
     #GUID            = str(pywintypes.CreateGuid())
     GUID            = "".join(["{",str(uuid.uuid3(uuid.NAMESPACE_URL,"make_libvcproj8" + projectName)).upper(),"}"])
+
+    #
+    # Determine exe/lib
+    #
+    if configType == 'lib':
+        configurationTypeNbr = '4'
+    elif configType == 'exe':
+        configurationTypeNbr = '1'
+    else:
+        print "Erroneous config type. Using 'lib'"
+        configType = 'lib'
+        configurationTypeNbr = '4'
 
     #
     # Determine debug/release
@@ -102,15 +119,13 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib, \
     project.startElement ('Configuration', {'Name':variant+'|' + platform,
                                             'OutputDirectory':"".join(['.\\',variant,"\\",projectName]),
                                             'IntermediateDirectory':"".join(['.\\',variant,"\\",projectName]),
-                                           'ConfigurationType':'4',
+                                           'ConfigurationType':configurationTypeNbr,
                                            'UseOfMFC':'0',
                                             'CharacterSet':'1'})
 
     #
     # Compiler
     #
-
-    # TODO: parse flags and add correct attributes in compiler tool.
 
     if type(incPaths) != list:
         incPaths = split(";", incPaths)
@@ -119,21 +134,71 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib, \
 
     incPaths = ";".join(incPaths)
 
-    # Add private include directories for modules in lib
-    #incPaths += ";" + ";".join(map(lambda m: m['PRIVHDRDIR'],codeModules))
-
-    project.element ('Tool', {'Name':'VCCLCompilerTool',
+    compilerTool = {'Name':'VCCLCompilerTool',
                                   'PreprocessorDefinitions': prepDefs,
                                    'ObjectFile':"".join(['.\\',variant,"\\",projectName,'/']),
                                    'ProgramDataBaseFileName':"".join(['.\\',variant,"\\",projectName,'/']),
                                   'SuppressStartupBanner':'TRUE',
-                                  'AdditionalOptions': cflags ,
                                   'AdditionalIncludeDirectories':incPaths,
                                   'Optimization':'0',
-                                   'DebugInformationFormat':debugInformationFormat})
+                                   'DebugInformationFormat':debugInformationFormat}
 
-    project.element ('Tool', {'Name':'VCLibrarianTool',
+    # Parse flags and add correct attributes in compiler tool.
+    mycflags = cflags
+    if type(mycflags) != list:
+            mycflags = mycflags.split(' ')
+
+
+
+    vcproj_opts_map = {
+                    '/Zi':('DebugInformationFormat', '3'),
+                    '/ZI':('DebugInformationFormat', '4'),
+                    '/W4':('WarningLevel', '4'),
+                    '/W3':('WarningLevel', '3'),
+                    '/W2':('WarningLevel', '2'),
+                    '/W1':('WarningLevel', '1'),
+                    '/W0':('WarningLevel', '0'),
+                    '/Od':('Optimization', '0'),
+                    '/O1':('Optimization', '1'),
+                    '/O2':('Optimization', '2')}
+
+    # digest, analyse and remove options
+    for opt in mycflags:
+        try:
+            (optionname,  numvalue) = vcproj_opts_map[opt]
+            compilerTool[ optionname ] = numvalue
+            mycflags.remove(opt)
+            print 'Digested %s'%opt
+        except KeyError:
+            print 'Passing %s'%opt
+            pass
+
+    # Write the rest of the options as AdditionalOptions
+    mycflags = " ".join(mycflags)
+    compilerTool['AdditionalOptions'] = mycflags;
+
+    # Write compilerTool to project
+    project.element ('Tool',  compilerTool)
+
+    #
+    # Archiver
+    #
+
+    if configType == 'lib':
+        project.element ('Tool', {'Name':'VCLibrarianTool',
                                    'OutputFile': '$(OutDir)/'+outLib})
+    elif configType == 'exe':
+        additionalDependencies = " ".join(additionalDependencies)
+        additionalLibraryDirectories = " ".join(additionalLibraryDirectories)
+        project.element ('Tool', {'Name':'VCLinkerTool',
+                                  'GenerateDebugInformation':'TRUE',
+                                  'TargetMachine':'1',
+                                  'AdditionalDependencies':additionalDependencies,
+                                  'AdditionalLibraryDirectories':additionalLibraryDirectories})
+        project.element ('Tool', {'Name':'VCManifestTool'})
+        project.element ('Tool', {'Name':'VCAppVerifierTool'})
+        project.element ('Tool', {'Name':'VCWebDeploymentTool'})
+
 
     project.endElement ('Configuration')
     project.endElement ('Configurations')

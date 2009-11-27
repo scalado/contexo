@@ -1,7 +1,6 @@
 
 import os
 import sys
-import re
 import hashlib
 import cPickle
 
@@ -10,54 +9,7 @@ from stat import *
 from ctx_common import *
 import ctx_cmod
 
-C_IDENTIFIER_REGEXP     = '[a-zA-Z_]+([a-zA-Z_]|[0-9])*'
-C_COMMENT_REGEXP        = '(/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/)|(//.*)'
-C_STRING_REGEXP         = '".*"'
-C_USER_INCLUDE_REGEXP   = '#include\s*"\S*"'
-C_SYSTEM_INCLUDE_REGEXP = '#include\s*<\S*>'
-C_SYS_INC_FILE_REGEXP   = '<.*>'
-C_SEPARATORS            = '[%&\^\|#><\+\-&!;{},=\(\)\[\]\:\.!~\*/\?]'
-
-regexp_identifier = re.compile (C_IDENTIFIER_REGEXP)
-
-#------------------------------------------------------------------------------
-def is_C_identifier ( token ):
-    if regexp_identifier.match (token):
-        return 1
-    else:
-        return 0
-
-#------------------------------------------------------------------------------
-def purge_comments ( src ):
-    return re.sub( C_COMMENT_REGEXP,'', src )
-
-
-#------------------------------------------------------------------------------
-def purge_strings ( src ):
-    return re.sub (C_STRING_REGEXP,'', src)
-
-#------------------------------------------------------------------------------
-def parseIncludes ( src ):
-
-    src = purge_comments( src )
-
-    purged_src = purge_strings (src)
-
-    includes = re.findall  (C_USER_INCLUDE_REGEXP, src)
-
-    user_includes = []
-    regexp = re.compile (C_STRING_REGEXP)
-    for i in includes:
-        user_includes.append (regexp.findall (i)[0][1:-1])
-
-    includes = re.findall (C_SYSTEM_INCLUDE_REGEXP, src)
-
-    system_includes = []
-    regexp = re.compile ( C_SYS_INC_FILE_REGEXP)
-    for i in includes:
-        system_includes.append (regexp.findall (i)[0][1:-1])
-
-    return (user_includes, system_includes)
+import ctx_cparser
 
 #------------------------------------------------------------------------------
 def getModulePrivHeaderDir( modulePath ):
@@ -79,7 +31,7 @@ def findFileInPathList( src_file, pathList ):
             if os.path.exists(src_path):
                 return src_path
         errorMessage("'%s' cannot be resolved in current path list."%( src_file) )
-        infoMessage("%s"%"\n".join(pathList), msgVerboseLevel=5)
+        infoMessage("%s"%"\n".join(pathList), msgVerboseLevel=8)
     return None
 
 #------------------------------------------------------------------------------
@@ -356,15 +308,16 @@ class CTXDepMgr: # The dependency manager class.
                 dependings = self.findFilesDependingOn(inputFile)
                 assert(dependings)
                 if ( self.tolerateMissingHeaders):
-                    warningMessage("Dependency manager cannot locate input file: %s (from %s)"%(inputFile, "".join(dependings) ))
+                    warningMessage("Dependency manager cannot locate input file: %s (from %s)"%(inputFile, ",".join(dependings) ))
                 else:
-                    userErrorExit("Dependency manager cannot locate input file: %s (from %s)"%(inputFile, "".join(dependings) ))
+                    userErrorExit("Dependency manager cannot locate input file: %s (from %s)"%(inputFile, ",".join(dependings) ))
                 continue #return
 
             #
             # Create checksum used to determine if the input file has changed
             # from stored checksum in dependencies
             #
+
             assert(os.path.isabs(inputFile) or not inputFile.endswith('.c') )
             if inputFilePath not in self.processed:
                 checksum = generateChecksum( inputFilePath, self.checksumMethod )
@@ -374,11 +327,14 @@ class CTXDepMgr: # The dependency manager class.
                     incFileList = self.dependencies[inputFilePath][INC_FILELIST]
                 else:
                     inputFileContents = getFileContents( inputFilePath )
-                    incFileList = parseIncludes(inputFileContents)[0]
+                    incFileList = ctx_cparser.parseIncludes(inputFileContents)[0]
+
 
                     self.dependencies[inputFilePath] = (incFileList, checksum)
 
                 self.processed.add ( inputFilePath )
+
+            inputFileContents = getFileContents( inputFilePath )
 
             #
             # We now have a list of the files on which our input file depend on,
@@ -457,7 +413,7 @@ class CTXDepMgr: # The dependency manager class.
         #
         # Try to load dependency dictionary from disk.
         #
-        #self.dependencies = self.loadDependencies()
+        self.dependencies = self.loadDependencies()
         self.processed = set()
 
         #
@@ -574,7 +530,6 @@ class CTXDepMgr: # The dependency manager class.
                     self.__updateDependencies ( [incFile], pathList  )
                     ctxAssert ( incFile in self.dependencies, "incFile= " + incFile )
                 if incFile not in processedFiles:
-                    import functools
                     depIncludes = set ( self.dependencies[incFile][0] )
                     fullpathIncludes = [ s for s in map( self.locate,  depIncludes) if s != None ]
                     processedFiles.add ( incFile )
@@ -600,24 +555,30 @@ class CTXDepMgr: # The dependency manager class.
         #get the includes that 'filenames' depend on i.e. ( the includes files in the filenames list include )
         depIncludes = self.__getDependentIncludes ( filenames, pathList )
 
-        includePaths = set ()
-        for f in depIncludes:
-            if f not in self.inputFilePathDict:
-                incPath = updatePath ( f, self.inputFilePathDict, pathList )
-            elif not os.path.exists (self.inputFilePathDict[f]):
-                incPath = updatePath ( f, self.inputFilePathDict, pathList )
-            else:
-                incPath = self.inputFilePathDict[f]
+#        includePaths = set ()
+#        for f in depIncludes:
+#            if f not in self.inputFilePathDict:
+#                incPath = updatePath ( f, self.inputFilePathDict, pathList )
+#            elif not os.path.exists (self.inputFilePathDict[f]):
+#                incPath = updatePath ( f, self.inputFilePathDict, pathList )
+#            else:
+#                incPath = self.inputFilePathDict[f]
 
 
-            includePaths.add ( os.path.dirname (incPath) )
+            #includePaths.add ( os.path.dirname (incPath) )
 
-        return list ( includePaths )
+        ret = set ( map(os.path.dirname,  depIncludes) )
+        #infoMessage("pathList: %s"%", ".join(pathList), 6 )
+        #infoMessage("getIncludePaths: %s"%", ".join(ret), 6 )
+        #import pdb
+        #pdb.set_trace()
+        return ret
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     def getModuleIncludePaths( self, moduleName ):
         from ctx_cmod import CTXCodeModule
-
+        #import pdb
+        #pdb.set_trace()
         if self.needUpdate:
             self.updateDependencyHash()
 
@@ -635,7 +596,10 @@ class CTXDepMgr: # The dependency manager class.
      #   pathList += assureList ( cmod.getSourceDir () )
 
        # return self.getIncludePaths ( filenames, pathList )
-        return self.getIncludePaths ( filenames, None )
+        ret = self.getIncludePaths ( filenames, None )
+#   print "getModuleIncludePaths: "
+#   print ret
+        return ret
 
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
@@ -650,13 +614,13 @@ class CTXDepMgr: # The dependency manager class.
 
         includeFiles = self.__getDependentIncludes ( [sourceFile], list(self.depPaths))
 
-        deps = list()
-        for f in includeFiles:
-            if not self.inputFilePathDict.has_key(f):
-                deps.append( updatePath( f, self.inputFilePathDict, self.depPaths ) )
-            deps.append(self.inputFilePathDict[f])
+        #deps = list()
+        #for f in includeFiles:
+        #    if not self.inputFilePathDict.has_key(f):
+        #        deps.append( updatePath( f, self.inputFilePathDict, self.depPaths ) )
+        #    deps.append(self.inputFilePathDict[f])
 
-        return deps
+        return includeFiles
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     def getDependenciesChecksum( self, inputFile ):
@@ -768,10 +732,11 @@ class CTXDepMgr: # The dependency manager class.
                 pubHeaders = self.cmods[ module_name ].getPubHeaderAbsolutePaths()
 
                 for header in pubHeaders:
-                    #if full_path:
-                        #header_set.add(self.inputFilePathDict [ header ])
-                    #else:
-                    header_set.add ( header )
+                    if full_path and not os.path.isabs(header):
+                        header_set.add(self.inputFilePathDict [ header ])
+                        assert(False)
+                    else:
+                        header_set.add ( header )
 
                     for dep_header in self.dependencies[header][0]:
                         if (full_path):

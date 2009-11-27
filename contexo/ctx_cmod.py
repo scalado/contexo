@@ -129,7 +129,8 @@ class CTXRawCodeModule:
         self.privHeaders    = list()
         self.msgSender      = 'CTXRawCodeModule'
         self.buildUnitTests = buildUnitTests
-        assert(os.path.isabs(moduleRoot))
+        assert( os.path.isabs(moduleRoot) )
+        moduleRoot = os.path.normpath(moduleRoot)
         if not os.path.exists(moduleRoot):
             self.modRoot = resolveModuleLocation( moduleRoot, pathlist )
         else:
@@ -310,7 +311,7 @@ class CTXCodeModule( CTXRawCodeModule ):
                     #cand = '\"' + cand + '\"'
                     include_paths.append( cand )
         else:
-            infoMessage("Module %s has no external depenencies."%self.getName(), 4)
+            infoMessage("Module %s has no external depenencies."%self.getName(), 5)
 
         return include_paths
 

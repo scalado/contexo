@@ -173,3 +173,7 @@ if sys.platform == 'win32':
 if sys.platform == 'win32':
     addPathsInWindowsRegistry()
 
+custom_configdir= os.path.expandvars("$CONTEXO_CONFIG_DIR")
+custom_homedir  = os.path.expandvars("$CONTEXO_HOME_DIR")
+configdir = os.path.join(os.path.expanduser('~'),  '.contexo')
+print 'Home directory resolved to %s. Normally configuration is put in %s.\nYou can override it with the environment variable CONTEXO_HOME_DIR (it will be the basedir for .contexo) or CONTEXO_CONFIG_DIR (instead of %s)' % (os.path.expanduser('~'),  configdir,  configdir)

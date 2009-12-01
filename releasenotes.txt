@@ -1,3 +1,8 @@
+Contexo 0.7.0
+-new plugin: android ndk makefile generation
+-new tool: bdef2rspec.py
+-fixed bug in freeze
+
 ﻿Contexo 0.6.99
 new features/fixes:
 -new command: build

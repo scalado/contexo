@@ -35,12 +35,12 @@ if (suspected_ctx_paths):
     sys.exit( -1 )
 
 setup(name="Contexo",
-      version="0.4.0",
+      version="0.6.99",
       description="Contexo build system",
       author="Manuel Astudillo",
       author_email="manuel.astudillo@scalado.com",
       url="http://www.scalado.com",
-      scripts =  ['contexo/cmdline/ctx.py',  'contexo/cmdline/ctx.bat', 'contexo/plugins/export/msvc.py', 'contexo/plugins/export/tengiltests.py' ],
+      scripts =  ['contexo/cmdline/ctx.py',  'contexo/cmdline/ctx.bat', 'contexo/cmdline/bdef2rspec.py', 'contexo/plugins/export/msvc.py', 'contexo/plugins/export/tengiltests.py' ],
       package_dir = { 'contexo.defaults':'defaults' ,'': 'otherlibs',  'contexo':'contexo'},  #the '':'otherlibs' is a hack to make it load argparse without a package, from a subdirectory otherlibs
       package_data={ 'contexo': ['cmdline/ctx.bat'],  'contexo.defaults': ['contexo.cfg', 'bconfs/*', 'cdefs/*' ], 'contexo.plugins.export': ['msvc.bat','rspectree.bat'] },
       packages = [ 'contexo.defaults', 'contexo' ,  'contexo.platform', 'contexo.plugins', 'contexo.plugins.export' ],
@@ -177,3 +177,4 @@ custom_configdir= os.path.expandvars("$CONTEXO_CONFIG_DIR")
 custom_homedir  = os.path.expandvars("$CONTEXO_HOME_DIR")
 configdir = os.path.join(os.path.expanduser('~'),  '.contexo')
 print 'Home directory resolved to %s. Normally configuration is put in %s.\nYou can override it with the environment variable CONTEXO_HOME_DIR (it will be the basedir for .contexo) or CONTEXO_CONFIG_DIR (instead of %s)' % (os.path.expanduser('~'),  configdir,  configdir)
+print 'Now use Contexo'

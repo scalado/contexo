@@ -319,7 +319,7 @@ def cmd_buildmod(args):
 
     output_path = os.path.join( args.output, args.libdir )
 
-    buildmodules( depmgr, session, modules, args, output_path, bc.getTitle(),  args.link_executable ,  libraryName = args.lib)
+    buildmodules( depmgr, session, modules, args, output_path, bc.getTitle(),  libraryName = args.lib)
 
     header_path = os.path.join(args.output, args.headerdir )
     export_public_module_headers( depmgr, modules, header_path )
@@ -807,7 +807,6 @@ parser_build.add_argument('-rv', '--repo-validation', action='store_true', help=
 parser_build.add_argument('-nra', '--no-remote-repo-access', action='store_true', help=standard_description['--no-remote-repo-access'])
 parser_build.add_argument('-f', '--force', action='store_true', help=standard_description['--force'])
 parser_build.add_argument('--tolerate-missing-headers',  action='store_true',  help = standard_description['--tolerate-missing-headers'])
-parser_build.add_argument('-exe', '--link-executable',  action='store_true',  help = 'link the elements into a single executable')
 
 
 # buildcomp parser

@@ -1,0 +1,17 @@
+#::::::::::::::::::::::::::::::::::::::::::::::::
+# Contexo Build Configuration
+#::::::::::::::::::::::::::::::::::::::::::::::::
+
+[meta]
+TITLE                   = 32bitDebug
+DESCRIPTION             = 32bit OSX debug
+
+[config]
+DEBUG_BUILD             = YES
+DEBUGMODE_MEMORY        = NO
+DEBUGMODE_FILE          = NO
+CHAR_ENCODING           = ASCII
+BYTE_ORDER              = LITTLE_ENDIAN
+CDEF                    = gcc_osx.cdef
+CFLAGS                  = -ggdb -fasm-blocks -pipe -Wall -W -O0 -std=c99 -arch i386
+PREP_DEFINES            = 

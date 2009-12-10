@@ -108,12 +108,16 @@ def cmd_parse( args ):
                 user_paths += line.split(";")
             file.close()
             user_paths = filter(lambda x: x.strip(" ") != '',user_paths)
-        return user_paths
+        dirname = os.path.abspath(os.path.dirname(filename))
+        return map (lambda path: os.path.join(dirname,  path),  user_paths)
 
     if args.additional_includes != None:
         filename = args.additional_includes
         user_includepaths = getPathsFromOption(filename)
+        dirname = os.path.dirname(filename)
         incPaths += user_includepaths
+
+    print   'incPaths %s' %incPaths
 
     libPaths = list()
     if args.additional_libdir != None:

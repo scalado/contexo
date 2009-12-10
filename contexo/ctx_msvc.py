@@ -168,9 +168,9 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib,
             (optionname,  numvalue) = vcproj_opts_map[opt]
             compilerTool[ optionname ] = numvalue
             mycflags.remove(opt)
-            print 'Digested %s'%opt
+            #print 'Digested %s'%opt
         except KeyError:
-            print 'Passing %s'%opt
+            #print 'Passing %s'%opt
             pass
 
     # Write the rest of the options as AdditionalOptions

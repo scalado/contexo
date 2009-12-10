@@ -103,6 +103,7 @@ def prepareCommandFile( commandline,  commandfileName ):
 
     # write commandfile
     cmdfile = open( cmdfilename, 'w' )
+    #cmdfile_contents = os.path.normpath(cmdfile_contents.replace('"',""))#<-new code
     cmdfile.write(cmdfile_contents)
     cmdfile.close()
 
@@ -394,13 +395,13 @@ class CTXCompiler:
         # Prepare object files
         objfiles_cmdline = str()
         for objectFile in objectFiles:
-            objPath = os.path.join(objectFile.filepath, objectFile.filename)
+            objPath = os.path.normpath(os.path.join(objectFile.filepath, objectFile.filename))
             objPath = shortenPathIfPossible( objPath )  #TODO: shortenPath is disabled now. Investigate the effects and possibly find out a portable way of doing this.
             objfiles_cmdline += " %s"%objPath
 
         # Prepare library
         lib_cmdline = "%s%s%s"%( self.cdef['LIBPREFIX'], libTitle, self.cdef['LIBSUFFIX'] )
-        lib_cmdline = os.path.join( outputDir, lib_cmdline )
+        lib_cmdline = os.path.normpath(os.path.join( outputDir, lib_cmdline ))
 
         cmdline = self.cdef['ARCOM']
 
@@ -544,7 +545,7 @@ class CTXBuildSession:
         buildParams.ldDirs
 
         for ldpath in buildParams.ldDirs:
-            ldpath_dec = " %s%s%s"%( self.compiler.cdef['LDDIRPREFIX'], ldpath, self.compiler.cdef['LDDIRSUFFIX'] )
+            ldpath_dec = " %s%s%s"%( self.compiler.cdef['LDDIRPREFIX'], os.path.normpath(ldpath), self.compiler.cdef['LDDIRSUFFIX'] )
             lddirs_cmdline += ldpath_dec
 
         ldlibs_cmdline = str()
@@ -552,14 +553,14 @@ class CTXBuildSession:
             ldpath_dec = " %s%s"%( self.compiler.cdef['LDLIBPREFIX'], lib )
             ldlibs_cmdline += ldpath_dec
 
-        exefile_cmdline = os.path.join( outputDir, exeFilename )
+        exefile_cmdline = os.path.normpath( os.path.join( outputDir, exeFilename ) )
 
         objfiles_cmdline = str()
         for object in objects:
             #libFile = "%s%s%s"%( self.compiler.cdef['LIBPREFIX'], object, self.compiler.cdef['LIBSUFFIX'] )
             #libPath = os.path.join( outputDir, libFile )
             #objfiles_cmdline += " %s"%libPath
-            objfiles_cmdline += " %s"%( os.path.join( object.filepath,  object.filename ) )
+            objfiles_cmdline += " %s"%( os.path.normpath(os.path.join( object.filepath,  object.filename )) )
 
         # Expand all commandline mask variables to the corresponding items we prepared.
         cmdline = self.compiler.cdef['LDCOM']

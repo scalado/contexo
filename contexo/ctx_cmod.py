@@ -359,7 +359,7 @@ class CTXCodeModule( CTXRawCodeModule ):
 
         objlist = []
         for src in srcFiles:
-            obj = session.buildStaticObject( src, outputDir, buildParams, self.rebuildAll )
+            obj = session.buildStaticObject( os.path.normpath( src ), os.path.normpath( outputDir ), buildParams, self.rebuildAll )
             objlist.append( obj )
 
         #LOG

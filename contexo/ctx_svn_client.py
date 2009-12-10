@@ -12,6 +12,7 @@
 ###############################################################################
 
 from ctx_common import ctxAssert, userErrorExit, infoMessage, errorMessage
+import ctx_common
 import os
 import sys
 import pysvn
@@ -175,7 +176,12 @@ class CTXSubversionClient():
                 else:
                     userErrorExit("Unknown failure when updating '%s'\nPYSVN Exception:\n%s (%d)"%(lc_path, message, code))
 
-
+    def prepareRevision(self,  revision):
+        if revision.upper() == 'HEAD':
+            rev = pysvn.Revision(pysvn.opt_revision_kind.head )
+        else:
+            rev = pysvn.Revision(pysvn.opt_revision_kind.number, revision )
+        return rev
     #--------------------------------------------------------------------------
     # Checks out the given revision of the remote file or folder specified by
     # 'url' to the given local directory.
@@ -190,10 +196,7 @@ class CTXSubversionClient():
         if not self.isRepoURL(url):
             userErrorExit("Invalid SVN repository: '%s'"%(url))
 
-        if revision.upper() == 'HEAD':
-            rev = pysvn.Revision(pysvn.opt_revision_kind.head )
-        else:
-            rev = pysvn.Revision(pysvn.opt_revision_kind.number, revision )
+        rev = self.prepareRevision(revision)
 
         if not os.path.isdir(local_directory):
             userErrorExit("Checkout destination '%s' is not a directory"%(local_directory))
@@ -211,7 +214,7 @@ class CTXSubversionClient():
 
 
     #--------------------------------------------------------------------------
-    # Checks out the given revision of the remote file or folder specified by
+    # Exports the given revision of the remote file or folder specified by
     # 'url' to the given local directory.
     #--------------------------------------------------------------------------
     def export( self, url, local_directory, revision ):
@@ -220,20 +223,17 @@ class CTXSubversionClient():
         if not self.isRepoURL(url):
             userErrorExit("Invalid SVN repository: '%s'"%(url))
 
-        if revision.upper() == 'HEAD':
-            rev = pysvn.Revision(pysvn.opt_revision_kind.head )
-        else:
-            rev = pysvn.Revision(pysvn.opt_revision_kind.number, revision )
+        rev = self.prepareRevision(revision)
 
         if not os.path.isdir( local_directory ):
             os.makedirs( local_directory )
         elif self.isWorkingCopy( local_directory ):
             userErrorExit("Export destination '%s' is an existing working copy"%(local_directory))
 
-
         export_dest = os.path.join( local_directory, os.path.basename(url) )
 
         try:
+            url = urllib.quote(url,  safe=',~=!@#$%^&*()+|}{:?><;[]\\/')
             self.client.export(src_url_or_path=url, dest_path=export_dest, force=False, revision=rev)
         except :
             userErrorExit("Exception caught from pysvn: \n%s"%(sys.exc_value))

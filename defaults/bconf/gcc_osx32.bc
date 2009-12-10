@@ -1,0 +1,17 @@
+#::::::::::::::::::::::::::::::::::::::::::::::::
+# Contexo Build Configuration
+#::::::::::::::::::::::::::::::::::::::::::::::::
+
+[meta]
+TITLE                   = 32bitRelease
+DESCRIPTION             = 32bit OSX
+
+[config]
+DEBUG_BUILD             = NO
+DEBUGMODE_MEMORY        = NO
+DEBUGMODE_FILE          = NO
+CHAR_ENCODING           = ASCII
+BYTE_ORDER              = LITTLE_ENDIAN
+CDEF                    = gcc_osx.cdef
+CFLAGS                  = -pipe -Wall -W -O2 -std=c99 -funroll-loops -fstrict-aliasing -arch i386
+PREP_DEFINES            = 

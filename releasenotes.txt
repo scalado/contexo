@@ -1,0 +1,35 @@
+Contexo 0.7.1
+-fixed a fatal bug in buildmod
+
+Contexo 0.7.0
+-new plugin: android ndk makefile generation
+-new tool: bdef2rspec.py
+-fixed bug in freeze
+
+﻿Contexo 0.6.99
+new features/fixes:
+-new command: build
+	-Can be used in place of  buildmod and buildcomp (kept for backwards compatibility)
+	-Can link executables (options: -exe, -I -L -l)
+	-Can export all headers (--all-headers)
+-new command: freeze – to freeze the revision numbers
+-New option: --tolerate-missing-headers
+-inform what source file the missing header is included from.
+-source files (not headers) can have doubled names in a view now
+-changed config structure: CONFIG_DIR in config, CONTEXO_HOME_DIR, CONTEXO_CONFIG_DIR to find config.
+-msvc plugin: export tests as well
+-msvc plugin: additional includes can be a directory name (if having only one)
+-msvc plugin: support for exe type projects
+-msvc plugin: workaround for VS flawed handling of additional options (compiler flags).
+-new plugin (tengilplugin): find and export invocations of given names from the source files (used for automatic discovery of tests)
+-can export headers from modules that have no source files.
+
+Some known limitations/bugs:
+-local includes does not have precedence over external includes: make sure your names are unique.
+-verbosity cannot be set from the command line
+-cdef and bc-files are found if placed in the view root, env- files are found in the same directory as the command is called upon
+-in order to build from deep within a view, use –view and point out the root view directory. e.g. --view ../../..  (not very elegant + doesnt work with env files in the view root – see above )
+-hierarchical rspecs need a live network connection. 
+-clean does not work on comp-files. To make sure all is rebuild, use the --force / -f flag
+-After first installation, on windows, sometimes in order to get the paths to the scripts set up, you need to open the 'environment variables'  window from control panel->system and then close it. You dont need to add any paths, as they are already added, but windows sometimes doesn't acknowledge them fully.
+

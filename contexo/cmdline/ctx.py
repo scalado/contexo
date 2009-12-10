@@ -173,7 +173,8 @@ def build_libraries( ctx_modules, lib_name, output_path, build_dir, session ):
 
         obj_list = list()
         for mod in mods:
-            obj_list +=  mod.buildStaticObjects( session, build_dir )
+            mod_objs = mod.buildStaticObjects( session, build_dir )
+            obj_list +=  mod_objs
 
         if len(obj_list) > 0:
             session.buildStaticLibrary( obj_list, lib, output_path )
@@ -844,12 +845,13 @@ parser_build.add_argument('-rv', '--repo-validation', action='store_true', help=
 parser_build.add_argument('-nra', '--no-remote-repo-access', action='store_true', help=standard_description['--no-remote-repo-access'])
 parser_build.add_argument('-f', '--force', action='store_true', help=standard_description['--force'])
 parser_build.add_argument('--tolerate-missing-headers',  action='store_true',  help = standard_description['--tolerate-missing-headers'])
-parser_build.add_argument('-exe', '--executable-name',  help = 'link the elements into a single executable')
+parser_build.add_argument('--all-headers', action='store_true', help = "export all public headers")
 parser_build.add_argument('-lib', '--library-name', help="(modules) build a single library, with the given name")
+parser_build.add_argument('-I',  '--incdirs', nargs='*',  default = [],  help = "additional include paths")
+parser_build.add_argument('-exe', '--executable-name',  help = 'link the elements into a single executable')
 parser_build.add_argument('-L',  '--libdirs', nargs='*',  default = [],  help = "(linking) directories to search for libs")
 parser_build.add_argument('-l',  '--libs', nargs='*',  default = [],  help = "(linking) libraries to link in")
-parser_build.add_argument('-I',  '--incdirs', nargs='*',  default = [],  help = "additional include paths")
-parser_build.add_argument('--all-headers', action='store_true', help = "export all public headers")
+
 
 # clean parser
 parser_clean = subparsers.add_parser('clean', help="clean a module(s) ( and optionaly its dependencies)")

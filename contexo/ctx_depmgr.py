@@ -232,7 +232,10 @@ def findAllCodeModulPaths( searchPaths ):
         codeModulePaths = []
 
         if len(codeModulePaths) == 0:
-            pathCandidates = os.listdir( path )
+            try:
+                pathCandidates = os.listdir( path )
+            except OSError as (errno,  errmsg):
+                userErrorExit("Could not list directory '%s': %s"%(path,  errmsg))
             for cand in pathCandidates:
                 candPath = os.path.join( path, cand )
                 if isContexoCodeModule( candPath ) == True:

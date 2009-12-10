@@ -49,7 +49,7 @@ pysvn.wc_notify_action.update_update:   'update',
 #
 # PYSVN exception error codes
 #
-
+ERR_UNSUPPORTED_WORKING_COPY_FORMAT = 155021
 ERR_NOT_A_WORKING_COPY = 155007
 ERR_HOST_UNRESOLVED    = 175002
 ERR_INVALID_ARGUMENT   = 22
@@ -98,6 +98,10 @@ class CTXSubversionClient():
             for message, code in e.args[1]:
                 if code in [ERR_NOT_A_WORKING_COPY, ERR_INVALID_ARGUMENT]:
                     return False
+                elif code == ERR_UNSUPPORTED_WORKING_COPY_FORMAT:
+                    userErrorExit("Unsupported working copy format in '%s'\n \
+                        Looks like the working copy was accessed using an incomptatible version of a svn client\n. \
+                        PySvn currently uses svn version %s. "%(local_path, pysvn.svn_version)  )
                 else:
                     ctxAssert( False, "Unhandled pysvn exception: (%d) %s. This code need to be updated." )
 

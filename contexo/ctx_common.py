@@ -25,6 +25,13 @@ import os.path
 cleanupFuncStack    = list()
 globalVerboseLevel  = 1
 
+def areURLsEqual(url1,  url2):
+    import urllib
+    if str.rstrip(urllib.unquote(url1),  '/' ) != str.rstrip( urllib.unquote(url2),  '/'):
+        return False
+    else:
+        return True
+
 #------------------------------------------------------------------------------
 def ctxExit( exitcode ):
     global cleanupFuncStack

@@ -117,7 +117,7 @@ def cmd_parse( args ):
         dirname = os.path.dirname(filename)
         incPaths += user_includepaths
 
-    print   'incPaths %s' %incPaths
+    #print   'incPaths %s' %incPaths
 
     libPaths = list()
     if args.additional_libdir != None:

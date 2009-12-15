@@ -234,7 +234,7 @@ def findAllCodeModulPaths( searchPaths ):
         if len(codeModulePaths) == 0:
             try:
                 pathCandidates = os.listdir( path )
-            except OSError as (errno,  errmsg):
+            except OSError, (errno,  errmsg):
                 userErrorExit("Could not list directory '%s': %s"%(path,  errmsg))
             for cand in pathCandidates:
                 candPath = os.path.join( path, cand )

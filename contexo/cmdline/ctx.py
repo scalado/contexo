@@ -389,7 +389,7 @@ def cmd_buildcomp(args):
             depmgr.addCodeModules( modules, args.tests )
 
             args.lib = library
-            print args
+            infoMessage('args: %s'%args,  6)
             buildmodules( depmgr, session,  modules,  args, lib_dir, session.bc.getTitle(),  libraryName = args.lib)
 
             depmgr.emptyCodeModules()
@@ -474,7 +474,7 @@ def cmd_build(args):
                 modules = expand_list_files( cview, modules )
                 depmgr.addCodeModules( modules, args.tests )
                 args.library_name = library
-                print args
+                infoMessage('args: %s'%args,  6)
                 objs += buildmodules( depmgr, session,  modules,  args, bin_dir, session.bc.getTitle(),  args.library_name)
 
                 if (args.all_headers):

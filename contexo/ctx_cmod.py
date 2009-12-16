@@ -126,6 +126,7 @@ class CTXRawCodeModule:
         self.srcFiles       = list()
         self.testSrcFiles   = list()
         self.pubHeaders     = list()
+        self.testHeaders = list()
         self.privHeaders    = list()
         self.msgSender      = 'CTXRawCodeModule'
         self.buildUnitTests = buildUnitTests
@@ -173,6 +174,28 @@ class CTXRawCodeModule:
             srcDir = self.getTestDir()
             self.testSrcFiles = getSourcesFromDir( self, srcDir )
         return self.testSrcFiles
+
+    def getTestHeaderFilenames(self):
+        # update if list is empty.
+        if len(self.testHeaders) == 0:
+            ### Assemble public header files
+            header_extensions = [ '.h',]
+            # Determine the path to the private header directory of the module.
+            testHdrDir = self.getTestDir()
+            #testHeaders = list( )
+            ctxAssert( os.path.exists(testHdrDir), 'Directory %s was assumed to exist'%(testHdrDir) )
+            # Collect all source files.
+            dirlist = os.listdir( testHdrDir )
+            for file in dirlist:
+                if os.path.isfile( os.path.join(testHdrDir, file) ):
+                    root, ext = os.path.splitext( file )
+                    if header_extensions.count( ext ) != 0:
+                        self.testHeaders.append(file)
+        return self.testHeaders
+
+    def getTestHeaderAbsolutePaths(self):
+        import functools
+        return map ( functools.partial( os.path.join,  self.getTestDir() ),  self.getTestHeaderFilenames() )
 
     #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     def getPrivHeaderFilenames(self):
@@ -359,7 +382,7 @@ class CTXCodeModule( CTXRawCodeModule ):
 
         objlist = []
         for src in srcFiles:
-            obj = session.buildStaticObject( src, outputDir, buildParams, self.rebuildAll )
+            obj = session.buildStaticObject( os.path.normpath( src ), os.path.normpath( outputDir ), buildParams, self.rebuildAll )
             objlist.append( obj )
 
         #LOG

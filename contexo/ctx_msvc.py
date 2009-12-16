@@ -232,13 +232,15 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib,
         if do_tests:
             # Add test folder.
             project.startElement ('Filter', {'Name': 'tests','Filter':''})
-            for src in mod['TESTSOURCES'] + mod['TESTHDRS'] :
+            for src in mod['TESTSOURCES']:
                 #project.characters('testsource:%s vcprojPath: %s'%(src, vcprojPath))
                 project.startElement ('File', {'RelativePath':relntpath(src, vcprojPath)} )
                 project.startElement('FileConfiguration',{'Name':"".join([variant,'|',platform])})
                 project.element('Tool',{'Name':'VCCLCompilerTool','AdditionalIncludeDirectories':relntpath(mod['PRIVHDRDIR'], vcprojPath)})
                 project.endElement ('FileConfiguration')
                 project.endElement ('File')
+            for hdr in mod['TESTHDRS']:
+                project.element ('File', {'RelativePath':relntpath(hdr, vcprojPath)})
 
             project.endElement ('Filter')
 

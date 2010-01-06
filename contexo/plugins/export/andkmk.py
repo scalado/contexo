@@ -48,24 +48,41 @@ def computeLinkOrder(modules, depMgr):
     sortedMods.reverse()
     return sortedMods
 
+absPathSub = ["", ""]
+relPathSub = ["", ""]
+
+def absPath(path):
+    newPath = path
+    for i in range(len(absPathSub) / 2):
+        newPath = newPath.replace(absPathSub[2 * i], absPathSub[2 * i + 1])
+    return newPath
+def relPath(path):
+    newPath = path
+    for i in range(len(relPathSub) / 2):
+        newPath = newPath.replace(relPathSub[2 * i], relPathSub[2 * i + 1])
+    return newPath
+	
 def computeRelPath(fromPath, toPath):
     """Returns a relative path starting from fromPath pointing
     at toPath.
     """
-    fromComps = re.split("[/]", fromPath)
-    toComps = re.split("[/]", toPath)
+    fromComps = re.split("[/\\\\]", fromPath)
+    toComps = re.split("[/\\\\]", toPath)
     i = 0
     n = min(len(fromComps), len(toComps))
     while i < n:
         if fromComps[i] != toComps[i]:
             break
         i += 1
+    # A bit silly to have these two cases?
     if i == 0:
-        return None
-    m = len(fromComps) - (i)
-    # Step up m tims (with "..") then down into the rest of toComps.
-    return "/".join(m * [".."]) + "/" + "/".join(toComps[i:])
-    
+        m = len(fromComps)
+        path = "/".join(m * [".."]) + "/" + "/".join(toComps[i:])
+    else:
+        m = len(fromComps) - (i)
+        path = "/".join(m * [".."]) + "/" + "/".join(toComps[i:])
+    return path
+
 def moduleMk(module, build_params, modules, incPaths, depMgr, lclDstDir, localPath=True, ldlibs=None, staticLibs=None):
     """Returns a string containing Android.mk data for module.
     Several calls to this function can be combined into the same
@@ -73,7 +90,7 @@ def moduleMk(module, build_params, modules, incPaths, depMgr, lclDstDir, localPa
     """
     
     def _incPath(path):
-        return "$(LOCAL_PATH)/" + computeRelPath(lclDstDir, path.replace("\\", "/"))
+        return "$(LOCAL_PATH)/" + relPath(computeRelPath(lclDstDir, path.replace("\\", "/")))
     
     outData = []
     #
@@ -133,7 +150,7 @@ def moduleMk(module, build_params, modules, incPaths, depMgr, lclDstDir, localPa
     outData.append("LOCAL_SRC_FILES := \\\n")
     for source in sources:
         srcPath, srcName = os.path.split(source)
-        srcPath = srcPath.replace("\\", "/")
+        srcPath = relPath(srcPath)
         srcRelPath = computeRelPath(lclDstDir, srcPath)
         outData.append("    %s \\\n" % (srcRelPath + "/" + srcName))
     outData.append("\n")
@@ -146,7 +163,7 @@ def moduleMk(module, build_params, modules, incPaths, depMgr, lclDstDir, localPa
             depMods = staticLibs
         if len(depMods) > 0:
             outData.append("LOCAL_STATIC_LIBRARIES := %s\n\n" % (" ".join(depMods)))
-        if ldlibs <> None:
+        if ldlibs <> None and len(ldlibs) > 0:
             ldlibs = [("-l" + ldlib) for ldlib in ldlibs]
             if len(ldlibs) > 0:
                 outData.append("LOCAL_LDLIBS := %s\n\n" % (" ".join(ldlibs)))
@@ -256,12 +273,12 @@ def cmd_parse( args ):
     # Regardless if we export components or modules, all modules are located in export_data['MODULES']
     module_map = create_module_mapping_from_module_list( package.export_data['MODULES'].values() )
 
-    jniLibs = []
+    staticLibs = []
     if comp_export:
         for comp in package.export_data['COMPONENTS']:
             for library, modules in comp.libraries.iteritems():
                 ctxMods = [ mod for mod in module_map if mod['MODNAME'] in modules  ]
-                jniLibs.append( { 'PROJNAME': library, 'LIBNAME': library, 'MODULELIST': ctxMods } )
+                staticLibs.append( { 'PROJNAME': library, 'LIBNAME': library, 'MODULELIST': ctxMods } )
 
     if args.ndk == None:
         userErrorExit("--ndk not specified.")
@@ -270,20 +287,42 @@ def cmd_parse( args ):
     if args.app == None:
         userErrorExit("--app not specified.")
 
-    # Set up paths.
-    dstDir = os.path.join(args.ndk, "apps", args.app)
-    if args.output <> None:
-        outDir = os.path.join(args.output, args.app)
-        if not os.path.isabs(outDir):
-            outDir = os.path.join(os.getcwd(), outDir)
-    else:
-        outDir = dstDir
-    projectPath = "project"
-    libPath = os.path.join(projectPath, args.mk_path)
+    if args.abs_sub <> None:
+        if (len(args.abs_sub) % 2 != 0): userErrorExit("--abs-sub: number of arguments must be a 2-multiple.")
+        global absPathSub
+        absPathSub = args.abs_sub
+    if args.rel_sub <> None:
+        if (len(args.rel_sub) % 2 != 0): userErrorExit("--rel-sub: number of arguments must be a 2-multiple.")
+        global relPathSub
+        relPathSub = args.rel_sub
 
-    if args.ldlibs <> None and args.shared == None:
-        warningMessage("Ignoring option --ldlibs since --shared was not specified.")
-    ldlibs = args.ldlibs
+    # Set up paths.
+    def getDstPath(*pathComps):
+        if args.project <> None:
+            if not os.path.isabs(args.project):
+                return os.path.join(os.getcwd(), args.project, *pathComps).replace("\\", "/")
+            else:
+                return os.path.join(args.project, *pathComps).replace("\\", "/")
+        else:
+            return os.path.join(args.ndk, "apps", args.app, "project").replace("\\", "/")
+    def getOutPath(*pathComps):
+        if args.output <> None:
+            if not os.path.isabs(args.output):
+                return os.path.join(os.getcwd(), args.output, "apps", args.app, "project", *pathComps).replace("\\", "/")
+            else:
+                return os.path.join(args.output, "apps", args.app, "project", *pathComps).replace("\\", "/")
+        else:
+            return getDstPath(*pathComps)
+    if args.output == None:
+        applicationDir = os.path.join(args.ndk, "apps", args.app)
+    else:
+        if not os.path.isabs(args.output):
+            applicationDir = os.path.join(os.getcwd(), args.output, "apps", args.app).replace("\\", "/")
+        else:
+            applicationDir = os.path.join(args.output, "apps", args.app).replace("\\", "/")
+    #projectPath = "project"
+    #libPath = os.path.join(projectPath, args.mk_path)
+    libPath = args.mk_path
 
     # Determine if anything is to be omitted.
     omits = {"static" : False, "shared" : False, "top" : False, "app" : False}
@@ -299,8 +338,8 @@ def cmd_parse( args ):
     # Generate the makefile
     #
 
-    if not os.path.exists( outDir ):
-        os.makedirs( outDir )
+    # if not os.path.exists( outDir ):
+        # os.makedirs( outDir )
 
     # There were some problems when one makefile per comp was created, (with the android build).
     # I guess it should be possible to do it that way.
@@ -308,60 +347,69 @@ def cmd_parse( args ):
     # So, we set allInOne to True.
     allInOne = True
 
-    sharedInSeparateMk = True
     sharedObjLib = None
     if args.shared <> None:
-        for jniMod in jniLibs:
-            if jniMod['LIBNAME'] == args.shared:
-                # Move it to last in list.
-                sharedObjLib = jniMod
-                del jniLibs[jniLibs.index(sharedObjLib)]
-                if not sharedInSeparateMk:
-                    jniLibs.append(sharedObjLib)
-                sharedObjLib['SHAREDOBJECT'] = True
-                break
-        else:
-            userErrorExit("Library specifed by --shared ('%s') not found." % (args.shared))
-
+        if len(args.shared) == 0:
+            userErrorExit("No libraries specifed by --shared.")
+        partsOfShared = []
+        for name in args.shared:
+            for libMod in staticLibs:
+                if libMod["LIBNAME"] == name:
+                    break
+            else:
+                userErrorExit("Contexo library '%s', specified by --shared not found in export." % (name))
+            del staticLibs[staticLibs.index(libMod)]
+            partsOfShared.append(libMod)
+        name = args.shared[0] if args.shared_name == None else args.shared_name
+        sharedObjLib = { 'PROJNAME': name, 'LIBNAME': name, 'MODULELIST': [], 'SHAREDOBJECT' : True }
+        for part in partsOfShared:
+            sharedObjLib['MODULELIST'].extend(part['MODULELIST'])
+    else:
+        if args.ldlibs <> None:
+            warningMessage("Ignoring option --ldlibs since --shared was not specified.")
+        if args.shared_name <> None:
+            warningMessage("Ignoring option --shared-name since --shared was not specified.")
+    ldlibs = args.ldlibs
+	
     staticRelPath = "static"
     sharedRelPath = "shared"
 
     mkFileVerbosity = 1
-    if not omits["static"]:
+    if not omits["static"] and len(staticLibs) > 0:
         if not allInOne:
-            for jniMod in jniLibs:
-                lclDstDir = os.path.join(dstDir, libPath, jniMod['LIBNAME']).replace("\\", "/")
-                lclOutDir = os.path.join(outDir, libPath, jniMod['LIBNAME']).replace("\\", "/")
+            for staticLib in staticLibs:
+                lclDstDir = getDstPath(libPath, staticLib['LIBNAME'])
+                lclOutDir = getOutPath(libPath, staticLib['LIBNAME'])
                 if not os.path.exists(lclOutDir):
                     os.makedirs(lclOutDir)
                 mkFileName = os.path.join(lclOutDir, "Android.mk")
                 file = open(mkFileName, "wt")
-                file.write(moduleMk(jniMod, build_params, jniLibs, None, depMgr, lclDstDir))
+                file.write(moduleMk(staticLib, build_params, staticLibs, None, depMgr, lclDstDir))
                 file.close()
                 infoMessage("Created %s" % (mkFileName), mkFileVerbosity)
         else:
-            lclDstDir = os.path.join(dstDir, libPath, staticRelPath).replace("\\", "/")
-            lclOutDir = os.path.join(outDir, libPath, staticRelPath).replace("\\", "/")
+            lclDstDir = getDstPath(libPath, staticRelPath)
+            lclOutDir = getOutPath(libPath, staticRelPath)
             if not os.path.exists(lclOutDir):
                 os.makedirs(lclOutDir)
             mkFileName = os.path.join(lclOutDir, "Android.mk")
             file = open(mkFileName, "wt")
             i = 0
-            for jniMod in jniLibs:
-                file.write(moduleMk(jniMod, build_params, jniLibs, None, depMgr, lclDstDir, i == 0))
+            for staticLib in staticLibs:
+                file.write(moduleMk(staticLib, build_params, staticLibs, None, depMgr, lclDstDir, i == 0))
                 file.write("#" * 60 + "\n")
                 i += 1
             file.close()
             infoMessage("Created %s" % (mkFileName), mkFileVerbosity)
 
     if sharedObjLib <> None and not omits["shared"]:
-        lclDstDir = os.path.join(dstDir, libPath, sharedRelPath).replace("\\", "/")
-        lclOutDir = os.path.join(outDir, libPath, sharedRelPath).replace("\\", "/")
+        lclDstDir = getDstPath(libPath, sharedRelPath)
+        lclOutDir = getOutPath(libPath, sharedRelPath)
         if not os.path.exists(lclOutDir):
             os.makedirs(lclOutDir)
         mkFileName = os.path.join(lclOutDir, "Android.mk")
         file = open(mkFileName, "wt")
-        file.write(moduleMk(sharedObjLib, build_params, jniLibs, None, depMgr, lclDstDir, localPath=True, ldlibs=ldlibs, staticLibs=args.static_libs))
+        file.write(moduleMk(sharedObjLib, build_params, staticLibs, None, depMgr, lclDstDir, localPath=True, ldlibs=ldlibs, staticLibs=args.static_libs))
         file.close()
         if args.static_libs == None:
             warningMessage("Computed link order is very likely not accurate.")
@@ -369,19 +417,21 @@ def cmd_parse( args ):
         infoMessage("Created %s" % (mkFileName), mkFileVerbosity)
 
     if not omits["top"]:
-        topMkFileName = os.path.join(outDir, libPath, "Android.mk")
+        topMkFileName = getOutPath(libPath, "Android.mk")
         file = open(topMkFileName, "wt")
         file.write("include $(call all-subdir-makefiles)")
         file.close()
 
     if not omits["app"]:
-        appMkFileName = os.path.join(outDir, "Application.mk")
+        appMkFileName = os.path.join(applicationDir, "Application.mk")
         file = open(appMkFileName, "wt")
-        libNames = [jniLib['LIBNAME'] for jniLib in jniLibs]
+        libNames = [staticLib['LIBNAME'] for staticLib in staticLibs]
         if sharedObjLib <> None:
             libNames.append(sharedObjLib['LIBNAME'])
         file.write("APP_PROJECT_PATH := $(call my-dir)/project\n")
         file.write("APP_MODULES      := %s\n" % (" ".join(libNames)))
+        if args.project <> None:
+            file.write("APP_PROJECT_PATH := %s" % (absPath(getDstPath())))
         if bc_file.dbgmode:
             file.write("APP_OPTIM      := debug\n")
         file.close()
@@ -401,26 +451,29 @@ compatible with Android. Make sure to specify a bc-file in the
 export.
 
 This script can produce the following output:
-  <NDK root>/apps/<APP>/Application.mk
-  <NDK root>/apps/<APP>/project/<MK path>/Android.mk
-  <NDK root>/apps/<APP>/project/<MK path>/static/Android.mk
-  <NDK root>/apps/<APP>/project/<MK path>/shared/Android.mk
-
-<NDK root>, <APP> and <MK path> are all specified by command line options.
+  * Application.mk that points at the other makefiles
+  * An Android.mk that builds static libraries
+  * An Android.mk that builds a shared object
+  * An Android.mk that invokes the other Android.mk-files
 
 The @ can be used to put arguments in a file.
 
 Example usage:
-ctx export @allcomps.txt --bconf android.bc --env android.env --view . | andkmk.py @args.txt --app-mk --top-mk -o mk
+<Contexo Export> | andkmk.py @args.txt --ndk C:/dev/android/android-ndk-1.6_r1 --project project --abs-sub C: /cygdrive/c
 Content of args.txt = [
---ndk C:/dev/android/android-ndk-1.6_r1
 --app midemo
 --shared albv_android
 --ldlibs GLESv1_CM dl log
 --static-libs deplib1 deplib2 deplib3 deplib4
 ]
+The example will create:
+<NDK>/apps/midemo/Application.mk
+<CWD>/project/jni/Android.mk
+<CWD>/project/jni/static/Android.mk
+<CWD>/project/jni/shared/Android.mk
+
 """,
- version="0.1", formatter_class=RawDescriptionHelpFormatter, fromfile_prefix_chars='@')
+ version="0.3", formatter_class=RawDescriptionHelpFormatter, fromfile_prefix_chars='@')
 
 parser.set_defaults(func=cmd_parse)
 
@@ -431,25 +484,25 @@ parser.add_argument('-a', '--app',
  help="""Specifies the name of the application.""")
 
 parser.add_argument('-mp', '--mk-path', default="jni",
- help="""Specifies where the makefiles will be created. This
- is relative to <NDK root>/apps/<APP>/project. All created makefiles
+ help="""Specifies the relative path from project folder to where the
+ makefiles are located. All created makefiles
  will be put in this directory or below it, except the
- Application.mk.""")
+ Application.mk. Defaults to 'jni'.""")
 
-parser.add_argument('-o', '--output',
- help="""The output directory for the export. Use this option e.g not to
- to overwrite existing makefiles.
- Note that this option does not affect the source and include
- paths in the created makefiles.""")
+parser.add_argument('-p', '--project',
+ help="""The project directory.""")
 
-parser.add_argument('-so', '--shared', default=None,
- help="""Specifies one library that will be built to a shared object,
- depending on all the others. This will be put in a separate makefile.""")
+parser.add_argument('-so', '--shared', default=None, nargs='+',
+ help="""Specifies one or more libraries (libraries meaning the output specified
+ in comp-files), that will be built into one shared object.
+ A separate makefile will be generated for this shared object.""")
 
-parser.add_argument('--static-libs', default=None, nargs='+',
+parser.add_argument('--static-libs', default=None, nargs='*',
  help="""Specifies which static libraries the shared object depends on.
  They must be specified in the order that they depend on each other, i.e. the dependant
- comes before dependee.""")
+ comes before the dependee. If this option is not used all static libraries
+ generated (by the export) are assumed (this will produce a probably erroneous link order).
+ Use this option with no arguments to have no dependencies.""")
 
 parser.add_argument('--ldlibs', default=None, nargs='+',
  help="""Specifies additional libraries the shared object depends on.
@@ -462,7 +515,25 @@ parser.add_argument('--no', default=None, nargs='+',
  static, shared, top and/or app.
  """)
 
+parser.add_argument('--shared-name', default=None,
+ help="""Specifies the name of the shared object. By default the shared object
+ will be given the same name as the first argument to --shared.""")
 
+parser.add_argument('--abs-sub', default=None, nargs='+',
+ help="""Substitutes substrings in absolute paths. Must be followed by a 2-multiple of arguments, the second will replace
+ the first (for each pair). Useful when building on Cygwin, par example: --abs-sub C: /cygdrive/c""")
 
+parser.add_argument('--rel-sub', default=None, nargs='+',
+ help="""Substitutes substrings in relative paths. Must be followed by a 2-multiple of arguments, the second will replace
+ the first (for each pair). May be useful when building on Cygwin, par example: --rel-sub C: c""")
+
+parser.add_argument('-o', '--output',
+ help="""The output directory for the export. Use this option e.g not to
+ to overwrite existing makefiles.
+ Note that this option does not affect the source and include
+ paths in the created makefiles. Without this option
+ the makefiles will be generated at their true
+ locations.""")
+ 
 args = parser.parse_args()
 args.func(args)

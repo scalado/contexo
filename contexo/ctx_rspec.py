@@ -38,7 +38,7 @@ def createRepoFromRCS( rcs, id, path, href, rev ):
 
     if rcs == 'svn':
         return CTXRepositorySVN( id, path, href, rev )
-    elif rcs == None:
+    elif rcs == None or rcs =='':
         return CTXRepositoryFS( id, path, href, rev )
     else:
         userErrorExit("Unsupported RCS for repository '%s'"%(id))
@@ -309,6 +309,7 @@ class RSpecFile:
         repository.setAccessPolicy( self.view.getAccessPolicy() )
 
     #--------------------------------------------------------------------------
+
     def getRepositories(self):
         return self.repositories.values()
 

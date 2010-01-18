@@ -59,6 +59,7 @@ class RspecFreezer():
         path = repo.getPath()
         rev = repo.getRSpecRevision()
         repo_path = repo.getAbsLocalPath()
+        #TODO: make it possible to base the freeze on an existing rspec (only freeze repos included in there)
         if (rcs == 'svn'):
             if rev == 'HEAD' or rev == None:
                 curr_rev = self.svnclient.getRevisionFromWorkingCopy(repo_path)
@@ -70,7 +71,8 @@ class RspecFreezer():
             self.xmlgenerator.startElement('ctx-repo',  attrs = {'id':id,'rcs':rcs, 'href': href,  'rev': str(curr_rev),  'path':path })
             self.xmlgenerator.characters("\n")
         else:
-            userErrorExit("Currently only supporting freeze for svn-repos")
+            warningMessage("Currently only supporting freeze for svn-repos, skipping '%s'"%repo_path)
+            return
         paths = repo.getAllRelativePaths()
         for path_type in paths:
             for  path_spec in paths[path_type]:

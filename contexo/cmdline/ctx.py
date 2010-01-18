@@ -426,13 +426,15 @@ def cmd_build(args):
         envLayout = EnvironmentLayout( cfgFile,  args.env )
         oldEnv    = switchEnvironment( envLayout, True )
 
+    absIncDirs = map(os.path.abspath,  args.incdirs)
+
     # Prepare all
     cview   = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=bool(args.repo_validation) )
     bc      = getBuildConfiguration( cview,  args )
-    bc.buildParams.incPaths.extend(     args.incdirs ) #TODO: accessing 'private' data?
+    bc.buildParams.incPaths.extend(     absIncDirs ) #TODO: accessing 'private' data?
     bc.buildParams.ldDirs.extend(args.libdirs)
     bc.buildParams.ldLibs.extend(args.libs)
-    depmgr  = CTXDepMgr ( cview.getItemPaths('modules'),  args.tolerate_missing_headers )
+    depmgr  = CTXDepMgr ( cview.getItemPaths('modules'),  args.tolerate_missing_headers, absIncDirs )
     session = ctx_base.CTXBuildSession( bc )
     session.setDependencyManager( depmgr )
 

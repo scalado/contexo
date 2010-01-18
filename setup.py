@@ -42,7 +42,7 @@ setup(name="Contexo",
       url="http://www.scalado.com",
       scripts =  ['contexo/cmdline/ctx.py',  'contexo/cmdline/ctx.bat', 'contexo/cmdline/bdef2rspec.py', 'contexo/plugins/export/msvc.py', 'contexo/plugins/export/tengiltests.py' ],
       package_dir = { 'contexo.defaults':'defaults' ,'': 'otherlibs',  'contexo':'contexo'},  #the '':'otherlibs' is a hack to make it load argparse without a package, from a subdirectory otherlibs
-      package_data={ 'contexo': ['cmdline/ctx.bat'],  'contexo.defaults': ['contexo.cfg', 'bconfs/*', 'cdefs/*' ], 'contexo.plugins.export': ['msvc.bat','rspectree.bat'] },
+      package_data={ 'contexo': ['cmdline/ctx.bat'],  'contexo.defaults': ['contexo.cfg', 'bconf/*', 'cdef/*' ], 'contexo.plugins.export': ['msvc.bat','rspectree.bat'] },
       packages = [ 'contexo.defaults', 'contexo' ,  'contexo.platform', 'contexo.plugins', 'contexo.plugins.export' ],
       py_modules = ['argparse']  #this will overwrite argparse if you already have it
     )
@@ -143,8 +143,8 @@ import shutil
 from os.path import join as pjoin
 python_lib = distutils.sysconfig.get_python_lib()  #path to site-packages
 contexo_path   = pjoin( python_lib, 'contexo' )
-default_bconfs = pjoin( contexo_path, 'defaults/bconfs' )
-default_cdefs  = pjoin( contexo_path, 'defaults/cdefs' )
+default_bconfs = pjoin( contexo_path, 'defaults/bconf' )
+default_cdefs  = pjoin( contexo_path, 'defaults/cdef' )
 
 if sys.platform == 'win32':
     # Create user profile directories

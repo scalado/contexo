@@ -1,3 +1,12 @@
+Contexo 0.7.4
+-made the dependency manager aware of include dirs added throug the -I flag
+-fixed a bug in setup (can't find cdefs/bconf)
+-made freeze skip fs-repos (i.e. non revision controlled)
+-changes to andkmk.py:
+ -Support for creating the shared object from multiple comp-file-library-entries.
+ -Support for configuring the project location.
+ -Support for renaming drives in the makefiles.
+
 Contexo 0.7.3
 -fixed str-unicode (fatal) incompatibility in areURLsEqual 
 -added headers from test folders into generated msvc projects

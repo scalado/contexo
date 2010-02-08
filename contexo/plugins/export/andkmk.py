@@ -61,7 +61,7 @@ def relPath(path):
     for i in range(len(relPathSub) / 2):
         newPath = newPath.replace(relPathSub[2 * i], relPathSub[2 * i + 1])
     return newPath
-	
+
 def computeRelPath(fromPath, toPath):
     """Returns a relative path starting from fromPath pointing
     at toPath.
@@ -83,12 +83,13 @@ def computeRelPath(fromPath, toPath):
         path = "/".join(m * [".."]) + "/" + "/".join(toComps[i:])
     return path
 
-def moduleMk(module, build_params, modules, incPaths, depMgr, lclDstDir, localPath=True, ldlibs=None, staticLibs=None):
+def moduleMk(module, build_params, modules, incPaths, depMgr, lclDstDir, args, localPath=True):
     """Returns a string containing Android.mk data for module.
     Several calls to this function can be combined into the same
     makefile.
     """
-    
+    ldlibs = args.ldlibs
+    staticLibs = args.static_libs
     def _incPath(path):
         return "$(LOCAL_PATH)/" + relPath(computeRelPath(lclDstDir, path.replace("\\", "/")))
     
@@ -168,6 +169,8 @@ def moduleMk(module, build_params, modules, incPaths, depMgr, lclDstDir, localPa
             if len(ldlibs) > 0:
                 outData.append("LOCAL_LDLIBS := %s\n\n" % (" ".join(ldlibs)))
 
+    if args.arm_mode <> None:
+        outData.append("LOCAL_ARM_MODE := %s\n\n" % (args.arm_mode))
     #
     # Type of library
     #
@@ -286,6 +289,8 @@ def cmd_parse( args ):
         userErrorExit("'%s' specified by --ndk does not exist or is not a directory." % (args.ndk))
     if args.app == None:
         userErrorExit("--app not specified.")
+    if args.arm_mode <> None and not args.arm_mode in ["arm", "thumb"]:
+        userErrorExit("Illegal arm mode '%s', specified with --arm-mode." % (args.arm_mode))
 
     if args.abs_sub <> None:
         if (len(args.abs_sub) % 2 != 0): userErrorExit("--abs-sub: number of arguments must be a 2-multiple.")
@@ -320,8 +325,7 @@ def cmd_parse( args ):
             applicationDir = os.path.join(os.getcwd(), args.output, "apps", args.app).replace("\\", "/")
         else:
             applicationDir = os.path.join(args.output, "apps", args.app).replace("\\", "/")
-    #projectPath = "project"
-    #libPath = os.path.join(projectPath, args.mk_path)
+    
     libPath = args.mk_path
 
     # Determine if anything is to be omitted.
@@ -337,15 +341,11 @@ def cmd_parse( args ):
     #
     # Generate the makefile
     #
-
-    # if not os.path.exists( outDir ):
-        # os.makedirs( outDir )
-
-    # There were some problems when one makefile per comp was created, (with the android build).
-    # I guess it should be possible to do it that way.
-    # However this way has proved to work.
-    # So, we set allInOne to True.
-    allInOne = True
+    # We generate one makefile per library.
+    # This variable could be possible to change via commandline.
+    # However, it's more practical to subdivide into several
+    # makefiles. If one of them is changed all others needn't be rebuilt.
+    allInOne = False
 
     sharedObjLib = None
     if args.shared <> None:
@@ -369,8 +369,7 @@ def cmd_parse( args ):
             warningMessage("Ignoring option --ldlibs since --shared was not specified.")
         if args.shared_name <> None:
             warningMessage("Ignoring option --shared-name since --shared was not specified.")
-    ldlibs = args.ldlibs
-	
+
     staticRelPath = "static"
     sharedRelPath = "shared"
 
@@ -378,13 +377,14 @@ def cmd_parse( args ):
     if not omits["static"] and len(staticLibs) > 0:
         if not allInOne:
             for staticLib in staticLibs:
-                lclDstDir = getDstPath(libPath, staticLib['LIBNAME'])
-                lclOutDir = getOutPath(libPath, staticLib['LIBNAME'])
+                dirName = staticRelPath + "_" + staticLib['LIBNAME']
+                lclDstDir = getDstPath(libPath, dirName)
+                lclOutDir = getOutPath(libPath, dirName)
                 if not os.path.exists(lclOutDir):
                     os.makedirs(lclOutDir)
                 mkFileName = os.path.join(lclOutDir, "Android.mk")
                 file = open(mkFileName, "wt")
-                file.write(moduleMk(staticLib, build_params, staticLibs, None, depMgr, lclDstDir))
+                file.write(moduleMk(staticLib, build_params, staticLibs, None, depMgr, lclDstDir, args))
                 file.close()
                 infoMessage("Created %s" % (mkFileName), mkFileVerbosity)
         else:
@@ -396,7 +396,7 @@ def cmd_parse( args ):
             file = open(mkFileName, "wt")
             i = 0
             for staticLib in staticLibs:
-                file.write(moduleMk(staticLib, build_params, staticLibs, None, depMgr, lclDstDir, i == 0))
+                file.write(moduleMk(staticLib, build_params, staticLibs, None, depMgr, lclDstDir, args, i == 0))
                 file.write("#" * 60 + "\n")
                 i += 1
             file.close()
@@ -409,7 +409,7 @@ def cmd_parse( args ):
             os.makedirs(lclOutDir)
         mkFileName = os.path.join(lclOutDir, "Android.mk")
         file = open(mkFileName, "wt")
-        file.write(moduleMk(sharedObjLib, build_params, staticLibs, None, depMgr, lclDstDir, localPath=True, ldlibs=ldlibs, staticLibs=args.static_libs))
+        file.write(moduleMk(sharedObjLib, build_params, staticLibs, None, depMgr, lclDstDir, args, localPath=True))
         file.close()
         if args.static_libs == None:
             warningMessage("Computed link order is very likely not accurate.")
@@ -450,16 +450,11 @@ def cmd_parse( args ):
 
 # Create Parser
 parser = ArgumentParser( description="""Android NDK MK export - plugin to Contexo Build System (c) 2006-2009 Scalado AB.
- 
+Creates makefiles for building a set of contexo component files with the Android NDK.
+
 Note that Contexo has a default bconf which likely is not
 compatible with Android. Make sure to specify a bc-file in the
 export.
-
-This script can produce the following output:
-  * Application.mk that points at the other makefiles
-  * An Android.mk that builds static libraries
-  * An Android.mk that builds a shared object
-  * An Android.mk that invokes the other Android.mk-files
 
 The @ can be used to put arguments in a file.
 
@@ -470,15 +465,16 @@ Content of args.txt = [
 --shared albv_android
 --ldlibs GLESv1_CM dl log
 --static-libs deplib1 deplib2 deplib3 deplib4
+--arm-mode arm
 ]
 The example will create:
 <NDK>/apps/midemo/Application.mk
 <CWD>/project/jni/Android.mk
-<CWD>/project/jni/static/Android.mk
+<CWD>/project/jni/static_<LIBNAME>/Android.mk (for each static library)
 <CWD>/project/jni/shared/Android.mk
 
 """,
- version="0.3", formatter_class=RawDescriptionHelpFormatter, fromfile_prefix_chars='@')
+ version="0.4", formatter_class=RawDescriptionHelpFormatter, fromfile_prefix_chars='@')
 
 parser.set_defaults(func=cmd_parse)
 
@@ -514,6 +510,11 @@ parser.add_argument('--ldlibs', default=None, nargs='+',
  Par example:
  --ldlibs GLESv1_CM dl log.""")
 
+parser.add_argument('--arm-mode', default=None,
+ help="""Specifies the arm mode. Must be either 'thumb' or 'arm'.
+ Par example:
+ --arm-mode arm.""")
+ 
 parser.add_argument('--no', default=None, nargs='+',
  help="""Omits creating the specified makefiles, which must be one or more of
  the following:

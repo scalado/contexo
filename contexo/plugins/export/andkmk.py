@@ -309,7 +309,7 @@ def cmd_parse( args ):
             else:
                 return os.path.join(args.project, *pathComps).replace("\\", "/")
         else:
-            return os.path.join(args.ndk, "apps", args.app, "project").replace("\\", "/")
+            return os.path.join(args.ndk, "apps", args.app, "project", *pathComps).replace("\\", "/")
     def getOutPath(*pathComps):
         if args.output <> None:
             if not os.path.isabs(args.output):
@@ -490,7 +490,7 @@ parser.add_argument('-mp', '--mk-path', default="jni",
  will be put in this directory or below it, except the
  Application.mk. Defaults to 'jni'.""")
 
-parser.add_argument('-p', '--project',
+parser.add_argument('-p', '--project', default=None,
  help="""The project directory.""")
 
 parser.add_argument('-so', '--shared', default=None, nargs='+',

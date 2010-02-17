@@ -1,3 +1,21 @@
+Contexo 0.7.4
+-made the dependency manager aware of include dirs added throug the -I flag
+-fixed a bug in setup (can't find cdefs/bconf)
+-made freeze skip fs-repos (i.e. non revision controlled)
+-changes to andkmk.py:
+ -Support for creating the shared object from multiple comp-file-library-entries.
+ -Support for configuring the project location.
+ -Support for renaming drives in the makefiles.
+
+Contexo 0.7.3
+-fixed str-unicode (fatal) incompatibility in areURLsEqual 
+-added headers from test folders into generated msvc projects
+-additional libraries in msvc are now named only by their basenames
+-made low verbosity more silent
+-imporved os-compatibility of paths passed to the tools (ar, ld, cc)
+-corrected python2.5 compatibility (syntax error when using 'as' in 'except err as foo') 
+-updated android make generator andkmk
+
 Contexo 0.7.2
 -added cdefs and bdefs for osx (because the 'ar' tool does not accept the '@optionfile' option)
 Bugfixes:
@@ -7,15 +25,18 @@ Bugfixes:
 -improved error handling when svn versions are not correct
 -imporved error handling when trying to work on a view that is not updated
 
+
 Contexo 0.7.1
 -fixed a fatal bug in buildmod
+
 
 Contexo 0.7.0
 -new plugin: android ndk makefile generation
 -new tool: bdef2rspec.py (translating the xml from bdef to rspec - no need for valid view)
 -fixed bug in freeze
 
-﻿Contexo 0.6.99
+﻿
+Contexo 0.6.99
 new features/fixes:
 -new command: build
     -Can be used in place of  buildmod and buildcomp (kept for backwards compatibility)

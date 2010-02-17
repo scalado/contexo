@@ -389,7 +389,7 @@ def cmd_buildcomp(args):
             depmgr.addCodeModules( modules, args.tests )
 
             args.lib = library
-            print args
+            infoMessage('args: %s'%args,  6)
             buildmodules( depmgr, session,  modules,  args, lib_dir, session.bc.getTitle(),  libraryName = args.lib)
 
             depmgr.emptyCodeModules()
@@ -426,13 +426,15 @@ def cmd_build(args):
         envLayout = EnvironmentLayout( cfgFile,  args.env )
         oldEnv    = switchEnvironment( envLayout, True )
 
+    absIncDirs = map(os.path.abspath,  args.incdirs)
+
     # Prepare all
     cview   = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=bool(args.repo_validation) )
     bc      = getBuildConfiguration( cview,  args )
-    bc.buildParams.incPaths.extend(     args.incdirs ) #TODO: accessing 'private' data?
+    bc.buildParams.incPaths.extend(     absIncDirs ) #TODO: accessing 'private' data?
     bc.buildParams.ldDirs.extend(args.libdirs)
     bc.buildParams.ldLibs.extend(args.libs)
-    depmgr  = CTXDepMgr ( cview.getItemPaths('modules'),  args.tolerate_missing_headers )
+    depmgr  = CTXDepMgr ( cview.getItemPaths('modules'),  args.tolerate_missing_headers, absIncDirs )
     session = ctx_base.CTXBuildSession( bc )
     session.setDependencyManager( depmgr )
 
@@ -474,7 +476,7 @@ def cmd_build(args):
                 modules = expand_list_files( cview, modules )
                 depmgr.addCodeModules( modules, args.tests )
                 args.library_name = library
-                print args
+                infoMessage('args: %s'%args,  6)
                 objs += buildmodules( depmgr, session,  modules,  args, bin_dir, session.bc.getTitle(),  args.library_name)
 
                 if (args.all_headers):

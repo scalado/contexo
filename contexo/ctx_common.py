@@ -27,7 +27,7 @@ globalVerboseLevel  = 1
 
 def areURLsEqual(url1,  url2):
     import urllib
-    if str.rstrip(urllib.unquote(url1),  '/' ) != str.rstrip( urllib.unquote(url2),  '/'):
+    if urllib.unquote(url1).rstrip(  '/' ) != urllib.unquote(url2).rstrip( '/'):
         return False
     else:
         return True

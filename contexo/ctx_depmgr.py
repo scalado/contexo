@@ -270,7 +270,7 @@ CHECKSUM            = 1
 #------------------------------------------------------------------------------
 class CTXDepMgr: # The dependency manager class.
 #------------------------------------------------------------------------------
-    def __init__(self, codeModulePaths = list(),  tolerateMissingHeaders = False):
+    def __init__(self, codeModulePaths = list(),  tolerateMissingHeaders = False,  additionalIncDirs = None):
         self.tolerateMissingHeaders = tolerateMissingHeaders
         self.msgSender                = 'CTXDepMgr'
         self.depRoots                 = list()
@@ -278,7 +278,9 @@ class CTXDepMgr: # The dependency manager class.
         self.checksumMethod           = self.supportedChecksumMethods[0]
 
         self.cmods                    = dict() # Dictionary mapping mod name to raw mod.
+        self.additionalIncludeDirs = assureList(additionalIncDirs)
         self.depPaths                 = set() # Paths to be used for dep. search
+        self.depPaths.update ( self.additionalIncludeDirs )
         self.xdepPaths                = list() # Paths to be used for xdep. search.
 
         self.inputFilePathDict        = dict() # { src_file : absfilepath }

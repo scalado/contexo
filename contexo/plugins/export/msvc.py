@@ -24,7 +24,7 @@ ctx_common.setInfoMessageVerboseLevel( int(cfgFile.getVerboseLevel()) )
 def create_module_mapping_from_module_list( ctx_module_list ):
 
     code_module_map = list()
-
+    print 'mapping'
     for mod in ctx_module_list:
         srcFiles = list()
         privHdrs = list()
@@ -36,8 +36,8 @@ def create_module_mapping_from_module_list( ctx_module_list ):
         privHdrs= rawMod.getPrivHeaderAbsolutePaths()
         pubHdrs = rawMod.getPubHeaderAbsolutePaths()
         testSrcs = rawMod.getTestSourceAbsolutePaths()
-
-        modDict = { 'MODNAME': rawMod.getName(), 'SOURCES': srcs, 'PRIVHDRS': privHdrs, 'PUBHDRS': pubHdrs, 'PRIVHDRDIR': rawMod.getPrivHeaderDir(),  'TESTSOURCES':testSrcs ,  'TESTDIR':rawMod.getTestDir()}
+        testHdrs = rawMod.getTestHeaderAbsolutePaths()
+        modDict = { 'MODNAME': rawMod.getName(), 'SOURCES': srcs, 'PRIVHDRS': privHdrs, 'PUBHDRS': pubHdrs, 'PRIVHDRDIR': rawMod.getPrivHeaderDir(),  'TESTSOURCES':testSrcs , 'TESTHDRS':testHdrs,  'TESTDIR':rawMod.getTestDir()}
         code_module_map.append( modDict )
 
     return code_module_map
@@ -117,7 +117,7 @@ def cmd_parse( args ):
         dirname = os.path.dirname(filename)
         incPaths += user_includepaths
 
-    print   'incPaths %s' %incPaths
+    #print   'incPaths %s' %incPaths
 
     libPaths = list()
     if args.additional_libdir != None:

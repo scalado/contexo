@@ -72,7 +72,15 @@ def lowestCommonPath(paths):
     """
     pos = 0
     reg = re.compile("[/\\\\]")
-    paths = [reg.split(absPath(path)) for path in paths]
+    def _preProcPath(_path):
+        if os.path.isfile(_path):
+            _p, _name = os.path.split(_path)
+            if len(_p) == 0:
+                userErrorExit( "Bad path '%s'." % (_path))
+            return absPath(_p)
+        else:
+            return absPath(_path)
+    paths = [reg.split(_preProcPath(path)) for path in paths]
     newPathComps = []
     size = len(paths[0])
     for path in paths:

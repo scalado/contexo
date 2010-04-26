@@ -13,15 +13,15 @@
 
 import os
 import sys
-import string
-import shutil
+#import string
+#import shutil
 import config
 from platform.ctx_platform import *
 from ctx_common import *
 from ctx_log import *
-import ctx_depmgr
+#import ctx_depmgr
 import hashlib
-import time
+#import time
 
 #------------------------------------------------------------------------------
 # \class {CTXBuildParams}
@@ -525,7 +525,7 @@ class CTXBuildSession:
             f = open( checksumPath, "r" )
             oldChecksum = f.read()
             f.close()
-            found = True
+            #found = True
         else:
             oldChecksum = '0'
 
@@ -535,7 +535,8 @@ class CTXBuildSession:
     def writeStaticObjectChecksum( self, objectFilename, checksum ):
         checksumPath = self.makeChecksumPath( objectFilename )
         f = open( checksumPath, "w" )
-        oldChecksum = f.write(checksum)
+        f.write(checksum)
+        #oldChecksum = f.write(checksum)
         f.close()
 
     def linkExecutable(self,  objects,  outputDir,   exeFilename):
@@ -579,7 +580,7 @@ class CTXBuildSession:
        # cmdline = cmdline.replace( '%TARGETFILE'  ,   objFilename         )
         cmdline = cmdline.replace( '%TARGET'      ,   exefile_cmdline     )
 
-        tool = 'LD' #'CXX' if cplusplus else 'CC'
+        #tool = 'LD' #'CXX' if cplusplus else 'CC'
         infoMessage('from ' + os.getcwd() + ' executing: ' + cmdline,  6)
         linkCommandFileName = 'linkCmdFileName096848hf434qas.file'
         cmdline = prepareCommandFile( cmdline,  linkCommandFileName )

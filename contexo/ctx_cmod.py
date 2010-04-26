@@ -359,7 +359,9 @@ class CTXCodeModule( CTXRawCodeModule ):
         # TODO: external dependencies must be revisited.
         xdepends = assureList( self.resolveExternalDeps() )
         if len(xdepends) != 0:
-            self.forceRebuild()
+	    # assume that external dependencies never change, otherwise we get forced rebuilds whenever we've got external dependencies
+	    ## contexo detects changes in the file xdepends elsewere
+            #self.forceRebuild()
             buildParams.incPaths.extend( xdepends )
 
         #

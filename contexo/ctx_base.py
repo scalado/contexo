@@ -570,7 +570,7 @@ class CTXBuildSession:
         for var in ['%LD', '%SOURCES']:
             if cmdline.find( var ) == -1:
                 userErrorExit("'%s' variable not found in commandline mask"%( var ))
-#TODO: replace is pritive. It will blindly replace each n first occurances
+#TODO: replace is primitive. It will blindly replace each n first occurances
         cmdline = cmdline.replace( '%LD'          ,   self.compiler.cdef['LD']  , 1   )
         #cmdline = cmdline.replace( '%CXX'         ,   self.cdef['CXX']    )
         cmdline = cmdline.replace( '%LDDIRS'    ,   lddirs_cmdline    )

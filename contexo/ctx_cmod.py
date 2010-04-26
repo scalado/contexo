@@ -12,10 +12,10 @@
 ###############################################################################
 
 import os
-import sys
+#import sys
 import string
 import shutil
-import config
+#import config
 import ctx_log
 import ctx_base
 from ctx_common import *

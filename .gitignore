@@ -5,3 +5,6 @@ contexo.e4p
 *.pyc
 *~
 private/
+examples/release
+examples/hello_view/hello_modules/hello/output
+examples/hello_view/hello_modules/hello_dependency/output

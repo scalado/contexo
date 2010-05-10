@@ -360,8 +360,7 @@ Global
 
 
 
-    globalEnd = """
-    EndGlobalSection
+    globalEnd = """EndGlobalSection
     GlobalSection(ExtensibilityGlobals) = postSolution
     EndGlobalSection
     GlobalSection(ExtensibilityAddIns) = postSolution

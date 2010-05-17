@@ -1,0 +1,11 @@
+*.bat -crlf
+*.BAT -crlf
+*.cmd -crlf
+*.CMD -crlf
+*.cdef crlf
+*.bc crlf
+*.py crlf
+*.txt crlf
+*.gz binary
+manifest crlf
+.gitattributes crlf

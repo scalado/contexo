@@ -38,9 +38,18 @@ def create_module_mapping_from_module_list( ctx_module_list, depMgr):
         testSrcs = rawMod.getTestSourceAbsolutePaths()
         testHdrs = rawMod.getTestHeaderAbsolutePaths()
         modName = rawMod.getName()
+        ## moduleDependencies[] only includes the top level includes, we must recurse through those to get all dependencies
+        for hdr in  depMgr.moduleDependencies[modName]:
+            hdr_location = depMgr.locate(hdr)
+            if hdr_location != None:
+                hdrpaths = depMgr.getDependencies(hdr_location)
+                for hdrpath in hdrpaths:
+                    depHdrDirs.add( os.path.dirname( hdrpath ))
+
         #modDict = { 'MODNAME': rawMod.getName(), 'SOURCES': srcs, 'PRIVHDRS': privHdrs, 'PUBHDRS': pubHdrs, 'PRIVHDRDIR': rawMod.getPrivHeaderDir(),  'TESTSOURCES':testSrcs , 'TESTHDRS':testHdrs,  'TESTDIR':rawMod.getTestDir()}
         modDict = { 'MODNAME': rawMod.getName(), 'SOURCES': srcs, 'PRIVHDRS': privHdrs, 'PUBHDRS': pubHdrs, 'PRIVHDRDIR': rawMod.getPrivHeaderDir(), 'TESTSOURCES':testSrcs , 'TESTHDRS':testHdrs, 'DEPHDRDIRS':depHdrDirs,'TESTDIR':rawMod.getTestDir()}        
         code_module_map.append( modDict )
+
 
     return code_module_map
 

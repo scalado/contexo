@@ -30,16 +30,17 @@ def create_module_mapping_from_module_list( ctx_module_list, depMgr):
         pubHdrs  = list()
         depHdrDirs = set()
 
-        rawMod = mod #ctx_cmod.CTXRawCodeModule( mod )
+        rawMod = ctx_module_list[mod] #ctx_cmod.CTXRawCodeModule( mod )
 
         srcs = rawMod.getSourceAbsolutePaths()
         privHdrs= rawMod.getPrivHeaderAbsolutePaths()
         pubHdrs = rawMod.getPubHeaderAbsolutePaths()
         testSrcs = rawMod.getTestSourceAbsolutePaths()
         testHdrs = rawMod.getTestHeaderAbsolutePaths()
-		#modDict = { 'MODNAME': rawMod.getName(), 'SOURCES': srcs, 'PRIVHDRS': privHdrs, 'PUBHDRS': pubHdrs, 'PRIVHDRDIR': rawMod.getPrivHeaderDir(),  'TESTSOURCES':testSrcs , 'TESTHDRS':testHdrs,  'TESTDIR':rawMod.getTestDir()}
-		modDict = { 'MODNAME': modName, 'SOURCES': srcs, 'PRIVHDRS': privHdrs, 'PUBHDRS': pubHdrs, 'PRIVHDRDIR': rawMod.getPrivHeaderDir(), 'TESTSOURCES':testSrcs , 'TESTHDRS':testHdrs, 'DEPHDRDIRS':depHdrDirs,'TESTDIR':rawMod.getTestDir()}        
-		code_module_map.append( modDict )
+        modName = rawMod.getName()
+        #modDict = { 'MODNAME': rawMod.getName(), 'SOURCES': srcs, 'PRIVHDRS': privHdrs, 'PUBHDRS': pubHdrs, 'PRIVHDRDIR': rawMod.getPrivHeaderDir(),  'TESTSOURCES':testSrcs , 'TESTHDRS':testHdrs,  'TESTDIR':rawMod.getTestDir()}
+        modDict = { 'MODNAME': rawMod.getName(), 'SOURCES': srcs, 'PRIVHDRS': privHdrs, 'PUBHDRS': pubHdrs, 'PRIVHDRDIR': rawMod.getPrivHeaderDir(), 'TESTSOURCES':testSrcs , 'TESTHDRS':testHdrs, 'DEPHDRDIRS':depHdrDirs,'TESTDIR':rawMod.getTestDir()}        
+        code_module_map.append( modDict )
 
     return code_module_map
 

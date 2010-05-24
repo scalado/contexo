@@ -12,10 +12,10 @@
 ###############################################################################
 
 import os
-import sys
+#import sys
 import string
 import shutil
-import config
+#import config
 import ctx_log
 import ctx_base
 from ctx_common import *
@@ -307,7 +307,7 @@ class CTXCodeModule( CTXRawCodeModule ):
 
             for xdep_var in xdep_vars:
 
-                xdep_not_found = True
+                #xdep_not_found = True
 
                 include_path_candidates = None
 
@@ -316,7 +316,7 @@ class CTXCodeModule( CTXRawCodeModule ):
                 if xdep_val != '':
                     include_path_candidates = xdep_val
                     include_path_candidates = include_path_candidates.split( os.pathsep )
-                    xdep_not_found = False
+                    #xdep_not_found = False
 
                 if include_path_candidates == None:
                     warningMessage("Cannot resolve item '%s' specified in '%s'"%( xdep_var, xdep_filepath))
@@ -359,7 +359,9 @@ class CTXCodeModule( CTXRawCodeModule ):
         # TODO: external dependencies must be revisited.
         xdepends = assureList( self.resolveExternalDeps() )
         if len(xdepends) != 0:
-            self.forceRebuild()
+	    # assume that external dependencies never change, otherwise we get forced rebuilds whenever we've got external dependencies
+	    ## contexo detects changes in the file xdepends elsewere
+            #self.forceRebuild()
             buildParams.incPaths.extend( xdepends )
 
         #

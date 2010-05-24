@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-import sys
+#import sys
 from argparse import ArgumentParser
 import contexo.ctx_export as ctx_export
 from contexo.ctx_common import infoMessage, userErrorExit, warningMessage
@@ -26,7 +26,7 @@ def create_module_mapping_from_module_list( ctx_module_list ):
     code_module_map = list()
     print 'mapping'
     for mod in ctx_module_list:
-        srcFiles = list()
+        #srcFiles = list()
         privHdrs = list()
         pubHdrs  = list()
 
@@ -114,7 +114,7 @@ def cmd_parse( args ):
     if args.additional_includes != None:
         filename = args.additional_includes
         user_includepaths = getPathsFromOption(filename)
-        dirname = os.path.dirname(filename)
+        #dirname = os.path.dirname(filename)
         incPaths += user_includepaths
 
     #print   'incPaths %s' %incPaths

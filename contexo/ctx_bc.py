@@ -16,11 +16,11 @@
 ###############################################################################
 
 import os
-import sys
+#import sys
 import string
-import shutil
+#import shutil
 import config
-import platform.ctx_platform
+#import platform.ctx_platform
 from ctx_common import *
 from ctx_base import *
 
@@ -148,7 +148,7 @@ class BCFile:
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - - -
     def __process_bc( self, bcFilePath, cfgFile, cdefPaths ):
 
-        msgSender    = 'BCFile'
+#        msgSender    = 'BCFile'
         option_name  = str()
         bcsec_meta   = dict()
         bcsec_config = dict()

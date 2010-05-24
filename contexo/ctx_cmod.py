@@ -87,7 +87,7 @@ def assertValidContexoCodeModule( path, msgSender ):
 def getSourcesFromDir( self, srcDir ):
     srcList = list ()
     ctxAssert( os.path.exists(srcDir), 'Directory %s was assumed to exist%(srcDir)' )
-    source_extensions = [ '.c', '.cpp']
+    source_extensions = [ '.c', '.cpp', '.asm', '.s']
 
     # Collect all source files.
     dirlist = os.listdir( srcDir )

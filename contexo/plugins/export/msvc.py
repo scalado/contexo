@@ -21,14 +21,14 @@ cfgFile = ctx_cfg.CFGFile( contexo_config_path)
 ctx_common.setInfoMessageVerboseLevel( int(cfgFile.getVerboseLevel()) )
 
 #------------------------------------------------------------------------------
-def create_module_mapping_from_module_list( ctx_module_list ):
-
+def create_module_mapping_from_module_list( ctx_module_list, depMgr):
     code_module_map = list()
     print 'mapping'
     for mod in ctx_module_list:
         srcFiles = list()
         privHdrs = list()
         pubHdrs  = list()
+        depHdrDirs = set()
 
         rawMod = mod #ctx_cmod.CTXRawCodeModule( mod )
 
@@ -37,8 +37,9 @@ def create_module_mapping_from_module_list( ctx_module_list ):
         pubHdrs = rawMod.getPubHeaderAbsolutePaths()
         testSrcs = rawMod.getTestSourceAbsolutePaths()
         testHdrs = rawMod.getTestHeaderAbsolutePaths()
-        modDict = { 'MODNAME': rawMod.getName(), 'SOURCES': srcs, 'PRIVHDRS': privHdrs, 'PUBHDRS': pubHdrs, 'PRIVHDRDIR': rawMod.getPrivHeaderDir(),  'TESTSOURCES':testSrcs , 'TESTHDRS':testHdrs,  'TESTDIR':rawMod.getTestDir()}
-        code_module_map.append( modDict )
+		#modDict = { 'MODNAME': rawMod.getName(), 'SOURCES': srcs, 'PRIVHDRS': privHdrs, 'PUBHDRS': pubHdrs, 'PRIVHDRDIR': rawMod.getPrivHeaderDir(),  'TESTSOURCES':testSrcs , 'TESTHDRS':testHdrs,  'TESTDIR':rawMod.getTestDir()}
+		modDict = { 'MODNAME': modName, 'SOURCES': srcs, 'PRIVHDRS': privHdrs, 'PUBHDRS': pubHdrs, 'PRIVHDRDIR': rawMod.getPrivHeaderDir(), 'TESTSOURCES':testSrcs , 'TESTHDRS':testHdrs, 'DEPHDRDIRS':depHdrDirs,'TESTDIR':rawMod.getTestDir()}        
+		code_module_map.append( modDict )
 
     return code_module_map
 
@@ -177,7 +178,9 @@ def cmd_parse( args ):
     vcprojList = list() # list of dict['PROJNAME':string, 'LIBNAME':string, 'MODULELIST':listof( see doc of make_libvcproj7 ) ]
 
     # Regardless if we export components or modules, all modules are located in export_data['MODULES']
-    module_map = create_module_mapping_from_module_list( package.export_data['MODULES'].values() )
+    depMgr = package.export_data['DEPMGR']
+    module_map = create_module_mapping_from_module_list( package.export_data['MODULES'], depMgr)
+
 
     if comp_export and args.mirror_components:
         for comp in package.export_data['COMPONENTS']:

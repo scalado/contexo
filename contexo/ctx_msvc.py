@@ -3,13 +3,11 @@
 import os.path
 import ntpath
 from xmltools import XMLGenerator
-#import pywintypes
 import uuid
 
 def relntpath(path, start):
     import ntpath #the windows version of os.path #available in python 2.6
 #    return ntpath.relpath(path,  start)
-
     if start == None:
         start = os.getcwd()
     path = ntpath.normpath(path)
@@ -41,7 +39,7 @@ def relntpath(path, start):
 
 
 
-#codeModules = listof dictionaries: { MODNAME: string, SOURCES: list(paths), PRIVHDRS: list(paths), PUBHDRS: list(paths), PRIVHDRDIR: string, TESTSOURCES:list }
+#codeModules = listof dictionaries: { MODNAME: string, SOURCES: list(paths), PRIVHDRS: list(paths), PUBHDRS: list(paths), PRIVHDRDIR: string, DEPHDRDIRS: set(paths), TESTSOURCES }
 def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib,
                     debug, do_tests,  incPaths, vcprojPath, platform = 'Win32',
                     fileTitle = None, configType = 'lib',
@@ -119,8 +117,8 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib,
     project.startElement ('Configuration', {'Name':variant+'|' + platform,
                                             'OutputDirectory':"".join(['.\\',variant,"\\",projectName]),
                                             'IntermediateDirectory':"".join(['.\\',variant,"\\",projectName]),
-                                           'ConfigurationType':configurationTypeNbr,
-                                           'UseOfMFC':'0',
+                                            'ConfigurationType':configurationTypeNbr,
+                                            'UseOfMFC':'0',
                                             'CharacterSet':'1'})
 
     #
@@ -136,12 +134,12 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib,
 
     compilerTool = {'Name':'VCCLCompilerTool',
                                   'PreprocessorDefinitions': prepDefs,
-                                   'ObjectFile':"".join(['.\\',variant,"\\",projectName,'/']),
-                                   'ProgramDataBaseFileName':"".join(['.\\',variant,"\\",projectName,'/']),
+                                    'ObjectFile':"".join(['.\\',variant,"\\",projectName,'/']),
+                                    'ProgramDataBaseFileName':"".join(['.\\',variant,"\\",projectName,'/']),
                                   'SuppressStartupBanner':'TRUE',
                                   'AdditionalIncludeDirectories':incPaths,
                                   'Optimization':'0',
-                                   'DebugInformationFormat':debugInformationFormat}
+                                    'DebugInformationFormat':debugInformationFormat}
 
     # Parse flags and add correct attributes in compiler tool.
     mycflags = cflags
@@ -186,7 +184,7 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib,
 
     if configType == 'lib':
         project.element ('Tool', {'Name':'VCLibrarianTool',
-                                   'OutputFile': '$(OutDir)/'+outLib})
+                                    'OutputFile': '$(OutDir)/'+outLib})
     elif configType == 'exe':
         additionalDependencies = " ".join(map(ntpath.basename, additionalDependencies))
         additionalLibraryDirectories = " ".join(additionalLibraryDirectories)
@@ -209,12 +207,11 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib,
 
 
     #NOTE:
-    #codeModules = listof dictionaries: { MODNAME: string, SOURCES: list(paths), PRIVHDRS: list(paths), PUBHDRS: list(paths), TESTSOURCES }
+    #codeModules = listof dictionaries: { MODNAME: string, SOURCES: list(paths), PRIVHDRS: list(paths), PUBHDRS: list(paths), PRIVHDRDIR: string, DEPHDRDIRS: set(paths), TESTSOURCES }
     for mod in codeModules:
 
         # Start module folder (public header goes here also)
         project.startElement ('Filter', {'Name': mod['MODNAME'],'Filter':''})
-
 
         # Start source file folder
         project.startElement ('Filter', {'Name': 'src','Filter':''})
@@ -222,7 +219,10 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib,
         for srcFile in mod['SOURCES']:
             project.startElement ('File', {'RelativePath': relntpath(srcFile, vcprojPath)})
             project.startElement('FileConfiguration',{'Name':"".join([variant,'|',platform])})
-            project.element('Tool',{'Name':'VCCLCompilerTool','AdditionalIncludeDirectories':relntpath(mod['PRIVHDRDIR'], vcprojPath)})
+            additionalIncludes = relntpath(mod['PRIVHDRDIR'], vcprojPath)
+            for hdrdir in mod['DEPHDRDIRS']:
+                additionalIncludes = additionalIncludes + ';' + relntpath(hdrdir, vcprojPath)
+            project.element('Tool',{'Name':'VCCLCompilerTool','AdditionalIncludeDirectories':additionalIncludes})
             project.endElement ('FileConfiguration')
             project.endElement ('File')
             #project.startElement ('FileConfiguration', {'Name':variant+'|Win32'})
@@ -296,10 +296,10 @@ def make_solution8( name, path, projects, exeproject = None, platform = 'Win32' 
     slnFile.write( "Microsoft Visual Studio Solution File, Format Version 9.00\n# Visual Studio 2005" )
 
     prjTemplate = """
-Project(\"%s\") = \"%s\", \"%s.vcproj\", \"%s\"
-    ProjectSection(ProjectDependencies) = postProject
-    EndProjectSection
-EndProject"""
+    Project(\"%s\") = \"%s\", \"%s.vcproj\", \"%s\"
+        ProjectSection(ProjectDependencies) = postProject
+        EndProjectSection
+    EndProject"""
     #%( solution GUID, project name, project name, project GUID )
 
 
@@ -366,39 +366,10 @@ Global
     EndGlobalSection
     GlobalSection(ExtensibilityAddIns) = postSolution
     EndGlobalSection
-EndGlobal"""
+    EndGlobal"""
 
     slnFile.write( globalEnd )
-
-
-
-
-
     slnFile.close()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 def env2MSVS ( env, projname, srcs, variant ):
     # Create .proj file
@@ -425,10 +396,10 @@ def env2MSVS ( env, projname, srcs, variant ):
     project.startElement ('Configurations', {})
 
     project.startElement ('Configuration', {'Name':variant+'|Win32',
-                                           'OutputDirectory':'.\\'+variant,
-                                           'IntermediateDirectory':'.\\'+variant,
-                                           'ConfigurationType':'1',
-                                           'UseOfMFC':'0',
+                                            'OutputDirectory':'.\\'+variant,
+                                            'IntermediateDirectory':'.\\'+variant,
+                                            'ConfigurationType':'1',
+                                            'UseOfMFC':'0',
                                             'CharacterSet':'2'})
 
 
@@ -448,9 +419,9 @@ def env2MSVS ( env, projname, srcs, variant ):
                                   'ObjectFile':'.\\' + variant + '/',
                                   'ProgramDataBaseFileName':'.\\' + variant + '/',
                                   'SuppressStartupBanner':'TRUE',
-                                   'AdditionalOptions':str(ccflags),
+                                    'AdditionalOptions':str(ccflags),
                                   'Optimization':'0',
-                                   'DebugInformationFormat':'4'})
+                                    'DebugInformationFormat':'4'})
 
 
     #
@@ -536,10 +507,10 @@ def env2MSVS8 ( env, projname, path, srcs, variant ):
     project.startElement ('Configurations', {})
 
     project.startElement ('Configuration', {'Name':variant+'|Win32',
-                                           'OutputDirectory':'.\\'+variant,
-                                           'IntermediateDirectory':'.\\'+variant,
-                                           'ConfigurationType':'1',
-                                           'UseOfMFC':'0',
+                                            'OutputDirectory':'.\\'+variant,
+                                            'IntermediateDirectory':'.\\'+variant,
+                                            'ConfigurationType':'1',
+                                            'UseOfMFC':'0',
                                             'CharacterSet':'2'})
 
 
@@ -559,9 +530,9 @@ def env2MSVS8 ( env, projname, path, srcs, variant ):
                                   'ObjectFile':'.\\' + variant + '/',
                                   'ProgramDataBaseFileName':'.\\' + variant + '/',
                                   'SuppressStartupBanner':'TRUE',
-                                   'AdditionalOptions':str(ccflags),
+                                    'AdditionalOptions':str(ccflags),
                                   'Optimization':'0',
-                                   'DebugInformationFormat':'4'})
+                    'DebugInformationFormat':'4'})
 
 
     #

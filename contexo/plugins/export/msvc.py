@@ -88,19 +88,9 @@ def cmd_parse( args ):
 
     modTags     = list()
     incPaths    = list()
-    depRoots    = package.export_data['PATHS']['MODULES']
-    for depRoot in depRoots:
-        incPathCandidates = os.listdir( depRoot )
-        for cand in incPathCandidates:
-            path = os.path.join(depRoot, cand)
-            if contexo.ctx_cmod.isContexoCodeModule( path ):
-                rawMod = contexo.ctx_cmod.CTXRawCodeModule(path)
-                incPaths.append( path )
+    incPathSet  = set()
 
-                # Only include private headers for projects containing the specified module
-                #incPaths.append( os.path.join(rawMod.getRootPath(), rawMod.getPrivHeaderDir()) )
-
-                modTags.append( 'COMPILING_MOD_' + string.upper( rawMod.getName() ) )
+    #modTags.append( 'COMPILING_MOD_' + string.upper( rawMod.getName() ) )
 
     #
     # Collect additional include paths and additional library paths
@@ -125,8 +115,9 @@ def cmd_parse( args ):
     if args.additional_includes != None:
         filename = args.additional_includes
         user_includepaths = getPathsFromOption(filename)
-        dirname = os.path.dirname(filename)
-        incPaths += user_includepaths
+        #dirname = os.path.dirname(filename)
+        for inc in user_includepaths:
+            incPathSet.add(inc)
 
     #print   'incPaths %s' %incPaths
 
@@ -211,6 +202,7 @@ def cmd_parse( args ):
 
     guidDict = dict()
     for proj in vcprojList:
+        #codeModules = listof dictionaries: { MODNAME: string, SOURCES: list(paths), PRIVHDRS: list(paths), PUBHDRS: list(paths), PRIVHDRDIR: string, TESTSOURCES:list }
         guidDict[proj['PROJNAME']] = contexo.ctx_msvc.make_libvcproj8( proj['PROJNAME'],
                                                                        build_params.cflags,
                                                                        build_params.prepDefines + modTags,
@@ -235,15 +227,15 @@ def cmd_parse( args ):
         external_vcproj = contexo.ctx_msvc.get_info_vcproj8( os.path.abspath( args.external_vcproj ) )
         external_vcproj['DEBUG'] = debugmode
         attrs = list()
-        attrs.append(   dict({ "DEBUG":debugmode,
+        attrs.append(    dict({ "DEBUG":debugmode,
                                 "TOOL":"VCCLCompilerTool",
                                  "KEY":"AdditionalIncludeDirectories",
-                               "VALUE":";".join(incPaths) }))
+                                "VALUE":";".join(incPaths) }))
 
-        attrs.append(   dict({ "DEBUG":debugmode,
+        attrs.append(    dict({ "DEBUG":debugmode,
                                 "TOOL":"VCLinkerTool",
-                                 "KEY":"AdditionalLibraryDirectories",
-                               "VALUE":";".join(libPaths) }))
+                                "KEY":"AdditionalLibraryDirectories",
+                                "VALUE":";".join(libPaths) }))
 
         contexo.ctx_msvc.update_vcproj8(external_vcproj['FILENAME'],attrs)
 

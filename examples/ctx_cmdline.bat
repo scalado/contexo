@@ -1,1 +1,1 @@
-ctx buildmod hello -e msvc.env -o release
+ctx buildcomp hello -b gcc-example.bc -e msvc.env -o release

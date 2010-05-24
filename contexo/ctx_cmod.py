@@ -80,7 +80,8 @@ def assertValidContexoCodeModule( path, msgSender ):
 
     for d in criteriaDirs:
         if not os.path.exists( os.path.join( path, d) ):
-            userErrorExit("'%s' was found but is not a valid Contexo code module"%(path))
+            warningMessage('Must have the dir "'+d+'" in order to be a valid contexo dir')
+            userErrorExit("'%s' was found but is not a valid Contexo code module. "%(path))
 
 
 def getSourcesFromDir( self, srcDir ):

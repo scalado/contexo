@@ -325,7 +325,7 @@ class BCFile:
 		## By not forcing a naming convention on the architectures makes it simple to support future architectures without modifing Contexo
 		## the ARCH_PATH is relative to the [CONTEXO_MODULE]/src folder
 
-		option_name = 'ARCH_PATH'
+        option_name = 'ARCH_PATH'
 
         #
         # Colormodes

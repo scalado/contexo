@@ -19,10 +19,11 @@ import shutil
 import ctx_log
 import ctx_base
 from ctx_common import *
+from ctx_bc import *
 
 #
 # Current Contexo module structure.
-# Note: This can be dinamically created using XML in the future.
+# Note: This can be dynamically created using XML in the future.
 #
 contexo_dirname     = 'contexo'
 src_dirname         = 'src'
@@ -35,6 +36,8 @@ srclist_filename    = 'sourcefiles'
 
 criteriaDirs = ['contexo','doc','inc', 'src', 'test']
 
+#------------------------------------------------------------------------------
+bc = BConf()
 
 #------------------------------------------------------------------------------
 def resolveModuleLocation( modName, pathlist ):
@@ -86,19 +89,42 @@ def assertValidContexoCodeModule( path, msgSender ):
 
 def getSourcesFromDir( self, srcDir ):
     # TODO: use Set() here instead
-    srcList = list ()
+    srcList = list()
+    srcListDict = dict()
+
     ctxAssert( os.path.exists(srcDir), 'Directory %s was assumed to exist%(srcDir)' )
     source_extensions = [ '.c', '.cpp']
+
+    # TODO: insert stuff here to get ARCH_PATH
+    # override source files with ARCH_PATH files.
 
     # Collect all source files.
     dirlist = os.listdir( srcDir )
     for file in dirlist:
         if os.path.isfile( os.path.join(srcDir, file) ):
             root, ext = os.path.splitext( file )
+
             if source_extensions.count( ext ) != 0:
                 srcList.append(file)
+
     # override source files
     arch_spec_source_extensions = [ '.c', '.cpp', '.asm', '.s']
+    archPath = bc.getArchPath()
+    for archRelDir in archPath:
+        archDirList = os.listdir( os.path.join(srcDir, archRelDir ))
+        for archDirEntry in archDirList:
+            for item in archDirEntry:
+                if os.path.isfile( item ):
+                    root, ext = os.path.splitext( item )
+                    if source_extensions.count( ext ) != 0:
+
+                        # not yet
+                        # srcList.append(item)
+
+
+
+
+
     for file in srcList:
         userErrorExit('NOT FINISHED')
     return srcList
@@ -284,6 +310,7 @@ class CTXCodeModule( CTXRawCodeModule ):
         CTXRawCodeModule.__init__( self, moduleRoot, pathlist, buildUnitTests )
         self.moduleTag     = str()
         self.buildParams   = ctx_base.CTXBuildParams()
+        self.bc            = ctx_base.getBCFile()
         self.buildDir      = str()
         self.rebuildAll    = forceRebuild
         self.msgSender     = 'CTXCodeModule'

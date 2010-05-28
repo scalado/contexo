@@ -12,18 +12,6 @@ from ctx_common import *
 import ctx_cparser
 
 #------------------------------------------------------------------------------
-def getModulePrivHeaderDir( modulePath ):
-    return CTXRawCodeModule(modulePath).getPrivHeaderDir()
-
-#------------------------------------------------------------------------------
-def getModulePubHeaderDir( modulePath ):
-    return CTXRawCodeModule(modulePath).getPubHeaderDir()
-
-#------------------------------------------------------------------------------
-def getModuleSourceDir( modulePath ):
-    return CTXRawCodeModule(modulePath).getSourceDir()
-
-#------------------------------------------------------------------------------
 def findFileInPathList( src_file, pathList ):
     if src_file and pathList:
         for path in pathList:

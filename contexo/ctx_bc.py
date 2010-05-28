@@ -45,6 +45,7 @@ class BCFile:
         self.cdef            = str()
         self.compiler        = None
         self.msgSender       = 'BCFile'
+        self.archPath        = list()
         #
 
         bcFilePaths = assureList( bcFilePaths )
@@ -319,13 +320,23 @@ class BCFile:
 		#
 
         ## ARCH_PATH specifies a path with architecture specific files
-		## its implementation was motivated by the need to include specific asm (.s) files because of bugs in GCC, which attributed to so many lines of assembly that it wasn't feasable to write compiler specific inlined assembler for each compiler.
+		## its implementation was motivated by the need to include specific asm
+        ## (.s) files because of bugs in GCC, which attributed to so many lines
+        ## of assembly that it wasn't feasable to write compiler specific
+        ## inlined assembler for each compiler.
 		## additionally arch specific .c files may be placed here too
-		## Since several architectures can share arch some specific code, several arch specific directories may be specified, and separated by ';'.
-		## By not forcing a naming convention on the architectures makes it simple to support future architectures without modifing Contexo
-		## the ARCH_PATH is relative to the [CONTEXO_MODULE]/src folder
+		## Since several architectures can share some arch specific code,
+        ## several arch specific directories may be specified, and
+        ## separated by ';'.
+		## By not forcing a naming convention on the architectures future 
+        ## architecture specific code will be simple to support without modifing
+        ## Contexo
+		## The ARCH_PATH is relative to the [CONTEXO_MODULE]/src folder.
 
         option_name = 'ARCH_PATH'
+        if section.has_key( option_name ):
+            for pathElem in section[ option_name ]:
+                self.archPath.append(pathElem)
 
         #
         # Colormodes
@@ -372,3 +383,9 @@ class BCFile:
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - - -
     def getTitle( self ):
         return self.bcTitle
+
+    # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - - -
+    def getArchPath( self ):
+        return self.archPath
+
+

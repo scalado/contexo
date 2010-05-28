@@ -85,9 +85,10 @@ def assertValidContexoCodeModule( path, msgSender ):
 
 
 def getSourcesFromDir( self, srcDir ):
+    # TODO: use Set() here instead
     srcList = list ()
     ctxAssert( os.path.exists(srcDir), 'Directory %s was assumed to exist%(srcDir)' )
-    source_extensions = [ '.c', '.cpp', '.asm', '.s']
+    source_extensions = [ '.c', '.cpp']
 
     # Collect all source files.
     dirlist = os.listdir( srcDir )
@@ -96,6 +97,10 @@ def getSourcesFromDir( self, srcDir ):
             root, ext = os.path.splitext( file )
             if source_extensions.count( ext ) != 0:
                 srcList.append(file)
+    # override source files
+    arch_spec_source_extensions = [ '.c', '.cpp', '.asm', '.s']
+    for file in srcList:
+        userErrorExit('NOT FINISHED')
     return srcList
 
 

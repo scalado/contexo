@@ -17,16 +17,16 @@ import logging.handlers
 import os
 import os.path
 import shutil
-import string
+#import string
 from argparse import ArgumentParser
 import argparse
-from contexo import ctx_rspec
+#from contexo import ctx_rspec
 from contexo import ctx_view
 from contexo import ctx_cfg
-from contexo import ctx_cmod
+#from contexo import ctx_cmod
 from contexo.ctx_envswitch  import  assureList, EnvironmentLayout, switchEnvironment
 from contexo import ctx_common
-from contexo.ctx_common import getUserTempDir,  setInfoMessageVerboseLevel, infoMessage, userErrorExit, warningMessage, ctxAssert
+from contexo.ctx_common import setInfoMessageVerboseLevel, infoMessage, userErrorExit, warningMessage, ctxAssert
 from contexo.ctx_comp import ctx_log, COMPFile
 from contexo import ctx_sysinfo
 

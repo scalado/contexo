@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-import sys
+#import sys
 from argparse import ArgumentParser
 import contexo.ctx_export as ctx_export
 from contexo.ctx_common import infoMessage, userErrorExit, warningMessage
@@ -25,7 +25,7 @@ def create_module_mapping_from_module_list( ctx_module_list, depMgr):
     code_module_map = list()
     print 'mapping'
     for mod in ctx_module_list:
-        srcFiles = list()
+        #srcFiles = list()
         privHdrs = list()
         pubHdrs  = list()
         depHdrDirs = set()

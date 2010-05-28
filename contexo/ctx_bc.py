@@ -16,11 +16,11 @@
 ###############################################################################
 
 import os
-import sys
+#import sys
 import string
-import shutil
+#import shutil
 import config
-import platform.ctx_platform
+#import platform.ctx_platform
 from ctx_common import *
 from ctx_base import *
 

@@ -13,15 +13,15 @@
 
 import os
 import sys
-import string
-import shutil
+#import string
+#import shutil
 import config
 from platform.ctx_platform import *
 from ctx_common import *
 from ctx_log import *
-import ctx_depmgr
+#import ctx_depmgr
 import hashlib
-import time
+#import time
 
 #------------------------------------------------------------------------------
 # \class {CTXBuildParams}

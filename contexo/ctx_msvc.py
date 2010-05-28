@@ -149,6 +149,8 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib,
 
 
     vcproj_opts_map = {
+                    '/Z7':('DebugInformationFormat', '1'),
+                    '/Zd':('DebugInformationFormat', '2'),
                     '/Zi':('DebugInformationFormat', '3'),
                     '/ZI':('DebugInformationFormat', '4'),
                     '/W4':('WarningLevel', '4'),
@@ -158,7 +160,8 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib,
                     '/W0':('WarningLevel', '0'),
                     '/Od':('Optimization', '0'),
                     '/O1':('Optimization', '1'),
-                    '/O2':('Optimization', '2')}
+                    '/O2':('Optimization', '2'),
+		    '/OX':('Optimization', '3')}
 
     # digest, analyse and remove options
     for opt in mycflags:

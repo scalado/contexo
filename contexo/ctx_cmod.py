@@ -282,7 +282,11 @@ class CTXCodeModule( CTXRawCodeModule ):
         self.rebuildAll    = forceRebuild
         self.msgSender     = 'CTXCodeModule'
 
-        # TODO: Obsolete. should be removed.
+        # TODO: the preprocessor define COMPILING_MOD_ is a legacy definition,
+        # initially created to make sure private headers were not included in a
+        # project.
+        # DO NOT REMOVE until all previous releases compiles without it.
+        # /thomase
         self.moduleTag     = 'COMPILING_MOD_' + string.upper( self.getName() )
         self.buildParams.prepDefines.append( self.moduleTag )
 

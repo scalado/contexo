@@ -95,7 +95,14 @@ def cmd_parse( args ):
     # project.
     # DO NOT REMOVE until all previous releases compiles without it.
     # /thomase
-    modTags.append( 'COMPILING_MOD_' + string.upper( rawMod.getName() ) )
+    depRoots    = package.export_data['PATHS']['MODULES']
+    for depRoot in depRoots:
+        incPathCandidates = os.listdir( depRoot )
+        for cand in incPathCandidates:
+            path = os.path.join(depRoot, cand)
+            if contexo.ctx_cmod.isContexoCodeModule( path ):
+                rawMod = contexo.ctx_cmod.CTXRawCodeModule(path)
+                modTags.append( 'COMPILING_MOD_' + string.upper( rawMod.getName() ) )
 
     #
     # Collect additional include paths and additional library paths

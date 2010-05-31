@@ -225,8 +225,11 @@ for depRoot in depRoots:
         if ctx_cmod.isContexoCodeModule( path ):
             rawMod = CTXRawCodeModule(path)
             incPaths.append( path )
-            # Only include private headers for projects containing the specified module
-            #incPaths.append( os.path.join(rawMod.getRootPath(), rawMod.getPrivHeaderDir()) )
+            # TODO: the preprocessor define COMPILING_MOD_ is a legacy definition,
+            # initially created to make sure private headers were not included in a
+            # project.
+            # DO NOT REMOVE until all previous releases compiles without it.
+            # /thomase
             modTags.append( 'COMPILING_MOD_' + string.upper( rawMod.getName() ) )
 
 incPaths += additionalIncPaths

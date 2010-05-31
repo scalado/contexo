@@ -113,6 +113,11 @@ def moduleMk(module, build_params, modules, incPaths, depMgr, lclDstDir, localPa
     prepDefPrefix = "-D"
     prepDefSuffix = ""
     for ctxMod in module['MODULELIST']:
+        # TODO: the preprocessor define COMPILING_MOD_ is a legacy definition,
+        # initially created to make sure private headers were not included in a
+        # project.
+        # DO NOT REMOVE until all previous releases compiles without it.
+        # /thomase
         localFlags.append(prepDefPrefix + "COMPILING_MOD_" + ctxMod["MODNAME"].upper() + prepDefSuffix)
     for prepDef in build_params.prepDefines:
         localFlags.append(prepDefPrefix + prepDef + prepDefSuffix)

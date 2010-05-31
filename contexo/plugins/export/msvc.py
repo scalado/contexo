@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-import sys
+#import sys
 from argparse import ArgumentParser
 import contexo.ctx_export as ctx_export
 from contexo.ctx_common import infoMessage, userErrorExit, warningMessage
@@ -25,7 +25,7 @@ def create_module_mapping_from_module_list( ctx_module_list, depMgr):
     code_module_map = list()
     print 'mapping'
     for mod in ctx_module_list:
-        srcFiles = list()
+        #srcFiles = list()
         privHdrs = list()
         pubHdrs  = list()
         depHdrDirs = set()
@@ -90,7 +90,19 @@ def cmd_parse( args ):
     incPaths    = list()
     incPathSet  = set()
 
-    #modTags.append( 'COMPILING_MOD_' + string.upper( rawMod.getName() ) )
+    # TODO: the preprocessor define COMPILING_MOD_ is a legacy definition,
+    # initially created to make sure private headers were not included in a
+    # project.
+    # DO NOT REMOVE until all previous releases compiles without it.
+    # /thomase
+    depRoots    = package.export_data['PATHS']['MODULES']
+    for depRoot in depRoots:
+        incPathCandidates = os.listdir( depRoot )
+        for cand in incPathCandidates:
+            path = os.path.join(depRoot, cand)
+            if contexo.ctx_cmod.isContexoCodeModule( path ):
+                rawMod = contexo.ctx_cmod.CTXRawCodeModule(path)
+                modTags.append( 'COMPILING_MOD_' + string.upper( rawMod.getName() ) )
 
     #
     # Collect additional include paths and additional library paths

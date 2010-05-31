@@ -1,13 +1,12 @@
-
 import os
-import sys
+#import sys
 import hashlib
 import cPickle
 
 from stat import *
 
 from ctx_common import *
-import ctx_cmod
+#import ctx_cmod
 
 import ctx_cparser
 
@@ -297,7 +296,7 @@ class CTXDepMgr: # The dependency manager class.
         self.addDependSearchPaths( codeModulePaths )
 
     def _CTXDepMgr__updateDependencies ( self, inputFileList, pathList):
-
+#
         inputFilePath       = str()
         incFileList         = list()
         checksum            = str()
@@ -310,12 +309,12 @@ class CTXDepMgr: # The dependency manager class.
             #
             inputFilePath = self.locate(inputFile,  pathList)
             if inputFilePath == None:
-                dependings = self.findFilesDependingOn(inputFile)
-                assert(dependings)
+                dependencies = self.findFilesDependingOn(inputFile)
+                assert(dependencies)
                 if ( self.tolerateMissingHeaders):
-                    warningMessage("Dependency manager cannot locate input file: %s (from %s)"%(inputFile, ",".join(dependings) ))
+                    warningMessage("Dependency manager cannot locate input file: %s (from %s)"%(inputFile, ",".join(dependencies) ))
                 else:
-                    userErrorExit("Dependency manager cannot locate input file: %s (from %s)"%(inputFile, ",".join(dependings) ))
+                    userErrorExit("Dependency manager cannot locate input file: %s (from %s)"%(inputFile, ",".join(dependencies) ))
                 continue #return
 
             #

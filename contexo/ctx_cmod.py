@@ -37,9 +37,6 @@ srclist_filename    = 'sourcefiles'
 criteriaDirs = ['contexo','doc','inc', 'src', 'test']
 
 #------------------------------------------------------------------------------
-bc = BConf()
-
-#------------------------------------------------------------------------------
 def resolveModuleLocation( modName, pathlist ):
     tried = [modName,]
 
@@ -102,31 +99,29 @@ def getSourcesFromDir( self, srcDir ):
     dirlist = os.listdir( srcDir )
     for file in dirlist:
         if os.path.isfile( os.path.join(srcDir, file) ):
-            root, ext = os.path.splitext( file )
-
+            fileRoot, ext = os.path.splitext( file )
             if source_extensions.count( ext ) != 0:
-                srcList.append(file)
+                baseFileName = os.path.basename(fileRoot)
+                srcListDict[baseFileName] = file
 
-    # override source files
+    # override source files with architecture specific files
     arch_spec_source_extensions = [ '.c', '.cpp', '.asm', '.s']
     archPath = bc.getArchPath()
+    # similar to windows and unix paths, ARCH_PATH the first items should be 
+    # the items with highest precedence
+    # since this for loop overrides earlier values, the for loop needs to be reversed.
+    archPath.reverse()
     for archRelDir in archPath:
         archDirList = os.listdir( os.path.join(srcDir, archRelDir ))
         for archDirEntry in archDirList:
             for item in archDirEntry:
                 if os.path.isfile( item ):
-                    root, ext = os.path.splitext( item )
-                    if source_extensions.count( ext ) != 0:
-
-                        # not yet
-                        # srcList.append(item)
-
-
-
-
-
-    for file in srcList:
-        userErrorExit('NOT FINISHED')
+                    fileRoot, ext = os.path.splitext( item )
+                    if arch_spec_source_extensions.count( ext ) != 0:
+                        baseFileName = os.path.basename(fileRoot)
+                        srcListDict[baseFileName] = file
+    for file in srcList.values():
+        srcList.append(file)
     return srcList
 
 

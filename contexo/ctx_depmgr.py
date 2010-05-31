@@ -245,7 +245,7 @@ def findAllCodeModulPaths( searchPaths ):
                     codeModulePaths.append( mod.getTestDir () )
         pathList.extend( codeModulePaths )
 
-    return pathLi
+    return pathList
 
 def finAllCodeModules( searchPaths ):
     from ctx_cmod import isContexoCodeModule, CTXRawCodeModule
@@ -296,7 +296,7 @@ class CTXDepMgr: # The dependency manager class.
         self.addDependSearchPaths( codeModulePaths )
 
     def _CTXDepMgr__updateDependencies ( self, inputFileList, pathList):
-
+#
         inputFilePath       = str()
         incFileList         = list()
         checksum            = str()

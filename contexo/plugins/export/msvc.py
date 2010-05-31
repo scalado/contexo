@@ -90,7 +90,12 @@ def cmd_parse( args ):
     incPaths    = list()
     incPathSet  = set()
 
-    #modTags.append( 'COMPILING_MOD_' + string.upper( rawMod.getName() ) )
+    # TODO: the preprocessor define COMPILING_MOD_ is a legacy definition,
+    # initially created to make sure private headers were not included in a
+    # project.
+    # DO NOT REMOVE until all previous releases compiles without it.
+    # /thomase
+    modTags.append( 'COMPILING_MOD_' + string.upper( rawMod.getName() ) )
 
     #
     # Collect additional include paths and additional library paths

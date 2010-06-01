@@ -10,7 +10,7 @@
 #   Defines the foundation classes of the build system.                       #
 #                                                                             #
 ###############################################################################
-
+import platform
 import os
 import sys
 #import string
@@ -406,6 +406,12 @@ class CTXCompiler:
         cmdline = self.cdef['ARCOM']
 
         cmdline = cmdline.replace( '%AR'     , self.cdef['AR'] )
+        # workaround for contexo writing control characters instead of backslashes on windows
+        # this seems to work with msvc LIB.EXE and GCC ar
+        if sys.platform == 'win32' or sys.platform == 'win64':
+            lib_cmdline = lib_cmdline.replace('\\','\\\\')
+            objfiles_cmdline = objfiles_cmdline.replace('\\','\\\\')
+
         cmdline = cmdline.replace( '%TARGET' , lib_cmdline )
         cmdline = cmdline.replace( '%SOURCES', objfiles_cmdline )
 

@@ -262,6 +262,7 @@ class CTXDepMgr: # The dependency manager class.
             inputFilePath = self.locate(inputFile,  pathList)
             if inputFilePath == None:
                 dependings = self.findFilesDependingOn(inputFile)
+                print 'dependings:'+inputFile
                 assert(dependings)
                 if ( self.tolerateMissingHeaders):
                     warningMessage("Dependency manager cannot locate input file: %s (from %s)"%(inputFile, ",".join(dependings) ))
@@ -474,15 +475,6 @@ class CTXDepMgr: # The dependency manager class.
                             if isContexoCodeModule( candPath ) == True:
                                 emptyPathList = list()
                                 unitTestDummyValue = False
-                                #TODO : DEBUG
-                                i = 0
-                                for item in self.archPath:
-                                    print item
-                                    i+=1
-                                if i == 0:
-                                    print 'findAllCodeModules'
-                                    import pdb
-                                    pdb.set_trace()
                                 mod = CTXRawCodeModule(candPath, emptyPathList, unitTestDummyValue, self.archPath)
                                 codeModulePaths.append( mod.getPubHeaderDir() )
                                 codeModulePaths.append( mod.getPrivHeaderDir() )
@@ -708,14 +700,6 @@ class CTXDepMgr: # The dependency manager class.
 
             emptyPathList = list()
             unitTestsDummyValue = False
-            #TODO : DEBUG
-            i = 0
-            for item in self.archPath:
-                print item
-                i+=1
-            if i == 0:
-                import pdb
-                pdb.set_trace()
             cmod = CTXRawCodeModule( module, emptyPathList, unitTestsDummyValue, self.archPath )
             self.updateModuleDependencies( cmod )
 

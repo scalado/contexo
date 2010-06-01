@@ -98,34 +98,30 @@ def getSourcesFromDir( self, srcDir ):
             if source_extensions.count( ext ) != 0:
                 baseFileName = os.path.basename(fileRoot)
                 srcListDict[baseFileName] = file
-    # TODO: DEBUG CODE, TO BE REMOVED
-    archPathItems = 0
-    for item in self.archPath:
-        print 'ARCHPATHITEM '+item
-        archPathItems+=1
-
-    if archPathItems == 0:
-        print 'FAIL'
-        exit(42)
 
     archPathCopy = self.archPath[:]
-    # the for loop below overrides earlier values, thus we must reverse the list
-    # so the values with highest precedence overrides earlier values
+    # thus we must reverse the list so the values with highest precedence
+    # overrides earlier values
     archPathCopy.reverse()
     # override source files with architecture specific files
     arch_spec_source_extensions = [ '.c', '.cpp', '.asm', '.s']
-    for archRelDir in archPathCopy:
-        archDirList = os.listdir( os.path.join(srcDir, archRelDir ))
-        for archDirEntry in archDirList:
-            for item in archDirEntry:
-                if os.path.isfile( item ):
-                    fileRoot, ext = os.path.splitext( item )
+    arch_srcDir = os.path.join(srcDir, 'arch')
+    for archRelDirBase in archPathCopy:
+        archRelDir = os.path.join(arch_srcDir, archRelDirBase )
+        if os.path.isdir(archRelDir):
+            archDirList = os.listdir( os.path.join(arch_srcDir, archRelDir ))
+            for archDirEntry in archDirList:
+                archFile = os.path.join(archRelDir, archDirEntry)
+                if os.path.isfile( archFile ):
+                    baseFileName, ext = os.path.splitext( archDirEntry )
                     if arch_spec_source_extensions.count( ext ) != 0:
-                        baseFileName = os.path.basename(fileRoot)
-                        msg = 'Overriding source file '+srcListDict[baseFileName]+' with architecture specific file: '+file
-                        infoMessage(msg, 1)
+                        for key in srcListDict.keys():
+                            if key == baseFileName:
+                                msg = 'Overriding source file '+srcListDict[baseFileName]+' with architecture specific file: '+file
+                                infoMessage(msg, 1)
                         srcListDict[baseFileName] = file
-    for file in srcListDict.values():
+    for file in srcListDict.values(): ## TODO: sth FAILs here, we get .c~ but no .s files. boo!
+        print 'srcList item: '+file
         srcList.append(file)
     return srcList
 

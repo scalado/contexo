@@ -15,5 +15,5 @@ BYTE_ORDER              = LITTLE_ENDIAN
 CDEF                    = gcc_std.cdef
 CFLAGS                  = -pipe -Wall -W -O2 -std=c99 -funroll-loops -fstrict-aliasing
 PREP_DEFINES            =
-ARCH_PATH               = x86/80386;intrinsics
+ARCH_PATH               = x86/80386;gcc-intrinsics
 

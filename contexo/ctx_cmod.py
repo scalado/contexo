@@ -84,15 +84,11 @@ def assertValidContexoCodeModule( path, msgSender ):
 
 
 def getSourcesFromDir( self, srcDir ):
-    # TODO: use Set() here instead
     srcList = list()
     srcListDict = dict()
 
     ctxAssert( os.path.exists(srcDir), 'Directory %s was assumed to exist%(srcDir)' )
     source_extensions = [ '.c', '.cpp']
-
-    # TODO: insert stuff here to get ARCH_PATH
-    # override source files with ARCH_PATH files.
 
     # Collect all source files.
     dirlist = os.listdir( srcDir )
@@ -102,6 +98,15 @@ def getSourcesFromDir( self, srcDir ):
             if source_extensions.count( ext ) != 0:
                 baseFileName = os.path.basename(fileRoot)
                 srcListDict[baseFileName] = file
+    # TODO: DEBUG CODE, TO BE REMOVED
+    archPathItems = 0
+    for item in self.archPath:
+        print 'ARCHPATHITEM '+item
+        archPathItems+=1
+
+    if archPathItems == 0:
+        print 'FAIL'
+        exit(42)
 
     archPathCopy = self.archPath[:]
     # the for loop below overrides earlier values, thus we must reverse the list

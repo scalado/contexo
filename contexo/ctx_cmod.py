@@ -19,7 +19,6 @@ import shutil
 import ctx_log
 import ctx_base
 from ctx_common import *
-from ctx_bc import *
 
 #
 # Current Contexo module structure.
@@ -104,14 +103,13 @@ def getSourcesFromDir( self, srcDir ):
                 baseFileName = os.path.basename(fileRoot)
                 srcListDict[baseFileName] = file
 
+    archPathCopy = self.archPath[:]
+    # the for loop below overrides earlier values, thus we must reverse the list
+    # so the values with highest precedence overrides earlier values
+    archPathCopy.reverse()
     # override source files with architecture specific files
     arch_spec_source_extensions = [ '.c', '.cpp', '.asm', '.s']
-    archPath = bc.getArchPath()
-    # similar to windows and unix paths, ARCH_PATH the first items should be 
-    # the items with highest precedence
-    # since this for loop overrides earlier values, the for loop needs to be reversed.
-    archPath.reverse()
-    for archRelDir in archPath:
+    for archRelDir in archPathCopy:
         archDirList = os.listdir( os.path.join(srcDir, archRelDir ))
         for archDirEntry in archDirList:
             for item in archDirEntry:
@@ -119,8 +117,10 @@ def getSourcesFromDir( self, srcDir ):
                     fileRoot, ext = os.path.splitext( item )
                     if arch_spec_source_extensions.count( ext ) != 0:
                         baseFileName = os.path.basename(fileRoot)
+                        msg = 'Overriding source file '+srcListDict[baseFileName]+' with architecture specific file: '+file
+                        infoMessage(msg, 1)
                         srcListDict[baseFileName] = file
-    for file in srcList.values():
+    for file in srcListDict.values():
         srcList.append(file)
     return srcList
 
@@ -147,16 +147,18 @@ class CTXRawCodeModule:
     # The constructor aborts execution with an error if the path doesn't
     # qualify as a code module when passing it to isContexoCodeModule().
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
-    def __init__( self, moduleRoot, pathlist = None, buildUnitTests = False ):
+    def __init__( self, moduleRoot, pathlist = None, buildUnitTests = False , archPath = list()):
         self.modName        = str()
         self.modRoot        = str()
         self.srcFiles       = list()
         self.testSrcFiles   = list()
         self.pubHeaders     = list()
-        self.testHeaders = list()
+        self.testHeaders    = list()
         self.privHeaders    = list()
         self.msgSender      = 'CTXRawCodeModule'
         self.buildUnitTests = buildUnitTests
+        self.archPath       = archPath
+
         assert( os.path.isabs(moduleRoot) )
         moduleRoot = os.path.normpath(moduleRoot)
         if not os.path.exists(moduleRoot):
@@ -305,7 +307,6 @@ class CTXCodeModule( CTXRawCodeModule ):
         CTXRawCodeModule.__init__( self, moduleRoot, pathlist, buildUnitTests )
         self.moduleTag     = str()
         self.buildParams   = ctx_base.CTXBuildParams()
-        self.bc            = ctx_base.getBCFile()
         self.buildDir      = str()
         self.rebuildAll    = forceRebuild
         self.msgSender     = 'CTXCodeModule'

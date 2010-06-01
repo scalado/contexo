@@ -210,7 +210,7 @@ def getCachedCodeModulePaths( searchPath ):
 #
 #------------------------------------------------------------------------------
 
-def findAllCodeModulPaths( searchPaths ):
+def findAllCodeModulePaths( searchPaths ):
     from ctx_cmod import isContexoCodeModule, CTXRawCodeModule
 
     searchPaths = assureList ( searchPaths )
@@ -258,12 +258,13 @@ CHECKSUM            = 1
 #------------------------------------------------------------------------------
 class CTXDepMgr: # The dependency manager class.
 #------------------------------------------------------------------------------
-    def __init__(self, codeModulePaths = list(),  tolerateMissingHeaders = False,  additionalIncDirs = None):
+    def __init__(self, codeModulePaths = list(),  tolerateMissingHeaders = False,  additionalIncDirs = None, archPath = list() ):
         self.tolerateMissingHeaders = tolerateMissingHeaders
         self.msgSender                = 'CTXDepMgr'
         self.depRoots                 = list()
         self.supportedChecksumMethods = ['MTIME', 'MD5']
         self.checksumMethod           = self.supportedChecksumMethods[0]
+        self.archPath                 = archPath
 
         self.cmods                    = dict() # Dictionary mapping mod name to raw mod.
         self.additionalIncludeDirs = assureList(additionalIncDirs)
@@ -467,7 +468,9 @@ class CTXDepMgr: # The dependency manager class.
 
             modPath = self.resolveCodeModulePath( mod )
 
-            rawmod = CTXRawCodeModule(modPath, buildUnitTests = unitTests)
+            #def __init__( self, moduleRoot, pathlist = None, buildUnitTests = False , archPath = list()):
+            emptyPathList = list()
+            rawmod = CTXRawCodeModule(modPath, emptyPathList, unitTests, self.archPath)
             self.cmods[rawmod.getName()] = rawmod
 
         self.needUpdate = True
@@ -477,7 +480,7 @@ class CTXDepMgr: # The dependency manager class.
     def addDependSearchPaths( self, paths ):
         if len(paths) != 0:
             self.depRoots += assureList( paths )
-            self.depPaths.update(findAllCodeModulPaths( self.depRoots ))
+            self.depPaths.update(findAllCodeModulePaths( self.depRoots ))
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     def enableDiskCaching( self ):

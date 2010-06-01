@@ -435,7 +435,9 @@ def cmd_build(args):
     bc.buildParams.incPaths.extend(     absIncDirs ) #TODO: accessing 'private' data?
     bc.buildParams.ldDirs.extend(args.libdirs)
     bc.buildParams.ldLibs.extend(args.libs)
-    depmgr  = CTXDepMgr ( cview.getItemPaths('modules'),  args.tolerate_missing_headers, absIncDirs )
+    archPath = list()
+    archPath = bc.getArchPath()
+    depmgr  = CTXDepMgr ( cview.getItemPaths('modules'),  args.tolerate_missing_headers, absIncDirs, archPath )
     session = ctx_base.CTXBuildSession( bc )
     session.setDependencyManager( depmgr )
 
@@ -531,7 +533,7 @@ def cmd_export(args):
     # Prepare all
     cview   = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=bool(args.repo_validation) )
     bc      = getBuildConfiguration( cview,  args )
-    depmgr  = CTXDepMgr ( cview.getItemPaths('modules'),  args.tolerate_missing_headers )
+    depmgr  = CTXDepMgr ( cview.getItemPaths('modules'),  args.tolerate_missing_headers ) #TODO: add archPath
     session = ctx_base.CTXBuildSession( bc )
     session.setDependencyManager( depmgr )
 

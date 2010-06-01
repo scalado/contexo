@@ -220,7 +220,7 @@ CHECKSUM            = 1
 #------------------------------------------------------------------------------
 class CTXDepMgr: # The dependency manager class.
 #------------------------------------------------------------------------------
-    def __init__(self, codeModulePaths = list(),  tolerateMissingHeaders = False,  additionalIncDirs = None, archPath = list() ):
+    def __init__(self, codeModulePaths = list(),  tolerateMissingHeaders = False, archPath = list() , additionalIncDirs = None ):
         self.tolerateMissingHeaders = tolerateMissingHeaders
         self.msgSender                = 'CTXDepMgr'
         self.depRoots                 = list()

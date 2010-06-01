@@ -257,8 +257,11 @@ def cmd_info(args):
     # Module
     #
 
+    # Prepare all
+    bc      = getBuildConfiguration( cview,  args )
+
     if args.module != None:
-        depmgr = CTXDepMgr ( cview.getItemPaths('modules') )
+        depmgr = CTXDepMgr ( cview.getItemPaths('modules'), args.tolerateMissingHeaders, bc.getArchPath() )
         depmgr.addCodeModules( args.module )
         module_names = depmgr.getCodeModulesWithDependencies ()
         module_names.sort ()
@@ -301,7 +304,7 @@ def cmd_buildmod(args):
     modules = expand_list_files(cview, args.modules)
     bc      = getBuildConfiguration( cview,  args )
 
-    depmgr  = CTXDepMgr( cview.getItemPaths('modules'),  args.tolerate_missing_headers )
+    depmgr  = CTXDepMgr( cview.getItemPaths('modules'),  args.tolerate_missing_headers , bc.getArchPath() )
     depmgr.addCodeModules( modules, args.tests )
 
     session = ctx_base.CTXBuildSession( bc )
@@ -358,7 +361,7 @@ def cmd_buildcomp(args):
     components  = expand_list_files( cview, args.components )
 
     bc          = getBuildConfiguration( cview,  args )
-    depmgr      = CTXDepMgr ( cview.getItemPaths('modules') ,  args.tolerate_missing_headers)
+    depmgr      = CTXDepMgr ( cview.getItemPaths('modules') ,  args.tolerate_missing_headers, bc.getArchPath() )
     session     = ctx_base.CTXBuildSession( bc )
     session.setDependencyManager( depmgr )
 
@@ -437,7 +440,7 @@ def cmd_build(args):
     bc.buildParams.ldLibs.extend(args.libs)
     archPath = list()
     archPath = bc.getArchPath()
-    depmgr  = CTXDepMgr ( cview.getItemPaths('modules'),  args.tolerate_missing_headers, absIncDirs, archPath )
+    depmgr  = CTXDepMgr ( cview.getItemPaths('modules'),  args.tolerate_missing_headers, bc.getArchPath(), absIncDirs, archPath )
     session = ctx_base.CTXBuildSession( bc )
     session.setDependencyManager( depmgr )
 
@@ -533,7 +536,7 @@ def cmd_export(args):
     # Prepare all
     cview   = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=bool(args.repo_validation) )
     bc      = getBuildConfiguration( cview,  args )
-    depmgr  = CTXDepMgr ( cview.getItemPaths('modules'),  args.tolerate_missing_headers ) #TODO: add archPath
+    depmgr  = CTXDepMgr ( cview.getItemPaths('modules'),  args.tolerate_missing_headers, bc.getArchPath() )
     session = ctx_base.CTXBuildSession( bc )
     session.setDependencyManager( depmgr )
 
@@ -640,7 +643,7 @@ def cmd_clean(args):
     exp_modules = expand_list_files(cview, args.modules)
     bc      = getBuildConfiguration( cview,  args )
 
-    depmgr  = CTXDepMgr( cview.getItemPaths('modules') ,  args.tolerate_missing_headers)
+    depmgr  = CTXDepMgr( cview.getItemPaths('modules') ,  args.tolerate_missing_headers, bc.getArchPath() )
     depmgr.addCodeModules( exp_modules, args.tests )
 
     session = ctx_base.CTXBuildSession( bc )

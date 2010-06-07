@@ -158,7 +158,7 @@ class CTXCompiler:
 
         self.cdef = cdef_config.get_section( 'setup' )
 
-        cdefKeys = "LDCOM LD LDDIR LDLIB LDDIRPREFIX LDDIRSUFFIX LDLIBPREFIX CCCOM CXXCOM AR ARCOM ARCOM_METHOD CC CXX ECHO_SOURCES CFILESUFFIX CXXFILESUFFIX OBJSUFFIX CPPDEFPREFIX CPPDEFSUFFIX INCPREFIX INCSUFFIX LIBPREFIX LIBSUFFIX RANLIB".split()
+        cdefKeys = "LDCOM LD LDDIR LDLIB LDDIRPREFIX LDDIRSUFFIX LDLIBPREFIX CCCOM CXXCOM AR ARCOM ARCOM_METHOD ASMCOM CC CXX ECHO_SOURCES ASMFILESUFFIX CFILESUFFIX CXXFILESUFFIX OBJSUFFIX CPPDEFPREFIX CPPDEFSUFFIX INCPREFIX INCSUFFIX LIBPREFIX LIBSUFFIX RANLIB".split()
         for key in cdefKeys:
             if self.cdef.has_key(key) and type(self.cdef[key]) is str:
                 # strip quotation. Note that we only strip the outer quotations.
@@ -265,16 +265,28 @@ class CTXCompiler:
             return True
         else:
             return False
+    #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+    def isSourceType( self, sourceType, sourceFile ):
+
+        suffix_len = len(sourceType)
+        if sourceFile[ -suffix_len : ] == sourceType:
+            return True
+        else:
+            return False
+
+
 
     #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     def makeObjFileName( self, srcFileName, objFileTitle = None ):
 
         if objFileTitle == None:
             objFileTitle = os.path.basename( srcFileName )
-            if self.isCPPSource(srcFileName):
+            if self.isSourceType( self.cdef['CXXFILESUFFIX'] , srcFileName ):
                 objFileTitle = objFileTitle[ 0:-len(self.cdef['CXXFILESUFFIX']) ]
-            else:
+            elif self.isSourceType( self.cdef['CFILESUFFIX'] , srcFileName ):
                 objFileTitle = objFileTitle[ 0:-len(self.cdef['CFILESUFFIX']) ]
+            elif self.isSourceType( self.cdef['ASMFILESUFFIX'], srcFileName ):
+                objFileTitle = objFileTitle[ 0:-len(self.cdef['ASMFILESUFFIX']) ]
 
         objFilename = "%s%s"%( objFileTitle, self.cdef['OBJSUFFIX'] )
         return objFilename
@@ -282,15 +294,17 @@ class CTXCompiler:
     #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     def makeStaticObjectCommandline( self, sourceFile, buildParams, outputDir, objFilename ):
 
-        cplusplus = self.isCPPSource( sourceFile )
-
-        if cplusplus: cmdline = self.cdef['CXXCOM']
-        else:         cmdline = self.cdef['CCCOM']
+        cmdline = ''
+        if self.isSourceType(self.cdef['CXXFILESUFFIX'], sourceFile ):
+            cmdline = self.cdef['CXXCOM']
+        elif self.isSourceType(self.cdef[CFILESUFFIX], sourceFile):
+            cmdline = self.cdef['CCCOM']
+        elif self.isSourceType(self.cdef['ASMFILESUFFIX'], sourceFile):
+            cmdline = self.cdef['ASMCOM']
 
         #
         # Prepare preproessor definitions
         #
-
         cppdefines_cmdline = str()
         for cppdef in buildParams.prepDefines:
             cppdef_dec = " %s%s%s"%( self.cdef['CPPDEFPREFIX'], cppdef, self.cdef['CPPDEFSUFFIX'] )
@@ -355,6 +369,7 @@ class CTXCompiler:
         cmdline = cmdline.replace( '%TARGETFILE'  ,   objFilename         )
         cmdline = cmdline.replace( '%TARGET'      ,   objfile_cmdline     )
 
+        cplusplus = self.isSourceType(self.cdef['CXXFILESUFFIX'], sourceFile )
         tool = 'CXX' if cplusplus else 'CC'
         self.validateTool( tool )
 

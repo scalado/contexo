@@ -227,7 +227,6 @@ class CTXDepMgr: # The dependency manager class.
         self.supportedChecksumMethods = ['MTIME', 'MD5']
         self.checksumMethod           = self.supportedChecksumMethods[0]
         self.archPath                 = archPath
-        print archPath
 
         self.cmods                    = dict() # Dictionary mapping mod name to raw mod.
         self.additionalIncludeDirs    = assureList(additionalIncDirs)
@@ -263,7 +262,7 @@ class CTXDepMgr: # The dependency manager class.
             inputFilePath = self.locate(inputFile,  pathList)
             if inputFilePath == None:
                 dependings = self.findFilesDependingOn(inputFile)
-                print 'dependings:'+inputFile
+                #print 'dependings:'+inputFile
                 assert(dependings)
                 if ( self.tolerateMissingHeaders):
                     warningMessage("Dependency manager cannot locate input file: %s (from %s)"%(inputFile, ",".join(dependings) ))
@@ -597,8 +596,6 @@ class CTXDepMgr: # The dependency manager class.
 
        # return self.getIncludePaths ( filenames, pathList )
         ret = self.getIncludePaths ( filenames, None )
-#   print "getModuleIncludePaths: "
-#   print ret
         return ret
 
 

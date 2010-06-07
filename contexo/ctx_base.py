@@ -326,7 +326,6 @@ class CTXCompiler:
         #
 
         incpaths_cmdline = str()
-        buildParams.incPaths #TODO: wathe??
         for incpath in buildParams.incPaths:
             incpath_dec = " %s%s%s"%( self.cdef['INCPREFIX'], incpath, self.cdef['INCSUFFIX'] )
             incpaths_cmdline += incpath_dec
@@ -361,6 +360,8 @@ class CTXCompiler:
 
         cmdline = cmdline.replace( '%CC'          ,   self.cdef['CC']     )
         cmdline = cmdline.replace( '%CXX'         ,   self.cdef['CXX']    )
+        cmdline = cmdline.replace( '%ASM'         ,   self.cdef['ASM']    )
+        cmdline = cmdline.replace( '%ASMFLAGS'    ,   self.cdef['ASMFLAGS']    )
         cmdline = cmdline.replace( '%CFLAGS'      ,   cflags_cmdline      )
         cmdline = cmdline.replace( '%CPPDEFINES'  ,   cppdefines_cmdline  )
         cmdline = cmdline.replace( '%INCPATHS'    ,   incpaths_cmdline    )

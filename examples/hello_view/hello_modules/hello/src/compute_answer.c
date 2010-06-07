@@ -1,5 +1,5 @@
 
 int compute_answer() {
-#error YOU CAN'T HAS THIS
+#warn SOURCE FILE NOT OVERRIDDEN
 	return 42;
 }

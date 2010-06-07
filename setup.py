@@ -173,7 +173,7 @@ if sys.platform == 'win32':
 if sys.platform == 'win32' or sys.platform == 'win64':
     addPathsInWindowsRegistry()
     if os.path.expandvars("$HOMEPATH") != '\\':
-        print 'HOMEPATH is not set to \\, Contexo may not detect your home directory correctly'
+        print 'HOMEPATH is not set to \\, Contexo may not detect your home directory correctly, the HOMEPATH variable may be changed with the Registry Editor'
 
 
 custom_configdir= os.path.expandvars("$CONTEXO_CONFIG_DIR")

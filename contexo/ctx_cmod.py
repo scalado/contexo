@@ -1,3 +1,4 @@
+import pdb
 ###############################################################################
 #                                                                             #
 #   ctx_cmod.py                                                               #
@@ -117,11 +118,10 @@ def getSourcesFromDir( self, srcDir ):
                     if arch_spec_source_extensions.count( ext ) != 0:
                         for key in srcListDict.keys():
                             if key == baseFileName:
-                                msg = 'Overriding source file '+srcListDict[baseFileName]+' with architecture specific file: '+file
+                                msg = 'Overriding source file '+srcListDict[baseFileName]+' with architecture specific file: '+archFile[len(srcDir):]
                                 infoMessage(msg, 1)
-                        srcListDict[baseFileName] = file
-    for file in srcListDict.values(): ## TODO: sth FAILs here, we get .c~ but no .s files. boo!
-        print 'srcList item: '+file
+                        srcListDict[baseFileName] = archFile[len(srcDir)+1:]
+    for file in srcListDict.values():
         srcList.append(file)
     return srcList
 

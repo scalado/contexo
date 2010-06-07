@@ -349,6 +349,13 @@ class BCFile:
         # Additional compiler flags
         #
 
+        option_name = 'ASMFLAGS'
+
+        if section.has_key( option_name ):
+            self.buildParams.asmflags = section[ option_name ]
+
+        self.__assert_correct_type( option_name, self.buildParams.asmflags, [str,] )
+
         option_name = 'CFLAGS'
 
         if section.has_key( option_name ):

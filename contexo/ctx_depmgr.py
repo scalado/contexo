@@ -227,6 +227,7 @@ class CTXDepMgr: # The dependency manager class.
         self.supportedChecksumMethods = ['MTIME', 'MD5']
         self.checksumMethod           = self.supportedChecksumMethods[0]
         self.archPath                 = archPath
+        print archPath
 
         self.cmods                    = dict() # Dictionary mapping mod name to raw mod.
         self.additionalIncludeDirs    = assureList(additionalIncDirs)
@@ -327,7 +328,10 @@ class CTXDepMgr: # The dependency manager class.
         paths = self.depPaths;
 
         if cmod.hasExternalDependencies():
-            paths.update( assureList( CTXCodeModule(cmod.modRoot).resolveExternalDeps() ) )
+            paths.update( assureList( CTXCodeModule(moduleRoot = cmod.modRoot,
+                                                    pathlist = None,
+                                                    buildUnitTests = False,
+                                                    archPath = self.archPath).resolveExternalDeps() ) )
 
         if len(paths) == 0:
             infoMessage("WARNING: List of dependency search paths is empty.", 2)
@@ -570,20 +574,16 @@ class CTXDepMgr: # The dependency manager class.
         ret = set ( map(os.path.dirname,  depIncludes) )
         #infoMessage("pathList: %s"%", ".join(pathList), 6 )
         #infoMessage("getIncludePaths: %s"%", ".join(ret), 6 )
-        #import pdb
-        #pdb.set_trace()
         return ret
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     def getModuleIncludePaths( self, moduleName ):
         from ctx_cmod import CTXCodeModule
-        #import pdb
-        #pdb.set_trace()
         if self.needUpdate:
             self.updateDependencyHash()
 
         if moduleName not in self.moduleDependencies:
-            cmod = CTXCodeModule ( moduleName, self.codeModulePaths, False )
+            cmod = CTXCodeModule ( moduleName, self.codeModulePaths, None, False , self.archPath )
             self.cmods[moduleName] = cmod
             self.updateModuleDependencies ( cmod )
 
@@ -682,7 +682,8 @@ class CTXDepMgr: # The dependency manager class.
             codeModules.append( CTXCodeModule(modPath,
                                               pathlist=None,
                                               buildUnitTests = buildTests,
-                                              forceRebuild=force) )
+                                              forceRebuild=force,
+                                              archPath = self.archPath) )
 
         return codeModules
 

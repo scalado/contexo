@@ -1,4 +1,3 @@
-import pdb
 ###############################################################################
 #                                                                             #
 #   ctx_cmod.py                                                               #
@@ -118,7 +117,7 @@ def getSourcesFromDir( self, srcDir ):
                     if arch_spec_source_extensions.count( ext ) != 0:
                         for key in srcListDict.keys():
                             if key == baseFileName:
-                                msg = 'Overriding source file '+srcListDict[baseFileName]+' with architecture specific file: '+archFile[len(srcDir):]
+                                msg = 'Overriding source file '+os.path.join(srcDir, srcListDict[baseFileName])+' with architecture specific file: '+archFile
                                 infoMessage(msg, 1)
                         srcListDict[baseFileName] = archFile[len(srcDir)+1:]
     for file in srcListDict.values():
@@ -148,7 +147,7 @@ class CTXRawCodeModule:
     # The constructor aborts execution with an error if the path doesn't
     # qualify as a code module when passing it to isContexoCodeModule().
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
-    def __init__( self, moduleRoot, pathlist = None, buildUnitTests = False , archPath = list()):
+    def __init__( self, moduleRoot, pathlist = None, buildUnitTests = False ,archPath = list()):
         self.modName        = str()
         self.modRoot        = str()
         self.srcFiles       = list()
@@ -304,8 +303,8 @@ class CTXCodeModule( CTXRawCodeModule ):
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     #
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
-    def __init__( self, moduleRoot, pathlist = None, buildUnitTests = False, forceRebuild = False  ):
-        CTXRawCodeModule.__init__( self, moduleRoot, pathlist, buildUnitTests )
+    def __init__( self, moduleRoot, pathlist = None, buildUnitTests = False, forceRebuild = False, archPath = list() ):
+        CTXRawCodeModule.__init__( self, moduleRoot, pathlist, buildUnitTests, archPath )
         self.moduleTag     = str()
         self.buildParams   = ctx_base.CTXBuildParams()
         self.buildDir      = str()

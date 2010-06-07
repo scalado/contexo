@@ -170,8 +170,11 @@ if sys.platform == 'win32':
     if not os.path.exists( dst ):
         shutil.copyfile( pjoin(contexo_path, 'defaults/contexo.cfg'), dst )
 
-if sys.platform == 'win32':
+if sys.platform == 'win32' or sys.platform == 'win64':
     addPathsInWindowsRegistry()
+    if os.path.expandvars("$HOMEPATH") != '\\':
+        print 'HOMEPATH is not set to \\, Contexo may not detect your home directory correctly'
+
 
 custom_configdir= os.path.expandvars("$CONTEXO_CONFIG_DIR")
 custom_homedir  = os.path.expandvars("$CONTEXO_HOME_DIR")

@@ -14,5 +14,5 @@ DEBUGMODE_FILE          = NO
 CHAR_ENCODING           = UTF16
 BYTE_ORDER              = LITTLE_ENDIAN
 CDEF                    = msvc.cdef
-CFLAGS                  = /Zi /Od /W4 /Fdmsvc.pdb
+CFLAGS                  = /Zi /Od /W4 /MP /Fdmsvc.pdb
 PREP_DEFINES            = UNICODE;_UNICODE;WIN32;SCB_DOT

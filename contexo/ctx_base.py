@@ -199,6 +199,7 @@ class CTXCompiler:
             if not self.cdef.has_key( key ):
                 userErrorExit("Missing mandatory CDEF option '%s'"%key)
             asmcom_cmdline = self.cdef[key]
+            self.cdef[option] = asmcom_cmdline
 
         option = 'ASMCOM'
         if option not in self.cdef:
@@ -347,6 +348,11 @@ class CTXCompiler:
             asmflag_dec = "%s"%( asmflag )
             asmflags_cmdline += asmflag_dec
 
+        # use cflags if asmflags are not available, handy when falling back to
+        # gcc and rvct
+        if asmflags_cmdline == '':
+            asmflags_cmdline = cflags_cmdline
+
         #
         # Prepare include paths
         #
@@ -386,18 +392,11 @@ class CTXCompiler:
                 if cmdline.find( var ) == -1:
                     userErrorExit("'%s' variable not found in commandline mask"%( var ))
 
-        # handle ASM in a special way, it is not a mandatory key (that would
-        # break old cdefs, fallback to CC since some compilers can handle assembly
-        # eg. gcc
-        asm_cmd = self.cdef['CC']
-        if self.cdef.has_key('ASM'):
-            asm_cmd = self.cdef['ASM']
-
         # Expand all commandline mask variables to the corresponding items we prepared.
         cmdline = cmdline.replace( '%CC'          ,   self.cdef['CC']     )
         cmdline = cmdline.replace( '%CXX'         ,   self.cdef['CXX']    )
         cmdline = cmdline.replace( '%ASMFLAGS'    ,   asmflags_cmdline    )
-        cmdline = cmdline.replace( '%ASM'         ,   asm_cmd             )
+        cmdline = cmdline.replace( '%ASM'         ,   self.cdef['ASM']    )
         cmdline = cmdline.replace( '%CFLAGS'      ,   cflags_cmdline      )
         cmdline = cmdline.replace( '%CPPDEFINES'  ,   cppdefines_cmdline  )
         cmdline = cmdline.replace( '%INCPATHS'    ,   incpaths_cmdline    )

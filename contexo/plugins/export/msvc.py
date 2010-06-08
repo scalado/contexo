@@ -88,7 +88,6 @@ def cmd_parse( args ):
 
     modTags     = list()
     incPaths    = list()
-    incPathSet  = set()
 
     # TODO: the preprocessor define COMPILING_MOD_ is a legacy definition,
     # initially created to make sure private headers were not included in a
@@ -129,7 +128,7 @@ def cmd_parse( args ):
         user_includepaths = getPathsFromOption(filename)
         #dirname = os.path.dirname(filename)
         for inc in user_includepaths:
-            incPathSet.add(inc)
+            incPaths.append(inc)
 
     #print   'incPaths %s' %incPaths
 

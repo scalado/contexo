@@ -1,0 +1,18 @@
+#::::::::::::::::::::::::::::::::::::::::::::::::
+# Contexo Build Configuration
+#::::::::::::::::::::::::::::::::::::::::::::::::
+
+[meta]
+TITLE                   = Win32 Debug UTF16
+DESCRIPTION             = For Win32 debug targets with UTF16 Unicode support.
+
+[config]
+DEBUG_BUILD             = YES
+DEBUGMODE_MEMORY		= YES
+DEBUGMODE_FILE          = NO
+CHAR_ENCODING           = UTF16
+BYTE_ORDER              = LITTLE_ENDIAN
+ARCH_PATH               = x86/msvc
+CDEF                    = msvcasm.cdef
+CFLAGS                  = /Zi /Od /W4 /Fdmsvc.pdb
+PREP_DEFINES            = WIN32;SCB_DOT

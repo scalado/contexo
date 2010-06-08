@@ -13,7 +13,7 @@ DEBUGMODE_FILE          = NO
 CHAR_ENCODING           = ASCII
 BYTE_ORDER              = LITTLE_ENDIAN
 ARCH_PATH               = arm
-CDEF                    = rvctasm.cdef
+CDEF                    = rvct2x.cdef
 CFLAGS                  = -c --diag_style=ide --diag_suppress=1 --diag_suppress=14  --depend_format=unix_escaped --no_depend_system_headers --enum_is_int --c99 --cpu=Cortex-A8 -O2 -Otime --forceinline -c  -g --dwarf2 
 PREP_DEFINES            = SCB_TESTING_INLINE_TESTS;MSC_CLOCK;SCB_NO_GUI;QA_NOT_USE_DIR
 

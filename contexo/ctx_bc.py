@@ -335,8 +335,11 @@ class BCFile:
 
         option_name = 'ARCH_PATH'
         if section.has_key( option_name ):
-            for pathElem in section[ option_name ]:
-                self.archPath.append(pathElem)
+            if type( section[ option_name ] ) == type( str() ):
+                self.archPath.append( section[ option_name ] )
+            else:
+                for pathElem in section[ option_name ]:
+                    self.archPath.append(pathElem)
 
         #
         # Colormodes

@@ -98,7 +98,6 @@ def getSourcesFromDir( self, srcDir ):
             if source_extensions.count( ext ) != 0:
                 baseFileName = os.path.basename(fileRoot)
                 srcListDict[baseFileName] = file
-
     archPathCopy = self.archPath[:]
     # thus we must reverse the list so the values with highest precedence
     # overrides earlier values

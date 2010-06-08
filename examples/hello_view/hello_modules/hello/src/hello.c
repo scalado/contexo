@@ -2,7 +2,7 @@
 #include "private_hello.h"
 #include "hello_dependency.h"
 
-extern void* compute_answer();
+extern int compute_answer();
 
 void hello(char* s) {
 	// this is a comment

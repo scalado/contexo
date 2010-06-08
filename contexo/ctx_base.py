@@ -407,7 +407,6 @@ class CTXCompiler:
         cmdline = cmdline.replace( '%TARGETFILE'  ,   objFilename         )
         cmdline = cmdline.replace( '%TARGET'      ,   objfile_cmdline     )
 
-        cplusplus = self.isSourceType(self.cdef['CXXFILESUFFIX'], sourceFile )
         self.validateTool( tool )
 
         return cmdline

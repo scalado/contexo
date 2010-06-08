@@ -251,7 +251,6 @@ class CTXCompiler:
         else:
             self.validatedTools.append( cdefItem )
 
-
         if sys.platform == 'win32':
             delimiter = ';'
             tool_ext = '.exe'
@@ -279,6 +278,10 @@ class CTXCompiler:
         ctxAssert( toolPath == None or os.path.isfile(toolPath), "Internal error here.." )
 
         if toolPath == None:
+            import pdb
+            pdb.set_trace()
+
+
             warningMessage("Unresolved tool: '%s'"%(cdefItem))
             print 'searched:'
             print cands
@@ -392,7 +395,7 @@ class CTXCompiler:
         # eg. gcc
         asm_cmd = self.cdef['CC']
         if self.cdef.has_key('ASM'):
-            asm_cmd = self.cdef.has_key('ASM')
+            asm_cmd = self.cdef['ASM']
 
         # Expand all commandline mask variables to the corresponding items we prepared.
         cmdline = cmdline.replace( '%CC'          ,   self.cdef['CC']     )
@@ -407,7 +410,7 @@ class CTXCompiler:
         cmdline = cmdline.replace( '%TARGETFILE'  ,   objFilename         )
         cmdline = cmdline.replace( '%TARGET'      ,   objfile_cmdline     )
 
-        self.validateTool( tool )
+        # self.validateTool( self.cdef[tool] )
 
         return cmdline
 

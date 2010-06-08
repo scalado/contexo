@@ -15,4 +15,5 @@ BYTE_ORDER              = LITTLE_ENDIAN
 ARCH_PATH               = x86/msvc
 CDEF                    = msvcasm.cdef
 CFLAGS                  = /Zi /Od /W4 /Fdmsvc.pdb
+ASMFLAGS                = /Cx /coff
 PREP_DEFINES            = WIN32;SCB_DOT

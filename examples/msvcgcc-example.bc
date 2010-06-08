@@ -1,0 +1,18 @@
+#::::::::::::::::::::::::::::::::::::::::::::::::
+# Contexo Build Configuration
+#::::::::::::::::::::::::::::::::::::::::::::::::
+
+[meta]
+TITLE                   = MSVC with GCC as assembler
+DESCRIPTION             = MSVC with GCC as assembler
+[config]
+DEBUG_BUILD             = YES
+DEBUGMODE_MEMORY	= YES
+DEBUGMODE_FILE          = NO
+CHAR_ENCODING           = UTF16
+BYTE_ORDER              = LITTLE_ENDIAN
+ARCH_PATH               = x86/gcc
+CDEF                    = msvcgccasm.cdef
+CFLAGS                  = /Zi /Od /W4 /Fdmsvc.pdb
+ASMFLAGS                = -pipe -Wall -W 
+PREP_DEFINES            = WIN32;SCB_DOT

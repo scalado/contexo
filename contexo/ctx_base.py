@@ -163,7 +163,7 @@ class CTXCompiler:
 
         self.cdef = cdef_config.get_section( 'setup' )
 
-        cdefKeys = "LDCOM LD LDDIR LDLIB LDDIRPREFIX LDDIRSUFFIX LDLIBPREFIX CCCOM CXXCOM AR ARCOM ARCOM_METHOD ASMCOM CC CXX ECHO_SOURCES ASMFILESUFFIX CFILESUFFIX CXXFILESUFFIX OBJSUFFIX CPPDEFPREFIX CPPDEFSUFFIX INCPREFIX INCSUFFIX LIBPREFIX LIBSUFFIX RANLIB".split()
+        cdefKeys = "LDCOM LD LDDIR LDLIB LDDIRPREFIX LDDIRSUFFIX LDLIBPREFIX CCCOM CXXCOM ASM ASMCOM AR ARCOM ARCOM_METHOD ASMCOM CC CXX ECHO_SOURCES ASMFILESUFFIX CFILESUFFIX CXXFILESUFFIX OBJSUFFIX CPPDEFPREFIX CPPDEFSUFFIX INCPREFIX INCSUFFIX LIBPREFIX LIBSUFFIX RANLIB".split()
         for key in cdefKeys:
             if self.cdef.has_key(key) and type(self.cdef[key]) is str:
                 # strip quotation. Note that we only strip the outer quotations.
@@ -214,7 +214,7 @@ class CTXCompiler:
         # Assert presence of mandatory options
         #
 
-        mandatory = "CCCOM AR ARCOM ARCOM_METHOD CC ECHO_SOURCES CFILESUFFIX OBJSUFFIX CPPDEFPREFIX CPPDEFSUFFIX INCPREFIX INCSUFFIX LIBPREFIX LIBSUFFIX".split()
+        mandatory = "CCCOM ASM ASMCOM AR ARCOM ARCOM_METHOD CC ECHO_SOURCES CFILESUFFIX OBJSUFFIX CPPDEFPREFIX CPPDEFSUFFIX INCPREFIX INCSUFFIX LIBPREFIX LIBSUFFIX".split()
         for key in mandatory:
             if not self.cdef.has_key( key ):
                 userErrorExit("Missing mandatory CDEF option '%s'"%key)
@@ -245,7 +245,6 @@ class CTXCompiler:
 
     #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     def validateTool( self, cdefItem ):
-
         if cdefItem in self.validatedTools:
             return
         else:
@@ -278,9 +277,6 @@ class CTXCompiler:
         ctxAssert( toolPath == None or os.path.isfile(toolPath), "Internal error here.." )
 
         if toolPath == None:
-            import pdb
-            pdb.set_trace()
-
 
             warningMessage("Unresolved tool: '%s'"%(cdefItem))
             print 'searched:'
@@ -382,11 +378,11 @@ class CTXCompiler:
 
         # Require all mandatory variables in commandline mask
         if tool == 'ASM':
-            for var in ['%ASMFLAGS', '%SOURCES']:
+            for var in ['%ASMFLAGS', '%SOURCES', '%TARGET']:
                 if cmdline.find( var ) == -1:
                     userErrorExit("'%s' variable not found in commandline mask"%( var ))
         else:
-            for var in ['%CFLAGS', '%CPPDEFINES', '%INCPATHS', '%SOURCES']:
+            for var in ['%CFLAGS', '%CPPDEFINES', '%INCPATHS', '%SOURCES', '%TARGET']:
                 if cmdline.find( var ) == -1:
                     userErrorExit("'%s' variable not found in commandline mask"%( var ))
 

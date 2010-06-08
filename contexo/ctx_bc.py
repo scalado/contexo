@@ -45,6 +45,7 @@ class BCFile:
         self.cdef            = str()
         self.compiler        = None
         self.msgSender       = 'BCFile'
+        self.archPath        = list()
         #
 
         bcFilePaths = assureList( bcFilePaths )
@@ -148,7 +149,7 @@ class BCFile:
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - - -
     def __process_bc( self, bcFilePath, cfgFile, cdefPaths ):
 
-        msgSender    = 'BCFile'
+#        msgSender    = 'BCFile'
         option_name  = str()
         bcsec_meta   = dict()
         bcsec_config = dict()
@@ -314,6 +315,31 @@ class BCFile:
 
         self.__assert_correct_type( option_name, self.byteOrder, [str,] )
 
+        #
+		# ARCH_PATH
+		#
+
+        ## ARCH_PATH specifies a path with architecture specific files
+		## its implementation was motivated by the need to include specific asm
+        ## (.s) files because of bugs in GCC, which attributed to so many lines
+        ## of assembly that it wasn't feasable to write compiler specific
+        ## inlined assembler for each compiler.
+		## additionally arch specific .c files may be placed here too
+		## Since several architectures can share some arch specific code,
+        ## several arch specific directories may be specified, and
+        ## separated by ';'.
+		## By not forcing a naming convention on the architectures future 
+        ## architecture specific code will be simple to support without modifing
+        ## Contexo
+		## The ARCH_PATH is relative to the [CONTEXO_MODULE]/src folder.
+
+        option_name = 'ARCH_PATH'
+        if section.has_key( option_name ):
+            if type( section[ option_name ] ) == type( str() ):
+                self.archPath.append( section[ option_name ] )
+            else:
+                for pathElem in section[ option_name ]:
+                    self.archPath.append(pathElem)
 
         #
         # Colormodes
@@ -332,6 +358,13 @@ class BCFile:
             self.buildParams.cflags = section[ option_name ]
 
         self.__assert_correct_type( option_name, self.buildParams.cflags, [str,] )
+
+        option_name = 'ASMFLAGS'
+
+        self.buildParams.asmflags = str()
+        if section.has_key( option_name ):
+            self.buildParams.asmflags = section[ option_name ]
+            self.__assert_correct_type( option_name, self.buildParams.asmflags, [str,] )
 
 
         #
@@ -360,3 +393,9 @@ class BCFile:
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - - -
     def getTitle( self ):
         return self.bcTitle
+
+    # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - - -
+    def getArchPath( self ):
+        return self.archPath
+
+

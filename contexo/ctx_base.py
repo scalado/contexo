@@ -10,7 +10,7 @@
 #   Defines the foundation classes of the build system.                       #
 #                                                                             #
 ###############################################################################
-
+#import platform
 import os
 import sys
 #import string
@@ -32,6 +32,9 @@ class CTXBuildParams:
         # \member{ prepDefines }
         self.prepDefines     = list()
 
+        # \member {asmflags}
+        self.asmflags        = str()
+
         # \member {cflags}
         self.cflags          = str()
 
@@ -47,6 +50,7 @@ class CTXBuildParams:
     def add( self, addParams ):
         self.prepDefines.extend(  addParams.prepDefines )
         self.cflags = "%s %s"%(self.cflags, addParams.cflags)
+        self.asmflags = "%s %s"%(self.asmflags, addParams.asmflags)
         self.incPaths.extend(     addParams.incPaths )
         self.ldDirs.extend(addParams.ldDirs)
         self.ldLibs.extend(addParams.ldLibs)
@@ -70,6 +74,7 @@ class CTXBuildParams:
 
         md.update( self.ldFlags )
         md.update( self.cflags )
+        md.update( self.asmflags )
 
         return md.hexdigest()
 
@@ -158,7 +163,7 @@ class CTXCompiler:
 
         self.cdef = cdef_config.get_section( 'setup' )
 
-        cdefKeys = "LDCOM LD LDDIR LDLIB LDDIRPREFIX LDDIRSUFFIX LDLIBPREFIX CCCOM CXXCOM AR ARCOM ARCOM_METHOD CC CXX ECHO_SOURCES CFILESUFFIX CXXFILESUFFIX OBJSUFFIX CPPDEFPREFIX CPPDEFSUFFIX INCPREFIX INCSUFFIX LIBPREFIX LIBSUFFIX RANLIB".split()
+        cdefKeys = "LDCOM LD LDDIR LDLIB LDDIRPREFIX LDDIRSUFFIX LDLIBPREFIX CCCOM CXXCOM ASM ASMCOM AR ARCOM ARCOM_METHOD ASMCOM CC CXX ECHO_SOURCES ASMFILESUFFIX CFILESUFFIX CXXFILESUFFIX OBJSUFFIX CPPDEFPREFIX CPPDEFSUFFIX INCPREFIX INCSUFFIX LIBPREFIX LIBSUFFIX RANLIB".split()
         for key in cdefKeys:
             if self.cdef.has_key(key) and type(self.cdef[key]) is str:
                 # strip quotation. Note that we only strip the outer quotations.
@@ -183,11 +188,33 @@ class CTXCompiler:
         if option not in self.cdef:
             self.cdef[option] = False
 
+        option = 'ASMFILESUFFIX'
+        if option not in self.cdef:
+            self.cdef[option] = '.s'
+
+        # this is sufficient for gcc, but will break on others
+        option = 'ASM'
+        if option not in self.cdef:
+            key = 'CC'
+            if not self.cdef.has_key( key ):
+                userErrorExit("Missing mandatory CDEF option '%s'"%key)
+            asmcom_cmdline = self.cdef[key]
+
+        option = 'ASMCOM'
+        if option not in self.cdef:
+            key = 'CCCOM'
+            if not self.cdef.has_key( key ):
+                userErrorExit("Missing mandatory CDEF option '%s'"%key)
+            asmcom_cmdline = self.cdef[key]
+            asmcom_cmdline = self.cdef['CCCOM'].replace('%CC', '%ASM')
+            asmcom_cmdline = asmcom_cmdline.replace('%CFLAGS', '%ASMFLAGS')
+            self.cdef[option] = asmcom_cmdline
+
         #
         # Assert presence of mandatory options
         #
 
-        mandatory = "CCCOM AR ARCOM ARCOM_METHOD CC ECHO_SOURCES CFILESUFFIX OBJSUFFIX CPPDEFPREFIX CPPDEFSUFFIX INCPREFIX INCSUFFIX LIBPREFIX LIBSUFFIX".split()
+        mandatory = "CCCOM ASM ASMCOM AR ARCOM ARCOM_METHOD CC ECHO_SOURCES CFILESUFFIX OBJSUFFIX CPPDEFPREFIX CPPDEFSUFFIX INCPREFIX INCSUFFIX LIBPREFIX LIBSUFFIX".split()
         for key in mandatory:
             if not self.cdef.has_key( key ):
                 userErrorExit("Missing mandatory CDEF option '%s'"%key)
@@ -213,15 +240,15 @@ class CTXCompiler:
         if self.cdef['ARCOM'].find( '%AR' ) == -1:
             warningMessage("CDEF field 'AR' not found in field 'ARCOM'")
 
+        if self.cdef['ASMCOM'].find( '%ASM' ) == -1:
+            warningMessage("CDEF field 'ASM' not found in field 'ASMCOM'")
 
     #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     def validateTool( self, cdefItem ):
-
         if cdefItem in self.validatedTools:
             return
         else:
             self.validatedTools.append( cdefItem )
-
 
         if sys.platform == 'win32':
             delimiter = ';'
@@ -250,31 +277,35 @@ class CTXCompiler:
         ctxAssert( toolPath == None or os.path.isfile(toolPath), "Internal error here.." )
 
         if toolPath == None:
+
             warningMessage("Unresolved tool: '%s'"%(cdefItem))
             print 'searched:'
             print cands
         else:
             infoMessage("Tool defined by '%s' resolved at '%s'"%(cdefItem, toolPath), 2)
 
-
     #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-    def isCPPSource( self, sourceFile ):
+    def isSourceType( self, sourceType, sourceFile ):
 
-        suffix_len = len(self.cdef['CXXFILESUFFIX'])
-        if sourceFile[ -suffix_len : ] == self.cdef['CXXFILESUFFIX']:
+        suffix_len = len(sourceType)
+        if sourceFile[ -suffix_len : ] == sourceType:
             return True
         else:
             return False
+
+
 
     #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     def makeObjFileName( self, srcFileName, objFileTitle = None ):
 
         if objFileTitle == None:
             objFileTitle = os.path.basename( srcFileName )
-            if self.isCPPSource(srcFileName):
+            if self.isSourceType( self.cdef['CXXFILESUFFIX'] , srcFileName ):
                 objFileTitle = objFileTitle[ 0:-len(self.cdef['CXXFILESUFFIX']) ]
-            else:
+            elif self.isSourceType( self.cdef['CFILESUFFIX'] , srcFileName ):
                 objFileTitle = objFileTitle[ 0:-len(self.cdef['CFILESUFFIX']) ]
+            elif self.isSourceType( self.cdef['ASMFILESUFFIX'], srcFileName ):
+                objFileTitle = objFileTitle[ 0:-len(self.cdef['ASMFILESUFFIX']) ]
 
         objFilename = "%s%s"%( objFileTitle, self.cdef['OBJSUFFIX'] )
         return objFilename
@@ -282,15 +313,20 @@ class CTXCompiler:
     #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     def makeStaticObjectCommandline( self, sourceFile, buildParams, outputDir, objFilename ):
 
-        cplusplus = self.isCPPSource( sourceFile )
-
-        if cplusplus: cmdline = self.cdef['CXXCOM']
-        else:         cmdline = self.cdef['CCCOM']
+        cmdline = str()
+        if self.isSourceType(self.cdef['CXXFILESUFFIX'], sourceFile ):
+            cmdline = self.cdef['CXXCOM']
+            tool = 'CXX'
+        elif self.isSourceType(self.cdef['CFILESUFFIX'], sourceFile):
+            cmdline = self.cdef['CCCOM']
+            tool = 'CC'
+        elif self.isSourceType(self.cdef['ASMFILESUFFIX'], sourceFile):
+            cmdline = self.cdef['ASMCOM']
+            tool = 'ASM'
 
         #
         # Prepare preproessor definitions
         #
-
         cppdefines_cmdline = str()
         for cppdef in buildParams.prepDefines:
             cppdef_dec = " %s%s%s"%( self.cdef['CPPDEFPREFIX'], cppdef, self.cdef['CPPDEFSUFFIX'] )
@@ -306,13 +342,16 @@ class CTXCompiler:
             cflag_dec = "%s"%( cflag )
             cflags_cmdline += cflag_dec
 
+        asmflags_cmdline = str()
+        for asmflag in buildParams.asmflags:
+            asmflag_dec = "%s"%( asmflag )
+            asmflags_cmdline += asmflag_dec
 
         #
         # Prepare include paths
         #
 
         incpaths_cmdline = str()
-        buildParams.incPaths #TODO: wathe??
         for incpath in buildParams.incPaths:
             incpath_dec = " %s%s%s"%( self.cdef['INCPREFIX'], incpath, self.cdef['INCSUFFIX'] )
             incpaths_cmdline += incpath_dec
@@ -338,15 +377,27 @@ class CTXCompiler:
 
 
         # Require all mandatory variables in commandline mask
+        if tool == 'ASM':
+            for var in ['%ASMFLAGS', '%SOURCES', '%TARGET']:
+                if cmdline.find( var ) == -1:
+                    userErrorExit("'%s' variable not found in commandline mask"%( var ))
+        else:
+            for var in ['%CFLAGS', '%CPPDEFINES', '%INCPATHS', '%SOURCES', '%TARGET']:
+                if cmdline.find( var ) == -1:
+                    userErrorExit("'%s' variable not found in commandline mask"%( var ))
 
-        for var in ['%CFLAGS', '%CPPDEFINES', '%INCPATHS', '%SOURCES']:
-            if cmdline.find( var ) == -1:
-                userErrorExit("'%s' variable not found in commandline mask"%( var ))
+        # handle ASM in a special way, it is not a mandatory key (that would
+        # break old cdefs, fallback to CC since some compilers can handle assembly
+        # eg. gcc
+        asm_cmd = self.cdef['CC']
+        if self.cdef.has_key('ASM'):
+            asm_cmd = self.cdef['ASM']
 
         # Expand all commandline mask variables to the corresponding items we prepared.
-
         cmdline = cmdline.replace( '%CC'          ,   self.cdef['CC']     )
         cmdline = cmdline.replace( '%CXX'         ,   self.cdef['CXX']    )
+        cmdline = cmdline.replace( '%ASMFLAGS'    ,   asmflags_cmdline    )
+        cmdline = cmdline.replace( '%ASM'         ,   asm_cmd             )
         cmdline = cmdline.replace( '%CFLAGS'      ,   cflags_cmdline      )
         cmdline = cmdline.replace( '%CPPDEFINES'  ,   cppdefines_cmdline  )
         cmdline = cmdline.replace( '%INCPATHS'    ,   incpaths_cmdline    )
@@ -355,8 +406,7 @@ class CTXCompiler:
         cmdline = cmdline.replace( '%TARGETFILE'  ,   objFilename         )
         cmdline = cmdline.replace( '%TARGET'      ,   objfile_cmdline     )
 
-        tool = 'CXX' if cplusplus else 'CC'
-        self.validateTool( tool )
+        # self.validateTool( self.cdef[tool] )
 
         return cmdline
 
@@ -379,7 +429,7 @@ class CTXCompiler:
             print os.path.basename( sourceFile )
 
         objFileName = self.makeObjFileName( sourceFile, objFileTitle )
-        commandline = self.makeStaticObjectCommandline( sourceFile, buildParams, outputDir, objFileName )
+        commandline = self.makeStaticObjectCommandline(sourceFile, buildParams, outputDir, objFileName )
 
         ret = executeCommandline( commandline )
         if ret != 0:
@@ -411,7 +461,6 @@ class CTXCompiler:
         if sys.platform == 'win32' or sys.platform == 'win64':
             lib_cmdline = lib_cmdline.replace('\\','\\\\')
             objfiles_cmdline = objfiles_cmdline.replace('\\','\\\\')
-
 
         cmdline = cmdline.replace( '%TARGET' , lib_cmdline )
         cmdline = cmdline.replace( '%SOURCES', objfiles_cmdline )
@@ -532,7 +581,7 @@ class CTXBuildSession:
             f = open( checksumPath, "r" )
             oldChecksum = f.read()
             f.close()
-            found = True
+            #found = True
         else:
             oldChecksum = '0'
 
@@ -542,7 +591,8 @@ class CTXBuildSession:
     def writeStaticObjectChecksum( self, objectFilename, checksum ):
         checksumPath = self.makeChecksumPath( objectFilename )
         f = open( checksumPath, "w" )
-        oldChecksum = f.write(checksum)
+        f.write(checksum)
+        #oldChecksum = f.write(checksum)
         f.close()
 
     def linkExecutable(self,  objects,  outputDir,   exeFilename):
@@ -576,7 +626,7 @@ class CTXBuildSession:
         for var in ['%LD', '%SOURCES']:
             if cmdline.find( var ) == -1:
                 userErrorExit("'%s' variable not found in commandline mask"%( var ))
-#TODO: replace is pritive. It will blindly replace each n first occurances
+#TODO: replace is primitive. It will blindly replace each n first occurances
         cmdline = cmdline.replace( '%LD'          ,   self.compiler.cdef['LD']  , 1   )
         #cmdline = cmdline.replace( '%CXX'         ,   self.cdef['CXX']    )
         cmdline = cmdline.replace( '%LDDIRS'    ,   lddirs_cmdline    )
@@ -586,7 +636,7 @@ class CTXBuildSession:
        # cmdline = cmdline.replace( '%TARGETFILE'  ,   objFilename         )
         cmdline = cmdline.replace( '%TARGET'      ,   exefile_cmdline     )
 
-        tool = 'LD' #'CXX' if cplusplus else 'CC'
+        #tool = 'LD' #'CXX' if cplusplus else 'CC'
         infoMessage('from ' + os.getcwd() + ' executing: ' + cmdline,  6)
         linkCommandFileName = 'linkCmdFileName096848hf434qas.file'
         cmdline = prepareCommandFile( cmdline,  linkCommandFileName )

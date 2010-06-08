@@ -12,17 +12,17 @@
 ###############################################################################
 
 import os
-import sys
+#import sys
 import string
 import shutil
-import config
+#import config
 import ctx_log
 import ctx_base
 from ctx_common import *
 
 #
 # Current Contexo module structure.
-# Note: This can be dinamically created using XML in the future.
+# Note: This can be dynamically created using XML in the future.
 #
 contexo_dirname     = 'contexo'
 src_dirname         = 'src'
@@ -34,7 +34,6 @@ xdep_filename       = 'xdepends'
 srclist_filename    = 'sourcefiles'
 
 criteriaDirs = ['contexo','doc','inc', 'src', 'test']
-
 
 #------------------------------------------------------------------------------
 def resolveModuleLocation( modName, pathlist ):
@@ -80,11 +79,14 @@ def assertValidContexoCodeModule( path, msgSender ):
 
     for d in criteriaDirs:
         if not os.path.exists( os.path.join( path, d) ):
-            userErrorExit("'%s' was found but is not a valid Contexo code module"%(path))
+            warningMessage('Must have the dir "'+d+'" in order to be a valid contexo dir')
+            userErrorExit("'%s' was found but is not a valid Contexo code module. "%(path))
 
 
 def getSourcesFromDir( self, srcDir ):
-    srcList = list ()
+    srcList = list()
+    srcListDict = dict()
+
     ctxAssert( os.path.exists(srcDir), 'Directory %s was assumed to exist%(srcDir)' )
     source_extensions = [ '.c', '.cpp']
 
@@ -92,9 +94,33 @@ def getSourcesFromDir( self, srcDir ):
     dirlist = os.listdir( srcDir )
     for file in dirlist:
         if os.path.isfile( os.path.join(srcDir, file) ):
-            root, ext = os.path.splitext( file )
+            fileRoot, ext = os.path.splitext( file )
             if source_extensions.count( ext ) != 0:
-                srcList.append(file)
+                baseFileName = os.path.basename(fileRoot)
+                srcListDict[baseFileName] = file
+    archPathCopy = self.archPath[:]
+    # thus we must reverse the list so the values with highest precedence
+    # overrides earlier values
+    archPathCopy.reverse()
+    # override source files with architecture specific files
+    arch_spec_source_extensions = [ '.c', '.cpp', '.asm', '.s']
+    arch_srcDir = os.path.join(srcDir, 'arch')
+    for archRelDirBase in archPathCopy:
+        archRelDir = os.path.join(arch_srcDir, archRelDirBase )
+        if os.path.isdir(archRelDir):
+            archDirList = os.listdir( os.path.join(arch_srcDir, archRelDir ))
+            for archDirEntry in archDirList:
+                archFile = os.path.join(archRelDir, archDirEntry)
+                if os.path.isfile( archFile ):
+                    baseFileName, ext = os.path.splitext( archDirEntry )
+                    if arch_spec_source_extensions.count( ext ) != 0:
+                        for key in srcListDict.keys():
+                            if key == baseFileName:
+                                msg = 'Overriding source file '+os.path.join(srcDir, srcListDict[baseFileName])+' with architecture specific file: '+archFile
+                                infoMessage(msg, 1)
+                        srcListDict[baseFileName] = archFile[len(srcDir)+1:]
+    for file in srcListDict.values():
+        srcList.append(file)
     return srcList
 
 
@@ -120,16 +146,18 @@ class CTXRawCodeModule:
     # The constructor aborts execution with an error if the path doesn't
     # qualify as a code module when passing it to isContexoCodeModule().
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
-    def __init__( self, moduleRoot, pathlist = None, buildUnitTests = False ):
+    def __init__( self, moduleRoot, pathlist = None, buildUnitTests = False ,archPath = list()):
         self.modName        = str()
         self.modRoot        = str()
         self.srcFiles       = list()
         self.testSrcFiles   = list()
         self.pubHeaders     = list()
-        self.testHeaders = list()
+        self.testHeaders    = list()
         self.privHeaders    = list()
         self.msgSender      = 'CTXRawCodeModule'
         self.buildUnitTests = buildUnitTests
+        self.archPath       = archPath
+
         assert( os.path.isabs(moduleRoot) )
         moduleRoot = os.path.normpath(moduleRoot)
         if not os.path.exists(moduleRoot):
@@ -274,8 +302,8 @@ class CTXCodeModule( CTXRawCodeModule ):
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     #
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
-    def __init__( self, moduleRoot, pathlist = None, buildUnitTests = False, forceRebuild = False  ):
-        CTXRawCodeModule.__init__( self, moduleRoot, pathlist, buildUnitTests )
+    def __init__( self, moduleRoot, pathlist = None, buildUnitTests = False, forceRebuild = False, archPath = list() ):
+        CTXRawCodeModule.__init__( self, moduleRoot, pathlist, buildUnitTests, archPath )
         self.moduleTag     = str()
         self.buildParams   = ctx_base.CTXBuildParams()
         self.buildDir      = str()
@@ -311,7 +339,7 @@ class CTXCodeModule( CTXRawCodeModule ):
 
             for xdep_var in xdep_vars:
 
-                xdep_not_found = True
+                #xdep_not_found = True
 
                 include_path_candidates = None
 
@@ -320,7 +348,7 @@ class CTXCodeModule( CTXRawCodeModule ):
                 if xdep_val != '':
                     include_path_candidates = xdep_val
                     include_path_candidates = include_path_candidates.split( os.pathsep )
-                    xdep_not_found = False
+                    #xdep_not_found = False
 
                 if include_path_candidates == None:
                     warningMessage("Cannot resolve item '%s' specified in '%s'"%( xdep_var, xdep_filepath))
@@ -363,7 +391,9 @@ class CTXCodeModule( CTXRawCodeModule ):
         # TODO: external dependencies must be revisited.
         xdepends = assureList( self.resolveExternalDeps() )
         if len(xdepends) != 0:
-            self.forceRebuild()
+	    # assume that external dependencies never change, otherwise we get forced rebuilds whenever we've got external dependencies
+	    ## contexo detects changes in the file xdepends elsewere
+            #self.forceRebuild()
             buildParams.incPaths.extend( xdepends )
 
         #

@@ -17,8 +17,8 @@
 
 import os
 import shutil
-import sys
-import string
+#import sys
+#import string
 import config
 import ctx_base
 import ctx_log
@@ -118,7 +118,7 @@ class COMPFile:
         compsec_meta        = dict()
         compsec_general     = dict()
         compsec_libraries   = dict()
-        compsec_export      = dict()
+        #compsec_export      = dict()
 
         #
         ## Load Config sections from the COMP file.
@@ -205,6 +205,7 @@ class COMPFile:
         if len(self.moduleCache) == 0:
             for library, modules in self.libraries.items():
                 for module in modules:
+                    ## TODO: does this instance of CTXCodeModule need archPath?
                     cm = ctx_cmod.CTXCodeModule( module, pathlist = None, buildUnitTests = False, forceRebuild = False )
                     cm.addBuildParams( self.buildParams )
                     self.moduleCache.append( cm )
@@ -212,7 +213,7 @@ class COMPFile:
 
     def copyPublicHeaderFiles( self, dependPaths, outputPath, headerDir, nameAsSubDir ):
 
-        libPath       = outputPath
+        #libPath       = outputPath
         headerPath    = outputPath
 
         if dependPaths == None:
@@ -249,6 +250,7 @@ class COMPFile:
             self.staticObjects[library] = list()
 
             for module in modules:
+                ## TODO: does this instance of CTXCodeModule need archPath?
                 cm = ctx_cmod.CTXCodeModule( module, pathlist = None, buildUnitTests = False, forceRebuild = False )
                 cm.addBuildParams( self.buildParams )
                 self.moduleCache.append( cm )

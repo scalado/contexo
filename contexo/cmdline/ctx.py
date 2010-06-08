@@ -257,8 +257,11 @@ def cmd_info(args):
     # Module
     #
 
+    # Prepare all
+    bc      = getBuildConfiguration( cview,  args )
+
     if args.module != None:
-        depmgr = CTXDepMgr ( cview.getItemPaths('modules') )
+        depmgr = CTXDepMgr ( cview.getItemPaths('modules'), args.tolerateMissingHeaders, bc.getArchPath() )
         depmgr.addCodeModules( args.module )
         module_names = depmgr.getCodeModulesWithDependencies ()
         module_names.sort ()
@@ -301,7 +304,7 @@ def cmd_buildmod(args):
     modules = expand_list_files(cview, args.modules)
     bc      = getBuildConfiguration( cview,  args )
 
-    depmgr  = CTXDepMgr( cview.getItemPaths('modules'),  args.tolerate_missing_headers )
+    depmgr  = CTXDepMgr( cview.getItemPaths('modules'),  args.tolerate_missing_headers , bc.getArchPath() )
     depmgr.addCodeModules( modules, args.tests )
 
     session = ctx_base.CTXBuildSession( bc )
@@ -358,7 +361,7 @@ def cmd_buildcomp(args):
     components  = expand_list_files( cview, args.components )
 
     bc          = getBuildConfiguration( cview,  args )
-    depmgr      = CTXDepMgr ( cview.getItemPaths('modules') ,  args.tolerate_missing_headers)
+    depmgr      = CTXDepMgr ( cview.getItemPaths('modules') ,  args.tolerate_missing_headers, bc.getArchPath() )
     session     = ctx_base.CTXBuildSession( bc )
     session.setDependencyManager( depmgr )
 
@@ -378,8 +381,9 @@ def cmd_buildcomp(args):
         lib_dir = os.path.join( outputPath, args.libdir )
         header_dir = os.path.join( outputPath, args.headerdir )
 
-        # Workaround to get header export to work
-        codemodule_map = dict()
+	# TODO: this is unused, what does it fix?
+	# Workaround to get header export to work
+        #codemodule_map = dict()
 
         # Build component modules.
         for library, modules in comp.libraries.items():
@@ -434,7 +438,9 @@ def cmd_build(args):
     bc.buildParams.incPaths.extend(     absIncDirs ) #TODO: accessing 'private' data?
     bc.buildParams.ldDirs.extend(args.libdirs)
     bc.buildParams.ldLibs.extend(args.libs)
-    depmgr  = CTXDepMgr ( cview.getItemPaths('modules'),  args.tolerate_missing_headers, absIncDirs )
+    archPath = list()
+    archPath = bc.getArchPath()
+    depmgr  = CTXDepMgr ( cview.getItemPaths('modules'),  args.tolerate_missing_headers, bc.getArchPath(), absIncDirs, archPath )
     session = ctx_base.CTXBuildSession( bc )
     session.setDependencyManager( depmgr )
 
@@ -468,8 +474,9 @@ def cmd_build(args):
         for comp in components:
             ctx_log.ctxlogBeginComponent( comp.name )
 
+            # TODO: also unused, what does the workaround below fix?
             # Workaround to get header export to work
-            codemodule_map = dict()
+            #codemodule_map = dict()
 
             # Build component modules.
             for library, modules in comp.libraries.items():
@@ -529,7 +536,7 @@ def cmd_export(args):
     # Prepare all
     cview   = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=bool(args.repo_validation) )
     bc      = getBuildConfiguration( cview,  args )
-    depmgr  = CTXDepMgr ( cview.getItemPaths('modules'),  args.tolerate_missing_headers )
+    depmgr  = CTXDepMgr ( cview.getItemPaths('modules'),  args.tolerate_missing_headers, bc.getArchPath() )
     session = ctx_base.CTXBuildSession( bc )
     session.setDependencyManager( depmgr )
 
@@ -636,7 +643,7 @@ def cmd_clean(args):
     exp_modules = expand_list_files(cview, args.modules)
     bc      = getBuildConfiguration( cview,  args )
 
-    depmgr  = CTXDepMgr( cview.getItemPaths('modules') ,  args.tolerate_missing_headers)
+    depmgr  = CTXDepMgr( cview.getItemPaths('modules') ,  args.tolerate_missing_headers, bc.getArchPath() )
     depmgr.addCodeModules( exp_modules, args.tests )
 
     session = ctx_base.CTXBuildSession( bc )

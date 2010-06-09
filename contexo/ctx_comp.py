@@ -205,7 +205,6 @@ class COMPFile:
         if len(self.moduleCache) == 0:
             for library, modules in self.libraries.items():
                 for module in modules:
-                    ## TODO: does this instance of CTXCodeModule need archPath?
                     cm = ctx_cmod.CTXCodeModule( module, pathlist = None, buildUnitTests = False, forceRebuild = False )
                     cm.addBuildParams( self.buildParams )
                     self.moduleCache.append( cm )
@@ -250,7 +249,6 @@ class COMPFile:
             self.staticObjects[library] = list()
 
             for module in modules:
-                ## TODO: does this instance of CTXCodeModule need archPath?
                 cm = ctx_cmod.CTXCodeModule( module, pathlist = None, buildUnitTests = False, forceRebuild = False )
                 cm.addBuildParams( self.buildParams )
                 self.moduleCache.append( cm )

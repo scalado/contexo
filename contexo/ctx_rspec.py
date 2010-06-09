@@ -19,6 +19,7 @@ from xml.sax            import  make_parser
 from xml.sax.handler    import  ContentHandler
 
 from ctx_repo_svn       import *
+from ctx_repo_git       import *
 from ctx_repo_fs        import *
 from ctx_common         import userErrorExit, warningMessage, infoMessage
 from ctx_common         import getVerboseLevel, ctxAssert, getUserTempDir
@@ -38,6 +39,8 @@ def createRepoFromRCS( rcs, id, path, href, rev ):
 
     if rcs == 'svn':
         return CTXRepositorySVN( id, path, href, rev )
+    elif rcs == 'git':
+        return CTXRepositoryGIT( id, path, href, rev )
     elif rcs == None or rcs =='':
         return CTXRepositoryFS( id, path, href, rev )
     else:

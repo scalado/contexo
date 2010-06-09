@@ -11,11 +11,12 @@
 #                                                                             #
 ###############################################################################
 
-from ctx_rspec import RSpecFile, RSpecFileLocator
+from ctx_rspec import RSpecFile
+#, RSpecFileLocator
 from ctx_repo_svn import *
 from ctx_common import userErrorExit
 from ctx_common import warningMessage, assureList
-from os import sep
+#from os import sep
 
 SYSGLOBAL_PATH_SECTIONS = ['modules',
                            'cdef',

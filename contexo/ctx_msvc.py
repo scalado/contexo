@@ -160,7 +160,16 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib,
                     '/W0':('WarningLevel', '0'),
                     '/Od':('Optimization', '0'),
                     '/O1':('Optimization', '1'),
-                    '/O2':('Optimization', '2')}
+                    '/O2':('Optimization', '2'),
+                    '/MT' :('RuntimeLibrary', '0'),
+                    '/MTd':('RuntimeLibrary', '1'),
+                    '/MD' :('RuntimeLibrary', '2'),
+                    '/MDd':('RuntimeLibrary', '3'),
+                    '/MLd':('RuntimeLibrary', '5'),
+                    '/ML' :('RuntimeLibrary', '4')}
+
+    for flag in mycflags:
+        print flag
 
     # digest, analyse and remove options
     for opt in mycflags:
@@ -168,9 +177,9 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib,
             (optionname,  numvalue) = vcproj_opts_map[opt]
             compilerTool[ optionname ] = numvalue
             mycflags.remove(opt)
-            #print 'Digested %s'%opt
+            print 'Digested %s'%opt
         except KeyError:
-            #print 'Passing %s'%opt
+            print 'Passing %s'%opt
             pass
 
     # Write the rest of the options as AdditionalOptions

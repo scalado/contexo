@@ -151,6 +151,8 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib,
 
 
     vcproj_opts_map = {
+                    '/Z7':('DebugInformationFormat', '1'),
+                    '/Zd':('DebugInformationFormat', '2'),
                     '/Zi':('DebugInformationFormat', '3'),
                     '/ZI':('DebugInformationFormat', '4'),
                     '/W4':('WarningLevel', '4'),
@@ -161,26 +163,43 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib,
                     '/Od':('Optimization', '0'),
                     '/O1':('Optimization', '1'),
                     '/O2':('Optimization', '2'),
-                    '/MT' :('RuntimeLibrary', '0'),
+		            '/OX':('Optimization', '3'),
+                    '/MT': ('RuntimeLibrary', '0'),
                     '/MTd':('RuntimeLibrary', '1'),
-                    '/MD' :('RuntimeLibrary', '2'),
+                    '/MD': ('RuntimeLibrary', '2'),
                     '/MDd':('RuntimeLibrary', '3'),
                     '/MLd':('RuntimeLibrary', '5'),
-                    '/ML' :('RuntimeLibrary', '4')}
+                    '/ML': ('RuntimeLibrary', '4')}
 
-    for flag in mycflags:
-        print flag
-
-    # digest, analyse and remove options
     for opt in mycflags:
-        try:
-            (optionname,  numvalue) = vcproj_opts_map[opt]
+        print opt
+
+    for opt in mycflags:
+        print opt
+        if vcproj_opts_map.has_key(opt):
+            (optionname, numvalue) = vcproj_opts_map[opt]
             compilerTool[ optionname ] = numvalue
             mycflags.remove(opt)
             print 'Digested %s'%opt
-        except KeyError:
+        else:
             print 'Passing %s'%opt
-            pass
+
+
+    # digest, analyse and remove options
+    #for opt in mycflags:
+    #    try:
+    #        print 'try opt:'+opt
+    #        (optionname,  numvalue) = vcproj_opts_map[opt]
+    #        print 'optionname:'+optionname
+    #        print 'numvalue:'+numvalue
+    #        compilerTool[ optionname ] = numvalue
+    #        print 'compilertool ok:'+numvalue
+    #        mycflags.remove(opt)
+    #        print 'Digested %s'%opt
+    #    except KeyError:
+    #        print 'Passing %s'%opt
+    #        continue
+    #        #pass
 
     # Write the rest of the options as AdditionalOptions
     mycflags = " ".join(mycflags)

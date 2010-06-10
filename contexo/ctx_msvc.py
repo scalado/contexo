@@ -142,9 +142,14 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib,
                                     'DebugInformationFormat':debugInformationFormat}
 
     # Parse flags and add correct attributes in compiler tool.
-    mycflags = cflags
+    # make a duplicate of the list
+    mycflags = cflags[:]
+    work_cflags = cflags[:]
     if type(mycflags) != list:
             mycflags = mycflags.split(' ')
+
+    if type(work_cflags) != list:
+            work_cflags = work_cflags.split(' ')
 
 
 
@@ -161,18 +166,42 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib,
                     '/Od':('Optimization', '0'),
                     '/O1':('Optimization', '1'),
                     '/O2':('Optimization', '2'),
-		    '/OX':('Optimization', '3')}
+		            '/Ox':('Optimization', '3'),
+                    '/MT': ('RuntimeLibrary', '0'),
+                    '/MTd':('RuntimeLibrary', '1'),
+                    '/MD': ('RuntimeLibrary', '2'),
+                    '/MDd':('RuntimeLibrary', '3'),
+                    '/MLd':('RuntimeLibrary', '5'),
+                    '/ML': ('RuntimeLibrary', '4'),
+                    '/GZ':('BasicRuntimeChecks', '1'),
+                    '/RTCsu':('BasicRuntimeChecks', '3'),
+                    '/RTCs':('BasicRuntimeChecks', '1'),
+                    '/RTCu': ('BasicRuntimeChecks', '2'),
+                    '/RTC1':('BasicRuntimeChecks', '3'),
+                    '/arch:SSE2':('EnableEnhancedInstructionSet', '2'),
+                    '/arch:SSE':('EnableEnhancedInstructionSet', '1'),
+                    '/Ot':('FavorSizeOrSpeed', '1'),
+                    '/Os':('FavorSizeOrSpeed', '2'),
+                    '/TC':('CompileAs', '1'),
+                    '/TP':('CompileAs', '2'),
+                    '/GB':('OptimizeForProcessor', '0'),
+                    '/G5':('OptimizeForProcessor', '1'),
+                    '/G6':('OptimizeForProcessor', '2'),
+                    '/G7':('OptimizeForProcessor', '3'),
+                    '/Ob0':('InlineFunctionExpansion', '0'),
+                    '/Ob1':('InlineFunctionExpansion', '1'),
+                    '/Ob2':('InlineFunctionExpansion', '2'),
+                    '/Zp1':('StructMemberAlignment', '1'),
+                    '/Zp2':('StructMemberAlignment', '2'),
+                    '/Zp4':('StructMemberAlignment', '3'),
+                    '/Zp8':('StructMemberAlignment', '4'),
+                    '/Zp16':('StructMemberAlignment', '5')}
 
-    # digest, analyse and remove options
-    for opt in mycflags:
-        try:
-            (optionname,  numvalue) = vcproj_opts_map[opt]
+    for opt in work_cflags:
+        if vcproj_opts_map.has_key(opt):
+            (optionname, numvalue) = vcproj_opts_map[opt]
             compilerTool[ optionname ] = numvalue
             mycflags.remove(opt)
-            #print 'Digested %s'%opt
-        except KeyError:
-            #print 'Passing %s'%opt
-            pass
 
     # Write the rest of the options as AdditionalOptions
     mycflags = " ".join(mycflags)

@@ -22,14 +22,12 @@ class CTXRepositoryGIT(CTXRepository):
         self.path = os.path.abspath('')
         self.destpath = os.path.join(local_path, id_name)
         self.id_name = id_name
-        self.branch = branch
         self.git = 'git'
-
-
-        if href == None:
-            # No remote repo source given, see if we have a local representation
-            if os.path.exists( self.path ):
-                href = self.path
+        if rev == None:
+            warningMessage("rev is None")
+            self.rev = 'HEAD'
+        else:
+            self.rev = rev
 
         if href == None:
             userErrorExit("No HREF specified for repository '%s'. Failed to aquire HREF from local copy '%s'"\
@@ -41,23 +39,6 @@ class CTXRepositoryGIT(CTXRepository):
     def getSHA1(self):
         raise NotImplementedError
 
-    #--------------------------------------------------------------------------
-    def getBranch(self):
-        import subprocess
-        os.chdir(self.destpath)
-        args = [self.git, 'branch', '--no-color' ]
-        p = subprocess.Popen(args, bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        retcode = p.wait()
-
-        stdout = p.stdout.read()
-        p.wait()
-        for line in stdout.split('\n'):
-            if line.find('*') == 0:
-                branch = line.split(' ')[1]
-                return branch
-
-        errorMessage("git branch parsing failed")
-        raise
 
 
     #--------------------------------------------------------------------------
@@ -78,9 +59,14 @@ class CTXRepositoryGIT(CTXRepository):
             print stderr
             warningMessage("Not a valid GIT repo")
             return False
+        # TODO: temporary workaround, rev is modified elsewhere!
+        if self.rev == None:
+            self.rev = 'master'
+            errorMessage("overriding undefined self.rev revision with \'master\'")
+        infoMessage("Running 'git checkout %s'"%(self.rev),1)
+        args = [self.git, 'checkout', self.rev]
 
-        infoMessage("Running 'git checkout %s'"%(self.branch),1)
-        p = subprocess.Popen([self.git, 'checkout', self.branch], bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        p = subprocess.Popen(args, bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stderr = p.stderr.readline()
         retcode = p.wait()
         if retcode != 0:
@@ -89,6 +75,81 @@ class CTXRepositoryGIT(CTXRepository):
         #    print stderr
 
         return True
+
+
+
+    #--------------------------------------------------------------------------
+    def getBranch(self):
+        import subprocess
+        os.chdir(self.destpath)
+        args = [self.git, 'branch', '--no-color' ]
+        p = subprocess.Popen(args, bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stderr = p.stderr.read()
+        stdout = p.stdout.read()
+        retcode = p.wait()
+
+        if retcode != 0:
+            print stderr
+            errorMessage("GIT execution failed with error code %d"%(retcode))
+            exit(retcode)
+
+        p.wait()
+        for line in stdout.split('\n'):
+            if line.find('*') == 0:
+                branch = line.split(' ')[1]
+                return branch
+
+        errorMessage("git branch parsing failed")
+        raise
+
+    #--------------------------------------------------------------------------
+    def getLocalRev(self):
+        import subprocess
+        os.chdir(self.destpath)
+        args = [self.git, '--no-pager', 'log', '-a', '--no-color' ]
+        p = subprocess.Popen(args, bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stderr = p.stderr.read()
+        stdout = p.stdout.read()
+        retcode = p.wait()
+
+        if retcode != 0:
+            print stderr
+            errorMessage("GIT execution failed with error code %d"%(retcode))
+            exit(retcode)
+
+        p.wait()
+        for line in stdout.split('\n'):
+            if line.find('commit') == 0:
+                rev = (line.split(' ')[1])
+                return rev
+        print stdout
+        print stderr
+        errorMessage("could not find SHA1 information")
+        raise
+
+    #--------------------------------------------------------------------------
+    def getLocalBranches(self):
+        import subprocess
+        os.chdir(self.destpath)
+        args = [self.git, 'branch', '-a', '--no-color' ]
+        p = subprocess.Popen(args, bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stderr = p.stderr.read()
+        stdout = p.stdout.read()
+        retcode = p.wait()
+
+        if retcode != 0:
+            print stderr
+            errorMessage("GIT execution failed with error code %d"%(retcode))
+            exit(retcode)
+
+        p.wait()
+        localBranches = list()
+        for line in stdout.split('\n'):
+            if line.find('*') == 0:
+                localBranches.append(line.split(' ')[1])
+            else:
+                localBranches.append(line.trim())
+        return localBranches
 
     #--------------------------------------------------------------------------
     def getRcs(self):
@@ -107,8 +168,8 @@ class CTXRepositoryGIT(CTXRepository):
             errorMessage("could not pull from %s"%(self.href))
             exit(retcode)
 
-        infoMessage("Running 'git checkout %s'"%(self.branch),1)
-        p = subprocess.Popen([self.git, 'checkout', self.branch], bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        infoMessage("Running 'git checkout %s'"%(self.rev),1)
+        p = subprocess.Popen([self.git, 'checkout', self.rev], bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stderr = p.stderr.readline()
         retcode = p.wait()
         if retcode != 0:

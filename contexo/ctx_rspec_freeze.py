@@ -15,8 +15,8 @@
 #                                                                             #
 ###############################################################################
 
-from xml.sax            import  make_parser
-from xml.sax.handler    import  ContentHandler
+#from xml.sax            import  make_parser
+#from xml.sax.handler    import  ContentHandler
 from xml.sax.saxutils import XMLGenerator
 
 from ctx_common         import userErrorExit, warningMessage, infoMessage

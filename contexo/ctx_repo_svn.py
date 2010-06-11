@@ -14,11 +14,11 @@ from ctx_repo import *
 from ctx_common import ctxAssert, userErrorExit, infoMessage
 import ctx_common
 import ctx_svn_client
-from getpass import getpass
+#from getpass import getpass
 
 #------------------------------------------------------------------------------
 class CTXRepositorySVN(CTXRepository):
-    def __init__(self, id_name, local_path, href, rev):
+    def __init__(self, id_name, local_path, href, rev, branch):
         self.client = ctx_svn_client.CTXSubversionClient()
         self.path = os.path.join(local_path, id_name)
 

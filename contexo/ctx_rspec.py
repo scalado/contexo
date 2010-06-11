@@ -33,16 +33,16 @@ class LIFOStack( list ):
         self.peek = lambda: self[ len(self)-1 ] if len(self) else None
 
 #------------------------------------------------------------------------------
-def createRepoFromRCS( rcs, id, path, href, rev ):
+def createRepoFromRCS( rcs, id, path, href, rev, branch ):
 
     rcs = rcs.lower() if rcs != None else None
 
     if rcs == 'svn':
-        return CTXRepositorySVN( id, path, href, rev )
+        return CTXRepositorySVN( id, path, href, rev, branch )
     elif rcs == 'git':
-        return CTXRepositoryGIT( id, path, href, rev )
+        return CTXRepositoryGIT( id, path, href, rev, branch )
     elif rcs == None or rcs =='':
-        return CTXRepositoryFS( id, path, href, rev )
+        return CTXRepositoryFS( id, path, href, rev, branch )
     else:
         userErrorExit("Unsupported RCS for repository '%s'"%(id))
 
@@ -109,7 +109,8 @@ class rspecXmlHandler(ContentHandler):
                                                    attrs.get('id', ""),
                                                    attrs.get('path', ""),
                                                    attrs.get('href', ""),
-                                                   attrs.get('rev', "") )
+                                                   attrs.get('rev', ""),
+                                                   attrs.get('branch'))
             self.rspecFile.addRepository ( self.current_repo )
 
         # .....................................................................

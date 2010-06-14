@@ -152,29 +152,6 @@ class CTXRepositoryGIT(CTXRepository):
             import shutil
             shutil.rmtree(tmpdir)
         return remote
-
-    #--------------------------------------------------------------------------
-    # returns list() of revision in commit order, newest first, oldest last.
-    # used by ctx view freeze
-    def getRevisions(self):
-        import subprocess
-        localRevisions = list()
-        args = [self.git, '--no-pager', 'log', '--pretty=oneline', '--no-color']
-        p = subprocess.Popen(args, bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stderr = p.stderr.read()
-        stdout = p.stdout.read()
-
-        retcode = p.wait()
-        for log_entry in stdout.split('\n'):
-            localRevisions.append(log_entry[0])
-
-        if retcode != 0:
-            print stderr
-            errorMessage("could not run git log, git log failed with return code %d"%(retcode))
-            exit(retcode)
-        os.chdir(self.path)
-        return localRevisisons
-
     #--------------------------------------------------------------------------
     def getRcs(self):
        return 'git'
@@ -277,7 +254,7 @@ class CTXRepositoryGIT(CTXRepository):
             return True
 
     #--------------------------------------------------------------------------
-    # call clone() instead to avoid confusion
+    # call clone() instead to avoid confusion over function naming
     def checkout(self):
         return self.clone()
 

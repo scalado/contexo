@@ -105,8 +105,9 @@ class CTXRepositoryGIT(CTXRepository):
         return ''
 
     #--------------------------------------------------------------------------
-    # TODO: disconnected operation?
-    # if not set or not applicable, returns empty string
+    # TODO: test disconnected operation
+    # resolves git remotes such as 'origin' or href urls to a href url
+    # if remote repo is not available, an empty string is returned
     def getRemote(self, fetch_url):
         import subprocess
         import tempfile
@@ -154,6 +155,7 @@ class CTXRepositoryGIT(CTXRepository):
 
     #--------------------------------------------------------------------------
     # returns list() of revision in commit order, newest first, oldest last.
+    # used by ctx view freeze
     def getRevisions(self):
         import subprocess
         localRevisions = list()
@@ -172,33 +174,6 @@ class CTXRepositoryGIT(CTXRepository):
             exit(retcode)
         os.chdir(self.path)
         return localRevisisons
-
-
-    #--------------------------------------------------------------------------
-    def getBranches(self):
-        import subprocess
-        os.chdir(self.destpath)
-        args = [self.git, 'branch', '-a', '--no-color' ]
-        p = subprocess.Popen(args, bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stderr = p.stderr.read()
-        stdout = p.stdout.read()
-        retcode = p.wait()
-
-        if retcode != 0:
-            print stderr
-            errorMessage("GIT execution failed with error code %d"%(retcode))
-            exit(retcode)
-
-        p.wait()
-        os.chdir(self.path)
-        localBranches = list()
-        for line in stdout.split('\n'):
-            if line.find('*') == 0:
-                localBranches.append(line.split(' ')[1])
-            else:
-                localBranches.append(line.split()[0])
-        print localBranches
-        return localBranches
 
     #--------------------------------------------------------------------------
     def getRcs(self):
@@ -301,8 +276,8 @@ class CTXRepositoryGIT(CTXRepository):
                 return False
             return True
 
-
     #--------------------------------------------------------------------------
+    # call clone() instead to avoid confusion
     def checkout(self):
         return self.clone()
 

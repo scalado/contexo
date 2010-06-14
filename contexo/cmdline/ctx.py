@@ -868,7 +868,7 @@ parser_clean.add_argument('-nra', '--no-remote-repo-access', action='store_true'
 parser_clean.add_argument('--tolerate-missing-headers',  action='store_true',  help = standard_description['--tolerate-missing-headers'])
 
 # freeze parser
-parser_freeze = subparsers.add_parser('freeze', help="Generate a rspec with svn versions frozen in their current state (from working copy).")
+parser_freeze = subparsers.add_parser('freeze', help="Generate a rspec with either svn revisions or git sha1s frozen in their current state (from working copy).")
 parser_freeze.set_defaults(func=cmd_freeze)
 #parser_freeze.add_argument('--file',  help="rspec to freeze. Imports will not be frozen")
 parser_freeze.add_argument('-o', '--output',  help="file to write to (standard output is used by default)")

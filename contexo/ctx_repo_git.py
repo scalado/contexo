@@ -233,8 +233,8 @@ class CTXRepositoryGIT(CTXRepository):
         # getBranch changes dir, go back to git dir
         os.chdir(self.destpath)
         if localBranch != '' and localBranch != '(no branch)':
-            infoMessage("Running 'git pull'")
-            p = subprocess.Popen([self.git, 'pull'], bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            infoMessage("Running 'git pull %s %s'"%('origin', self.rev))
+            p = subprocess.Popen([self.git, 'pull', 'origin', self.rev], bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             retcode = p.wait()
             if retcode != 0:
                 print p.stderr.read()

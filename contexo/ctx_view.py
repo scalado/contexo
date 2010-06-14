@@ -305,9 +305,17 @@ class CTXView:
     #--------------------------------------------------------------------------
     def freeze(self, repo_names = None,  output=sys.stdout):
         from contexo.ctx_rspec_freeze import RspecFreezer
-        freezer = RspecFreezer(self.rspec.getRepositories(),  output = output)
+        # work around the use of stdout since git needs access to it
+        import tempfile
+        (fd, fileName) = tempfile.mkstemp()
+        f = os.fdopen(fd, "w+b")
+        freezer = RspecFreezer(self.rspec.getRepositories(),  output = f)
         freezer.generateFrozen(repo_names)
-
+        f.close()
+        f = open(fileName, 'r+')
+        output.write(f.read())
+        f.close()
+        os.remove(fileName)
 
     #--------------------------------------------------------------------------
     # unfreezes given repo, or all repos in the view

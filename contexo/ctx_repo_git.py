@@ -236,11 +236,13 @@ class CTXRepositoryGIT(CTXRepository):
 
 
     #--------------------------------------------------------------------------
-    # is there such a sha in the remote repo?
+    # this method is unused
     def checkValidRevision(self):
-        raise NotImplementedError
-        # Not applicable to non revisioned repositories
-        return True
+        if self.getBranch() != '':
+            # repo is cloned
+            return True
+        else:
+            return False
 
     #--------------------------------------------------------------------------
     def checkValid(self, updating ):

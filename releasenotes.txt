@@ -12,7 +12,7 @@ Bugfixes:
 
 New features:
 - ARCH_PATH in .bc, adds a path relative to [CONTEXOMOD]/src where source files of type C, C++, and Assembler may be added. This was created so architecture specific files could be added and override cross-platform files.
-To support assembler-compilation, the flags ASMCOM, ASM are added to .bconf and ASMFLAGS is added to .bc, these flags will default to the C equivalent if not present.
+To support assembler-compilation, the flags ASMCOM, ASM are added to .cdef and ASMFLAGS is added to .bc, these flags will default to the C equivalent if not present.
 - An example view with a classic hello world can be found under the examples/ directory. Example use of ARCH_PATH and contexo may be found here.
 - Parallell builds enabled with the /MP flag when building with Visual Studio CL.EXE (msvc 2005 and later).
 

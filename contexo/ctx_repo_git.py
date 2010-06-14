@@ -31,11 +31,6 @@ class CTXRepositoryGIT(CTXRepository):
 
         CTXRepository.__init__( self, id_name, local_path, href, rev, version_control=True )
         self.msgSender = "CTXRepositoryGIT"
-    #--------------------------------------------------------------------------
-    def getSHA1(self):
-        raise NotImplementedError
-
-
 
     #--------------------------------------------------------------------------
     def isLocal(self):
@@ -49,7 +44,7 @@ class CTXRepositoryGIT(CTXRepository):
 
         os.chdir(self.destpath)
         p = subprocess.Popen([self.git, 'status'], bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stderr = p.stderr.readline()
+        stderr = p.stderr.read()
         retcode = p.wait()
 
         if retcode != 0:
@@ -61,10 +56,14 @@ class CTXRepositoryGIT(CTXRepository):
         args = [self.git, 'checkout', self.rev]
 
         p = subprocess.Popen(args, bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stderr = p.stderr.readline()
+        stderr = p.stderr.read()
+        stdout = p.stdout.read()
         retcode = p.wait()
         if retcode != 0:
+            print stdout
             print stderr
+            errorMessage("could not checkout %s"%(self.rev))
+            exit(retcode)
         os.chdir(self.path)
 
         return True
@@ -111,8 +110,14 @@ class CTXRepositoryGIT(CTXRepository):
     def getRemote(self, fetch_url):
         import subprocess
         import tempfile
+        if fetch_url == '.' or fetch_url == '':
+            errorMessage("getRemote called with invalid parameters (%s), make sure the .rspec points to valid repositories."%(fetch_url))
+            exit(42)
+
         tmpdir = ''
         if self.getBranch() == '':
+            # git can validate remote repos, but only if it is executed from a
+            # git repository, this creates a temporary git repo to check the remote repo
             tmpdir = tempfile.mkdtemp(suffix='ctx_git')
             os.chdir(tmpdir)
             args = [self.git, 'init']
@@ -147,35 +152,30 @@ class CTXRepositoryGIT(CTXRepository):
             shutil.rmtree(tmpdir)
         return remote
 
-
     #--------------------------------------------------------------------------
-    def getLocalRev(self):
+    # returns list() of revision in commit order, newest first, oldest last.
+    def getRevisions(self):
         import subprocess
-        os.chdir(self.destpath)
-        args = [self.git, '--no-pager', 'log', '-a', '--no-color' ]
+        localRevisions = list()
+        args = [self.git, '--no-pager', 'log', '--pretty=oneline', '--no-color']
         p = subprocess.Popen(args, bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stderr = p.stderr.read()
         stdout = p.stdout.read()
+
         retcode = p.wait()
+        for log_entry in stdout.split('\n'):
+            localRevisions.append(log_entry[0])
 
         if retcode != 0:
             print stderr
-            errorMessage("GIT execution failed with error code %d"%(retcode))
+            errorMessage("could not run git log, git log failed with return code %d"%(retcode))
             exit(retcode)
-
-        retcode = p.wait()
         os.chdir(self.path)
-        for line in stdout.split('\n'):
-            if line.find('commit') == 0:
-                rev = (line.split(' ')[1])
-                return rev
-        print stdout
-        print stderr
-        errorMessage("could not find SHA1 information")
-        raise
+        return localRevisisons
+
 
     #--------------------------------------------------------------------------
-    def getLocalBranches(self):
+    def getBranches(self):
         import subprocess
         os.chdir(self.destpath)
         args = [self.git, 'branch', '-a', '--no-color' ]
@@ -225,13 +225,13 @@ class CTXRepositoryGIT(CTXRepository):
 
         infoMessage("Running 'git checkout %s'"%(self.rev),1)
         p = subprocess.Popen([self.git, 'checkout', self.rev], bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stderr = p.stderr.readline()
+        stderr = p.stderr.read()
         retcode = p.wait()
         if retcode != 0:
             print stderr
-
-        # TODO: don't run this if we are not on a local branch!
         localBranch = self.getBranch()
+        # getBranch changes dir, go back to git dir
+        os.chdir(self.destpath)
         if localBranch != '' and localBranch != '(no branch)':
             infoMessage("Running 'git pull'")
             p = subprocess.Popen([self.git, 'pull'], bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -241,7 +241,7 @@ class CTXRepositoryGIT(CTXRepository):
                 errorMessage("could not pull from %s"%(self.href))
                 exit(retcode)
 
-            stderr = p.stderr.readline()
+            stderr = p.stderr.read()
         os.chdir(self.path)
 
     #--------------------------------------------------------------------------
@@ -250,13 +250,13 @@ class CTXRepositoryGIT(CTXRepository):
         infoMessage("Cloning RSpec defined GIT repo '%s' (%s)"%(self.id_name, self.href), 1)
         infoMessage("Running 'git clone %s %s'"%(self.href, self.id_name), 1)
         p = subprocess.Popen([self.git, 'clone', self.href, self.id_name],bufsize=0 ,stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        output = p.stderr.readline()
-        while output != '':
-            output = p.stderr.readline()
-            print output
+        stderr = p.stderr.read()
+        stdout = p.stdout.read()
+
         retnum = p.wait()
         if retnum != 0:
-            print p.stdout.read()
+            print stdout
+            print stderr
             errorMessage("Could not clone %s"%(self.href))
             exit(retnum)
         if not os.path.isdir(self.id_name):

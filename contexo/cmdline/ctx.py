@@ -440,7 +440,7 @@ def cmd_build(args):
     bc.buildParams.ldLibs.extend(args.libs)
     archPath = list()
     archPath = bc.getArchPath()
-    depmgr  = CTXDepMgr ( cview.getItemPaths('modules'),  args.tolerate_missing_headers, bc.getArchPath(), absIncDirs, archPath )
+    depmgr  = CTXDepMgr ( cview.getItemPaths('modules'),  args.tolerate_missing_headers, bc.getArchPath(), absIncDirs )
     session = ctx_base.CTXBuildSession( bc )
     session.setDependencyManager( depmgr )
 

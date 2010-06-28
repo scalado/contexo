@@ -87,10 +87,7 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib,
     # Determine DebugInformationFormat
     #
     debugInformationFormat = str()
-    if platform == 'Win32':
-        debugInformationFormat = '4'
-    else:
-        debugInformationFormat = '3'
+    debugInformationFormat = '0'
 
     #
     # Prepare proprocessor definitions.

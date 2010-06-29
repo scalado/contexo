@@ -216,7 +216,7 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib,
                                     'OutputFile': '$(OutDir)/'+outLib})
     elif configType == 'exe':
         additionalDependencies = " ".join(map(ntpath.basename, additionalDependencies))
-        additionalLibraryDirectories = " ".join(additionalLibraryDirectories)
+        additionalLibraryDirectories = ";".join(additionalLibraryDirectories)
         project.element ('Tool', {'Name':'VCLinkerTool',
                                   'GenerateDebugInformation':'TRUE',
                                   'TargetMachine':'1',

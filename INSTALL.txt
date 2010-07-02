@@ -1,0 +1,5 @@
+If an installation prefix different to /usr/local is desired, run eg:
+
+python ./setup.py install --home=~
+
+to install Contexo to your home directory.

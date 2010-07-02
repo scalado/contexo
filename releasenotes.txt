@@ -12,6 +12,7 @@ Bugfixes:
 - .gitattributes added which is needed for MSysGIT in windows.
 - Removed/commented unused imports and code
 - there is now a 'ctx' command without the .py suffix for unix users
+- fixed typo in gcc cdefs which should remove warnings about LDDIRSPREFIX.
 
 New features:
 - ARCH_PATH in .bc, adds a path relative to [CONTEXOMOD]/src where source files of type C, C++, and Assembler may be added. This was created so architecture specific files could be added and override cross-platform files.

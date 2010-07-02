@@ -1,10 +1,12 @@
+import os.path
 ###############################################################################
 #                                                                             #
 #   ctx_cmod.py                                                               #
-#   Component of Contexo Core - (c) Scalado AB 2007                           #
+#   Component of Contexo Core - (c) Scalado AB 2010                           #
 #                                                                             #
 #   Author: Robert Alm (robert.alm@scalado.com)                               #
 #                                                                             #
+#   Modified by: Thomas Eriksson (thomas.eriksson@scalado.com)                #
 #   ------------                                                              #
 #                                                                             #
 #   Classes and functions for Contexo code modules.                           #
@@ -21,9 +23,26 @@ import ctx_base
 from ctx_common import *
 
 #
-# Current Contexo module structure.
-# Note: This can be dynamically created using XML in the future.
+# In earlier releases of Contexo, a contexo module was defined by a set of
+# directories:
+# "criteria dirs" ("src", "inc", "doc", "contexo", "test").
+# This does not work well in practice since some popular version control systems
+# such as git, hg and perforce does not support empty directories, and since we
+# want old code to build
+# the definition of a contexo module must change to:
 #
+# A directory which MUST reside in a module path as defined by <ctx-path ...>.
+# Furthermore, such a directory MUST contain either:
+# 1. One or more public header files.
+# OR
+# 2. One or more of the criteria dirs.
+#
+# (obviously when migrating to $popular_version_control system, no empty
+# directories would be kept, so a spiffy recursive script putting placeholders
+# all over the code base would not suffice in case we ever would like to check out
+# an old revision)
+#
+
 contexo_dirname     = 'contexo'
 src_dirname         = 'src'
 inc_dirname         = 'inc'
@@ -33,7 +52,7 @@ dep_filename        = 'depends'
 xdep_filename       = 'xdepends'
 srclist_filename    = 'sourcefiles'
 
-criteriaDirs = ['contexo','doc','inc', 'src', 'test']
+criteriaDirs = [contexo_dirname, 'doc', inc_dirname, src_dirname, test_dirname]
 
 #------------------------------------------------------------------------------
 def resolveModuleLocation( modName, pathlist ):
@@ -64,11 +83,25 @@ def isContexoCodeModule( path ):
     if not os.path.exists(path):
         return False
 
-    for d in criteriaDirs:
-        if not os.path.isdir( os.path.join( path, d) ):
-            return False
+    numPublicHeaderFiles = 0
+    for entry in os.listdir( path ):
+	entrypath = os.path.join( path, entry)
+	if os.path.isfile( entrypath ) and ( entrypath.endswith('.h') or entrypath.endswith('.H') ):
+	    numPublicHeaderFiles+=1
 
-    return True
+    numCriteriaDirs = 0
+    for d in criteriaDirs:
+	criteriaDirPath = os.path.join( path, d)
+        if os.path.isfile( criteriaDirPath ):
+            userErrorExit("'%s' was found but is not a valid Contexo code module"%(path))
+	    return False
+	
+	if os.path.isdir( criteriaDirPath ):
+	    numCriteriaDirs+=1
+    if numPublicHeaderFiles > 0 or numCriteriaDirs > 0:
+        return True
+
+    return False
 
 
 #------------------------------------------------------------------------------
@@ -84,10 +117,11 @@ def assertValidContexoCodeModule( path, msgSender ):
 
 
 def getSourcesFromDir( self, srcDir ):
-    srcList = list()
     srcListDict = dict()
-
-    ctxAssert( os.path.exists(srcDir), 'Directory %s was assumed to exist%(srcDir)' )
+    srcList = list ()
+    if not os.path.exists(srcDir):
+	    srcList = list()
+	    return srcList
     source_extensions = [ '.c', '.cpp']
 
     # Collect all source files.
@@ -211,7 +245,8 @@ class CTXRawCodeModule:
             # Determine the path to the private header directory of the module.
             testHdrDir = self.getTestDir()
             #testHeaders = list( )
-            ctxAssert( os.path.exists(testHdrDir), 'Directory %s was assumed to exist'%(testHdrDir) )
+            if not os.path.exists( testHdrDir ):
+		    return self.testHeaders
             # Collect all source files.
             dirlist = os.listdir( testHdrDir )
             for file in dirlist:
@@ -233,7 +268,8 @@ class CTXRawCodeModule:
             header_extensions = [ '.h',]
             # Determine the path to the private header directory of the module.
             privHdrDir = self.getPrivHeaderDir()
-            ctxAssert( os.path.exists(privHdrDir), 'Directory was assumed to exist' )
+	    if not os.path.exists( privHdrDir ):
+	        return self.privHeaders
             # Collect all source files.
             dirlist = os.listdir( privHdrDir )
             for file in dirlist:
@@ -255,7 +291,8 @@ class CTXRawCodeModule:
             header_extensions = [ '.h',]
             # Determine the path to the private header directory of the module.
             pubHdrDir = self.getPubHeaderDir()
-            ctxAssert( os.path.exists(pubHdrDir), 'Directory %s was assumed to exist'%(pubHdrDir) )
+	    if not os.path.exists( pubHdrDir ):
+	        return self.pubHeaders
             # Collect all source files.
             dirlist = os.listdir( pubHdrDir )
             for file in dirlist:

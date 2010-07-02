@@ -83,6 +83,9 @@ def isContexoCodeModule( path ):
     if not os.path.exists(path):
         return False
 
+    if not os.path.isdir( path ):
+	return False
+
     numPublicHeaderFiles = 0
     for entry in os.listdir( path ):
 	entrypath = os.path.join( path, entry)

@@ -1,8 +1,10 @@
-Contexo 0.7.5
+Contexo 0.8.0
 Bugfixes:
 - Fixes for the MSVC plugin:
   - local dependency includes for each module instead of global includes for all modules
   - digests compilation flags which eliminates warnings with overriding flags. Lots of flags added.
+  - adding additional libraries for msvc has been fixed
+  - Debug is no longer hardcoded to be enabled. This could in some configurations cause CL to not compile due to compile flag incompatibility. If Debugging is wanted, debugging must be explicitly stated in the .bc file.
 - disable rebuild if the project has external dependencies
 - Warning if %HOMEPATH% is set to something else than '\' on windows since contexo will fail to detect correct home directory in that case.
 - Correctly escapes arguments to AR in windows since the windows paths with backslashes otherwise would be supplied as control characters.

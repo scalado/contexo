@@ -107,7 +107,7 @@ def isContexoCodeModule( path ):
 #------------------------------------------------------------------------------
 def assertValidContexoCodeModule( path, msgSender ):
 
-    if not isContexoModule( path ):
+    if not isContexoCodeModule( path ):
         userErrorExit("'%s' was found but is not a valid Contexo code module"%(path))
 
 

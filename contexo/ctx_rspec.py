@@ -200,7 +200,8 @@ class RSpecFileLocator:
             if os.path.exists(temp_rspec):
                 os.remove( temp_rspec )
 
-            if self.rcs == 'svn':
+            # rspec access is still handled by svn
+            if self.rcs == 'svn' or self.rcs == 'git':
 
                 svn = ctx_svn_client.CTXSubversionClient()
                 svn.export( self.getHref(), temp_dir, self.revision )

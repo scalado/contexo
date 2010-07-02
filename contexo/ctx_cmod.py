@@ -107,13 +107,8 @@ def isContexoCodeModule( path ):
 #------------------------------------------------------------------------------
 def assertValidContexoCodeModule( path, msgSender ):
 
-    if not os.path.exists(path):
-        userErrorExit("Unable to locate code module '%s'"%(path))
-
-    for d in criteriaDirs:
-        if not os.path.exists( os.path.join( path, d) ):
-            warningMessage('Must have the dir "'+d+'" in order to be a valid contexo dir')
-            userErrorExit("'%s' was found but is not a valid Contexo code module. "%(path))
+    if not self.isContexoModule( path ):
+        userErrorExit("'%s' was found but is not a valid Contexo code module"%(path))
 
 
 def getSourcesFromDir( self, srcDir ):

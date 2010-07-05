@@ -63,7 +63,7 @@ class CTXRepositoryGIT(CTXRepository):
             warningMessage("Not a valid GIT repo")
             os.chdir(self.path)
             return False
-        infoMessage("Running 'git checkout %s'"%(self.rev),1)
+        infoMessage("Running 'git checkout %s' in '%s'"%(self.rev, self.id_name),1)
         args = [self.git, 'checkout', self.rev]
 
         p = subprocess.Popen(args, bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -184,7 +184,7 @@ class CTXRepositoryGIT(CTXRepository):
             warningMessage("rspec href is set to %s, but the git repository origin is set to %s. Using git repository origin"%(self.href, origin_href))
 
         os.chdir(self.destpath)
-        infoMessage("Running 'git fetch'")
+        infoMessage("Running 'git fetch' in '%s'"%(self.id_name))
         p = subprocess.Popen([self.git, 'fetch'], bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         retcode = p.wait()
         if retcode != 0:
@@ -192,7 +192,7 @@ class CTXRepositoryGIT(CTXRepository):
             errorMessage("could not fetch from %s"%(self.href))
             exit(retcode)
 
-        infoMessage("Running 'git checkout %s'"%(self.rev),1)
+        infoMessage("Running 'git checkout %s' in '%s'"%(self.rev, self.id_name),1)
         p = subprocess.Popen([self.git, 'checkout', self.rev], bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stderr = p.stderr.read()
         retcode = p.wait()
@@ -202,7 +202,7 @@ class CTXRepositoryGIT(CTXRepository):
         # getBranch changes dir, go back to git dir
         os.chdir(self.destpath)
         if localBranch != '' and localBranch != '(no branch)':
-            infoMessage("Running 'git pull %s %s'"%('origin', self.rev))
+            infoMessage("Running 'git pull %s %s' in '%s''"%('origin', self.rev, self.id_name))
             p = subprocess.Popen([self.git, 'pull', 'origin', self.rev], bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             retcode = p.wait()
             if retcode != 0:

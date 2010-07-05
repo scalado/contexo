@@ -32,7 +32,14 @@ class CTXRepositoryGIT(CTXRepository):
                            %(id_name, self.getAbsLocalPath()))
 
         CTXRepository.__init__( self, id_name, local_path, href, rev, version_control=True )
-        self.msgSender = "CTXRepositoryGIT"
+	
+	# these are hardcoded dummy paths for ctxview
+	self.local_path = local_path
+	self.codeModulePaths = ['dummy1']
+	self.componentPaths = ['dummy2']
+	# END hardcoded dummy paths
+
+	self.msgSender = "CTXRepositoryGIT"
 
     #--------------------------------------------------------------------------
     def isLocal(self):

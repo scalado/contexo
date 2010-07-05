@@ -233,7 +233,7 @@ class CTXRepositoryGIT(CTXRepository):
             exit(42)
 
         os.chdir(self.id_name)
-        infoMessage("Running 'git checkout %s'"%(self.rev), 1)
+        infoMessage("Running 'git checkout %s' in '%s'"%(self.rev, self.id_name), 1)
         args = [self.git, 'checkout', self.rev]
         p = subprocess.Popen( args,bufsize=0 ,stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stderr = p.stderr.read()
@@ -242,11 +242,11 @@ class CTXRepositoryGIT(CTXRepository):
         if retnum != 0:
             print stdout
             print stderr
-            errorMessage("Could not checkout %s"%(self.rev))
+            errorMessage("Could not checkout '%s' in '%s'"%(self.rev, self.id_name))
             exit(retnum)
         os.chdir(self.path)
 
-        infoMessage("Successfully cloned GIT repo", 1)
+        infoMessage("Successfully cloned GIT repo '%s'"%(self.id_name), 1)
 
 
 

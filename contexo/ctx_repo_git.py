@@ -150,8 +150,14 @@ class CTXRepositoryGIT(CTXRepository):
         retcode = p.wait()
         if retcode != 0:
             remote = ''
+		# this section is a bit version dependent
         for line in stdout.split('\n'):
             split_line = line.split()
+			# git 1.6
+            if len(split_line) == 2:
+				if split_line[0] == 'URL:':
+					remote = split_line[1]
+            # git v1.7
             if len(split_line) == 3:
                 if split_line[0] == 'Fetch' and split_line[1] == 'URL:':
                     remote = split_line[2]

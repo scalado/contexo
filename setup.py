@@ -42,11 +42,7 @@ setup(name="Contexo",
       author="Manuel Astudillo",
       author_email="manuel.astudillo@scalado.com",
       url="http://www.scalado.com",
-<<<<<<< HEAD
       scripts =  ['contexo/cmdline/ctx.py',  'contexo/cmdline/ctx', 'contexo/cmdline/ctx.bat', 'contexo/cmdline/bdef2rspec.py', 'contexo/plugins/export/msvc.py', 'contexo/plugins/export/tengiltests.py' ],
-=======
-      scripts =  ['contexo/cmdline/ctx.py', 'contexo/cmdline/ctx.bat', 'contexo/cmdline/git-ctx.py', 'contexo/cmdline/git-ctx', 'contexo/cmdline/ctx', 'contexo/cmdline/bdef2rspec.py', 'contexo/plugins/export/msvc.py', 'contexo/plugins/export/tengiltests.py' ],
->>>>>>> lunch
       package_dir = { 'contexo.defaults':'defaults' ,'': 'otherlibs',  'contexo':'contexo'},  #the '':'otherlibs' is a hack to make it load argparse without a package, from a subdirectory otherlibs
       package_data={ 'contexo': ['cmdline/ctx.bat'],  'contexo.defaults': ['contexo.cfg', 'bconf/*', 'cdef/*' ], 'contexo.plugins.export': ['msvc.bat','rspectree.bat'] },
       packages = [ 'contexo.defaults', 'contexo' ,  'contexo.platform', 'contexo.plugins', 'contexo.plugins.export' ],

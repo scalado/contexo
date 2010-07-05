@@ -96,5 +96,3 @@ if len(sys.argv) == 0:
 	gitctx.help()
 if sys.argv[1] == 'status':
 	gitctx.status()
-
-#argparser?

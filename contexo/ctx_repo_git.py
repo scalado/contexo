@@ -56,7 +56,9 @@ class CTXRepositoryGIT(CTXRepository):
         stderr = p.stderr.read()
         retcode = p.wait()
 
-        if retcode != 0:
+	# git 1.6 returns 1
+	# git 1.7 returns 0
+        if retcode != 0 and retcode != 1:
             print stderr
             warningMessage("Not a valid GIT repo")
             os.chdir(self.path)

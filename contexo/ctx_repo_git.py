@@ -203,14 +203,14 @@ class CTXRepositoryGIT(CTXRepository):
         os.chdir(self.destpath)
         if localBranch != '' and localBranch != '(no branch)':
             infoMessage("Running 'git pull %s %s' in '%s''"%('origin', self.rev, self.id_name))
-            p = subprocess.Popen([self.git, 'pull', 'origin', self.rev], bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            p = subprocess.Popen([self.git, 'pull', 'origin', self.rev], bufsize=4096, stdin=None)
             retcode = p.wait()
+            print ''
             if retcode != 0:
-                print p.stderr.read()
+                #print p.stderr.read()
                 errorMessage("could not pull from %s"%(self.href))
                 exit(retcode)
 
-            stderr = p.stderr.read()
         os.chdir(self.path)
 
     #--------------------------------------------------------------------------
@@ -218,14 +218,12 @@ class CTXRepositoryGIT(CTXRepository):
         import subprocess
         infoMessage("Cloning RSpec defined GIT repo '%s' (%s)"%(self.id_name, self.href), 1)
         infoMessage("Running 'git clone %s %s'"%(self.href, self.id_name), 1)
-        p = subprocess.Popen([self.git, 'clone', self.href, self.id_name],bufsize=0 ,stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stderr = p.stderr.read()
-        stdout = p.stdout.read()
+        p = subprocess.Popen([self.git, 'clone', self.href, self.id_name],bufsize=0 ,stdin=None)
 
         retnum = p.wait()
+	# newline after output
+	print ''
         if retnum != 0:
-            print stdout
-            print stderr
             errorMessage("Could not clone %s"%(self.href))
             exit(retnum)
         if not os.path.isdir(self.id_name):

@@ -61,17 +61,20 @@ git-ctx help
 
         #path = os.abs
 
-    def status( self ):
+    def status( git_argv ):
+	print 'foo'
         for repo_path in self.git_repos:
             if not os.path.isdir(repo_path):
                 return ''
             os.chdir(repo_path)
             import subprocess
             args = [self.git, 'status', '--porcelain']
+            args.append(git_argv)
             p = subprocess.Popen(args, bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stderr = p.stderr.read()
             stdout = p.stdout.read()
             retcode = p.wait()
+            print stdout
 
             if retcode != 0:
                 print stderr
@@ -90,9 +93,14 @@ git-ctx help
 
         return ''
 
+#
+git_argv = list(sys.argv[:])
+git_argv.remove(0)
+git_argv.remove(0)
 gitctx = GITCtx()
 #gitctx.print_all()
 if len(sys.argv) == 0:
 	gitctx.help()
 if sys.argv[1] == 'status':
-	gitctx.status()
+	gitctx.status(git_argv)
+

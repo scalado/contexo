@@ -19,6 +19,8 @@ import sys
 from contexo import ctx_repo
 from contexo import ctx_rspec
 from contexo import ctx_view
+from contexo.ctx_common import errorMessage
+
 def dir_has_rspec(view_dir):
     view_filelist = os.listdir(view_dir)
     for entry in view_filelist:
@@ -33,21 +35,23 @@ class GITCtx:
         self.git = 'git'
         self.git_repos = list()
         self.ignored_repos = list()
-        # instead of manually specifying rspec (as is the de facto uage convention
-        # with contexo)
+        # instead of manually specifying view (as is the de facto uage convention for contexo)
         # search backwards in path until an rspec file is found (the de-facto
         # git usage convention)
         self.view_dir = os.path.abspath('')
         while not dir_has_rspec(self.view_dir):
             os.chdir('..')
+            if self.view_dir == os.path.abspath(''):
+                errorMessage('rspec not found, git ctx must be launched from a valid Contexo view')
+                exit(2)
             self.view_dir = os.path.abspath('')
         ctxview = ctx_view.CTXView(self.view_dir)
 
         for repo in ctxview.getRSpec().getRepositories():
             if repo.getRcs() == 'git':
-                self.git_repos.append(repo.getAbsLocalPath())
-            else:
-                self.ignored_repos.append(repo.getAbsLocalPath())
+                self.git_repos.append(repo)
+            #else:
+            #    self.ignored_repos.append(repo.getAbsLocalPath())
 
     def help( self ):
         print """
@@ -64,26 +68,22 @@ usage: git ctx [git-command] [options] [--] <filepattern>...
         #ctxview.printView()
 
         #path = os.abs
+
     def _banner_branch( self ):
-        print """	    
+        print """#
 # Changed but not updated:
 #   (use "git ctx add/rm <file>..." to update what will be committed)
-#   (use "git ctx checkout -- <file>..." to discard changes in working directory)
-#
-        """
+#   (use "git ctx checkout -- <file>..." to discard changes in working directory)"""
     def _banner_untracked( self ):
-        print """
-# Untracked files:
+        print """# Untracked files:
 #   (use "git ctx add <file>..." to include in what will be committed)
-        """
+#"""
     def _postbanner_untracked( self ):
-        print """
-no changes added to commit (use "git add" and/or "git commit -a")
+        print """no changes added to commit (use "git add" and/or "git commit -a")
         """
 
 
     def status( self, git_argv ):
-	print 'git status'
 	statusdict = dict()
 	statusdict['M'] = list()
 	statusdict['??'] = list()
@@ -94,7 +94,8 @@ no changes added to commit (use "git add" and/or "git commit -a")
 
 	untracked_files = list()
 	modified_files = list()
-        for repo_path in self.git_repos:
+        for repo in self.git_repos:
+            repo_path = repo.getAbsLocalPath()
             if not os.path.isdir(repo_path):
                 return ''
             os.chdir(repo_path)
@@ -112,15 +113,27 @@ no changes added to commit (use "git add" and/or "git commit -a")
                 exit(retcode)
 
             os.chdir(self.view_dir)
-	    print "# %s is on branch master"
+	    print "# %s is on branch %s"%(os.path.basename(repo_path), repo.getBranch())
             for line in stdout.split('\n'):
-                split_line = line.split()
+                split_line = line.lstrip().split(' ',1)
                 if len(split_line) == 2:
 		    if statusdict.has_key( split_line[0] ):
-		        statusdict[ split_line[0] ].append( repo_path + split_line[1] )
+		        statusdict[ split_line[0] ].append( os.path.basename(repo_path) + '/' + split_line[1] )
 		    else:
-		        warningMessage("unknown git status code %s"%(split_line[0]))
-        return ''
+		        warningMessage("unknown git file status code %s"%(split_line[0]))
+
+        self._banner_branch()
+        if len(statusdict['M']) > 0 or len(statusdict['D']) > 0:
+            for modified_file in statusdict['M']:
+                print '#' + '\t' + 'modified:' + '\t' + modified_file
+            for deleted_file in statusdict['D']:
+                print '#' + '\t' + 'deleted: ' + '\t' + deleted_file
+            print '#'
+        if len(statusdict['??']) > 0:
+            self._banner_untracked()
+            for untracked_file in statusdict['??']:
+                print '#' + '\t' + untracked_file
+            self._postbanner_untracked()
 
     def generic( self, git_cmd, git_argv ):
         for repo_path in self.git_repos:

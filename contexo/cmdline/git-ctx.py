@@ -53,6 +53,7 @@ class GITCtx:
         print """
 git-ctx help
         """
+	sys.exit(42)
     def print_all( self ):
 
         print self.git_repos
@@ -93,14 +94,17 @@ git-ctx help
 
         return ''
 
+if len(sys.argv) == 0:
+	gitctx.help()
+	sys.exit(0)
 #
+print 'git_ctx'
 git_argv = list(sys.argv[:])
-git_argv.remove(0)
+print git_argv
 git_argv.remove(0)
 gitctx = GITCtx()
 #gitctx.print_all()
-if len(sys.argv) == 0:
-	gitctx.help()
+print len(sys.argv)
 if sys.argv[1] == 'status':
 	gitctx.status(git_argv)
 

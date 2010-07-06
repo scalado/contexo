@@ -49,9 +49,12 @@ class GITCtx:
             else:
                 self.ignored_repos.append(repo.getAbsLocalPath())
 
-    def help():
+    def help( self ):
         print """
-git-ctx help
+git ctx is a component of the Contexo build system which integrates with the git toolsuite.
+Any git command supplied to 'git ctx' will be executed for each subrepository in the view as defined by the Contexo .rspec.
+
+usage: git ctx [git-command] [options] [--] <filepattern>...
         """
 	sys.exit(42)
     def print_all( self ):
@@ -61,21 +64,47 @@ git-ctx help
         #ctxview.printView()
 
         #path = os.abs
+    def _banner_branch( self ):
+        print """	    
+# Changed but not updated:
+#   (use "git ctx add/rm <file>..." to update what will be committed)
+#   (use "git ctx checkout -- <file>..." to discard changes in working directory)
+#
+        """
+    def _banner_untracked( self ):
+        print """
+# Untracked files:
+#   (use "git ctx add <file>..." to include in what will be committed)
+        """
+    def _postbanner_untracked( self ):
+        print """
+no changes added to commit (use "git add" and/or "git commit -a")
+        """
 
-    def status( git_argv ):
-	print 'foo'
+
+    def status( self, git_argv ):
+	print 'git status'
+	statusdict = dict()
+	statusdict['M'] = list()
+	statusdict['??'] = list()
+	statusdict['A'] = list()
+	statusdict['U'] = list()
+	statusdict['R'] = list()
+	statusdict['D'] = list()
+
+	untracked_files = list()
+	modified_files = list()
         for repo_path in self.git_repos:
             if not os.path.isdir(repo_path):
                 return ''
             os.chdir(repo_path)
             import subprocess
             args = [self.git, 'status', '--porcelain']
-            args.append(git_argv)
+            args.extend(git_argv)
             p = subprocess.Popen(args, bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stderr = p.stderr.read()
             stdout = p.stdout.read()
             retcode = p.wait()
-            print stdout
 
             if retcode != 0:
                 print stderr
@@ -83,28 +112,49 @@ git-ctx help
                 exit(retcode)
 
             os.chdir(self.view_dir)
-        for line in stdout.split('\n'):
-            split_line = line.split()
-            if len(split_line) == 3:
-                if split_line[0] == '*' and split_line[1] == '(no' and split_line[2] == 'branch)':
-                    return '(no branch)'
-                if line.find('*') == 0:
-                    branch = split_line[1]
-                    return branch
-
+	    print "# %s is on branch master"
+            for line in stdout.split('\n'):
+                split_line = line.split()
+                if len(split_line) == 2:
+		    if statusdict.has_key( split_line[0] ):
+		        statusdict[ split_line[0] ].append( repo_path + split_line[1] )
+		    else:
+		        warningMessage("unknown git status code %s"%(split_line[0]))
         return ''
 
-if len(sys.argv) == 0:
-	gitctx.help()
-	sys.exit(0)
-#
-print 'git_ctx'
-git_argv = list(sys.argv[:])
-print git_argv
-git_argv.remove(0)
+    def generic( self, git_cmd, git_argv ):
+        for repo_path in self.git_repos:
+            if not os.path.isdir(repo_path):
+                return ''
+            os.chdir(repo_path)
+
+            import subprocess
+            args = [self.git, git_cmd ]
+            args.extend(git_argv)
+
+	    p = subprocess.Popen(args, bufsize=4096, stdin=None)
+            retcode = p.wait()
+
+            if retcode != 0:
+                errorMessage("GIT execution failed with error code %d"%(retcode))
+                exit(retcode)
+
+            os.chdir(self.view_dir)
+	sys.exit(retcode)
+    
+
 gitctx = GITCtx()
-#gitctx.print_all()
-print len(sys.argv)
+
+if len(sys.argv) == 0:
+    gitctx.help()
+    sys.exit(1)
+if sys.argv[1] == '-h' or sys.argv[1] == '--help':
+    gitctx.help()
+    sys.exit(1)
+#
+git_argv = list(sys.argv[2:])
 if sys.argv[1] == 'status':
-	gitctx.status(git_argv)
+    gitctx.status(git_argv)
+else:
+    gitctx.generic(sys.argv[1], git_argv)
 

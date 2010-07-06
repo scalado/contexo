@@ -60,7 +60,7 @@ Any git command supplied to 'git ctx' will be executed for each subrepository in
 
 usage: git ctx [git-command] [options] [--] <filepattern>...
         """
-	sys.exit(42)
+        sys.exit(42)
     def print_all( self ):
 
         print self.git_repos
@@ -84,16 +84,16 @@ usage: git ctx [git-command] [options] [--] <filepattern>...
 
 
     def status( self, git_argv ):
-	statusdict = dict()
-	statusdict['M'] = list()
-	statusdict['??'] = list()
-	statusdict['A'] = list()
-	statusdict['U'] = list()
-	statusdict['R'] = list()
-	statusdict['D'] = list()
+        statusdict = dict()
+        statusdict['M'] = list()
+        statusdict['??'] = list()
+        statusdict['A'] = list()
+        statusdict['U'] = list()
+        statusdict['R'] = list()
+        statusdict['D'] = list()
 
-	untracked_files = list()
-	modified_files = list()
+        untracked_files = list()
+        modified_files = list()
         for repo in self.git_repos:
             repo_path = repo.getAbsLocalPath()
             if not os.path.isdir(repo_path):
@@ -113,14 +113,14 @@ usage: git ctx [git-command] [options] [--] <filepattern>...
                 exit(retcode)
 
             os.chdir(self.view_dir)
-	    print "# %s is on branch %s"%(os.path.basename(repo_path), repo.getBranch())
+            print "# %s is on branch %s"%(os.path.basename(repo_path), repo.getBranch())
             for line in stdout.split('\n'):
                 split_line = line.lstrip().split(' ',1)
                 if len(split_line) == 2:
-		    if statusdict.has_key( split_line[0] ):
-		        statusdict[ split_line[0] ].append( os.path.basename(repo_path) + '/' + split_line[1] )
-		    else:
-		        warningMessage("unknown git file status code %s"%(split_line[0]))
+                    if statusdict.has_key( split_line[0] ):
+                        statusdict[ split_line[0] ].append( os.path.basename(repo_path) + '/' + split_line[1] )
+                    else:
+                        warningMessage("unknown git file status code %s"%(split_line[0]))
 
         self._banner_branch()
         if len(statusdict['M']) > 0 or len(statusdict['D']) > 0:
@@ -135,8 +135,46 @@ usage: git ctx [git-command] [options] [--] <filepattern>...
                 print '#' + '\t' + untracked_file
             self._postbanner_untracked()
 
+    def generic_translateargs( self, git_cmd, git_argv ):
+        for repo in self.git_repos:
+            repo_path = repo.getAbsLocalPath()
+            if not os.path.isdir(repo_path):
+                return ''
+            os.chdir(repo_path)
+
+            import subprocess
+            dashfile = False
+            repo_name = os.path.basename(repo_path)+'/'
+            # need iteration copy to avoid concurrency problems
+            repo_git_argv = list()
+            for arg in git_argv:
+                if arg[:len(repo_name)] == repo_name:
+                    if arg == repo_name:
+                        repo_git_argv.append('.')
+                    else:
+                        repo_git_argv.append(arg.replace(os.path.basename(repo_path)+'/','',1))
+                else:
+                        if arg[0] == '-' and arg != '--':
+                            repo_git_argv.append(arg)
+            if len(repo_git_argv) != 0:
+                args = [self.git, git_cmd ]
+                args.extend(repo_git_argv)
+                print os.path.abspath('')
+                print args
+
+                p = subprocess.Popen(args, bufsize=4096, stdin=None)
+                retcode = p.wait()
+
+                if retcode != 0:
+                    errorMessage("GIT execution failed with error code %d"%(retcode))
+                    exit(retcode)
+
+                os.chdir(self.view_dir)
+        sys.exit(retcode)
+ 
     def generic( self, git_cmd, git_argv ):
-        for repo_path in self.git_repos:
+        for repo in self.git_repos:
+            repo_path = repo.getAbsLocalPath()
             if not os.path.isdir(repo_path):
                 return ''
             os.chdir(repo_path)
@@ -145,7 +183,7 @@ usage: git ctx [git-command] [options] [--] <filepattern>...
             args = [self.git, git_cmd ]
             args.extend(git_argv)
 
-	    p = subprocess.Popen(args, bufsize=4096, stdin=None)
+            p = subprocess.Popen(args, bufsize=4096, stdin=None)
             retcode = p.wait()
 
             if retcode != 0:
@@ -153,7 +191,7 @@ usage: git ctx [git-command] [options] [--] <filepattern>...
                 exit(retcode)
 
             os.chdir(self.view_dir)
-	sys.exit(retcode)
+        sys.exit(retcode)
     
 
 gitctx = GITCtx()
@@ -168,6 +206,6 @@ if sys.argv[1] == '-h' or sys.argv[1] == '--help':
 git_argv = list(sys.argv[2:])
 if sys.argv[1] == 'status':
     gitctx.status(git_argv)
-else:
-    gitctx.generic(sys.argv[1], git_argv)
+elif sys.argv[1] == 'add':
+    gitctx.generic_translateargs(sys.argv[1], git_argv)
 

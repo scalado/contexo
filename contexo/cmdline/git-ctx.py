@@ -139,11 +139,13 @@ usage: git ctx [git-command] [options] [--] <filepattern>...
 #           """
 
             for untracked_file in statusdict['??']:
-                print '#' + '\t' + untracked_file
+                print '#' + '\t' + Fore.RED + untracked_file + Style.RESET_ALL
             print """no changes added to commit (use "git add" and/or "git commit -a")"""
 
-
     def generic_translateargs( self, git_cmd, git_argv ):
+        from colorama import init
+        init()
+        from colorama import Fore, Back, Style
         for repo in self.git_repos:
             repo_path = repo.getAbsLocalPath()
             if not os.path.isdir(repo_path):
@@ -172,11 +174,11 @@ usage: git ctx [git-command] [options] [--] <filepattern>...
                 args = [self.git, git_cmd ]
                 args.extend(repo_git_argv)
                 print os.path.abspath('')
-		print 'ctx-git:' + 'executing \'',
-                for arg in print args:
-		    print arg,
+                print Fore.MAGENTA + 'ctx-git' + Fore.GREEN + ':' + Style.RESET_ALL,
+                sys.stdout.write(' executing \'' + self.git + ' ' + git_cmd)
+                for arg in git_argv:
+		    sys.stdout.write(' '+arg)
 		print '\' in ' + os.path.basename(repo_path)
-
 
                 p = subprocess.Popen(args, bufsize=4096, stdin=None)
                 retcode = p.wait()
@@ -186,9 +188,13 @@ usage: git ctx [git-command] [options] [--] <filepattern>...
                     exit(retcode)
 
                 os.chdir(self.view_dir)
-        sys.exit(retcode)
+        sys.exit(0)
  
     def generic( self, git_cmd, git_argv ):
+        from colorama import init
+        init()
+        from colorama import Fore, Back, Style
+
         for repo in self.git_repos:
             repo_path = repo.getAbsLocalPath()
             if not os.path.isdir(repo_path):
@@ -198,6 +204,13 @@ usage: git ctx [git-command] [options] [--] <filepattern>...
             import subprocess
             args = [self.git, git_cmd ]
             args.extend(git_argv)
+            print os.path.abspath('')
+            print Fore.MAGENTA + 'ctx-git' + Fore.GREEN + ':' + Style.RESET_ALL,
+            sys.stdout.write(' executing \'' + self.git + ' ' + git_cmd)
+            for arg in git_argv:
+		sys.stdout.write(' '+arg)
+            print '\' in ' + os.path.basename(repo_path)
+
 
             p = subprocess.Popen(args, bufsize=4096, stdin=None)
             retcode = p.wait()

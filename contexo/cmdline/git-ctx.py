@@ -157,6 +157,12 @@ usage: git ctx [git-command] [options] [--] <filepattern>...
             repo_name = os.path.basename(repo_path)+'/'
             repo_git_argv = list()
 	    # count arguments that are valid for the current repo
+	    # valid arguments are 
+	    # 1. those that begins with the name of the repo-dir with a preceeding '/', we're dealing with a file within the repo
+	    # 2. those that do not contain a '/', which most likely are comments or branch names
+	    #
+	    # arguments that begin with a '-' are options and are passed to the git command in a normal way IF there are valid arguments as specified above.
+	    
 	    valid_git_argv = list()
             for arg in git_argv:
                 if arg[:len(repo_name)] == repo_name:
@@ -164,13 +170,17 @@ usage: git ctx [git-command] [options] [--] <filepattern>...
 		        tmparg = '.'
                         repo_git_argv.append(tmparg)
 			valid_git_argv.append(tmparg)
+                    elif arg[0] == '-' and arg != '--':
+                        repo_git_argv.append(arg)
                     else:
 		        tmparg = arg.replace(os.path.basename(repo_path)+'/','',1)
                         repo_git_argv.append(tmparg)
 			valid_git_argv.append(tmparg)
-                elif arg[0] == '-' and arg != '--':
-                     repo_git_argv.append(arg)
-            if len(repo_git_argv) != 0:
+                if arg.find('/') != -1:
+                    repo_git_argv.append(arg)
+                    valid_git_argv.append(tmparg)
+                    
+            if len(valid_git_argv) != 0:
                 args = [self.git, git_cmd ]
                 args.extend(repo_git_argv)
                 print os.path.abspath('')

@@ -172,7 +172,11 @@ usage: git ctx [git-command] [options] [--] <filepattern>...
                 args = [self.git, git_cmd ]
                 args.extend(repo_git_argv)
                 print os.path.abspath('')
-                print args
+		print 'ctx-git:' + 'executing \'',
+                for arg in print args:
+		    print arg,
+		print '\' in ' + os.path.basename(repo_path)
+
 
                 p = subprocess.Popen(args, bufsize=4096, stdin=None)
                 retcode = p.wait()

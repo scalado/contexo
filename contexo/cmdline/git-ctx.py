@@ -45,7 +45,9 @@ class GITCtx:
                 errorMessage('rspec not found, git ctx must be launched from a valid Contexo view')
                 exit(2)
             self.view_dir = os.path.abspath('')
-        ctxview = ctx_view.CTXView(self.view_dir)
+        # ctxview default args: view_path, access_policy=AP_PREFER_REMOTE_ACCESS, updating=False, validate=True
+        # keep the validate=False if there is any repo under svn control, otherwise things will be very slow
+        ctxview = ctx_view.CTXView(self.view_dir, 1, False, False)
 
         for repo in ctxview.getRSpec().getRepositories():
             if repo.getRcs() == 'git':
@@ -59,7 +61,12 @@ git ctx is a component of the Contexo build system which integrates with the git
 Any git command supplied to 'git ctx' will be executed for each subrepository in the view as defined by the Contexo .rspec.
 
 usage: git ctx [git-command] [options] [--] <filepattern>...
+
+git-command may be any of the following:
         """
+        git_commands = ['branch', 'status', 'commit', 'checkout', 'add', 'rm', 'reset']
+        for git_command in git_commands:
+            print '\t' + git_command
         sys.exit(42)
     def print_all( self ):
 
@@ -76,7 +83,7 @@ usage: git ctx [git-command] [options] [--] <filepattern>...
     def status( self, git_argv ):
         from colorama import init
         init()
-	from colorama import Fore, Back, Style
+        from colorama import Fore, Back, Style
         statusdict = dict()
         statusdict[' M'] = list()
         statusdict['??'] = list()
@@ -108,20 +115,21 @@ usage: git ctx [git-command] [options] [--] <filepattern>...
             os.chdir(self.view_dir)
             print "# %s is on branch %s"%(os.path.basename(repo_path), repo.getBranch())
             for line in stdout.split('\n'):
-	    	if len(line) > 3:
+                if len(line) > 3:
                     split_line = [ line[:2], line[3:] ]
                     if statusdict.has_key( split_line[0] ):
                         statusdict[ split_line[0] ].append( os.path.basename(repo_path) + '/' + split_line[1] )
                     else:
                         warningMessage("unknown git file status code %s"%(split_line[0]))
+        print '#'
 
-	if len(statusdict['A ']) > 0:
-	    print """# Changes to be committed:
+        if len(statusdict['A ']) > 0:
+            print """# Changes to be committed:
 #   (use "git reset HEAD <file>..." to unstage)
-#	    """
-	    for new_file in statusdict['A ']:
-	        print '#' + '\t' + 'new file:' + '\t' + Fore.GREEN + new_file + Style.RESET_ALL
-	    print '#'
+#            """
+            for new_file in statusdict['A ']:
+                print '#' + '\t' + 'new file:' + '\t' + Fore.GREEN + new_file + Style.RESET_ALL
+            print '#'
         if len(statusdict[' M']) > 0 or len(statusdict[' D']) > 0:
             print """#
 # Changed but not updated:
@@ -154,41 +162,42 @@ usage: git ctx [git-command] [options] [--] <filepattern>...
 
             import subprocess
             dashfile = False
-            repo_name = os.path.basename(repo_path)+'/'
+            repo_name = os.path.basename(repo_path)
             repo_git_argv = list()
-	    # count arguments that are valid for the current repo
-	    # valid arguments are 
-	    # 1. those that begins with the name of the repo-dir with a preceeding '/', we're dealing with a file within the repo
-	    # 2. those that do not contain a '/', which most likely are comments or branch names
-	    #
-	    # arguments that begin with a '-' are options and are passed to the git command in a normal way IF there are valid arguments as specified above.
-	    
-	    valid_git_argv = list()
+            # count arguments that are valid for the current repo
+            # valid arguments are 
+            # 1. those that begins with the name of the repo-dir with a preceeding '/', we're dealing with a file within the repo
+            # 2. those that do not contain a '/', which most likely are comments or branch names
+            #
+            # arguments that begin with a '-' are options and are passed to the git command in a normal way IF there are valid arguments as specified above.
+            
+            valid_git_argv = list()
             for arg in git_argv:
-                if arg[:len(repo_name)] == repo_name:
-                    if arg == repo_name:
-		        tmparg = '.'
-                        repo_git_argv.append(tmparg)
-			valid_git_argv.append(tmparg)
-                    elif arg[0] == '-' and arg != '--':
-                        repo_git_argv.append(arg)
-                    else:
-		        tmparg = arg.replace(os.path.basename(repo_path)+'/','',1)
-                        repo_git_argv.append(tmparg)
-			valid_git_argv.append(tmparg)
-                if arg.find('/') != -1:
-                    repo_git_argv.append(arg)
+                # if it starts with repo name...
+                if arg[:len(repo_name + '/')] == repo_name + '/':
+                    tmparg = arg.replace(os.path.basename(repo_path)+'/','',1)
+                    repo_git_argv.append(tmparg)
                     valid_git_argv.append(tmparg)
-                    
+                # if the argument is an option to be used for all...
+                elif arg[0] == '-' and arg != '--':
+                    repo_git_argv.append(arg)
+                # if arg is the repo name...
+                if arg == repo_name:
+                    tmparg = '.'
+                    repo_git_argv.append(tmparg)
+                    valid_git_argv.append(tmparg)
+                # if no / is found in the arg...
+                if arg.find('/') == -1:
+                    repo_git_argv.append(arg)
+                    valid_git_argv.append(arg)
             if len(valid_git_argv) != 0:
                 args = [self.git, git_cmd ]
-                args.extend(repo_git_argv)
-                print os.path.abspath('')
+                args.extend(valid_git_argv)
                 print Fore.MAGENTA + 'ctx-git' + Fore.GREEN + ':' + Style.RESET_ALL,
                 sys.stdout.write(' executing \'' + self.git + ' ' + git_cmd)
-                for arg in git_argv:
-		    sys.stdout.write(' '+arg)
-		print '\' in ' + os.path.basename(repo_path)
+                for arg in valid_git_argv:
+                    sys.stdout.write(' '+arg)
+                print '\' in ' + os.path.basename(repo_path)
 
                 p = subprocess.Popen(args, bufsize=4096, stdin=None)
                 retcode = p.wait()
@@ -218,7 +227,7 @@ usage: git ctx [git-command] [options] [--] <filepattern>...
             print Fore.MAGENTA + 'ctx-git' + Fore.GREEN + ':' + Style.RESET_ALL,
             sys.stdout.write(' executing \'' + self.git + ' ' + git_cmd)
             for arg in git_argv:
-		sys.stdout.write(' '+arg)
+                sys.stdout.write(' '+arg)
             print '\' in ' + os.path.basename(repo_path)
 
 
@@ -235,7 +244,7 @@ usage: git ctx [git-command] [options] [--] <filepattern>...
 
 gitctx = GITCtx()
 
-if len(sys.argv) == 0:
+if len(sys.argv) == 1:
     gitctx.help()
     sys.exit(1)
 if sys.argv[1] == '-h' or sys.argv[1] == '--help':
@@ -245,7 +254,7 @@ if sys.argv[1] == '-h' or sys.argv[1] == '--help':
 git_argv = list(sys.argv[2:])
 if sys.argv[1] == 'status':
     gitctx.status(git_argv)
-elif sys.argv[1] == 'add' or sys.argv[1] == 'rm' or sys.argv[1] == 'checkout':
+elif sys.argv[1] == 'add' or sys.argv[1] == 'rm' or sys.argv[1] == 'checkout' or sys.argv[1] == 'reset' or sys.argv[1] == 'commit':
     gitctx.generic_translateargs(sys.argv[1], git_argv)
 else:
     gitctx.generic(sys.argv[1], git_argv)

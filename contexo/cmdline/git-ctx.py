@@ -19,7 +19,7 @@ import sys
 from contexo import ctx_repo
 from contexo import ctx_rspec
 from contexo import ctx_view
-from contexo.ctx_common import errorMessage
+from contexo.ctx_common import errorMessage, warningMessage
 
 def dir_has_rspec(view_dir):
     view_filelist = os.listdir(view_dir)
@@ -69,28 +69,21 @@ usage: git ctx [git-command] [options] [--] <filepattern>...
 
         #path = os.abs
 
-    def _banner_branch( self ):
-        print """#
-# Changed but not updated:
-#   (use "git ctx add/rm <file>..." to update what will be committed)
-#   (use "git ctx checkout -- <file>..." to discard changes in working directory)"""
-    def _banner_untracked( self ):
         print """# Untracked files:
 #   (use "git ctx add <file>..." to include in what will be committed)
 #"""
-    def _postbanner_untracked( self ):
-        print """no changes added to commit (use "git add" and/or "git commit -a")
-        """
-
 
     def status( self, git_argv ):
+        from colorama import init
+        init()
+	from colorama import Fore, Back, Style
         statusdict = dict()
-        statusdict['M'] = list()
+        statusdict[' M'] = list()
         statusdict['??'] = list()
-        statusdict['A'] = list()
-        statusdict['U'] = list()
-        statusdict['R'] = list()
-        statusdict['D'] = list()
+        statusdict['A '] = list()
+        statusdict[' U'] = list()
+        statusdict[' R'] = list()
+        statusdict[' D'] = list()
 
         untracked_files = list()
         modified_files = list()
@@ -115,25 +108,40 @@ usage: git ctx [git-command] [options] [--] <filepattern>...
             os.chdir(self.view_dir)
             print "# %s is on branch %s"%(os.path.basename(repo_path), repo.getBranch())
             for line in stdout.split('\n'):
-                split_line = line.lstrip().split(' ',1)
-                if len(split_line) == 2:
+	    	if len(line) > 3:
+                    split_line = [ line[:2], line[3:] ]
                     if statusdict.has_key( split_line[0] ):
                         statusdict[ split_line[0] ].append( os.path.basename(repo_path) + '/' + split_line[1] )
                     else:
                         warningMessage("unknown git file status code %s"%(split_line[0]))
 
-        self._banner_branch()
-        if len(statusdict['M']) > 0 or len(statusdict['D']) > 0:
-            for modified_file in statusdict['M']:
-                print '#' + '\t' + 'modified:' + '\t' + modified_file
-            for deleted_file in statusdict['D']:
-                print '#' + '\t' + 'deleted: ' + '\t' + deleted_file
+	if len(statusdict['A ']) > 0:
+	    print """# Changes to be committed:
+#   (use "git reset HEAD <file>..." to unstage)
+#	    """
+	    for new_file in statusdict['A ']:
+	        print '#' + '\t' + 'new file:' + '\t' + Fore.GREEN + new_file + Style.RESET_ALL
+	    print '#'
+        if len(statusdict[' M']) > 0 or len(statusdict[' D']) > 0:
+            print """#
+# Changed but not updated:
+#   (use "git ctx add/rm <file>..." to update what will be committed)
+#   (use "git ctx checkout -- <file>..." to discard changes in working directory)"""
+
+            for modified_file in statusdict[' M']:
+                print '#' + '\t' + 'modified:' + '\t' + Fore.RED + modified_file + Style.RESET_ALL
+            for deleted_file in statusdict[' D']:
+                print '#' + '\t' + 'deleted: ' + '\t' + Fore.RED + deleted_file + Style.RESET_ALL
             print '#'
         if len(statusdict['??']) > 0:
-            self._banner_untracked()
+            print """# Untracked files:
+#   (use "git ctx add <file>..." to include in what will be committed)
+#           """
+
             for untracked_file in statusdict['??']:
                 print '#' + '\t' + untracked_file
-            self._postbanner_untracked()
+            print """no changes added to commit (use "git add" and/or "git commit -a")"""
+
 
     def generic_translateargs( self, git_cmd, git_argv ):
         for repo in self.git_repos:
@@ -145,17 +153,21 @@ usage: git ctx [git-command] [options] [--] <filepattern>...
             import subprocess
             dashfile = False
             repo_name = os.path.basename(repo_path)+'/'
-            # need iteration copy to avoid concurrency problems
             repo_git_argv = list()
+	    # count arguments that are valid for the current repo
+	    valid_git_argv = list()
             for arg in git_argv:
                 if arg[:len(repo_name)] == repo_name:
                     if arg == repo_name:
-                        repo_git_argv.append('.')
+		        tmparg = '.'
+                        repo_git_argv.append(tmparg)
+			valid_git_argv.append(tmparg)
                     else:
-                        repo_git_argv.append(arg.replace(os.path.basename(repo_path)+'/','',1))
-                else:
-                        if arg[0] == '-' and arg != '--':
-                            repo_git_argv.append(arg)
+		        tmparg = arg.replace(os.path.basename(repo_path)+'/','',1)
+                        repo_git_argv.append(tmparg)
+			valid_git_argv.append(tmparg)
+                elif arg[0] == '-' and arg != '--':
+                     repo_git_argv.append(arg)
             if len(repo_git_argv) != 0:
                 args = [self.git, git_cmd ]
                 args.extend(repo_git_argv)
@@ -206,6 +218,8 @@ if sys.argv[1] == '-h' or sys.argv[1] == '--help':
 git_argv = list(sys.argv[2:])
 if sys.argv[1] == 'status':
     gitctx.status(git_argv)
-elif sys.argv[1] == 'add':
+elif sys.argv[1] == 'add' or sys.argv[1] == 'rm' or sys.argv[1] == 'checkout':
     gitctx.generic_translateargs(sys.argv[1], git_argv)
+else:
+    gitctx.generic(sys.argv[1], git_argv)
 

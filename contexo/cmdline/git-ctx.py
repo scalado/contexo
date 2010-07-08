@@ -19,7 +19,7 @@ import sys
 from contexo import ctx_repo
 from contexo import ctx_rspec
 from contexo import ctx_view
-from contexo.ctx_common import errorMessage, warningMessage
+from contexo.ctx_common import errorMessage, warningMessage, infoMessage
 
 def dir_has_rspec(view_dir):
     view_filelist = os.listdir(view_dir)

@@ -58,7 +58,7 @@ def treesAreEqual( root_folderA, root_folderB ):
 
 #------------------------------------------------------------------------------
 class CTXRepositoryFS(CTXRepository):
-    def __init__(self, id_name, local_path, href, rev, branch):
+    def __init__(self, id_name, local_path, href, rev):
         self.path = os.path.join(local_path, id_name)
 
         if href == None:

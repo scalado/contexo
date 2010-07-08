@@ -33,16 +33,16 @@ class LIFOStack( list ):
         self.peek = lambda: self[ len(self)-1 ] if len(self) else None
 
 #------------------------------------------------------------------------------
-def createRepoFromRCS( rcs, id, path, href, rev, branch ):
+def createRepoFromRCS( rcs, id, path, href, rev ):
 
     rcs = rcs.lower() if rcs != None else None
 
     if rcs == 'svn':
-        return CTXRepositorySVN( id, path, href, rev, branch )
+        return CTXRepositorySVN( id, path, href, rev )
     elif rcs == 'git':
-        return CTXRepositoryGIT( id, path, href, rev, branch )
+        return CTXRepositoryGIT( id, path, href, rev )
     elif rcs == None or rcs =='':
-        return CTXRepositoryFS( id, path, href, rev, branch )
+        return CTXRepositoryFS( id, path, href, rev )
     else:
         userErrorExit("Unsupported RCS for repository '%s'"%(id))
 

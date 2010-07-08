@@ -18,7 +18,7 @@ import ctx_svn_client
 
 #------------------------------------------------------------------------------
 class CTXRepositorySVN(CTXRepository):
-    def __init__(self, id_name, local_path, href, rev, branch):
+    def __init__(self, id_name, local_path, href, rev):
         self.client = ctx_svn_client.CTXSubversionClient()
         self.path = os.path.join(local_path, id_name)
 

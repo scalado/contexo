@@ -16,11 +16,9 @@ from ctx_repo import *
 from ctx_common import userErrorExit
 #, infoMessage, ctxAssert
 
-# TODO: warn before merging a public branch into a local branch if not master
-
 #------------------------------------------------------------------------------
 class CTXRepositoryGIT(CTXRepository):
-    def __init__(self, id_name, local_path, href, rev , branch):
+    def __init__(self, id_name, local_path, href, rev):
         self.path = os.path.abspath('')
         self.destpath = os.path.join(local_path, id_name)
         self.id_name = id_name

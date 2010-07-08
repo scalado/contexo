@@ -125,7 +125,7 @@ git-command may be any of the following:
 
         if len(statusdict['A ']) > 0:
             print """# Changes to be committed:
-#   (use "git reset HEAD <file>..." to unstage)
+#   (use "git ctx reset HEAD <file>..." to unstage)
 #            """
             for new_file in statusdict['A ']:
                 print '#' + '\t' + 'new file:' + '\t' + Fore.GREEN + new_file + Style.RESET_ALL
@@ -148,7 +148,7 @@ git-command may be any of the following:
 
             for untracked_file in statusdict['??']:
                 print '#' + '\t' + Fore.RED + untracked_file + Style.RESET_ALL
-            print """no changes added to commit (use "git add" and/or "git commit -a")"""
+            print """no changes added to commit (use "git ctx add" and/or "git ictx commit -a")"""
 
     def generic_translateargs( self, git_cmd, git_argv ):
         from colorama import init
@@ -193,11 +193,11 @@ git-command may be any of the following:
             if len(valid_git_argv) != 0:
                 args = [self.git, git_cmd ]
                 args.extend(valid_git_argv)
-                print Fore.MAGENTA + 'ctx-git' + Fore.GREEN + ':' + Style.RESET_ALL,
-                sys.stdout.write(' executing \'' + self.git + ' ' + git_cmd)
+                msg = ' executing \'' + self.git + ' ' + git_cmd
                 for arg in valid_git_argv:
-                    sys.stdout.write(' '+arg)
-                print '\' in ' + os.path.basename(repo_path)
+                    msg = msg + ' ' +arg
+                msg = msg + '\' in ' + os.path.basename(repo_path)
+                infoMessage(msg,0)
 
                 p = subprocess.Popen(args, bufsize=4096, stdin=None)
                 retcode = p.wait()

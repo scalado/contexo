@@ -109,8 +109,7 @@ class rspecXmlHandler(ContentHandler):
                                                    attrs.get('id', ""),
                                                    attrs.get('path', ""),
                                                    attrs.get('href', ""),
-                                                   attrs.get('rev', ""),
-                                                   attrs.get('branch'))
+                                                   attrs.get('rev', ""))
             self.rspecFile.addRepository ( self.current_repo )
 
         # .....................................................................

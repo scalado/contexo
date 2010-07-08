@@ -197,7 +197,9 @@ git-command may be any of the following:
                 for arg in valid_git_argv:
                     msg = msg + ' ' +arg
                 msg = msg + '\' in ' + os.path.basename(repo_path)
-                infoMessage(msg,0)
+                print 'git-ctx: ' + msg
+                # TODO: doesn't work...
+                #infoMessage(msg,0)
 
                 p = subprocess.Popen(args, bufsize=4096, stdin=None)
                 retcode = p.wait()

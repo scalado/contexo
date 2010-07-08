@@ -52,13 +52,15 @@ class GITCtx:
         for repo in ctxview.getRSpec().getRepositories():
             if repo.getRcs() == 'git':
                 self.git_repos.append(repo)
-            #else:
-            #    self.ignored_repos.append(repo.getAbsLocalPath())
+            else:
+                self.ignored_repos.append(repo)
 
     def help( self ):
         print """
 git ctx is a component of the Contexo build system which integrates with the git toolsuite.
 Any git command supplied to 'git ctx' will be executed for each subrepository in the view as defined by the Contexo .rspec.
+
+git ctx performs all commands relative to the view root. Thus the output from git ctx status can be handled by the commands below.
 
 usage: git ctx [git-command] [options] [--] <filepattern>...
 
@@ -67,6 +69,11 @@ git-command may be any of the following:
         git_commands = ['branch', 'status', 'commit', 'checkout', 'add', 'rm', 'reset']
         for git_command in git_commands:
             print '\t' + git_command
+        print """
+other commands are executed in each git repo.
+
+Subversion repos are ignored.
+"""
         sys.exit(42)
     def print_all( self ):
 
@@ -79,8 +86,12 @@ git-command may be any of the following:
         print """# Untracked files:
 #   (use "git ctx add <file>..." to include in what will be committed)
 #"""
+    def ignored_svn_repo_banner( self ):
+        for ignored_repo in self.ignored_repos: 
+            print 'git-ctx: ignoring \'svn\' repo: ' + os.path.basename(ignored_repo.getAbsLocalPath())
 
     def status( self, git_argv ):
+        self.ignored_svn_repo_banner()
         from colorama import init
         init()
         from colorama import Fore, Back, Style
@@ -150,10 +161,8 @@ git-command may be any of the following:
                 print '#' + '\t' + Fore.RED + untracked_file + Style.RESET_ALL
             print """no changes added to commit (use "git ctx add" and/or "git ictx commit -a")"""
 
-    def generic_translateargs( self, git_cmd, git_argv ):
-        from colorama import init
-        init()
-        from colorama import Fore, Back, Style
+    def generic( self, git_cmd, git_argv, translate_arguments = False ):
+        self.ignored_svn_repo_banner()
         for repo in self.git_repos:
             repo_path = repo.getAbsLocalPath()
             if not os.path.isdir(repo_path):
@@ -190,7 +199,12 @@ git-command may be any of the following:
                 if arg.find('/') == -1:
                     repo_git_argv.append(arg)
                     valid_git_argv.append(arg)
-            if len(valid_git_argv) != 0:
+            # git checkout can be used in the following scenario:
+            # $ git checkout -b foo origin/bar
+            if git_cmd == 'checkout' and git_argv.count('-b') != 0:
+                translate_arguments = False
+
+            if translate_arguments == True and len(valid_git_argv) != 0:
                 args = [self.git, git_cmd ]
                 args.extend(valid_git_argv)
                 msg = ' executing \'' + self.git + ' ' + git_cmd
@@ -208,41 +222,26 @@ git-command may be any of the following:
                     errorMessage("GIT execution failed with error code %d"%(retcode))
                     exit(retcode)
 
-                os.chdir(self.view_dir)
-        sys.exit(0)
- 
-    def generic( self, git_cmd, git_argv ):
-        from colorama import init
-        init()
-        from colorama import Fore, Back, Style
+            elif translate_arguments == False:
+                args = [self.git, git_cmd ]
+                args.extend(git_argv)
+                msg = ' executing \'' + self.git + ' ' + git_cmd
+                for arg in git_argv:
+                    msg = msg + ' ' +arg
+                msg = msg + '\' in ' + os.path.basename(repo_path)
+                print 'git-ctx: ' + msg
+                # TODO: doesn't work...
+                #infoMessage(msg,0)
 
-        for repo in self.git_repos:
-            repo_path = repo.getAbsLocalPath()
-            if not os.path.isdir(repo_path):
-                return ''
-            os.chdir(repo_path)
+                p = subprocess.Popen(args, bufsize=4096, stdin=None)
+                retcode = p.wait()
 
-            import subprocess
-            args = [self.git, git_cmd ]
-            args.extend(git_argv)
-            print os.path.abspath('')
-            print Fore.MAGENTA + 'ctx-git' + Fore.GREEN + ':' + Style.RESET_ALL,
-            sys.stdout.write(' executing \'' + self.git + ' ' + git_cmd)
-            for arg in git_argv:
-                sys.stdout.write(' '+arg)
-            print '\' in ' + os.path.basename(repo_path)
-
-
-            p = subprocess.Popen(args, bufsize=4096, stdin=None)
-            retcode = p.wait()
-
-            if retcode != 0:
-                errorMessage("GIT execution failed with error code %d"%(retcode))
-                exit(retcode)
+                if retcode != 0:
+                    errorMessage("GIT execution failed with error code %d"%(retcode))
+                    exit(retcode)
 
             os.chdir(self.view_dir)
-        sys.exit(retcode)
-    
+        sys.exit(0)
 
 gitctx = GITCtx()
 
@@ -257,7 +256,8 @@ git_argv = list(sys.argv[2:])
 if sys.argv[1] == 'status':
     gitctx.status(git_argv)
 elif sys.argv[1] == 'add' or sys.argv[1] == 'rm' or sys.argv[1] == 'checkout' or sys.argv[1] == 'reset' or sys.argv[1] == 'commit':
-    gitctx.generic_translateargs(sys.argv[1], git_argv)
+    translate_arguments = True
+    gitctx.generic(sys.argv[1], git_argv, translate_arguments)
 else:
     gitctx.generic(sys.argv[1], git_argv)
 

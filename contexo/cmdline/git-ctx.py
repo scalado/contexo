@@ -19,7 +19,7 @@ import sys
 from contexo import ctx_repo
 from contexo import ctx_rspec
 from contexo import ctx_view
-from contexo.ctx_common import errorMessage, warningMessage, infoMessage
+from contexo.ctx_common import errorMessage, warningMessage, infoMessage, userErrorExit
 
 def dir_has_rspec(view_dir):
     view_filelist = os.listdir(view_dir)
@@ -76,20 +76,24 @@ other commands are executed in each git repo.
 Subversion repos are ignored.
 """
         sys.exit(42)
-    def print_all( self ):
 
-        print self.git_repos
-        print self.ignored_repos
-        #ctxview.printView()
-
-        #path = os.abs
-
-        print """# Untracked files:
-#   (use "git ctx add <file>..." to include in what will be committed)
-#"""
     def ignored_svn_repo_banner( self ):
         for ignored_repo in self.ignored_repos: 
             print 'git-ctx: ignoring \'svn\' repo: ' + os.path.basename(ignored_repo.getAbsLocalPath())
+    def check_unmerged( self ):
+        import subprocess
+        for repo in self.git_repos:
+            os.chdir(repo.getAbsLocalPath())
+            args = [self.git, 'status', '--porcelain']
+            p = subprocess.Popen(args, bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            stderr = p.stderr.read()
+            stdout = p.stdout.read()
+            #p.wait()
+            for line in stdout.split('\n'):
+                if line[1:2] == 'U' or line[:1] == 'U':
+                    msg = 'there are unmerged changes in \''+os.path.basename(repo.getAbsLocalPath()) + '\', cannot continue'
+                    userErrorExit(msg)
+            os.chdir(self.view_dir)
 
     def status( self, git_argv ):
         self.ignored_svn_repo_banner()
@@ -97,16 +101,14 @@ Subversion repos are ignored.
         init()
         from colorama import Fore, Back, Style
         statusdict = dict()
-        statusdict['M'] = list()
-        statusdict['??'] = list()
-        statusdict['A'] = list()
-        statusdict['U'] = list()
-        statusdict['R'] = list()
-        statusdict['D'] = list()
-        statusdict['C'] = list()
+        statusdict['M'] = set()
+        statusdict['??'] = set()
+        statusdict['A'] = set()
+        statusdict['U'] = set()
+        statusdict['R'] = set()
+        statusdict['D'] = set()
+        statusdict['C'] = set()
 
-        untracked_files = list()
-        modified_files = list()
         for repo in self.git_repos:
             repo_path = repo.getAbsLocalPath()
             if not os.path.isdir(repo_path):
@@ -132,7 +134,7 @@ Subversion repos are ignored.
                     split_line = [ line[:2], line[3:] ]
                     for key in [split_line[0], split_line[0][0], split_line[0][1]]:
                         if statusdict.has_key( key ):
-                            statusdict[ key ].append( os.path.basename(repo_path) + '/' + split_line[1] )
+                            statusdict[ key ].add( os.path.basename(repo_path) + '/' + split_line[1] )
         print '#'
 
         if len(statusdict['A']) > 0:
@@ -142,7 +144,7 @@ Subversion repos are ignored.
             for new_file in statusdict['A']:
                 print '#' + '\t' + 'new file:' + '\t' + Fore.GREEN + new_file + Style.RESET_ALL
             print '#'
-        if len(statusdict['M']) > 0 or len(statusdict['D']) > 0:
+        if len(statusdict['M']) > 0 or len(statusdict['D']) > 0 or len(statusdict['R']) > 0 or len(statusdict['C']) > 0:
             print """#
 # Changed but not updated:
 #   (use "git ctx add/rm <file>..." to update what will be committed)
@@ -159,6 +161,14 @@ Subversion repos are ignored.
             for copied_file in statusdict['C']:
                 print '#' + '\t' + 'copied:' + '\t' + Fore.RED + copied_file + Style.RESET_ALL
             print '#'
+        if len(statusdict['U']) > 0:
+            print """# Unmerged paths:
+#   (use "git ctx add/rm <file>..." as appropriate to mark resolution)
+#           """
+            for unmerged_file in statusdict['U']:
+                # the Fore.RED is placed here to show similar output to git status
+                print '#' + '\t' + Fore.RED + 'both modified:' + '\t' + unmerged_file + Style.RESET_ALL
+            print '#'
         if len(statusdict['??']) > 0:
             print """# Untracked files:
 #   (use "git ctx add <file>..." to include in what will be committed)
@@ -166,9 +176,11 @@ Subversion repos are ignored.
 
             for untracked_file in statusdict['??']:
                 print '#' + '\t' + Fore.RED + untracked_file + Style.RESET_ALL
-            print """no changes added to commit (use "git ctx add" and/or "git ictx commit -a")"""
+            print """no changes added to commit (use "git ctx add" and/or "git ctx commit -a")"""
 
     def generic( self, git_cmd, git_argv, translate_arguments = False, continue_on_error = False ):
+        if git_cmd not in ['add', 'rm']:
+            self.check_unmerged()
         self.ignored_svn_repo_banner()
         for repo in self.git_repos:
             repo_path = repo.getAbsLocalPath()

@@ -35,6 +35,8 @@ class GITCtx:
         self.git = 'git'
         self.git_repos = list()
         self.ignored_repos = list()
+        self.git_commands = ['branch', 'status', 'commit', 'checkout', 'add', 'rm', 'reset']
+        self.git_commands_continue_on_error = ['commit']
         # instead of manually specifying view (as is the de facto uage convention for contexo)
         # search backwards in path until an rspec file is found (the de-facto
         # git usage convention)
@@ -66,8 +68,7 @@ usage: git ctx [git-command] [options] [--] <filepattern>...
 
 git-command may be any of the following:
         """
-        git_commands = ['branch', 'status', 'commit', 'checkout', 'add', 'rm', 'reset']
-        for git_command in git_commands:
+        for git_command in self.git_commands:
             print '\t' + git_command
         print """
 other commands are executed in each git repo.
@@ -96,12 +97,13 @@ Subversion repos are ignored.
         init()
         from colorama import Fore, Back, Style
         statusdict = dict()
-        statusdict[' M'] = list()
+        statusdict['M'] = list()
         statusdict['??'] = list()
-        statusdict['A '] = list()
-        statusdict[' U'] = list()
-        statusdict[' R'] = list()
-        statusdict[' D'] = list()
+        statusdict['A'] = list()
+        statusdict['U'] = list()
+        statusdict['R'] = list()
+        statusdict['D'] = list()
+        statusdict['C'] = list()
 
         untracked_files = list()
         modified_files = list()
@@ -128,29 +130,34 @@ Subversion repos are ignored.
             for line in stdout.split('\n'):
                 if len(line) > 3:
                     split_line = [ line[:2], line[3:] ]
-                    if statusdict.has_key( split_line[0] ):
-                        statusdict[ split_line[0] ].append( os.path.basename(repo_path) + '/' + split_line[1] )
-                    else:
-                        warningMessage("unknown git file status code %s"%(split_line[0]))
+                    for key in [split_line[0], split_line[0][0], split_line[0][1]]:
+                        if statusdict.has_key( key ):
+                            statusdict[ key ].append( os.path.basename(repo_path) + '/' + split_line[1] )
         print '#'
 
-        if len(statusdict['A ']) > 0:
+        if len(statusdict['A']) > 0:
             print """# Changes to be committed:
 #   (use "git ctx reset HEAD <file>..." to unstage)
 #            """
-            for new_file in statusdict['A ']:
+            for new_file in statusdict['A']:
                 print '#' + '\t' + 'new file:' + '\t' + Fore.GREEN + new_file + Style.RESET_ALL
             print '#'
-        if len(statusdict[' M']) > 0 or len(statusdict[' D']) > 0:
+        if len(statusdict['M']) > 0 or len(statusdict['D']) > 0:
             print """#
 # Changed but not updated:
 #   (use "git ctx add/rm <file>..." to update what will be committed)
 #   (use "git ctx checkout -- <file>..." to discard changes in working directory)"""
 
-            for modified_file in statusdict[' M']:
+            for modified_file in statusdict['M']:
                 print '#' + '\t' + 'modified:' + '\t' + Fore.RED + modified_file + Style.RESET_ALL
-            for deleted_file in statusdict[' D']:
-                print '#' + '\t' + 'deleted: ' + '\t' + Fore.RED + deleted_file + Style.RESET_ALL
+            for deleted_file in statusdict['D']:
+                print '#' + '\t' + 'deleted:' + '\t' + Fore.RED + deleted_file + Style.RESET_ALL
+            # these two has not been observed in git 1.7, eventhough the git-status(1) documentation
+            # mentions them
+            for renamed_file in statusdict['R']:
+                print '#' + '\t' + 'renamed:' + '\t' + Fore.RED + renamed_file + Style.RESET_ALL
+            for copied_file in statusdict['C']:
+                print '#' + '\t' + 'copied:' + '\t' + Fore.RED + copied_file + Style.RESET_ALL
             print '#'
         if len(statusdict['??']) > 0:
             print """# Untracked files:
@@ -161,7 +168,7 @@ Subversion repos are ignored.
                 print '#' + '\t' + Fore.RED + untracked_file + Style.RESET_ALL
             print """no changes added to commit (use "git ctx add" and/or "git ictx commit -a")"""
 
-    def generic( self, git_cmd, git_argv, translate_arguments = False ):
+    def generic( self, git_cmd, git_argv, translate_arguments = False, continue_on_error = False ):
         self.ignored_svn_repo_banner()
         for repo in self.git_repos:
             repo_path = repo.getAbsLocalPath()
@@ -218,9 +225,10 @@ Subversion repos are ignored.
                 p = subprocess.Popen(args, bufsize=4096, stdin=None)
                 retcode = p.wait()
 
-                if retcode != 0:
-                    errorMessage("GIT execution failed with error code %d"%(retcode))
-                    exit(retcode)
+                if continue_on_error == False:
+	            if retcode != 0:
+        	        errorMessage("GIT execution failed with error code %d"%(retcode))
+                        exit(retcode)
 
             elif translate_arguments == False:
                 args = [self.git, git_cmd ]
@@ -236,9 +244,10 @@ Subversion repos are ignored.
                 p = subprocess.Popen(args, bufsize=4096, stdin=None)
                 retcode = p.wait()
 
-                if retcode != 0:
-                    errorMessage("GIT execution failed with error code %d"%(retcode))
-                    exit(retcode)
+                if continue_on_error == False:
+	            if retcode != 0:
+        	        errorMessage("GIT execution failed with error code %d"%(retcode))
+                        exit(retcode)
 
             os.chdir(self.view_dir)
         sys.exit(0)
@@ -255,7 +264,11 @@ if sys.argv[1] == '-h' or sys.argv[1] == '--help':
 git_argv = list(sys.argv[2:])
 if sys.argv[1] == 'status':
     gitctx.status(git_argv)
-elif sys.argv[1] == 'add' or sys.argv[1] == 'rm' or sys.argv[1] == 'checkout' or sys.argv[1] == 'reset' or sys.argv[1] == 'commit':
+elif gitctx.git_commands_continue_on_error.count(sys.argv[1]):
+    translate_arguments = True
+    continue_on_error = True
+    gitctx.generic(sys.argv[1], git_argv, translate_arguments, continue_on_error)
+elif gitctx.git_commands.count(sys.argv[1]):
     translate_arguments = True
     gitctx.generic(sys.argv[1], git_argv, translate_arguments)
 else:

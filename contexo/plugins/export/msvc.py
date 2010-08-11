@@ -211,6 +211,10 @@ def cmd_parse( args ):
     if not os.path.exists( args.output ):
         os.makedirs( args.output )
 
+	lib_ext = build_params.configuration_type
+	if build_params.configuration_type == 'exe':
+		lib_ext = 'lib'
+
     guidDict = dict()
     for proj in vcprojList:
         #codeModules = listof dictionaries: { MODNAME: string, SOURCES: list(paths), PRIVHDRS: list(paths), PUBHDRS: list(paths), PRIVHDRDIR: string, TESTSOURCES:list }
@@ -218,7 +222,7 @@ def cmd_parse( args ):
                                                                        build_params.cflags,
                                                                        build_params.prepDefines + modTags,
                                                                        proj['MODULELIST'],
-                                                                       proj['LIBNAME'] + '.lib',
+                                                                       proj['LIBNAME'] + '.' + lib_ext,
                                                                        debugmode, tests,
                                                                        incPaths,
                                                                        args.output,
@@ -336,8 +340,8 @@ parser.add_argument('-o', '--output', default=os.getcwd(),
  help="The output directory for the export.")
 
 parser.add_argument('-ct', '--configuration-type', default='lib',
- help="""Type of project, whether the project generates a lib or an exe. Default value is 'lib'.
-Accepted values 'exe' or 'lib'.
+ help="""Type of project, whether the project generates a lib, dll or an exe. Default value is 'lib'.
+Accepted values are 'dll, 'exe', or 'lib'.
 """)
 
 #parser.add_argument('-ld','--libdir', default="", help=standard_description['--libdir'])

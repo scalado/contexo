@@ -65,6 +65,8 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib,
     #
     if configType == 'lib':
         configurationTypeNbr = '4'
+	elif configType == 'dll':
+		configurationTypeNbr = '2'
     elif configType == 'exe':
         configurationTypeNbr = '1'
     else:
@@ -211,7 +213,7 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib,
     # Archiver
     #
 
-    if configType == 'lib':
+    if configType == 'lib' or configType == 'dll':
         project.element ('Tool', {'Name':'VCLibrarianTool',
                                     'OutputFile': '$(OutDir)/'+outLib})
     elif configType == 'exe':

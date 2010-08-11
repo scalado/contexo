@@ -65,8 +65,8 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib,
     #
     if configType == 'lib':
         configurationTypeNbr = '4'
-	elif configType == 'dll':
-		configurationTypeNbr = '2'
+        elif configType == 'dll':
+            configurationTypeNbr = '2'
     elif configType == 'exe':
         configurationTypeNbr = '1'
     else:
@@ -165,7 +165,7 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib,
                     '/Od':('Optimization', '0'),
                     '/O1':('Optimization', '1'),
                     '/O2':('Optimization', '2'),
-		            '/Ox':('Optimization', '3'),
+                    '/Ox':('Optimization', '3'),
                     '/MT': ('RuntimeLibrary', '0'),
                     '/MTd':('RuntimeLibrary', '1'),
                     '/MD': ('RuntimeLibrary', '2'),

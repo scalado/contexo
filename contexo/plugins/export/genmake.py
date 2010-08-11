@@ -114,12 +114,21 @@ for modName in modules:
 # "all" definition
 makefile.write("\n")
 makefile.write("### Build-all definition\n")
-makefile.write("all: ")
+makefile.write("all: create_dirs ")
 for comp in package.export_data['COMPONENTS']:
 	for lib in comp.libraries:
 		libfilename=lib+".a"
 		makefile.write(libfilename+" ")
-makefile.write("\n")makefile.write("\n")
+
+makefile.write("\n")
+makefile.write("\n")
+makefile.write("### Create build dirs\n")
+makefile.write("create_dirs:\n")
+makefile.write("\tmkdir -p $(OBJ_TEMP)\n")
+makefile.write("\tmkdir -p $(LIB_OUTPUT)\n")
+makefile.write("\tmkdir -p $(HEADER_OUTPUT)\n")
+makefile.write("\n")
+makefile.write("\n")
 makefile.write("clean:\n")
 makefile.write("\trm -f $(OBJ_TEMP)/*.o\n")
 makefile.write("\trm -f $(LIB_OUTPUT)/*.a\n")

@@ -211,8 +211,8 @@ def cmd_parse( args ):
     if not os.path.exists( args.output ):
         os.makedirs( args.output )
 
-    lib_ext = build_params.configuration_type
-    if build_params.configuration_type == 'exe':
+    lib_ext = args.configuration_type
+    if args.configuration_type == 'exe':
         lib_ext = 'lib'
 
     guidDict = dict()

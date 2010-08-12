@@ -218,7 +218,7 @@ def cmd_parse( args ):
                                                                        build_params.cflags,
                                                                        build_params.prepDefines + modTags,
                                                                        proj['MODULELIST'],
-                                                                       proj['LIBNAME'] + '.lib'
+                                                                       proj['LIBNAME'] + '.lib',
                                                                        debugmode, tests,
                                                                        incPaths,
                                                                        args.output,

@@ -211,10 +211,6 @@ def cmd_parse( args ):
     if not os.path.exists( args.output ):
         os.makedirs( args.output )
 
-    lib_ext = build_params.configuration_type
-    if build_params.configuration_type == 'exe':
-        lib_ext = 'lib'
-
     guidDict = dict()
     for proj in vcprojList:
         #codeModules = listof dictionaries: { MODNAME: string, SOURCES: list(paths), PRIVHDRS: list(paths), PUBHDRS: list(paths), PRIVHDRDIR: string, TESTSOURCES:list }
@@ -222,7 +218,7 @@ def cmd_parse( args ):
                                                                        build_params.cflags,
                                                                        build_params.prepDefines + modTags,
                                                                        proj['MODULELIST'],
-                                                                       proj['LIBNAME'] + '.' + lib_ext,
+                                                                       proj['LIBNAME'] + '.lib'
                                                                        debugmode, tests,
                                                                        incPaths,
                                                                        args.output,

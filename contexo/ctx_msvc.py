@@ -65,8 +65,8 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib,
     #
     if configType == 'lib':
         configurationTypeNbr = '4'
-        elif configType == 'dll':
-            configurationTypeNbr = '2'
+    elif configType == 'dll':
+        configurationTypeNbr = '2'
     elif configType == 'exe':
         configurationTypeNbr = '1'
     else:
@@ -213,10 +213,10 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib,
     # Archiver
     #
 
-    if configType == 'lib' or configType == 'dll':
+    if configType == 'lib':
         project.element ('Tool', {'Name':'VCLibrarianTool',
                                     'OutputFile': '$(OutDir)/'+outLib})
-    elif configType == 'exe':
+    elif configType == 'exe' or configType == 'dll':
         additionalDependencies = " ".join(map(ntpath.basename, additionalDependencies))
         additionalLibraryDirectories = ";".join(additionalLibraryDirectories)
         project.element ('Tool', {'Name':'VCLinkerTool',

@@ -219,8 +219,8 @@ CHECKSUM            = 1
 #------------------------------------------------------------------------------
 class CTXDepMgr: # The dependency manager class.
 #------------------------------------------------------------------------------
-    def __init__(self, codeModulePaths = list(),  tolerateMissingHeaders = False, archPath = list() , additionalIncDirs = None ):
-        self.tolerateMissingHeaders = tolerateMissingHeaders
+    def __init__(self, codeModulePaths = list(),  failOnMissingHeaders = False, archPath = list() , additionalIncDirs = None ):
+        self.failOnMissingHeaders = failOnMissingHeaders
         self.msgSender                = 'CTXDepMgr'
         self.depRoots                 = list()
         self.supportedChecksumMethods = ['MTIME', 'MD5']
@@ -262,10 +262,11 @@ class CTXDepMgr: # The dependency manager class.
             if inputFilePath == None:
                 dependencies = self.findFilesDependingOn(inputFile)
                 assert(dependencies)
-                if ( self.tolerateMissingHeaders):
-                    warningMessage("Dependency manager cannot locate input file: %s (from %s)"%(inputFile, ",".join(dependencies) ))
+                msg = "Dependency manager cannot locate input file: %s (from %s)"%(inputFile, ",".join(dependencies))
+                if ( self.failOnMissingHeaders):
+                    userErrorExit( msg )
                 else:
-                    userErrorExit("Dependency manager cannot locate input file: %s (from %s)"%(inputFile, ",".join(dependencies) ))
+                    warningMessage( msg )
                 continue #return
 
             #

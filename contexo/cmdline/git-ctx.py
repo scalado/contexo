@@ -35,8 +35,10 @@ class GITCtx:
         self.git = 'git'
         self.git_repos = list()
         self.ignored_repos = list()
-        self.git_commands = ['branch', 'status', 'commit', 'checkout', 'add', 'rm', 'reset']
-        self.git_commands_continue_on_error = ['commit']
+        self.git_commands = ['status', 'checkout', 'add', 'rm', 'reset']
+        # some commands must be allowed to continue in other repos even if they failed in one
+        # eg. one repo may be readonly and thus the other ones would not be able to push to.
+        self.git_commands_continue_on_error = ['commit', 'push', 'branch']
         # instead of manually specifying view (as is the de facto uage convention for contexo)
         # search backwards in path until an rspec file is found (the de-facto
         # git usage convention)

@@ -24,7 +24,7 @@ if (oldcontexofiles):
 path = os.path.expandvars("$PATH")
 paths = path.split(os.pathsep)
 
-interestingfiles = ['ctx.py',  'ctx.bat', 'ctx', 'msvc.py', 'msvc.bat', 'tengiltests.py', 'makefile.py']
+interestingfiles = ['ctx.py',  'ctx.bat', 'ctx', 'msvc.py', 'msvc.bat', 'tengiltests.py', 'genmake.py']
 combination = [(path, file) for path in paths for file in interestingfiles]
 ctxpaths = filter(os.path.exists, map(lambda (pair): os.path.join(*pair), combination) )
 suspected_ctx_paths = filter(lambda ctxpath: re.search(os.path.join('c:', 'program files'), ctxpath, re.IGNORECASE), ctxpaths)
@@ -39,7 +39,7 @@ setup(name="Contexo",
       author="Manuel Astudillo",
       author_email="manuel.astudillo@scalado.com",
       url="http://www.scalado.com",
-      scripts =  ['contexo/cmdline/ctx.py',  'contexo/cmdline/ctx', 'contexo/cmdline/ctx.bat', 'contexo/cmdline/bdef2rspec.py', 'contexo/plugins/export/msvc.py', 'contexo/plugins/export/tengiltests.py', 'contexo/plugins/export/makefile.py' ],
+      scripts =  ['contexo/cmdline/ctx.py',  'contexo/cmdline/ctx', 'contexo/cmdline/ctx.bat', 'contexo/cmdline/bdef2rspec.py', 'contexo/plugins/export/msvc.py', 'contexo/plugins/export/tengiltests.py', 'contexo/plugins/export/genmake.py' ],
       package_dir = { 'contexo.defaults':'defaults' ,'': 'otherlibs',  'contexo':'contexo'},  #the '':'otherlibs' is a hack to make it load argparse without a package, from a subdirectory otherlibs
       package_data={ 'contexo': ['cmdline/ctx.bat'],  'contexo.defaults': ['contexo.cfg', 'bconf/*', 'cdef/*' ], 'contexo.plugins.export': ['msvc.bat','rspectree.bat'] },
       packages = [ 'contexo.defaults', 'contexo' ,  'contexo.platform', 'contexo.plugins', 'contexo.plugins.export' ],

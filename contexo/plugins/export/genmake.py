@@ -50,7 +50,7 @@ import contexo.ctx_cmod
 # but may be needed for netbeans
 allincludes = False
 for arg in sys.argv:
-	if arg == '-a' or '--allincludes':
+	if arg == '-a' or arg == '--allincludes':
 		allincludes = True
 
 
@@ -138,16 +138,9 @@ makefile.write("\n")
 
 allIncDirs = set()
 for mod in module_map:
-	for hdr in mod['PUBHDRS']:
+	for hdr in mod['DEPHDRS']:
 		allIncDirs.add( os.path.dirname( hdr))
-		print 'added PUB:'+ os.path.dirname( hdr) 
-	for hdr in mod['PRIVHDRS']:
-		allIncDirs.add( os.path.dirname( hdr))
-		print 'added PRIV:'+os.path.dirname( hdr)
-	for hdr in mod['TESTHDRS']:
-		allIncDirs.add( os.path.dirname( hdr))
-		print 'added TEST:'+os.path.dirname( hdr)
-
+		print 'added DEP:'+ os.path.dirname( hdr) 
 
 if allincludes == True:
 	makefile.write("### All include paths\n");

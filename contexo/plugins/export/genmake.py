@@ -140,7 +140,6 @@ allIncDirs = set()
 for mod in module_map:
 	for hdr in mod['DEPHDRS']:
 		allIncDirs.add( os.path.dirname( hdr))
-		print 'added DEP:'+ os.path.dirname( hdr) 
 
 if allincludes == True:
 	makefile.write("### All include paths\n");
@@ -212,6 +211,7 @@ for comp in package.export_data['COMPONENTS']:
 
 		makefile.write("\t$(RANLIB) $@\n")
 
+	makefile.write("\tmkdir -p $(HEADER_OUTPUT)\n")
 	for headerFile in headerFiles:
 		makefile.write("\t$(EXPORT_CMD) "+headerDict[headerFile]+" $(HEADER_OUTPUT)/"+headerFile+"\n")
 	makefile.write("\n")

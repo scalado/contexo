@@ -1,4 +1,36 @@
 #!/usr/bin/python
+###############################################################################
+#                                                                             
+#   genmake.py
+#   Component of Contexo commandline tools - (c) Scalado AB 2010
+#                                                                             
+#   Author: Ulf Holmstedt (ulf.holmstedt@scalado.com)
+#           Thomas Eriksson (thomas.eriksson@scalado.com)
+#                                                                             
+#   ------------
+#                                                                             
+#   Generate GNU Makefile from contexo sources
+#                                                                             
+###############################################################################
+#
+# Paul's Rules of Makefiles (from: http://mad-scientist.net/make/rules.html)
+#
+# 1. Use GNU make.
+#    Don't hassle with writing portable makefiles, use a portable make instead!
+#
+# 2. Every non-.PHONY rule must update a file with the exact name of its target.
+#    Make sure every command script touches the file "$@"-- not "../$@", or "$(notdir $@)", but exactly $@. That way you and GNU make always agree.
+#
+# 3. Life is simplest if the targets are built in the current working directory.
+#    Use VPATH to locate the sources from the objects directory, not to locate the objects from the sources directory.
+#
+# 4. Follow the Principle of Least Repetition.
+# Try to never write a filename more than once. Do this through a combination of make variables, pattern rules, automatic variables, and GNU make functions.
+# 
+# 5. Every non-continued line that starts with a TAB is part of a command script--and vice versa.
+# If a non-continued line does not begin with a TAB character, it is never part of a command script: it is always interpreted as makefile syntax. If a non-continued line does begin with a TAB character, it is always part of a command script: it is never interpreted as makefile syntax.
+# 
+# Continued lines are always of the same type as their predecessor, regardless of what characters they start with.
 
 from argparse import ArgumentParser
 import os
@@ -10,25 +42,38 @@ import contexo.ctx_cfg as ctx_cfg
 import contexo.ctx_cmod
 
 #------------------------------------------------------------------------------
-def create_module_mapping_from_module_list( ctx_module_list ):
-
+def create_module_mapping_from_module_list( ctx_module_list, depMgr):
     code_module_map = list()
+    print 'mapping'
     for mod in ctx_module_list:
         #srcFiles = list()
         privHdrs = list()
         pubHdrs  = list()
+        depHdrDirs = set()
 
-        rawMod = mod #ctx_cmod.CTXRawCodeModule( mod )
+        rawMod = ctx_module_list[mod] #ctx_cmod.CTXRawCodeModule( mod )
 
         srcs = rawMod.getSourceAbsolutePaths()
         privHdrs= rawMod.getPrivHeaderAbsolutePaths()
         pubHdrs = rawMod.getPubHeaderAbsolutePaths()
         testSrcs = rawMod.getTestSourceAbsolutePaths()
         testHdrs = rawMod.getTestHeaderAbsolutePaths()
-        modDict = { 'MODNAME': rawMod.getName(), 'SOURCES': srcs, 'PRIVHDRS': privHdrs, 'PUBHDRS': pubHdrs, 'PRIVHDRDIR': rawMod.getPrivHeaderDir(),  'TESTSOURCES':testSrcs , 'TESTHDRS':testHdrs,  'TESTDIR':rawMod.getTestDir()}
+        modName = rawMod.getName()
+        ## moduleDependencies[] only includes the top level includes, we must recurse through those to get all dependencies
+        for hdr in  depMgr.moduleDependencies[modName]:
+            hdr_location = depMgr.locate(hdr)
+            if hdr_location != None:
+                hdrpaths = depMgr.getDependencies(hdr_location)
+                for hdrpath in hdrpaths:
+                    depHdrDirs.add( os.path.dirname( hdrpath ))
+
+        #modDict = { 'MODNAME': rawMod.getName(), 'SOURCES': srcs, 'PRIVHDRS': privHdrs, 'PUBHDRS': pubHdrs, 'PRIVHDRDIR': rawMod.getPrivHeaderDir(),  'TESTSOURCES':testSrcs , 'TESTHDRS':testHdrs,  'TESTDIR':rawMod.getTestDir()}
+        modDict = { 'MODNAME': rawMod.getName(), 'SOURCES': srcs, 'PRIVHDRS': privHdrs, 'PUBHDRS': pubHdrs, 'PRIVHDRDIR': rawMod.getPrivHeaderDir(), 'TESTSOURCES':testSrcs , 'TESTHDRS':testHdrs, 'DEPHDRDIRS':depHdrDirs,'TESTDIR':rawMod.getTestDir()}        
         code_module_map.append( modDict )
-        
+
+
     return code_module_map
+
 
 #------------------------------------------------------------------------------
 #-- End of method declaration
@@ -63,8 +108,8 @@ for depRoot in depRoots:
         if contexo.ctx_cmod.isContexoCodeModule( path ):
             incPaths.append( path )
             
-module_map = create_module_mapping_from_module_list( package.export_data['MODULES'].values() )
-modules = package.export_data['MODULES']
+depMgr = package.export_data['DEPMGR']
+module_map = create_module_mapping_from_module_list( package.export_data['MODULES'], depMgr)
 
 # Start writing to the file - using default settings for now
 makefile = open("Makefile", 'w')
@@ -77,7 +122,7 @@ makefile.write("### Makefile generated with contexo plugin.\n")
 makefile.write("CC=gcc\n")
 makefile.write("CFLAGS="+build_params.cflags+"\n")
 makefile.write("LDFLAGS=\n")
-makefile.write("OBJ_TEMP=output/temp\n")
+makefile.write("OBJ_TEMP=.\n")
 makefile.write("\n")
 makefile.write("AR=ar\n")
 makefile.write("RANLIB=ranlib\n")
@@ -104,29 +149,14 @@ for incPath in incPaths:
 	makefile.write("-I"+incPath+" ")
 makefile.write("\n")
 
-# Module specific include paths (one for each module)
-makefile.write("\n")
-makefile.write("### Module specific include paths\n")
-for modName in modules:
-	module = modules[modName]
-	makefile.write(module.getName().upper()+"_PRIV="+module.getPrivHeaderDir()+"\n")
-
 # "all" definition
 makefile.write("\n")
 makefile.write("### Build-all definition\n")
-makefile.write("all: create_dirs ")
+makefile.write("all: ")
 for comp in package.export_data['COMPONENTS']:
 	for lib in comp.libraries:
 		libfilename=lib+".a"
 		makefile.write(libfilename+" ")
-
-makefile.write("\n")
-makefile.write("\n")
-makefile.write("### Create build dirs\n")
-makefile.write("create_dirs:\n")
-makefile.write("\tmkdir -p $(OBJ_TEMP)\n")
-makefile.write("\tmkdir -p $(LIB_OUTPUT)\n")
-makefile.write("\tmkdir -p $(HEADER_OUTPUT)\n")
 makefile.write("\n")
 makefile.write("\n")
 makefile.write("clean:\n")
@@ -134,13 +164,6 @@ makefile.write("\trm -f $(OBJ_TEMP)/*.o\n")
 makefile.write("\trm -f $(LIB_OUTPUT)/*.a\n")
 makefile.write("\trm -f $(HEADER_OUTPUT)/*.h\n")
 makefile.write("\n")
-
-headerDict = dict()
-for modName in modules:
-	module = modules[modName]
-	files = module.getPubHeaderAbsolutePaths()
-	for f in files:
-		headerDict[os.path.basename(f)] = f
 
 # component definitions
 makefile.write("\n")
@@ -165,13 +188,12 @@ for comp in package.export_data['COMPONENTS']:
 			makefile.write(objfile+" ")
 		makefile.write("\n")
 
-		makefile.write("\t$(AR) r $(LIB_OUTPUT)/"+libfilename+" ")
+		makefile.write("\t$(AR) r $@ ")
 		for objfile in objectfiles:
 			makefile.write("$(OBJ_TEMP)/"+objfile+" ")
 		makefile.write("\n")
 
-		makefile.write("\t$(RANLIB) $(LIB_OUTPUT)/"+libfilename)
-		makefile.write("\n")
+		makefile.write("\t$(RANLIB) $@\n")
 
 	for headerFile in headerFiles:
 		makefile.write("\t$(EXPORT_CMD) "+headerDict[headerFile]+" $(HEADER_OUTPUT)/"+headerFile+"\n")
@@ -180,22 +202,29 @@ for comp in package.export_data['COMPONENTS']:
 makefile.write("\n")
 makefile.write("### Object definitions\n")
 
-for modName in modules:
-	module = modules[modName]
-	
-	for srcFile in module.getSourceAbsolutePaths():
+for mod in module_map:
+	for srcFile in mod['SOURCES']:
 		objfile = os.path.basename(srcFile)[:-2]+".o"
-		privInclude = module.getName().upper()+"_PRIV"
 		
-		makefile.write(objfile + ":\n")
-		makefile.write("\t$(CC) $(CFLAGS) $(STD_INCLUDE) $(PREP_DEFS) -I$("+privInclude+") -c "+srcFile+" -o $(OBJ_TEMP)/"+objfile+"\n");
+		makefile.write(objfile + ": " + srcFile + "\n")
+		makefile.write("\t$(CC) $(CFLAGS) ")
+		for hdrdir in mod['DEPHDRDIRS']:
+			makefile.write("-I"+hdrdir+" ")
+		#makefile.write("$(PREP_DEFS) -I$("+privInclude+") -c "+srcFile+" -o $@\n");
+		makefile.write("$(PREP_DEFS) -c "+srcFile+" -o $@\n");
 
-	for testFile in module.getTestSourceAbsolutePaths():
+	for testFile in mod['TESTSOURCES']:
 		objfile = os.path.basename(testFile)[:-2]+".o"
 		privInclude = module.getName().upper()+"_PRIV"
 		
-		makefile.write(objfile + ":\n")
-		makefile.write("\t$(CC) $(CFLAGS) $(STD_INCLUDE) $(PREP_DEFS) -I$("+privInclude+") -I"+module.getRootPath()+"/test/ -c "+testFile+" -o $(OBJ_TEMP)/"+objfile+"\n");
+		makefile.write(objfile + ": " + testFile + "\n")
+		makefile.write("\t$(CC) $(CFLAGS) ")
+		for hdrdir in module_map['DEPHDRDIRS']:
+			makefile.write("-I"+hdrdir+" ")
+		makefile.write("$(PREP_DEFS)")
+		for hdrdir in mod['DEPHDRDIRS']:
+			makefile.write("-I"+hdrdir+" ")
+		makefile.write("-I"+module.getRootPath()+"/test/ -c "+testFile+" -o $@\n")
 makefile.write("### End of Makefile\n")
 makefile.write("\n")
 

@@ -50,6 +50,7 @@ def create_module_mapping_from_module_list( ctx_module_list, depMgr):
         privHdrs = list()
         pubHdrs  = list()
         depHdrDirs = set()
+        depHdrs = set()
 
         rawMod = ctx_module_list[mod] #ctx_cmod.CTXRawCodeModule( mod )
 
@@ -65,10 +66,9 @@ def create_module_mapping_from_module_list( ctx_module_list, depMgr):
             if hdr_location != None:
                 hdrpaths = depMgr.getDependencies(hdr_location)
                 for hdrpath in hdrpaths:
-                    depHdrDirs.add( os.path.dirname( hdrpath ))
+					depHdrs.add( hdrpath)
 
-        #modDict = { 'MODNAME': rawMod.getName(), 'SOURCES': srcs, 'PRIVHDRS': privHdrs, 'PUBHDRS': pubHdrs, 'PRIVHDRDIR': rawMod.getPrivHeaderDir(),  'TESTSOURCES':testSrcs , 'TESTHDRS':testHdrs,  'TESTDIR':rawMod.getTestDir()}
-        modDict = { 'MODNAME': rawMod.getName(), 'SOURCES': srcs, 'PRIVHDRS': privHdrs, 'PUBHDRS': pubHdrs, 'PRIVHDRDIR': rawMod.getPrivHeaderDir(), 'TESTSOURCES':testSrcs , 'TESTHDRS':testHdrs, 'DEPHDRDIRS':depHdrDirs,'TESTDIR':rawMod.getTestDir()}        
+        modDict = { 'MODNAME': rawMod.getName(), 'SOURCES': srcs, 'PRIVHDRS': privHdrs, 'PUBHDRS': pubHdrs, 'PRIVHDRDIR': rawMod.getPrivHeaderDir(), 'TESTSOURCES':testSrcs , 'TESTHDRS':testHdrs, 'DEPHDRS':depHdrs, 'TESTDIR':rawMod.getTestDir()}
         code_module_map.append( modDict )
 
 
@@ -141,14 +141,6 @@ for prepDefine in build_params.prepDefines:
 	makefile.write("-D"+prepDefine+" ")
 makefile.write("\n")
 
-# Standard include path (all files)
-makefile.write("\n")
-makefile.write("### Standard include paths\n");
-makefile.write("STD_INCLUDE=")
-for incPath in incPaths:
-	makefile.write("-I"+incPath+" ")
-makefile.write("\n")
-
 # "all" definition
 makefile.write("\n")
 makefile.write("### Build-all definition\n")
@@ -164,6 +156,16 @@ makefile.write("\trm -f $(OBJ_TEMP)/*.o\n")
 makefile.write("\trm -f $(LIB_OUTPUT)/*.a\n")
 makefile.write("\trm -f $(HEADER_OUTPUT)/*.h\n")
 makefile.write("\n")
+
+modules = package.export_data['MODULES']
+
+headerDict = dict()
+for modName in modules:
+	module = modules[modName]
+	files = module.getPubHeaderAbsolutePaths()
+	for f in files:
+		headerDict[os.path.basename(f)] = f
+
 
 # component definitions
 makefile.write("\n")
@@ -206,25 +208,30 @@ for mod in module_map:
 	for srcFile in mod['SOURCES']:
 		objfile = os.path.basename(srcFile)[:-2]+".o"
 		
-		makefile.write(objfile + ": " + srcFile + "\n")
+		makefile.write(objfile + ": " + srcFile)
+		for hdr in mod['DEPHDRS']:
+			makefile.write(" " + hdr)
+		makefile.write("\n")
 		makefile.write("\t$(CC) $(CFLAGS) ")
-		for hdrdir in mod['DEPHDRDIRS']:
-			makefile.write("-I"+hdrdir+" ")
-		#makefile.write("$(PREP_DEFS) -I$("+privInclude+") -c "+srcFile+" -o $@\n");
-		makefile.write("$(PREP_DEFS) -c "+srcFile+" -o $@\n");
+		for hdrdir in mod['DEPHDRS']:
+			makefile.write(" -I"+os.path.dirname( hdrdir))
+		makefile.write(" $(PREP_DEFS) -c "+srcFile+" -o $@\n");
 
 	for testFile in mod['TESTSOURCES']:
 		objfile = os.path.basename(testFile)[:-2]+".o"
 		privInclude = module.getName().upper()+"_PRIV"
 		
-		makefile.write(objfile + ": " + testFile + "\n")
+		makefile.write(objfile + ": " + testFile + " ")
+		for hdr in mod['DEPHDRS']:
+			makefile.write( " " + hdr)
+		makefile.write("\n")
 		makefile.write("\t$(CC) $(CFLAGS) ")
-		for hdrdir in module_map['DEPHDRDIRS']:
-			makefile.write("-I"+hdrdir+" ")
+		for hdrdir in mod['DEPHDRS']:
+			makefile.write(" -I"+os.path.dirname( hdrdir))
 		makefile.write("$(PREP_DEFS)")
-		for hdrdir in mod['DEPHDRDIRS']:
-			makefile.write("-I"+hdrdir+" ")
-		makefile.write("-I"+module.getRootPath()+"/test/ -c "+testFile+" -o $@\n")
+		for hdrdir in mod['DEPHDRS']:
+			makefile.write(" -I"+os.path.dirname( hdrdir))
+		makefile.write(" -I"+module.getRootPath()+"/test/ -c "+testFile+" -o $@\n")
 makefile.write("### End of Makefile\n")
 makefile.write("\n")
 

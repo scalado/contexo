@@ -49,10 +49,15 @@ import contexo.ctx_cmod
 # may build incorrectly due to wrong header being selected
 # but may be needed for netbeans
 allincludes = False
+exearg = False
+exe = str()
+
 for arg in sys.argv:
+	if arg == '-h':
+		print 'help:'
+		print '-a, --allincludes: same include path for all build directives'
 	if arg == '-a' or arg == '--allincludes':
 		allincludes = True
-
 
 #------------------------------------------------------------------------------
 def create_module_mapping_from_module_list( ctx_module_list, depMgr):
@@ -114,6 +119,16 @@ build_params = bc_file.getBuildParams()
 depMgr = package.export_data['DEPMGR']
 module_map = create_module_mapping_from_module_list( package.export_data['MODULES'], depMgr)
 
+if not os.path.isfile("Makefile.inc"):
+	incmakefile = open("Makefile.inc", 'w')
+	incmakefile.write("### inc_all is built after all other projects is built\n")
+	incmakefile.write("### add dependencies for inc_all to add further build steps\n")
+	incmakefile.write("inc_all:\n")
+	incmakefile.write("\ttouch $@\n\n")
+	incmakefile.write("### add dependencies for inc_clean to add further clean steps\n")
+	incmakefile.write("inc_clean:\n")
+	incmakefile.write("\ttouch $@\n")
+
 # Start writing to the file - using default settings for now
 makefile = open("Makefile", 'w')
 
@@ -121,21 +136,27 @@ makefile = open("Makefile", 'w')
 makefile.write("#############################################\n")
 makefile.write("### Makefile generated with contexo plugin.\n")
 
-# Standard compiler settings
-makefile.write("CC=gcc\n")
-makefile.write("CFLAGS="+build_params.cflags+"\n")
-makefile.write("LDFLAGS=\n")
+# config settings
+if not os.path.isfile("Makefile.cfg"):
+	cfgmakefile = open("Makefile.cfg", 'w')
+	cfgmakefile.write("### Compiler settings\n")
+	cfgmakefile.write("CC=gcc\n")
+	cfgmakefile.write("CFLAGS="+build_params.cflags+"\n")
+	cfgmakefile.write("LDFLAGS=\n")
+	cfgmakefile.write("\n")
+	cfgmakefile.write("AR=ar\n")
+	cfgmakefile.write("RANLIB=ranlib\n")
+	cfgmakefile.write("\n")
+	cfgmakefile.write("LIBDIR=output/lib\n")
+	cfgmakefile.write("OBJDIR=output/obj\n")
+	cfgmakefile.write("HDRDIR=output/inc\n")
+	cfgmakefile.write("\n")
+	cfgmakefile.write("EXPORT_CMD=cp\n")
+	cfgmakefile.write("\n")
+
 makefile.write("\n")
-makefile.write("AR=ar\n")
-makefile.write("RANLIB=ranlib\n")
-makefile.write("\n")
-makefile.write("LIBDIR=output/lib\n")
-makefile.write("OBJDIR=output/obj\n")
-makefile.write("HDRDIR=output/inc\n")
-makefile.write("\n")
-makefile.write("EXPORT_CMD=cp\n")
-makefile.write("\n")
-makefile.write("EXECUTABLE=hello\n")
+makefile.write("### include user configured settings\n")
+makefile.write("include Makefile.cfg\n")
 makefile.write("\n")
 
 allIncDirs = set()
@@ -144,14 +165,14 @@ for mod in module_map:
 		allIncDirs.add( os.path.dirname( hdr))
 
 if allincludes == True:
-	makefile.write("### All include paths\n");
+	makefile.write("### All include paths\n")
 	makefile.write("INCLUDES=")
 	for incPath in allIncDirs:
 		makefile.write(" -I"+incPath)
 	makefile.write("\n")
 
 # Preprocessor defines
-makefile.write("### Standard defines\n");
+makefile.write("### Standard defines\n")
 makefile.write("PREP_DEFS=")
 for prepDefine in build_params.prepDefines:
 	makefile.write("-D"+prepDefine+" ")
@@ -165,12 +186,20 @@ for comp in package.export_data['COMPONENTS']:
 	for lib in comp.libraries:
 		libfilename=lib+".a"
 		makefile.write(" "+"$(LIBDIR)/"+libfilename)
+# add user configurable target in Makefile.inc
+makefile.write(" inc_all")
 makefile.write("\n")
-makefile.write("clean:\n")
+makefile.write("clean: inc_clean\n")
 makefile.write("\trm -f $(OBJDIR)/*.o\n")
 makefile.write("\trm -f $(LIBDIR)/*.a\n")
 makefile.write("\trm -f $(HDRDIR)/*.h\n")
 makefile.write("\n")
+
+makefile.write("\n")
+makefile.write("### include user configured targets\n")
+makefile.write("include Makefile.inc\n")
+makefile.write("\n")
+
 
 modules = package.export_data['MODULES']
 
@@ -188,8 +217,6 @@ makefile.write("$(OBJDIR):\n")
 makefile.write("\tmkdir -p $@\n")
 makefile.write("$(LIBDIR):\n")
 makefile.write("\tmkdir -p $@\n")
-
-makefile.write("\n")
 makefile.write("$(HDRDIR):\n")
 makefile.write("\tmkdir -p $@\n")
 makefile.write("\n")

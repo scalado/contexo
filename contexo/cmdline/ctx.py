@@ -942,6 +942,7 @@ parser_export.add_argument('-t', '--tests', action='store_true', help=standard_d
 parser_export.add_argument('-rv', '--repo-validation', action='store_true', help=standard_description['--repo-validation'])
 parser_export.add_argument('-nra', '--no-remote-repo-access', action='store_true', help=standard_description['--no-remote-repo-access'])
 parser_export.add_argument('--tolerate-missing-headers',  action='store_true',  help = standard_description['--tolerate-missing-headers'])
+parser_export.add_argument('--fail-on-missing-headers',  action='store_true',  help = standard_description['--fail-on-missing-headers'])
 
 #
 #

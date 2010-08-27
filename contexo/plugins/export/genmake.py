@@ -128,10 +128,12 @@ makefile.write("LDFLAGS=\n")
 makefile.write("\n")
 makefile.write("AR=ar\n")
 makefile.write("RANLIB=ranlib\n")
-makefile.write("LIB_OUTPUT=output/lib\n")
+makefile.write("\n")
+makefile.write("LIBDIR=output/lib\n")
+makefile.write("OBJDIR=output/obj\n")
+makefile.write("HDRDIR=output/inc\n")
 makefile.write("\n")
 makefile.write("EXPORT_CMD=cp\n")
-makefile.write("HEADER_OUTPUT=output/inc\n")
 makefile.write("\n")
 makefile.write("EXECUTABLE=hello\n")
 makefile.write("\n")
@@ -158,17 +160,16 @@ makefile.write("\n")
 # "all" definition
 makefile.write("\n")
 makefile.write("### Build-all definition\n")
-makefile.write("all: ")
+makefile.write("all: $(OBJDIR) $(HDRDIR) $(LIBDIR)")
 for comp in package.export_data['COMPONENTS']:
 	for lib in comp.libraries:
 		libfilename=lib+".a"
-		makefile.write(libfilename+" ")
-makefile.write("\n")
+		makefile.write(" "+"$(LIBDIR)/"+libfilename)
 makefile.write("\n")
 makefile.write("clean:\n")
-makefile.write("\trm -f ./*.o\n")
-makefile.write("\trm -f ./*.a\n")
-makefile.write("\trm -f $(HEADER_OUTPUT)/*.h\n")
+makefile.write("\trm -f $(OBJDIR)/*.o\n")
+makefile.write("\trm -f $(LIBDIR)/*.a\n")
+makefile.write("\trm -f $(HDRDIR)/*.h\n")
 makefile.write("\n")
 
 modules = package.export_data['MODULES']
@@ -180,6 +181,18 @@ for modName in modules:
 	for f in files:
 		headerDict[os.path.basename(f)] = f
 
+# create directories
+makefile.write("\n")
+makefile.write("### create directories\n")
+makefile.write("$(OBJDIR):\n")
+makefile.write("\tmkdir -p $@\n")
+makefile.write("$(LIBDIR):\n")
+makefile.write("\tmkdir -p $@\n")
+
+makefile.write("\n")
+makefile.write("$(HDRDIR):\n")
+makefile.write("\tmkdir -p $@\n")
+makefile.write("\n")
 
 # component definitions
 makefile.write("\n")
@@ -195,11 +208,11 @@ for comp in package.export_data['COMPONENTS']:
 
 		for libs in comp.libraries[lib]:
 			for srcFile in modules[libs].getSourceFilenames():
-				objectfiles.append(srcFile[:-2]+".o ")
+				objectfiles.append("$(OBJDIR)/" + srcFile[:-2]+".o ")
 			for testFile in modules[libs].getTestSourceFilenames():
-				objectfiles.append(testFile[:-2]+".o ")
+				objectfiles.append("$(OBJDIR)/" + testFile[:-2]+".o ")
 
-		makefile.write(libfilename+": ")
+		makefile.write("$(LIBDIR)/"+libfilename+": ")
 		for objfile in objectfiles:
 			makefile.write(objfile+" ")
 		makefile.write("\n")
@@ -211,9 +224,9 @@ for comp in package.export_data['COMPONENTS']:
 
 		makefile.write("\t$(RANLIB) $@\n")
 
-	makefile.write("\tmkdir -p $(HEADER_OUTPUT)\n")
+	makefile.write("\tmkdir -p $(HDRDIR) $(OBJDIR) $(LIBDIR)\n")
 	for headerFile in headerFiles:
-		makefile.write("\t$(EXPORT_CMD) "+headerDict[headerFile]+" $(HEADER_OUTPUT)/"+headerFile+"\n")
+		makefile.write("\t$(EXPORT_CMD) "+headerDict[headerFile]+" $(HDRDIR)/"+headerFile+"\n")
 	makefile.write("\n")
 
 makefile.write("\n")
@@ -223,7 +236,7 @@ for mod in module_map:
 	for srcFile in mod['SOURCES']:
 		objfile = os.path.basename(srcFile)[:-2]+".o"
 		
-		makefile.write(objfile + ": " + srcFile)
+		makefile.write("$(OBJDIR)/" + objfile + ": " + srcFile)
 		for hdr in mod['DEPHDRS']:
 			makefile.write(" " + hdr)
 		makefile.write("\n")
@@ -239,7 +252,7 @@ for mod in module_map:
 		objfile = os.path.basename(testFile)[:-2]+".o"
 		privInclude = module.getName().upper()+"_PRIV"
 		
-		makefile.write(objfile + ": " + testFile + " ")
+		makefile.write("$(OBJDIR)/" + objfile + ": " + testFile + " ")
 		for hdr in mod['DEPHDRS']:
 			makefile.write( " " + hdr)
 		makefile.write("\n")

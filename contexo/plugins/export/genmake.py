@@ -34,12 +34,30 @@
 
 from argparse import ArgumentParser
 import os
+import sys
 import contexo.ctx_export as ctx_export
 import contexo.ctx_common as ctx_common
 import contexo.ctx_sysinfo as ctx_sysinfo
 from contexo.ctx_common import infoMessage, userErrorExit, warningMessage
 import contexo.ctx_cfg as ctx_cfg
 import contexo.ctx_cmod
+
+# use the same include directories for ALL source files when building
+# however, only export public headers
+# defaults to OFF
+# may cause command line overflow
+# may build incorrectly due to wrong header being selected
+# but may be needed for netbeans
+allincludes = False
+exearg = False
+exe = str()
+
+for arg in sys.argv:
+	if arg == '-h':
+		print 'help:'
+		print '-a, --allincludes: same include path for all build directives'
+	if arg == '-a' or arg == '--allincludes':
+		allincludes = True
 
 #------------------------------------------------------------------------------
 def create_module_mapping_from_module_list( ctx_module_list, depMgr):
@@ -98,18 +116,18 @@ for item in package.export_data.keys():
 bc_file = package.export_data['SESSION'].getBCFile()
 build_params = bc_file.getBuildParams()
 
-depRoots = package.export_data['PATHS']['MODULES']
-incPaths = list()
-for depRoot in depRoots:
-    incPathCandidates = os.listdir( depRoot )
-
-    for cand in incPathCandidates:
-        path = os.path.join(depRoot, cand)
-        if contexo.ctx_cmod.isContexoCodeModule( path ):
-            incPaths.append( path )
-            
 depMgr = package.export_data['DEPMGR']
 module_map = create_module_mapping_from_module_list( package.export_data['MODULES'], depMgr)
+
+if not os.path.isfile("Makefile.inc"):
+	incmakefile = open("Makefile.inc", 'w')
+	incmakefile.write("### inc_all is built after all other projects is built\n")
+	incmakefile.write("### add dependencies for inc_all to add further build steps\n")
+	incmakefile.write("inc_all:\n")
+	incmakefile.write("\ttouch $@\n\n")
+	incmakefile.write("### add dependencies for inc_clean to add further clean steps\n")
+	incmakefile.write("inc_clean:\n")
+	incmakefile.write("\ttouch $@\n")
 
 # Start writing to the file - using default settings for now
 makefile = open("Makefile", 'w')
@@ -118,24 +136,43 @@ makefile = open("Makefile", 'w')
 makefile.write("#############################################\n")
 makefile.write("### Makefile generated with contexo plugin.\n")
 
-# Standard compiler settings
-makefile.write("CC=gcc\n")
-makefile.write("CFLAGS="+build_params.cflags+"\n")
-makefile.write("LDFLAGS=\n")
-makefile.write("OBJ_TEMP=.\n")
+# config settings
+if not os.path.isfile("Makefile.cfg"):
+	cfgmakefile = open("Makefile.cfg", 'w')
+	cfgmakefile.write("### Compiler settings\n")
+	cfgmakefile.write("CC=gcc\n")
+	cfgmakefile.write("CFLAGS="+build_params.cflags+"\n")
+	cfgmakefile.write("LDFLAGS=\n")
+	cfgmakefile.write("\n")
+	cfgmakefile.write("AR=ar\n")
+	cfgmakefile.write("RANLIB=ranlib\n")
+	cfgmakefile.write("\n")
+	cfgmakefile.write("LIBDIR=output/lib\n")
+	cfgmakefile.write("OBJDIR=output/obj\n")
+	cfgmakefile.write("HDRDIR=output/inc\n")
+	cfgmakefile.write("\n")
+	cfgmakefile.write("EXPORT_CMD=cp\n")
+	cfgmakefile.write("\n")
+
 makefile.write("\n")
-makefile.write("AR=ar\n")
-makefile.write("RANLIB=ranlib\n")
-makefile.write("LIB_OUTPUT=output/lib\n")
-makefile.write("\n")
-makefile.write("EXPORT_CMD=cp\n")
-makefile.write("HEADER_OUTPUT=output/inc\n")
-makefile.write("\n")
-makefile.write("EXECUTABLE=hello\n")
+makefile.write("### include user configured settings\n")
+makefile.write("include Makefile.cfg\n")
 makefile.write("\n")
 
+allIncDirs = set()
+for mod in module_map:
+	for hdr in mod['DEPHDRS']:
+		allIncDirs.add( os.path.dirname( hdr))
+
+if allincludes == True:
+	makefile.write("### All include paths\n")
+	makefile.write("INCLUDES=")
+	for incPath in allIncDirs:
+		makefile.write(" -I"+incPath)
+	makefile.write("\n")
+
 # Preprocessor defines
-makefile.write("### Standard defines\n");
+makefile.write("### Standard defines\n")
 makefile.write("PREP_DEFS=")
 for prepDefine in build_params.prepDefines:
 	makefile.write("-D"+prepDefine+" ")
@@ -144,18 +181,25 @@ makefile.write("\n")
 # "all" definition
 makefile.write("\n")
 makefile.write("### Build-all definition\n")
-makefile.write("all: ")
+makefile.write("all: $(OBJDIR) $(HDRDIR) $(LIBDIR)")
 for comp in package.export_data['COMPONENTS']:
 	for lib in comp.libraries:
 		libfilename=lib+".a"
-		makefile.write(libfilename+" ")
+		makefile.write(" "+"$(LIBDIR)/"+libfilename)
+# add user configurable target in Makefile.inc
+makefile.write(" inc_all")
 makefile.write("\n")
+makefile.write("clean: inc_clean\n")
+makefile.write("\trm -f $(OBJDIR)/*.o\n")
+makefile.write("\trm -f $(LIBDIR)/*.a\n")
+makefile.write("\trm -f $(HDRDIR)/*.h\n")
 makefile.write("\n")
-makefile.write("clean:\n")
-makefile.write("\trm -f $(OBJ_TEMP)/*.o\n")
-makefile.write("\trm -f $(LIB_OUTPUT)/*.a\n")
-makefile.write("\trm -f $(HEADER_OUTPUT)/*.h\n")
+
 makefile.write("\n")
+makefile.write("### include user configured targets\n")
+makefile.write("include Makefile.inc\n")
+makefile.write("\n")
+
 
 modules = package.export_data['MODULES']
 
@@ -166,6 +210,16 @@ for modName in modules:
 	for f in files:
 		headerDict[os.path.basename(f)] = f
 
+# create directories
+makefile.write("\n")
+makefile.write("### create directories\n")
+makefile.write("$(OBJDIR):\n")
+makefile.write("\tmkdir -p $@\n")
+makefile.write("$(LIBDIR):\n")
+makefile.write("\tmkdir -p $@\n")
+makefile.write("$(HDRDIR):\n")
+makefile.write("\tmkdir -p $@\n")
+makefile.write("\n")
 
 # component definitions
 makefile.write("\n")
@@ -181,24 +235,25 @@ for comp in package.export_data['COMPONENTS']:
 
 		for libs in comp.libraries[lib]:
 			for srcFile in modules[libs].getSourceFilenames():
-				objectfiles.append(srcFile[:-2]+".o ")
+				objectfiles.append("$(OBJDIR)/" + srcFile[:-2]+".o ")
 			for testFile in modules[libs].getTestSourceFilenames():
-				objectfiles.append(testFile[:-2]+".o ")
+				objectfiles.append("$(OBJDIR)/" + testFile[:-2]+".o ")
 
-		makefile.write(libfilename+": ")
+		makefile.write("$(LIBDIR)/"+libfilename+": ")
 		for objfile in objectfiles:
 			makefile.write(objfile+" ")
 		makefile.write("\n")
 
-		makefile.write("\t$(AR) r $@ ")
+		makefile.write("\t$(AR) r $@")
 		for objfile in objectfiles:
-			makefile.write("$(OBJ_TEMP)/"+objfile+" ")
+			makefile.write(" " + objfile)
 		makefile.write("\n")
 
 		makefile.write("\t$(RANLIB) $@\n")
 
+	makefile.write("\tmkdir -p $(HDRDIR) $(OBJDIR) $(LIBDIR)\n")
 	for headerFile in headerFiles:
-		makefile.write("\t$(EXPORT_CMD) "+headerDict[headerFile]+" $(HEADER_OUTPUT)/"+headerFile+"\n")
+		makefile.write("\t$(EXPORT_CMD) "+headerDict[headerFile]+" $(HDRDIR)/"+headerFile+"\n")
 	makefile.write("\n")
 
 makefile.write("\n")
@@ -208,27 +263,33 @@ for mod in module_map:
 	for srcFile in mod['SOURCES']:
 		objfile = os.path.basename(srcFile)[:-2]+".o"
 		
-		makefile.write(objfile + ": " + srcFile)
+		makefile.write("$(OBJDIR)/" + objfile + ": " + srcFile)
 		for hdr in mod['DEPHDRS']:
 			makefile.write(" " + hdr)
 		makefile.write("\n")
-		makefile.write("\t$(CC) $(CFLAGS) ")
-		for hdrdir in mod['DEPHDRS']:
-			makefile.write(" -I"+os.path.dirname( hdrdir))
+		makefile.write("\t$(CC) $(CFLAGS)")
+		if allincludes == True:
+			makefile.write(" $(INCLUDES)")
+		else:
+			for hdrdir in mod['DEPHDRS']:
+				makefile.write(" -I"+os.path.dirname( hdrdir))
 		makefile.write(" $(PREP_DEFS) -c "+srcFile+" -o $@\n");
 
 	for testFile in mod['TESTSOURCES']:
 		objfile = os.path.basename(testFile)[:-2]+".o"
 		privInclude = module.getName().upper()+"_PRIV"
 		
-		makefile.write(objfile + ": " + testFile + " ")
+		makefile.write("$(OBJDIR)/" + objfile + ": " + testFile + " ")
 		for hdr in mod['DEPHDRS']:
 			makefile.write( " " + hdr)
 		makefile.write("\n")
-		makefile.write("\t$(CC) $(CFLAGS) ")
-		for hdrdir in mod['DEPHDRS']:
-			makefile.write(" -I"+os.path.dirname( hdrdir))
-		makefile.write("$(PREP_DEFS)")
+		makefile.write("\t$(CC) $(CFLAGS)")
+		if allincludes == True:
+			makefile.write(" $(INCLUDES)")
+		else:
+			for hdrdir in mod['DEPHDRS']:
+				makefile.write(" -I"+os.path.dirname( hdrdir))
+		makefile.write(" $(PREP_DEFS)")
 		for hdrdir in mod['DEPHDRS']:
 			makefile.write(" -I"+os.path.dirname( hdrdir))
 		makefile.write(" -I"+module.getRootPath()+"/test/ -c "+testFile+" -o $@\n")

@@ -60,13 +60,6 @@ ERR_INVALID_ARGUMENT   = 22
 #
 
 #------------------------------------------------------------------------------
-def get_login( realm, username, may_save ):
-    print "Subversion login"
-    username = raw_input("user: ")
-    password = getpass("pass: ")
-    return True, username, password, True
-
-#------------------------------------------------------------------------------
 def ssl_server_trust_prompt( trust_dict ):
     return True, 0, False
 
@@ -74,15 +67,48 @@ def ssl_server_trust_prompt( trust_dict ):
 class CTXSubversionClient():
     def __init__(self):
         self.client = None
+        self.username = None
+        self.password = None
+        self.authenticated_realms = set([])
         self.msg_list = list()
         self.msgSender = "CTXSubversionClient"
 
         self.resetClient()
 
-    #--------------------------------------------------------------------------
+    #------------------------------------------------------------------------------
+    def get_login( self, realm, username, may_save ):
+
+        if realm in self.authenticated_realms:
+            print "Login failed for realm %s" % (realm)
+            return False, "", "", False
+
+        if self.username is None and os.environ.has_key('CTX_SVN_USERNAME'):
+           self.username = os.environ['CTX_SVN_USERNAME']
+
+        if self.password is None and os.environ.has_key('CTX_SVN_PASSWORD'):
+           self.password = os.environ['CTX_SVN_PASSWORD']
+        
+        username = self.username 
+        password = self.password
+
+        if username is None or password is None:
+
+            print "Subversion login"
+
+            if username is None:
+                username = raw_input("user: ")
+
+            if password is None:
+                password = getpass("pass: ")
+
+        self.authenticated_realms.add( realm )
+                
+        return True, username, password, True
+
+	#--------------------------------------------------------------------------
     def resetClient(self):
         self.client = pysvn.Client()
-        self.client.callback_get_login = get_login
+        self.client.callback_get_login = self.get_login
         self.client.callback_ssl_server_trust_prompt = ssl_server_trust_prompt
         self.client.callback_notify = self.svn_notify_callback
         self.client.exception_style = 1

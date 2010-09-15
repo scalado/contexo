@@ -330,10 +330,10 @@ def make_solution8( name, path, projects, exeproject = None, platform = 'Win32' 
     slnFile.write( "Microsoft Visual Studio Solution File, Format Version 9.00\n# Visual Studio 2005" )
 
     prjTemplate = """
-    Project(\"%s\") = \"%s\", \"%s.vcproj\", \"%s\"
-        ProjectSection(ProjectDependencies) = postProject
-        EndProjectSection
-    EndProject"""
+Project(\"%s\") = \"%s\", \"%s.vcproj\", \"%s\"
+ProjectSection(ProjectDependencies) = postProject
+EndProjectSection
+EndProject"""
     #%( solution GUID, project name, project name, project GUID )
 
 

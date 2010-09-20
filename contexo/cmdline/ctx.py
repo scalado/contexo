@@ -787,6 +787,7 @@ standard_description = dict({\
 '--repo-validation': "Validates all repositories before processing. This usually increases duration but ensures correct repository structure. Repository validation can also be done by running 'ctx view validate' as a separate step.",\
 '--no-remote-repo-access': "If specified, the system never tries to process items directly from an RSpec repository's remote location (href) even if so is possible. Normally, if a repository is accessible through regular file access, the system always tries to use it from its remote location.",\
 '--force':"Forces building all source files", \
+'--legacy-compiling-mod-defines':"Enables legacy COMPILING_MOD_<MODULENAME> defines which may be needed to build code which relied on this previous behaviour (in Contexo 0.8.0 and earlier).", \
 '--tolerate-missing-headers':"print a message about missing headers and go on, relying on the pre processor to resolve the problem"})
 
 
@@ -815,6 +816,7 @@ parser_build.add_argument('-lf', '--logfile', default=None, help=standard_descri
 parser_build.add_argument('-rv', '--repo-validation', action='store_true', help=standard_description['--repo-validation'])
 parser_build.add_argument('-nra', '--no-remote-repo-access', action='store_true', help=standard_description['--no-remote-repo-access'])
 parser_build.add_argument('-f', '--force', action='store_true', help=standard_description['--force'])
+'--legacy-compiling-mod-defines':"Enables legacy COMPILING_MOD_<MODULENAME> defines which may be needed to build code which relied on this previous behaviour (in Contexo 0.8.0 and earlier).", \
 parser_build.add_argument('--tolerate-missing-headers',  action='store_true',  help = standard_description['--tolerate-missing-headers'])
 
 
@@ -834,6 +836,7 @@ parser_build.add_argument('-lf', '--logfile', default=None, help=standard_descri
 parser_build.add_argument('-rv', '--repo-validation', action='store_true', help=standard_description['--repo-validation'])
 parser_build.add_argument('-nra', '--no-remote-repo-access', action='store_true', help=standard_description['--no-remote-repo-access'])
 parser_build.add_argument('-f', '--force', action='store_true', help=standard_description['--force'])
+'--legacy-compiling-mod-defines':"Enables legacy COMPILING_MOD_<MODULENAME> defines which may be needed to build code which relied on this previous behaviour (in Contexo 0.8.0 and earlier).", \
 parser_build.add_argument('--tolerate-missing-headers',  action='store_true',  help = standard_description['--tolerate-missing-headers'])
 
 

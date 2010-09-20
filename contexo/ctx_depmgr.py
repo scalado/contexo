@@ -219,13 +219,14 @@ CHECKSUM            = 1
 #------------------------------------------------------------------------------
 class CTXDepMgr: # The dependency manager class.
 #------------------------------------------------------------------------------
-    def __init__(self, codeModulePaths = list(),  tolerateMissingHeaders = False, archPath = list() , additionalIncDirs = None ):
+    def __init__(self, codeModulePaths = list(),  tolerateMissingHeaders = False, archPath = list() , additionalIncDirs = None, legacyCompilingMod = False):
         self.tolerateMissingHeaders = tolerateMissingHeaders
         self.msgSender                = 'CTXDepMgr'
         self.depRoots                 = list()
         self.supportedChecksumMethods = ['MTIME', 'MD5']
         self.checksumMethod           = self.supportedChecksumMethods[0]
         self.archPath                 = archPath
+        self.legacyCompilingMod       = legacyCompilingMod
 
         self.cmods                    = dict() # Dictionary mapping mod name to raw mod.
         self.additionalIncludeDirs    = assureList(additionalIncDirs)
@@ -434,7 +435,7 @@ class CTXDepMgr: # The dependency manager class.
 
             #def __init__( self, moduleRoot, pathlist = None, buildUnitTests = False , archPath = list()):
             emptyPathList = list()
-            rawmod = CTXRawCodeModule(modPath, emptyPathList, unitTests, self.archPath)
+            rawmod = CTXRawCodeModule(modPath, emptyPathList, unitTests, self.archPath, self.legacyCompilingMod)
             self.cmods[rawmod.getName()] = rawmod
 
         self.needUpdate = True

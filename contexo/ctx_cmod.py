@@ -146,7 +146,7 @@ class CTXRawCodeModule:
     # The constructor aborts execution with an error if the path doesn't
     # qualify as a code module when passing it to isContexoCodeModule().
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
-    def __init__( self, moduleRoot, pathlist = None, buildUnitTests = False ,archPath = list()):
+    def __init__( self, moduleRoot, pathlist = None, buildUnitTests = False ,archPath = list(), legacyCompilingMod = False):
         self.modName        = str()
         self.modRoot        = str()
         self.srcFiles       = list()
@@ -157,6 +157,7 @@ class CTXRawCodeModule:
         self.msgSender      = 'CTXRawCodeModule'
         self.buildUnitTests = buildUnitTests
         self.archPath       = archPath
+        self.legacyCompilingMod = legacyCompilingMod
 
         assert( os.path.isabs(moduleRoot) )
         moduleRoot = os.path.normpath(moduleRoot)

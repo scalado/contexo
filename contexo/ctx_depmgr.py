@@ -477,7 +477,7 @@ class CTXDepMgr: # The dependency manager class.
                             if isContexoCodeModule( candPath ) == True:
                                 emptyPathList = list()
                                 unitTestDummyValue = False
-                                mod = CTXRawCodeModule(candPath, emptyPathList, unitTestDummyValue, self.archPath)
+                                mod = CTXRawCodeModule(candPath, emptyPathList, unitTestDummyValue, self.archPath, self.legacyCompilingMod)
                                 codeModulePaths.append( mod.getPubHeaderDir() )
                                 codeModulePaths.append( mod.getPrivHeaderDir() )
                                 codeModulePaths.append( mod.getSourceDir () )
@@ -679,7 +679,7 @@ class CTXDepMgr: # The dependency manager class.
                                               pathlist=None,
                                               buildUnitTests = buildTests,
                                               forceRebuild=force,
-                                              archPath = self.archPath) )
+                                              archPath = self.archPath), legacyCompilingMod = self.legacyCompilingMod )
 
         return codeModules
 
@@ -697,7 +697,7 @@ class CTXDepMgr: # The dependency manager class.
 
             emptyPathList = list()
             unitTestsDummyValue = False
-            cmod = CTXRawCodeModule( module, emptyPathList, unitTestsDummyValue, self.archPath )
+            cmod = CTXRawCodeModule( module, emptyPathList, unitTestsDummyValue, self.archPath, self.legacyCompilingMod )
             self.updateModuleDependencies( cmod )
 
         modulePubFiles = set(self.cmods[module].getPubHeaderFilenames())

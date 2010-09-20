@@ -679,7 +679,7 @@ class CTXDepMgr: # The dependency manager class.
                                               pathlist=None,
                                               buildUnitTests = buildTests,
                                               forceRebuild=force,
-                                              archPath = self.archPath), legacyCompilingMod = self.legacyCompilingMod )
+                                              archPath = self.archPath, legacyCompilingMod = self.legacyCompilingMod )
 
         return codeModules
 

@@ -303,21 +303,23 @@ class CTXCodeModule( CTXRawCodeModule ):
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     #
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
-    def __init__( self, moduleRoot, pathlist = None, buildUnitTests = False, forceRebuild = False, archPath = list() ):
+    def __init__( self, moduleRoot, pathlist = None, buildUnitTests = False, forceRebuild = False, archPath = list(), legacyCompilingMod = False ):
         CTXRawCodeModule.__init__( self, moduleRoot, pathlist, buildUnitTests, archPath )
         self.moduleTag     = str()
         self.buildParams   = ctx_base.CTXBuildParams()
         self.buildDir      = str()
         self.rebuildAll    = forceRebuild
         self.msgSender     = 'CTXCodeModule'
+        self.legacyCompilingMod = legacyCompilingMod
 
-        # TODO: the preprocessor define COMPILING_MOD_ is a legacy definition,
-        # initially created to make sure private headers were not included in a
-        # project.
-        # DO NOT REMOVE until all previous releases compiles without it.
+        # the preprocessor define COMPILING_MOD_ is a legacy definition,
+        # initially created to make sure private headers were not included in a project.
+        # today this makes no sense since contexo keeps track of private and public headers, it can also be problematic when some build systems (eg. Visual Studio 2005) have limits on the number of preprocessor defines passed on to it.
+        # to build legacy code, and to activate this legacy code path, append the option --legacy-compiling-mod to the contexo tool in use
         # /thomase
-        self.moduleTag     = 'COMPILING_MOD_' + string.upper( self.getName() )
-        self.buildParams.prepDefines.append( self.moduleTag )
+        if self.legacyCompilingMod:
+            self.moduleTag     = 'COMPILING_MOD_' + string.upper( self.getName() )
+            self.buildParams.prepDefines.append( self.moduleTag )
 
 
 

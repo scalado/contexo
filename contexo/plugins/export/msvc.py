@@ -331,7 +331,7 @@ parser.add_argument('-pl', '--platform', default='Win32',
  the specified platform. Default is "Win32". Note that this option does not affect
  any settings introduced by the build configuration specified with the -b or
  --bconf option.""")
-parser.add_argument('--legacy-compiling-mod', default=False, help='Enables legacy COMPILING_MOD_<MODULENAME> preprocessor defines which may be needed to build code which relied on this previous behaviour (in Contexo 0.8.0 and earlier).')
+parser.add_argument('--legacy-compiling-mod', action='store_true', help='Enables legacy COMPILING_MOD_<MODULENAME> preprocessor defines which may be needed to build code which relied on this previous behaviour (in Contexo 0.8.0 and earlier).')
 
 parser.add_argument('-o', '--output', default=os.getcwd(),
  help="The output directory for the export.")

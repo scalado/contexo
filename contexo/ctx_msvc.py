@@ -125,7 +125,7 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib,
     #
 
     if type(incPaths) != list:
-        incPaths = split(";", incPaths)
+        incPaths = incPaths.split(';')
 
     incPaths = [relntpath(path, vcprojPath) for path in incPaths]
 

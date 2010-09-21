@@ -27,6 +27,7 @@ from ctx_common import *
 contexo_dirname     = 'contexo'
 src_dirname         = 'src'
 inc_dirname         = 'inc'
+doc_dirname			= 'doc'
 output_dirname      = 'output'
 test_dirname        = 'test'
 dep_filename        = 'depends'

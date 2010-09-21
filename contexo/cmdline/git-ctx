@@ -1,0 +1,4 @@
+#!/bin/bash
+PYTHONPATH=${0%/*}/../lib/python/ git-ctx.py "$@"
+
+

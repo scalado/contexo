@@ -19,6 +19,7 @@ from xml.sax            import  make_parser
 from xml.sax.handler    import  ContentHandler
 
 from ctx_repo_svn       import *
+from ctx_repo_git       import *
 from ctx_repo_fs        import *
 from ctx_common         import userErrorExit, warningMessage, infoMessage
 from ctx_common         import getVerboseLevel, ctxAssert, getUserTempDir
@@ -38,6 +39,8 @@ def createRepoFromRCS( rcs, id, path, href, rev ):
 
     if rcs == 'svn':
         return CTXRepositorySVN( id, path, href, rev )
+    elif rcs == 'git':
+        return CTXRepositoryGIT( id, path, href, rev )
     elif rcs == None or rcs =='':
         return CTXRepositoryFS( id, path, href, rev )
     else:
@@ -106,7 +109,7 @@ class rspecXmlHandler(ContentHandler):
                                                    attrs.get('id', ""),
                                                    attrs.get('path', ""),
                                                    attrs.get('href', ""),
-                                                   attrs.get('rev', "") )
+                                                   attrs.get('rev', ""))
             self.rspecFile.addRepository ( self.current_repo )
 
         # .....................................................................
@@ -196,7 +199,8 @@ class RSpecFileLocator:
             if os.path.exists(temp_rspec):
                 os.remove( temp_rspec )
 
-            if self.rcs == 'svn':
+            # rspec access is still handled by svn
+            if self.rcs == 'svn' or self.rcs == 'git':
 
                 svn = ctx_svn_client.CTXSubversionClient()
                 svn.export( self.getHref(), temp_dir, self.revision )

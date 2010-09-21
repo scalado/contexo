@@ -15,13 +15,14 @@
 #                                                                             #
 ###############################################################################
 
-from xml.sax            import  make_parser
-from xml.sax.handler    import  ContentHandler
+#from xml.sax            import  make_parser
+#from xml.sax.handler    import  ContentHandler
 from xml.sax.saxutils import XMLGenerator
 
 from ctx_common         import userErrorExit, warningMessage, infoMessage
 from ctx_common         import getVerboseLevel, ctxAssert, getUserTempDir
 from contexo                import ctx_svn_client
+from contexo                import ctx_git_client
 import os.path
 import sys
 
@@ -33,7 +34,9 @@ class RspecFreezer():
         self.repos = repositories
         self.msgSender = "rspecRecursiveFreezer"
         self.xmlgenerator = XMLGenerator(output,'utf-8');
-        self.svnclient = ctx_svn_client.CTXSubversionClient()
+        self.rcsclient = dict()
+        self.rcsclient['svn']= ctx_svn_client.CTXSubversionClient()
+        self.rcsclient['git']= ctx_git_client.CTXGitClient()
 
     #--------------------------------------------------------------------------
     def generateFrozen(self,  repo_names_to_freeze = None):
@@ -60,11 +63,11 @@ class RspecFreezer():
         rev = repo.getRSpecRevision()
         repo_path = repo.getAbsLocalPath()
         #TODO: make it possible to base the freeze on an existing rspec (only freeze repos included in there)
-        if (rcs == 'svn'):
-            if rev == 'HEAD' or rev == None:
-                curr_rev = self.svnclient.getRevisionFromWorkingCopy(repo_path)
+        if (rcs == 'svn' or rcs == 'git'):
+            if rev == 'HEAD' or rev == None or rev == 'master':
+                curr_rev = self.rcsclient[rcs].getRevisionFromWorkingCopy(repo_path)
             else:
-                curr_rev = self.svnclient.getRevisionFromWorkingCopy(repo_path)
+                curr_rev = self.rcsclient[rcs].getRevisionFromWorkingCopy(repo_path)
                 if str(curr_rev) != rev:
                     warningMessage('%s: Overwriting strict revision nr %d with %d'%(id, int(rev),  curr_rev))
             self.xmlgenerator.characters("\t")

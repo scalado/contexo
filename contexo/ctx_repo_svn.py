@@ -14,7 +14,7 @@ from ctx_repo import *
 from ctx_common import ctxAssert, userErrorExit, infoMessage
 import ctx_common
 import ctx_svn_client
-from getpass import getpass
+#from getpass import getpass
 
 #------------------------------------------------------------------------------
 class CTXRepositorySVN(CTXRepository):

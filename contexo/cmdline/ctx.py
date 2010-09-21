@@ -801,7 +801,7 @@ standard_description = dict({\
 '--force':"Forces building all source files", \
 '--fail-on-missing-headers':"Abort the build if a header is missing.",\
 '--legacy-compiling-mod':"Enables legacy COMPILING_MOD_<MODULENAME> preprocessor defines which may be needed to build code which relied on this previous behaviour (in Contexo 0.8.0 and earlier).", \
-'--tolerate-missing-headers':"DEPRECATED: this option is deprecated and will emit a warning since this is the default behaviour"})
+'--tolerate-missing-headers':"print a message about missing headers and go on, relying on the pre processor to resolve the problem"})
 
 
 # info parser
@@ -896,7 +896,7 @@ parser_clean.add_argument('--tolerate-missing-headers',  action='store_true',  h
 parser_clean.add_argument('--fail-on-missing-headers',  action='store_true',  help = standard_description['--fail-on-missing-headers'])
 
 # freeze parser
-parser_freeze = subparsers.add_parser('freeze', help="Generate a rspec with svn versions frozen in their current state (from working copy).")
+parser_freeze = subparsers.add_parser('freeze', help="Generate a rspec with either svn revisions or git sha1s frozen in their current state (from working copy).")
 parser_freeze.set_defaults(func=cmd_freeze)
 #parser_freeze.add_argument('--file',  help="rspec to freeze. Imports will not be frozen")
 parser_freeze.add_argument('-o', '--output',  help="file to write to (standard output is used by default)")

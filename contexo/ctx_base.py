@@ -79,7 +79,7 @@ class CTXBuildParams:
         return md.hexdigest()
 
 #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-def prepareCommandFile( commandline,  commandfileName ):
+def prepareCommandFile( commandline,  commandfileName, cdefPath ):
 
     marker = '%@'
 
@@ -90,7 +90,7 @@ def prepareCommandFile( commandline,  commandfileName ):
         return commandline
     elif commandline.find( marker, ix + len(marker) ) != -1:
         # Multiple (nested) commandfiles is currently not supported.
-        userErrorExit("Multiple '%s' symbols in ARCOM field is currently not supported.\n    File: %s"%(marker, self.cdefPath))
+        userErrorExit("Multiple '%s' symbols in ARCOM field is currently not supported.\n    File: %s"%(marker, cdefPath))
 
     #cmdfilename = time.strftime("%y%H%M%S.txt", time.localtime())
     cmdfilename = commandfileName
@@ -466,7 +466,7 @@ class CTXCompiler:
 
         self.validateTool( 'AR' )
 
-        cmdline = prepareCommandFile( cmdline,  self.stdCommandfileName )
+        cmdline = prepareCommandFile( cmdline,  self.stdCommandfileName, self.cdefPath )
 
         return cmdline
 

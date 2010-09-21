@@ -178,14 +178,19 @@ for prepDefine in build_params.prepDefines:
 	makefile.write("-D"+prepDefine+" ")
 makefile.write("\n")
 
-# "all" definition
-makefile.write("\n")
+# LIBS definition
 makefile.write("### Build-all definition\n")
-makefile.write("all: $(OBJDIR) $(HDRDIR) $(LIBDIR)")
+makefile.write("LIBS = ")
 for comp in package.export_data['COMPONENTS']:
 	for lib in comp.libraries:
 		libfilename=lib+".a"
 		makefile.write(" "+"$(LIBDIR)/"+libfilename)
+makefile.write("\n")
+
+# "all" definition
+makefile.write("\n")
+makefile.write("### Build-all definition\n")
+makefile.write("all: $(OBJDIR) $(HDRDIR) $(LIBDIR) $(LIBS)")
 # add user configurable target in Makefile.inc
 makefile.write(" inc_all")
 makefile.write("\n")

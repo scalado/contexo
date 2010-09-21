@@ -89,19 +89,19 @@ def cmd_parse( args ):
     modTags     = list()
     incPaths    = list()
 
-    # TODO: the preprocessor define COMPILING_MOD_ is a legacy definition,
+    # the preprocessor define COMPILING_MOD_ is a legacy definition,
     # initially created to make sure private headers were not included in a
     # project.
-    # DO NOT REMOVE until all previous releases compiles without it.
-    # /thomase
-    depRoots    = package.export_data['PATHS']['MODULES']
-    for depRoot in depRoots:
-        incPathCandidates = os.listdir( depRoot )
-        for cand in incPathCandidates:
-            path = os.path.join(depRoot, cand)
-            if contexo.ctx_cmod.isContexoCodeModule( path ):
-                rawMod = contexo.ctx_cmod.CTXRawCodeModule(path)
-                modTags.append( 'COMPILING_MOD_' + string.upper( rawMod.getName() ) )
+    # this is kept to build legacy products
+    if args.legacy_compiling_mod:
+        depRoots    = package.export_data['PATHS']['MODULES']
+        for depRoot in depRoots:
+            incPathCandidates = os.listdir( depRoot )
+            for cand in incPathCandidates:
+                path = os.path.join(depRoot, cand)
+                if contexo.ctx_cmod.isContexoCodeModule( path ):
+                    rawMod = contexo.ctx_cmod.CTXRawCodeModule(path)
+                    modTags.append( 'COMPILING_MOD_' + string.upper( rawMod.getName() ) )
 
     #
     # Collect additional include paths and additional library paths
@@ -331,6 +331,7 @@ parser.add_argument('-pl', '--platform', default='Win32',
  the specified platform. Default is "Win32". Note that this option does not affect
  any settings introduced by the build configuration specified with the -b or
  --bconf option.""")
+parser.add_argument('--legacy-compiling-mod', action='store_true', help='Enables legacy COMPILING_MOD_<MODULENAME> preprocessor defines which may be needed to build code which relied on this previous behaviour (in Contexo 0.8.0 and earlier).')
 
 parser.add_argument('-o', '--output', default=os.getcwd(),
  help="The output directory for the export.")

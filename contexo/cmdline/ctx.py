@@ -267,7 +267,7 @@ def cmd_info(args):
 
     if args.module != None:
         deprecated_tolerate_missing_headers_warning(args)
-        depmgr = CTXDepMgr ( cview.getItemPaths('modules'), args.fail_on_missing_headers, bc.getArchPath() )
+        depmgr = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), legacyCompilingMod = args.legacy_compiling_mod )
         depmgr.addCodeModules( args.module )
         module_names = depmgr.getCodeModulesWithDependencies ()
         module_names.sort ()
@@ -311,7 +311,8 @@ def cmd_buildmod(args):
     bc      = getBuildConfiguration( cview,  args )
 
     deprecated_tolerate_missing_headers_warning(args)
-    depmgr  = CTXDepMgr( cview.getItemPaths('modules'),  args.fail_on_missing_headers , bc.getArchPath() )
+    depmgr = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_heades, archPath = bc.getArchPath(), legacyCompilingMod = args.legacy_compiling_mod )
+
     depmgr.addCodeModules( modules, args.tests )
 
     session = ctx_base.CTXBuildSession( bc )
@@ -370,7 +371,8 @@ def cmd_buildcomp(args):
     bc          = getBuildConfiguration( cview,  args )
 
     deprecated_tolerate_missing_headers_warning(args)
-    depmgr      = CTXDepMgr ( cview.getItemPaths('modules') ,  args.fail_on_missing_headers, bc.getArchPath() )
+    # depmgr      = CTXDepMgr ( cview.getItemPaths('modules') ,  args.tolerate_missing_headers, bc.getArchPath(), args.legacyBuildMod )
+    depmgr = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_heades, archPath = bc.getArchPath(), legacyCompilingMod = args.legacy_compiling_mod )
     session     = ctx_base.CTXBuildSession( bc )
     session.setDependencyManager( depmgr )
 
@@ -451,7 +453,7 @@ def cmd_build(args):
     archPath = bc.getArchPath()
 
     deprecated_tolerate_missing_headers_warning(args)
-    depmgr  = CTXDepMgr ( cview.getItemPaths('modules'),  args.fail_on_missing_headers, bc.getArchPath(), absIncDirs )
+    depmgr = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_heades, archPath = bc.getArchPath(), legacyCompilingMod = args.legacy_compiling_mod )
     session = ctx_base.CTXBuildSession( bc )
     session.setDependencyManager( depmgr )
 
@@ -655,9 +657,9 @@ def cmd_clean(args):
 
     exp_modules = expand_list_files(cview, args.modules)
     bc      = getBuildConfiguration( cview,  args )
-
+    
     deprecated_tolerate_missing_headers_warning(args)
-    depmgr  = CTXDepMgr( cview.getItemPaths('modules') ,  args.fail_on_missing_headers, bc.getArchPath() )
+    depmgr = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_heades, archPath = bc.getArchPath(), legacyCompilingMod = args.legacy_compiling_mod )
     depmgr.addCodeModules( exp_modules, args.tests )
 
     session = ctx_base.CTXBuildSession( bc )
@@ -801,8 +803,10 @@ standard_description = dict({\
 '--repo-validation': "Validates all repositories before processing. This usually increases duration but ensures correct repository structure. Repository validation can also be done by running 'ctx view validate' as a separate step.",\
 '--no-remote-repo-access': "If specified, the system never tries to process items directly from an RSpec repository's remote location (href) even if so is possible. Normally, if a repository is accessible through regular file access, the system always tries to use it from its remote location.",\
 '--force':"Forces building all source files", \
+'--legacy-compiling-mod':"Enables legacy COMPILING_MOD_<MODULENAME> preprocessor defines which may be needed to build code which relied on this previous behaviour (in Contexo 0.8.0 and earlier).", \
 '--fail-on-missing-headers':"Abort the build if a header is missing.",\
-'--tolerate-missing-headers':"DEPRECATED: this option is deprecated and will emit a warning since this is the default behaviour"})
+'--legacy-compiling-mod':"Enables legacy COMPILING_MOD_<MODULENAME> preprocessor defines which may be needed to build code which relied on this previous behaviour (in Contexo 0.8.0 and earlier).", \
+'--tolerate-missing-headers':"print a message about missing headers and go on, relying on the pre processor to resolve the problem"})
 
 
 # info parser
@@ -830,6 +834,7 @@ parser_build.add_argument('-lf', '--logfile', default=None, help=standard_descri
 parser_build.add_argument('-rv', '--repo-validation', action='store_true', help=standard_description['--repo-validation'])
 parser_build.add_argument('-nra', '--no-remote-repo-access', action='store_true', help=standard_description['--no-remote-repo-access'])
 parser_build.add_argument('-f', '--force', action='store_true', help=standard_description['--force'])
+parser_build.add_argument('--legacy-compiling-mod', action='store_true', help=standard_description['--legacy-compiling-mod'])
 parser_build.add_argument('--tolerate-missing-headers',  action='store_true',  help = standard_description['--tolerate-missing-headers'])
 parser_build.add_argument('--fail-on-missing-headers',  action='store_true',  help = standard_description['--fail-on-missing-headers'])
 
@@ -850,6 +855,7 @@ parser_build.add_argument('-lf', '--logfile', default=None, help=standard_descri
 parser_build.add_argument('-rv', '--repo-validation', action='store_true', help=standard_description['--repo-validation'])
 parser_build.add_argument('-nra', '--no-remote-repo-access', action='store_true', help=standard_description['--no-remote-repo-access'])
 parser_build.add_argument('-f', '--force', action='store_true', help=standard_description['--force'])
+parser_build.add_argument('--legacy-compiling-mod', action='store_true', help=standard_description['--legacy-compiling-mod'])
 parser_build.add_argument('--tolerate-missing-headers',  action='store_true',  help = standard_description['--tolerate-missing-headers'])
 parser_build.add_argument('--fail-on-missing-headers',  action='store_true',  help = standard_description['--fail-on-missing-headers'])
 
@@ -870,6 +876,7 @@ parser_build.add_argument('-lf', '--logfile', default=None, help=standard_descri
 parser_build.add_argument('-rv', '--repo-validation', action='store_true', help=standard_description['--repo-validation'])
 parser_build.add_argument('-nra', '--no-remote-repo-access', action='store_true', help=standard_description['--no-remote-repo-access'])
 parser_build.add_argument('-f', '--force', action='store_true', help=standard_description['--force'])
+parser_build.add_argument('--legacy-compiling-mod', action='store_true', help=standard_description['--legacy-compiling-mod'])
 parser_build.add_argument('--tolerate-missing-headers',  action='store_true',  help = standard_description['--tolerate-missing-headers'])
 parser_build.add_argument('--fail-on-missing-headers',  action='store_true',  help = standard_description['--fail-on-missing-headers'])
 parser_build.add_argument('--all-headers', action='store_true', help = "export all public headers")

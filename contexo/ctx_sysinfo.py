@@ -17,7 +17,7 @@
 #
 
 CTX_VER_MAJOR           = 0
-CTX_VER_MINOR_1       = 8
+CTX_VER_MINOR_1       = 9
 CTX_VER_MINOR_2      = 0
 CTX_VER_STATE           = ''
 CTX_DISPLAYVERSION      = '%d.%d.%d %s'%(CTX_VER_MAJOR, CTX_VER_MINOR_1, CTX_VER_MINOR_2, CTX_VER_STATE)

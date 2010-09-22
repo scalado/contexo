@@ -123,7 +123,7 @@ if not os.path.isfile("Makefile.inc"):
 	incmakefile = open("Makefile.inc", 'w')
 	incmakefile.write("### inc_all is built after all other projects is built\n")
 	incmakefile.write("### add dependencies for inc_all to add further build steps\n")
-	incmakefile.write("inc_all:\n")
+	incmakefile.write("inc_all: $(LIBS)\n")
 	incmakefile.write("\ttouch $@\n\n")
 	incmakefile.write("### add dependencies for inc_clean to add further clean steps\n")
 	incmakefile.write("inc_clean:\n")
@@ -178,13 +178,15 @@ for prepDefine in build_params.prepDefines:
 	makefile.write("-D"+prepDefine+" ")
 makefile.write("\n")
 
+libs = set()
+for comp in package.export_data['COMPONENTS']:
+	libs = set.union( libs, comp.libraries)
+
 # LIBS definition
 makefile.write("### Build-all definition\n")
-makefile.write("LIBS = ")
-for comp in package.export_data['COMPONENTS']:
-	for lib in comp.libraries:
-		libfilename=lib+".a"
-		makefile.write(" "+"$(LIBDIR)/"+libfilename)
+makefile.write("LIBS =")
+for lib in libs:
+	makefile.write(" "+"$(LIBDIR)/"+lib+".a")
 makefile.write("\n")
 
 # "all" definition

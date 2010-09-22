@@ -228,13 +228,14 @@ makefile.write("$(HDRDIR):\n")
 makefile.write("\tmkdir -p $@\n")
 makefile.write("\n")
 
+# TODO: this matches duplicate libraries (when libraries in components overlap)
 # component definitions
 makefile.write("\n")
 makefile.write("### Component definitions\n")
 for comp in package.export_data['COMPONENTS']:
-	headerFiles=list()
+	headerFiles=set()
 	for headerFile in comp.publicHeaders:
-		headerFiles.append(headerFile)
+		headerFiles.add(headerFile)
 
 	for lib in comp.libraries:
 		objectfiles=list()

@@ -5,12 +5,13 @@ These are now removed, and thus to build very old projects the following flag mu
 --legacy-compiling-mod
 
 New features:
+* Git support! The command git-ctx has been added to aid in handling rspec views, also Contexo has gotten support for rspec with rcs="git".
 * Contexo modules are no longer depending on a certain directory structure.
 Now, any folder which is located in a folder defined by a ctx-path which contains source or header files are treated as Contexo modules.
+* The msvc plugin can now be suplied with '-ct dll' to build dlls.
 * Subversion username and password can now be supplied from environment variables (USERNAME, PASSWORD)
 * A GNU Makefile export plugin has been produced. This gives the  possibility to build in parallell and tweak compile flags on gnu-make compatible systems.
 * A NetBeans export plugin. This has not undergone serious testing and may not be stable for daily use.
-
 Bugfixes:
 * --tolerate-missing-headers has been set as default when building, to get the old behaviour where contexo would stop when encountering a header the flag --fail-on-missing-headers must be supplied to contexo.
 * sln export bugfix.

@@ -7,7 +7,8 @@ These are now removed, and thus to build very old projects the following flag mu
 New features:
 * Git support! The command git-ctx has been added to aid in handling rspec views, also Contexo has gotten support for rspec with rcs="git".
 * Contexo modules are no longer depending on a certain directory structure.
-Now, any folder which is located in a folder defined by a ctx-path which contains source or header files are treated as Contexo modules.
+Now, any folder which is located in a folder defined by a ctx-path, which contains either a header file or a source file in its src-folder is treated as a Contexo module.
+The reason for this was that git (and other popular revision control systems) does not store empty folders. Placeholders was out of the question since old Contexo managed projects then would not be able to be built if they were to be stored in Git.
 * The msvc plugin can now be suplied with '-ct dll' to build dlls.
 * Subversion username and password can now be supplied from environment variables (USERNAME, PASSWORD)
 * A GNU Makefile export plugin has been produced. This gives the  possibility to build in parallell and tweak compile flags on gnu-make compatible systems.

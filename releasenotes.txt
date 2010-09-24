@@ -6,18 +6,32 @@ These are now removed, and thus to build very old projects the following flag mu
 
 New features:
 * Git support! The command git-ctx has been added to aid in handling rspec views, also Contexo has gotten support for rspec with rcs="git".
-* Contexo modules are no longer depending on a certain directory structure.
-Now, any folder which is located in a folder defined by a ctx-path, which contains either a header file or a source file in its src-folder is treated as a Contexo module.
-The reason for this was that git (and other popular revision control systems) does not store empty folders. Placeholders was out of the question since old Contexo managed projects then would not be able to be built if they were to be stored in Git.
+* Contexo modules are no longer depending on certain directory being present in the module directory.
+Now, any folder which is located in a folder defined by a ctx-path, which contains either a header file or one of the criteria dirs: 'doc', 'contexo', 'test', 'src'.
+Previously all these directories were required for Contexo in order to be a valid Contexo module.
+
+This does not work well in practice since some popular version control systems such as git, hg and perforce does not support empty directories, and since we want old code to build the definition of a contexo module must change to:
+
+ A directory which MUST reside in a module path as defined by <ctx-path ...>.
+ Furthermore, such a directory MUST contain either:
+ 1. One or more public header files.
+ OR
+ 2. One or more of the criteria dirs.
+
+(obviously when migrating to $popular_version_control system, no empty directories would be kept, so a spiffy recursive script putting placeholders ll over the code base would not suffice in case we ever would like to check out an old revision)
+
 * The msvc plugin can now be suplied with '-ct dll' to build dlls.
 * Subversion username and password can now be supplied from environment variables (USERNAME, PASSWORD)
 * A GNU Makefile export plugin has been produced. This gives the  possibility to build in parallell and tweak compile flags on gnu-make compatible systems.
 * A NetBeans export plugin. This has not undergone serious testing and may not be stable for daily use.
+
+
 Bugfixes:
 * --tolerate-missing-headers has been set as default when building, to get the old behaviour where contexo would stop when encountering a header the flag --fail-on-missing-headers must be supplied to contexo.
 * sln export bugfix.
 * obsolete code has been removed.
 * minor cleanups/fixes as determined by static python analysis (pylint).
+
 
 Contexo 0.8.0
 Bugfixes:

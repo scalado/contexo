@@ -1,7 +1,7 @@
-Contexo 0.9.0
+Contexo 0.9.0:
 Note about building old Contexo projects:
 This release removes the preprocessor definition COMPILING_MOD_<MODNAME> for each module which caused very long preprocessor define strings. It was reported that too long preprocessor define strings would cause trouble in Visual Studio.
-These are now removed, and thus to build very old projects the following flag must be added to the build process:
+COMPILING_MOD_ preprocessor defines are now removed, and thus to build very old projects the following flag must be added to the build process:
 --legacy-compiling-mod
 
 New features:
@@ -18,20 +18,18 @@ This does not work well in practice since some popular version control systems s
  OR
  2. One or more of the criteria dirs.
 
-(obviously when migrating to $popular_version_control system, no empty directories would be kept, so a spiffy recursive script putting placeholders ll over the code base would not suffice in case we ever would like to check out an old revision)
-
-* The msvc plugin can now be suplied with '-ct dll' to build dlls.
+* The msvc plug-in can now be supplied with '-ct dll' to build dlls.
 * Subversion username and password can now be supplied from environment variables (USERNAME, PASSWORD)
-* A GNU Makefile export plugin has been produced. This gives the  possibility to build in parallell and tweak compile flags on gnu-make compatible systems.
+* A GNU Makefile export plug-in has been produced. This gives the  possibility to build in parallel and tweak compile flags on gnu-make compatible systems.
 * A NetBeans export plugin. This has not undergone serious testing and may not be stable for daily use.
 
-
 Bugfixes:
-* --tolerate-missing-headers has been set as default when building, to get the old behaviour where contexo would stop when encountering a header the flag --fail-on-missing-headers must be supplied to contexo.
+* --tolerate-missing-headers has been set as default when building, to get the old behaviour where contexo would stop when encountering a header, the flag --fail-on-missing-headers must be supplied to contexo.
 * sln export bugfix.
 * obsolete code has been removed.
 * minor cleanups/fixes as determined by static python analysis (pylint).
 * More informative message when a module is not considered valid by Contexo.
+
 
 Contexo 0.8.0
 Bugfixes:

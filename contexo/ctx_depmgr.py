@@ -759,7 +759,7 @@ class CTXDepMgr: # The dependency manager class.
                 if ctx_cmod.isContexoCodeModule(modPath):
                     break
                 else:
-                    infoMessage( "Directory %s is not a valid contexo module, ignoring"%modPath,  3  )
+                    infoMessage( "Ignoring directory %s since it is not a valid contexo module: no folder named 'contexo', 'doc', 'src', 'test', 'inc' nor header files found."%modPath,  3  )
             else:
                 modPath = str()
 

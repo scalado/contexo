@@ -31,7 +31,7 @@ Bugfixes:
 * sln export bugfix.
 * obsolete code has been removed.
 * minor cleanups/fixes as determined by static python analysis (pylint).
-
+* More informative message when a module is not considered valid by Contexo.
 
 Contexo 0.8.0
 Bugfixes:

@@ -37,7 +37,7 @@ if (suspected_ctx_paths):
     sys.exit( -1 )
 
 setup(name="Contexo",
-      version="0.6.99",
+      version="0.9.0",
       description="Contexo build system",
       author="Manuel Astudillo",
       author_email="manuel.astudillo@scalado.com",

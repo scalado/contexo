@@ -14,7 +14,15 @@ import os.path
 
 from ctx_repo import *
 from ctx_common import userErrorExit
+import os
+
 #, infoMessage, ctxAssert
+def locate_git():
+    for git_cand in ['git', 'git.cmd', 'git.exe', 'git.bat']:
+        for path in os.environ["PATH"].split(os.pathsep):
+            if os.path.exists(os.path.join( path, git_cand)) and os.access( os.path.join( path, git_cand), os.X_OK):
+                return git_cand
+    userErrorExit("Git cannot be found in your PATH. Please re-install Git and make sure the git.cmd, git.exe or git binary can be found in your PATH")
 
 #------------------------------------------------------------------------------
 class CTXRepositoryGIT(CTXRepository):
@@ -22,7 +30,7 @@ class CTXRepositoryGIT(CTXRepository):
         self.path = os.path.abspath('')
         self.destpath = os.path.join(local_path, id_name)
         self.id_name = id_name
-        self.git = 'git'
+        self.git = locate_git()
         self.rev = rev
 
         if href == None:

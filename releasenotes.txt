@@ -1,4 +1,11 @@
-Contexo 0.9.0:
+Contexo 0.9.2
+Bugfix:
+* Link problems resolved (JIRA: TOOLS-3)
+
+Contexo 0.9.1
+This is a minor bugfix release for 0.9.0 which solves problem where git cannot be found if installed as git.cmd in windows.
+
+Contexo 0.9.0
 Note about building old Contexo projects:
 This release removes the preprocessor definition COMPILING_MOD_<MODNAME> for each module which caused very long preprocessor define strings. It was reported that too long preprocessor define strings would cause trouble in Visual Studio.
 COMPILING_MOD_ preprocessor defines are now removed, and thus to build very old projects the following flag must be added to the build process:

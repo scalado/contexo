@@ -521,6 +521,7 @@ class CTXBuildSession:
     #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     def __init__(self, bc ):
         self.bc = bc
+        self.cdefPath       = bc.cdefPath
         self.compiler       = bc.getCompiler()
         self.buildParams    = CTXBuildParams()
         self.preloadModules = list()
@@ -638,7 +639,7 @@ class CTXBuildSession:
         #tool = 'LD' #'CXX' if cplusplus else 'CC'
         infoMessage('from ' + os.getcwd() + ' executing: ' + cmdline,  6)
         linkCommandFileName = 'linkCmdFileName096848hf434qas.file'
-        cmdline = prepareCommandFile( cmdline,  linkCommandFileName )
+        cmdline = prepareCommandFile( cmdline,  linkCommandFileName, self.cdefPath)
         ret = executeCommandline( cmdline )
         if ret != 0:
             userErrorExit("\nFailed to link: '%s'\nCompiler return code: %d"%(cmdline, ret))

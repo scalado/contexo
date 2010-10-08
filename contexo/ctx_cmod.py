@@ -117,7 +117,9 @@ def assertValidContexoCodeModule( path, msgSender ):
 
 def getSourcesFromDir( self, srcDir ):
     srcListDict = dict()
+    objListDict = dict()
     srcList = list ()
+    objList = list()
     if not os.path.exists(srcDir):
 	    srcList = list()
 	    return srcList
@@ -137,6 +139,7 @@ def getSourcesFromDir( self, srcDir ):
     archPathCopy.reverse()
     # override source files with architecture specific files
     arch_spec_source_extensions = [ '.c', '.cpp', '.asm', '.s']
+    obj_file_extensions = [ '.o', '.obj']
     arch_srcDir = os.path.join(srcDir, 'arch')
     for archRelDirBase in archPathCopy:
         archRelDir = os.path.join(arch_srcDir, archRelDirBase )
@@ -149,12 +152,22 @@ def getSourcesFromDir( self, srcDir ):
                     if arch_spec_source_extensions.count( ext ) != 0:
                         for key in srcListDict.keys():
                             if key == baseFileName:
-                                msg = 'Overriding source file '+os.path.join(srcDir, srcListDict[baseFileName])+' with architecture specific file: '+archFile
+                                msg = 'Overriding source file '+os.path.join(srcDir, srcListDict[baseFileName])+' with architecture specific file: '+file
                                 infoMessage(msg, 1)
-                        srcListDict[baseFileName] = archFile[len(srcDir)+1:]
-    for file in srcListDict.values():
-        srcList.append(file)
-    return srcList
+                        srcListDict[baseFileName] = file[len(srcDir)+1:]
+                    if obj_file_extensions.count( ext ) != 0:
+                        for key in srcListDict.keys():
+                            if key == baseFileName:
+                                msg = 'Overriding source file '+os.path.join(srcDir, srcListDict[baseFileName])+' with prebuilt object file: '+file
+                                infoMessage(msg, 1)
+                        # remove and (discard) returned object
+                        srcListDict.pop(baseFileName)
+                        objListDict[baseFileName] = file[len(srcDir)+1:]
+    for srcFile in srcListDict.values():
+        srcList.append(srcFile)
+    for objFile in objListDict.values():
+        objList.append(objFile)
+    return srcList,objList
 
 
 #------------------------------------------------------------------------------

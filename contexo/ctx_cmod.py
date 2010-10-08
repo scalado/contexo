@@ -152,17 +152,20 @@ def getSourcesFromDir( self, srcDir ):
                     if arch_spec_source_extensions.count( ext ) != 0:
                         for key in srcListDict.keys():
                             if key == baseFileName:
-                                msg = 'Overriding source file '+os.path.join(srcDir, srcListDict[baseFileName])+' with architecture specific file: '+file
+                                msg = 'Overriding source file '+os.path.join(srcDir, srcListDict[baseFileName])+' with architecture specific file: '+archFile
                                 infoMessage(msg, 1)
-                        srcListDict[baseFileName] = file[len(srcDir)+1:]
+                        srcListDict[baseFileName] = archFile[len(srcDir)+1:]
                     if obj_file_extensions.count( ext ) != 0:
                         for key in srcListDict.keys():
                             if key == baseFileName:
-                                msg = 'Overriding source file '+os.path.join(srcDir, srcListDict[baseFileName])+' with prebuilt object file: '+file
+                                msg = 'Overriding source file '+os.path.join(srcDir, srcListDict[baseFileName])+' with prebuilt object file: '+ archFile
                                 infoMessage(msg, 1)
                         # remove and (discard) returned object
                         srcListDict.pop(baseFileName)
-                        objListDict[baseFileName] = file[len(srcDir)+1:]
+                        # making object files a "first class citizen" in the dependency manager would mean that we'd have to add a whole lot of functions and extra stuff just to support object files which aren't used or referenced by any other source file anyway.
+                        # TODO: If more languages are added to contexo in the future, this may need a cleanup.
+                        # for now, bypass the dependency manager and add an absolute path directly
+                        objListDict[baseFileName] = os.path.join( srcDir, archFile[len(srcDir)+1:])
     for srcFile in srcListDict.values():
         srcList.append(srcFile)
     for objFile in objListDict.values():
@@ -196,7 +199,9 @@ class CTXRawCodeModule:
         self.modName        = str()
         self.modRoot        = str()
         self.srcFiles       = list()
+        self.prebuiltObjFiles       = list()
         self.testSrcFiles   = list()
+        self.testObjFiles   = list()
         self.pubHeaders     = list()
         self.testHeaders    = list()
         self.privHeaders    = list()
@@ -232,7 +237,7 @@ class CTXRawCodeModule:
     def getSourceFilenames(self):
         if len(self.srcFiles) == 0:
             srcDir = self.getSourceDir()
-            self.srcFiles = getSourcesFromDir( self, srcDir )
+            self.srcFiles, self.prebuiltObjFiles = getSourcesFromDir( self, srcDir )
         return self.srcFiles
 
     def getSourceAbsolutePaths(self):
@@ -247,7 +252,7 @@ class CTXRawCodeModule:
     def getTestSourceFilenames(self):
         if len(self.testSrcFiles) == 0:
             srcDir = self.getTestDir()
-            self.testSrcFiles = getSourcesFromDir( self, srcDir )
+            self.testSrcFiles, self.testObjFiles = getSourcesFromDir( self, srcDir )
         return self.testSrcFiles
 
     def getTestHeaderFilenames(self):
@@ -465,10 +470,13 @@ class CTXCodeModule( CTXRawCodeModule ):
         if self.buildUnitTests:
             srcFiles.extend( self.getTestSourceAbsolutePaths() )
 
-        objlist = []
+        objlist = list()
         for src in srcFiles:
             obj = session.buildStaticObject( os.path.normpath( src ), os.path.normpath( outputDir ), buildParams, self.rebuildAll )
             objlist.append( obj )
+        for prebuiltObjectFile in self.prebuiltObjFiles:
+            obj = session.copyPrebuiltObject( os.path.normpath( prebuiltObjectFile), outputDir)
+            objlist.append( obj)
 
         #LOG
         for obj in objlist:

@@ -420,6 +420,13 @@ class CTXCompiler:
         return obj
 
     #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+    def prebuiltObject( self, prebuiltObjFile, outputDir ):
+        import os.path
+        shutil.copy( prebuiltObjFile, outputDir)
+        obj = self.wrapStaticObject( os.path.dirname( prebuiltObjFile), os.path.basename( prebuiltObjFile), outputDir, '<PREBUILT OBJECT>', 'copy from ' + prebuiltObjFile + ' to '+ outputDir )
+        return obj
+
+    #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     def staticObject( self, sourceFile, buildParams, outputDir, objFileTitle = None ):
         if not os.path.exists( sourceFile ):
             userErrorExit("Sourcefile not found: %s"%sourceFile)
@@ -745,6 +752,8 @@ class CTXBuildSession:
 
         return obj
 
+    def copyPrebuiltObject( self, prebuiltObjFile, outputDir):
+        return self.compiler.prebuiltObject( prebuiltObjFile, outputDir)
 
 
     #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::

@@ -1,0 +1,3 @@
+@ECHO OFF
+ctx.py %*
+

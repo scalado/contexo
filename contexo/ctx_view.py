@@ -24,30 +24,16 @@ SYSGLOBAL_PATH_SECTIONS = ['modules',
                            'comp',
                            'misc']
 
-AP_PREFER_REMOTE_ACCESS = 0 # If a repository is accessible through regular file system access, Contexo will try to use it from its remote location.
-AP_NO_REMOTE_ACCESS     = 1 # Contexo always assumes repositories to be accessible through the local view.
-
-AP_TEXT  = dict({ AP_PREFER_REMOTE_ACCESS: 'AP_PREFER_REMOTE_ACCESS',
-                  AP_NO_REMOTE_ACCESS:     'AP_NO_REMOTE_ACCESS' })
-
-AP_FLAGS = dict( {AP_PREFER_REMOTE_ACCESS: 'default behaviour',
-                  AP_NO_REMOTE_ACCESS:     '--no-remote-repo-access' })
-
-default_access_policy = AP_PREFER_REMOTE_ACCESS
-
 #------------------------------------------------------------------------------
 class CTXView:
-    def __init__(self, view_path, access_policy=AP_PREFER_REMOTE_ACCESS, updating=False, validate=False ):
+    def __init__(self, view_path, updating=False, validate=False ):
         self.localPath = os.path.abspath(view_path)
         self.global_paths = dict() # {section: pathlist}, where 'section' is any of SYSGLOBAL_PATH_SECTIONS
         self.rspec = None
-        self.access_policy = access_policy
         self.updating = updating # True when the view is being updated instead of used for building
         self.msgSender = "CTXView"
 
         infoMessage("Using view: %s "%(self.getRoot()), 2)
-
-        infoMessage("Using repository access policy: %s"%AP_TEXT[self.access_policy], 2)
 
         for sec in SYSGLOBAL_PATH_SECTIONS:
             self.global_paths[sec] = list()
@@ -202,10 +188,6 @@ class CTXView:
         return item_paths
 
     #--------------------------------------------------------------------------
-    def getAccessPolicy( self ):
-        return self.access_policy
-
-    #--------------------------------------------------------------------------
     #def getRSpecPaths(self, path_section ):
     #    ctxAssert( self.hasRSpec(), "Caller should check if view has RSpec prior to this call" )
     #
@@ -244,15 +226,7 @@ class CTXView:
             elif len(candidate_locations) > 1:
                 userErrorExit("Multiple occurances of '%s' was found. Unable to determine which one to use: \n   %s"\
                                %(item, "\n   ".join(candidate_locations)))
-
-        # Item not present in any repository, be clear to the user..
-        if self.getRSpec() != None:
-            if self.getAccessPolicy() == AP_NO_REMOTE_ACCESS:
-                infoMessage("Item '%s' was not found in RSpec repositories.\nNote that the system is set to search for repository items in the local view only (%s).\nTrying system global locations."%(item, AP_FLAGS[self.getAccessPolicy()]), 2)
-            elif self.getAccessPolicy() == AP_PREFER_REMOTE_ACCESS:
-                infoMessage("Item '%s' was not found in RSpec repositories.\nNote that the system is set to search for repository items at the repository source location only (%s).\nTrying system global locations."%(item, AP_FLAGS[self.getAccessPolicy()]), 2)
-            else:
-                infoMessage("Item '%s' was not found in RSpec repositories.\nTrying system global locations."%(item), 2)
+            infoMessage("Item '%s' was not found in RSpec repositories.\nTrying system global locations."%(item), 2) 
 
         for path_section in path_sections:
             # File was not found in RSpec repositories, look in view

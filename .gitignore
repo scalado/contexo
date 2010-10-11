@@ -5,6 +5,8 @@ contexo.e4p
 *.pyc
 *~
 private/
+examples/hello.h
+examples/hello.a
 examples/msvc.pdb
 examples/release
 examples/hello_view/hello_modules/hello/output

@@ -26,3 +26,12 @@ http://sourceforge.net/projects/pywin32/files/
 
 (optional) git support
 ----------------------
+
+Contexo version number
+======================
+Following the 0.8.0 release, the Contexo version number is of the format x.y.z where x.y.z are integers:
+
+x = should be zero.
+y = increment means change in the build process.
+z = increment means service release, bugfix or performance updates but no change in the build process.
+

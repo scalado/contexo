@@ -261,7 +261,10 @@ for comp in package.export_data['COMPONENTS']:
 
 	makefile.write("\tmkdir -p $(HDRDIR) $(OBJDIR) $(LIBDIR)\n")
 	for headerFile in headerFiles:
-		makefile.write("\t$(EXPORT_CMD) "+headerDict[headerFile]+" $(HDRDIR)/"+headerFile+"\n")
+                if headerDict.has_key(headerFile):
+                    makefile.write("\t$(EXPORT_CMD) "+headerDict[headerFile]+" $(HDRDIR)/"+headerFile+"\n")
+                else:
+                    warningMessage('Headerfile '+headerFile+' could not be located')
 	makefile.write("\n")
 
 makefile.write("\n")

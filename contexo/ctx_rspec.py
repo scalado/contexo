@@ -233,7 +233,7 @@ class RSpecFile:
         #---
 
         if type(rspec_file) is str:
-            self.rspecFileLocator = RSpecFileLocator( _rcs=None, _href=rspec_file, _revision=None )
+            self.rspecFileLocator = RSpecFileLocator( _rcs=None, _href=rspec_file, _revision=None, view.updating )
         else:
             self.rspecFileLocator = rspec_file
 
@@ -325,10 +325,6 @@ class RSpecFile:
             paths.extend( repo.getFullPaths( path_section ) )
 
         return paths
-
-    #--------------------------------------------------------------------------
-    def getAccessPolicy( self ):
-        self.view.getAccessPolicy()
 
     #--------------------------------------------------------------------------
     def delRepository(self, name):

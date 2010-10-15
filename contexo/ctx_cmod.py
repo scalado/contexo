@@ -122,7 +122,7 @@ def getSourcesFromDir( self, srcDir ):
     objList = list()
     if not os.path.exists(srcDir):
 	    srcList = list()
-	    return srcList
+	    return srcList, objList
     source_extensions = [ '.c', '.cpp']
 
     # Collect all source files.

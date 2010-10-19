@@ -161,10 +161,11 @@ class rspecXmlHandler(ContentHandler):
 
 #------------------------------------------------------------------------------
 class RSpecFileLocator:
-    def __init__(self, _rcs, _href, _revision ):
+    def __init__(self, _rcs, _href, _revision, _wipecache ):
         self.rcs = _rcs
         self.href = _href
         self.revision = _revision
+        self.wipecache = _wipecache
         self.msgSender = 'RSpecFileLocator'
 
 
@@ -174,6 +175,9 @@ class RSpecFileLocator:
     # guaranteed to be available during the entire build session.
     #--------------------------------------------------------------------------
     def getLocalAccessPath(self):
+        # TODO: wipe cache if root element and first export ok
+        # TODO: what about -v ../.. style paths?
+        rspec_cache_dir = os.path.abspath('') + '.ctx/rspec-cache'
 
         local_access_path = None
 
@@ -203,15 +207,18 @@ class RSpecFileLocator:
             if self.rcs == 'svn' or self.rcs == 'git':
 
                 svn = ctx_svn_client.CTXSubversionClient()
+                # does this fail if rspec cannot be fetched?
                 svn.export( self.getHref(), temp_dir, self.revision )
-                local_access_path = temp_rspec
 
             #elif self.rcs == 'git':
                 #git = ctx_git_client.CTXGitClient()
 
             else:
                 userErrorExit("Unsupported RCS: %s"%(self.rcs))
-
+            cache_rspec = os.path.join( rspec_cache_dir, rspec_name)
+            # TODO: wipe cache?
+            shutil.copyfile( temp_rspec, cache_rspec)
+            local_access_path = cache_rspec
 
         infoMessage("RSpec local access path resolved to: %s"\
                      %(local_access_path), 4)
@@ -230,10 +237,12 @@ class RSpecFile:
         self.imports            = list() # List of RSpecFile objects, note the recursion.
         self.view               = view
         self.msgSender          = 'RSpecFile'
+        self.wipeCache          = False
         #---
 
         if type(rspec_file) is str:
-            self.rspecFileLocator = RSpecFileLocator( _rcs=None, _href=rspec_file, _revision=None, view.updating )
+            self.wipeCache = True
+            self.rspecFileLocator = RSpecFileLocator( _rcs=None, _href=rspec_file, _revision=None, view.updating, _wipecache )
         else:
             self.rspecFileLocator = rspec_file
 

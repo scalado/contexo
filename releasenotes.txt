@@ -1,6 +1,7 @@
 Contexo 0.10.0
 CR: TOOLS-5: this feature adds the ability to add object files, ".o" as architecture specific files. This is a Contexo internal only feature (ie: no plugin support).
 CR: TOOLS-4: added in-place ctx.py from ctx-devel.py (but with the ctx.py name) to make testing of contexo in place possible without modifying test scripts.
+* minor fixes to genmake.py
 
 Contexo 0.9.2
 Bugfix:

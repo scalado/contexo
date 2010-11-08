@@ -69,7 +69,7 @@ class RspecFreezer():
             else:
                 curr_rev = self.rcsclient[rcs].getRevisionFromWorkingCopy(repo_path)
                 if str(curr_rev) != rev:
-                    warningMessage('%s: Overwriting strict revision nr %d with %d'%(id, int(rev),  curr_rev))
+                    warningMessage('%s: Overwriting strict revision nr %s with %s'%(id, str(rev),  str(curr_rev)))
             self.xmlgenerator.characters("\t")
             self.xmlgenerator.startElement('ctx-repo',  attrs = {'id':id,'rcs':rcs, 'href': href,  'rev': str(curr_rev),  'path':path })
             self.xmlgenerator.characters("\n")

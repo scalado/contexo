@@ -32,7 +32,6 @@ class CTXGitClient():
         import subprocess
         args = [self.git, '--no-pager', 'log', '--pretty=oneline', '--no-color']
         p = subprocess.Popen(args, bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=None)
-        stderr = p.stderr.read()
         stdout = p.stdout.read()
 
         retcode = p.wait()

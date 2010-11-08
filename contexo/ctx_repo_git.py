@@ -179,6 +179,9 @@ class CTXRepositoryGIT(CTXRepository):
             while failcount < max_failures:
                 try:
                     shutil.rmtree(tmpdir)
+                    print 'success: removed after'
+                    print failcount
+                    print 'tries'
                     failcount = max_failures
                 except:
                     print 'could not remove temporary dir ' + tmpdir + ': retrying...'

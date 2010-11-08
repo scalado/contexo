@@ -173,7 +173,18 @@ class CTXRepositoryGIT(CTXRepository):
         # clean up
         if tmpdir != '':
             import shutil
-            shutil.rmtree(tmpdir)
+            import time
+            failcount = 0
+            max_failures = 20
+            while failcount < max_failures:
+                try:
+                    shutil.rmtree(tmpdir)
+                    failcount = max_failures
+                except:
+                    print 'could not remove temporary dir ' + tmpdir + ': retrying...'
+                    failcount = failcount + 1
+                    time.sleep(0.1)
+                    pass
         return remote
     #--------------------------------------------------------------------------
     def getRcs(self):

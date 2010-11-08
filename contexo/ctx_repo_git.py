@@ -59,12 +59,12 @@ class CTXRepositoryGIT(CTXRepository):
 
         os.chdir(self.destpath)
         p = subprocess.Popen([self.git, 'status'], bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stderr = p.stderr.read()
         retcode = p.wait()
 
 	# git 1.6 returns 1
 	# git 1.7 returns 0
         if retcode != 0 and retcode != 1:
+            stderr = p.stderr.read()
             print stderr
             warningMessage("Not a valid GIT repo")
             os.chdir(self.path)
@@ -73,9 +73,9 @@ class CTXRepositoryGIT(CTXRepository):
         args = [self.git, 'checkout', self.rev]
 
         p = subprocess.Popen(args, bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        retcode = p.wait()
         stderr = p.stderr.read()
         stdout = p.stdout.read()
-        retcode = p.wait()
         if retcode != 0:
             print stdout
             print stderr
@@ -99,9 +99,9 @@ class CTXRepositoryGIT(CTXRepository):
         import subprocess
         args = [self.git, 'branch', '--no-color' ]
         p = subprocess.Popen(args, bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        retcode = p.wait()
         stderr = p.stderr.read()
         stdout = p.stdout.read()
-        retcode = p.wait()
 
         if retcode != 0:
             print stderr
@@ -151,11 +151,11 @@ class CTXRepositoryGIT(CTXRepository):
 
         args = [self.git, 'remote', 'show', fetch_url]
         p = subprocess.Popen(args, bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stderr = p.stderr.read()
-        stdout = p.stdout.read()
         retcode = p.wait()
 
-        retcode = p.wait()
+        stderr = p.stderr.read()
+        stdout = p.stdout.read()
+ 
         if retcode != 0:
             remote = ''
 		# this section is a bit version dependent
@@ -214,8 +214,8 @@ class CTXRepositoryGIT(CTXRepository):
 
         infoMessage("Running 'git checkout %s' in '%s'"%(self.rev, self.id_name),1)
         p = subprocess.Popen([self.git, 'checkout', self.rev], bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stderr = p.stderr.read()
         retcode = p.wait()
+        stderr = p.stderr.read()
         if retcode != 0:
             print stderr
         localBranch = self.getBranch()
@@ -254,9 +254,9 @@ class CTXRepositoryGIT(CTXRepository):
         infoMessage("Running 'git checkout %s' in '%s'"%(self.rev, self.id_name), 1)
         args = [self.git, 'checkout', self.rev]
         p = subprocess.Popen( args,bufsize=0 ,stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        retnum = p.wait()
         stderr = p.stderr.read()
         stdout = p.stdout.read()
-        retnum = p.wait()
         if retnum != 0:
             print stdout
             print stderr

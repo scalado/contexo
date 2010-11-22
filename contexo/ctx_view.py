@@ -26,7 +26,7 @@ SYSGLOBAL_PATH_SECTIONS = ['modules',
 
 #------------------------------------------------------------------------------
 class CTXView:
-    def __init__(self, view_path, updating=False, validate=False ):
+    def __init__(self, view_path=str(), updating=False, validate=False ):
         self.localPath = os.path.abspath(view_path)
         self.global_paths = dict() # {section: pathlist}, where 'section' is any of SYSGLOBAL_PATH_SECTIONS
         self.rspec = None

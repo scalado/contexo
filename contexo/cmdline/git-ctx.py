@@ -51,7 +51,7 @@ class GITCtx:
             self.view_dir = os.path.abspath('')
         # ctxview default args: view_path, access_policy=AP_PREFER_REMOTE_ACCESS, updating=False, validate=True
         # keep the validate=False if there is any repo under svn control, otherwise things will be very slow
-        ctxview = ctx_view.CTXView(self.view_dir, 1, False, False)
+        ctxview = ctx_view.CTXView(view_path=self.view_dir, updating=False, validate=False)
 
         for repo in ctxview.getRSpec().getRepositories():
             if repo.getRcs() == 'git':

@@ -107,18 +107,19 @@ class CTXView:
         # Collect all rspecs
         rspec_path_list = list()
         root_files = os.listdir( self.localPath )
-        rspec_file = None
+        rspec = None
         for f in root_files:
-            if not rspec_file == None:
+            if not rspec == None:
                userErrorExit("Only one RSpec is allowed at the root of a view.")
             root, ext = os.path.splitext( f )
             if ext.lower() == '.rspec':
-                rspec_file = os.path.join(self.getRoot(), f ) 
-        if rspec_file == None:
+                rspec_path = os.path.join(self.getRoot(), f ) 
+                rspec = RSpecFile( rspec_path, parent=None, view=self, wipe_cache=self.updating )
+        if rspec == None:
             userErrorExit("No RSpec found in view")
 
-        infoMessage("Using RSpec: '%s'"%(candidate_rspecs[0].getFilename()), 2)
-        self.setRSpec( rspec_file )
+        infoMessage("Using RSpec: '%s'"%(rspec.getFilename()), 2)
+        self.setRSpec( rspec )
 
     #--------------------------------------------------------------------------
     def setRSpec( self, _rspec ):

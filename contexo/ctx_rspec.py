@@ -161,14 +161,16 @@ class rspecXmlHandler(ContentHandler):
 
 #------------------------------------------------------------------------------
 class RSpecFileLocator:
-    def __init__(self, _rcs=str(), _href=str(), _revision=str(), _updating = False, _wipecache=False ):
-        self.rcs = _rcs
-        self.href = _href
-        self.revision = _revision
-        self.wipecache = _wipecache
-        self.updating = _updating
+    def __init__(self, rcs=None, href=None, revision=None, updating = False, wipe_cache=False ):
+        self.rcs = rcs
+        self.href = href
+        self.revision = revision
+        self.updating = updating
+        # TODO: what about -v ../.. style paths?
+        self.rspec_cache_dir = os.path.abspath('') + os.sep + '.ctx' + os.sep + 'rspec-cache' + os.sep
+        if wipe_cache == True and os.path.exists(self.rspec_cache_dir):
+            shutil.rmtree(self.rspec_cache_dir)
         self.msgSender = 'RSpecFileLocator'
-
 
     #--------------------------------------------------------------------------
     # Returns a guaranteed local path to the RSpec file. The returned path might
@@ -177,7 +179,6 @@ class RSpecFileLocator:
     #--------------------------------------------------------------------------
     def getLocalAccessPath(self):
         # TODO: wipe cache if root element and first export ok
-        # TODO: what about -v ../.. style paths?
         src = str()
 
         if self.rcs == None:
@@ -186,7 +187,7 @@ class RSpecFileLocator:
                          %(self.getHref()), 4)
             if not os.path.exists(self.href):
                 userErrorExit("RSpec unreachable with regular file access: \n  %s"%(self.href))
-            src = self.getHref()
+            src = self.href
         else:
 
             temp_dir = getUserTempDir()
@@ -213,14 +214,13 @@ class RSpecFileLocator:
 
             else:
                 userErrorExit("Unsupported RCS: %s"%(self.rcs))
-            src = os.path.join( rspec_cache_dir, rspec_name)
+            src = os.path.join( self.rspec_cache_dir, rspec_name)
             # TODO: wipe cache?
 
-        rspec_cache_dir = os.path.abspath('') + os.sep + '.ctx' + os.sep + 'rspec-cache' + os.sep
-        if not os.path.exists(rspec_cache_dir):
-            os.makedirs(rspec_cache_dir)
+        if not os.path.exists(self.rspec_cache_dir):
+            os.makedirs(self.rspec_cache_dir)
 
-        local_access_path = rspec_cache_dir + os.path.basename(self.getHref()) 
+        local_access_path = self.rspec_cache_dir + os.path.basename(self.getHref()) 
         shutil.copyfile( src, local_access_path )
 
         infoMessage("RSpec local access path resolved to: %s"\
@@ -234,21 +234,25 @@ class RSpecFileLocator:
 
 #------------------------------------------------------------------------------
 class RSpecFile:
-    def __init__(self, rspec_file=str(), parent=None, view=str(), wipeCache=False):
+    def __init__(self, rspec_file=None, parent=None, view=str(), wipe_cache=False):
         self.repositories       = dict()
         self.rspecFileLocator   = None
         self.imports            = list() # List of RSpecFile objects, note the recursion.
         self.view               = view
         self.msgSender          = 'RSpecFile'
-        self.wipeCache          = wipeCache
+        self.wipe_cache         = wipe_cache
         #---
-
+ 
         if type(rspec_file) is str:
-            self.wipeCache = True
-            self.rspecFileLocator = RSpecFileLocator( _rcs=None, _href=rspec_file, _revision=None, _updating=view.updating, _wipecache=True )
+            self.wipe_cache = True
+            self.rspecFileLocator = RSpecFileLocator( rcs=None, href=rspec_file, revision=None, updating=view.updating, wipe_cache=True )
         else:
             self.rspecFileLocator = rspec_file
 
+        _wipe_cache=False
+        if parent == None:
+            _wipe_cache=True
+        self.rspecFileLocator = RSpecFileLocator( rcs=None, href=rspec_file, revision=None, updating=view.updating, wipe_cache=_wipe_cache )
 
         localPath = self.rspecFileLocator.getLocalAccessPath()
 

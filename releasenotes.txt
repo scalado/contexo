@@ -1,3 +1,7 @@
+Contexo 0.10.2
+Bugfix: CFLAGS and ASMFLAGS that contain ',' can now be used
+Bugfix: deprecated '--repo-validation','-rv' which caused some extra roundtrips (bad over vpn) and caused some problems when the PATH was set and Contexo couldn't find git.
+
 Contexo 0.10.1
 Bugfix: Some issues in ctx freeze resolved.
 Bugfix: Regression, additional includes (-I and --incdirs) has been non-functional since 0.8.0.

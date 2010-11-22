@@ -107,50 +107,18 @@ class CTXView:
         # Collect all rspecs
         rspec_path_list = list()
         root_files = os.listdir( self.localPath )
+        rspec_file = None
         for f in root_files:
+            if not rspec_file == None:
+               userErrorExit("Only one RSpec is allowed at the root of a view.")
             root, ext = os.path.splitext( f )
             if ext.lower() == '.rspec':
-                rspec_path_list.append( os.path.join(self.getRoot(), f ) )
+                rspec_file = os.path.join(self.getRoot(), f ) 
+        if rspec_file == None:
+            userErrorExit("No RSpec found in view")
 
-        if len(rspec_path_list) != 0:
-            infoMessage("RSpecs detected in view: \n   %s"%("\n   ".join(rspec_path_list)), 2)
-
-        # Determine the import relationship between the RSpecs
-        if len(rspec_path_list):
-            #
-            candidate_rspecs = list()
-            for rspec_path in rspec_path_list:
-
-                rspec = RSpecFile( rspec_path, parent=None, view=self )
-                remainder = False
-
-                for potential_import in rspec_path_list:
-                    if potential_import == rspec_path:
-                        continue # skip checking if we import ourselves
-
-                    if potential_import not in rspec.getImportPaths( recursive=True ):
-                        remainder = True
-                        break # we found an RSpec not imported so move on to the next one
-
-                # remainder is False if all other RSpecs could be found in the
-                # import tree of 'rspec', or if 'rspec' is the only one present
-                # in the view.
-                if remainder == False:
-                    candidate_rspecs.append( rspec )
-
-            # We should have exactly ONE candidate rspec. If we have zero candidates, it
-            # means no single rspec imports all the others.
-            # If we have multiple candidates, it means more than one rspec imports all
-            # the others. Both these cases are terminal errors since we have no logic
-            # way of selecting one of the candidates.
-            if len(candidate_rspecs) != 1:
-                userErrorExit("RSpec selection is ambiguous. Only one RSpec is allowed in a view. If multiple RSpecs exist, at least one of them must directly or indirectly import the others")
-            else:
-                infoMessage("Using RSpec: '%s'"%(candidate_rspecs[0].getFilename()), 2)
-                self.setRSpec( candidate_rspecs[0] )
-
-        else:
-            infoMessage("No RSpec found in view", 2)
+        infoMessage("Using RSpec: '%s'"%(candidate_rspecs[0].getFilename()), 2)
+        self.setRSpec( rspec_file )
 
     #--------------------------------------------------------------------------
     def setRSpec( self, _rspec ):

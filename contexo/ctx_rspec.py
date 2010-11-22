@@ -161,11 +161,12 @@ class rspecXmlHandler(ContentHandler):
 
 #------------------------------------------------------------------------------
 class RSpecFileLocator:
-    def __init__(self, _rcs, _href, _revision, _wipecache ):
+    def __init__(self, _rcs=str(), _href=str(), _revision=str(), _updating = False, _wipecache=False ):
         self.rcs = _rcs
         self.href = _href
         self.revision = _revision
         self.wipecache = _wipecache
+        self.updating = _updating
         self.msgSender = 'RSpecFileLocator'
 
 
@@ -177,7 +178,7 @@ class RSpecFileLocator:
     def getLocalAccessPath(self):
         # TODO: wipe cache if root element and first export ok
         # TODO: what about -v ../.. style paths?
-        rspec_cache_dir = os.path.abspath('') + '.ctx/rspec-cache'
+        rspec_cache_dir = os.path.abspath('') + '.ctx' + os.sep + 'rspec-cache'
 
         local_access_path = None
 
@@ -242,7 +243,7 @@ class RSpecFile:
 
         if type(rspec_file) is str:
             self.wipeCache = True
-            self.rspecFileLocator = RSpecFileLocator( _rcs=None, _href=rspec_file, _revision=None, view.updating, _wipecache )
+            self.rspecFileLocator = RSpecFileLocator( _rcs=None, _href=rspec_file, _revision=None, _updating=view.updating, _wipecache=True )
         else:
             self.rspecFileLocator = rspec_file
 
@@ -319,7 +320,6 @@ class RSpecFile:
     def addRepository(self, repository):
         self.repositories[repository.id_name] = repository
         repository.setViewRoot( self.view.getRoot() )
-        repository.setAccessPolicy( self.view.getAccessPolicy() )
 
     #--------------------------------------------------------------------------
 

@@ -245,7 +245,7 @@ def cmd_info(args):
     # Get Code Module Paths from view.
     #
 
-    cview = ctx_view.CTXView(args.view, ctx_view.AP_NO_REMOTE_ACCESS, False, False)
+    cview = ctx_view.CTXView(view_path=args.view, updating=False, validate=False)
 
     #
     # Show info

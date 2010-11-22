@@ -61,9 +61,17 @@ CTX_DEFAULT_BCONF = cfgFile.getDefaultBConf().strip(" '")
 
 #TODO: make args not global in ctx.py
 #------------------------------------------------------------------------------
+# tolerate missing headers was removed since contexo assumed that external headers would be set up correctly, no one bothered to do this, and the compiler didn't complain so this option was mainly a nuicence.
 def deprecated_tolerate_missing_headers_warning(args):
     if args.tolerate_missing_headers:
         warningMessage('--tolerate-missing-headers is deprecated and redunant. The default is to ignore missing headers and let the compiler abort compilation if necessary. To get the old behaviour where contexo aborts when headers are missing: use the \'--fail-on-missing-headers\' option.')
+
+# --repo-validaiton caused excessive round trips to the revision control server - bad for usage on vpn - and also exposed a bug with .env switching in ctx export that would cause ctx unable to find git if the path has been set in an .env file.
+# A further motivation for removing repo-validation was that it's only needed when communicating with an rcs, not so much when building and exporting to build plugins.
+def deprecated_validate_repo_warning(args):
+    if args.repo_validation:
+        warningMessage('--repo-validation is deprecated. Please run \'ctx view validate\' manually to validate the view.')
+
 
 #------------------------------------------------------------------------------
 def getBuildConfiguration( cview ,  args):
@@ -306,7 +314,8 @@ def cmd_buildmod(args):
         ctx_log.ctxlogStart()
 
     # Prepare all
-    cview   = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=bool(args.repo_validation) )
+    deprecated_validate_repo_warning(args)
+    cview   = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=False )
     modules = expand_list_files(cview, args.modules)
     bc      = getBuildConfiguration( cview,  args )
     deprecated_tolerate_missing_headers_warning(args)
@@ -364,7 +373,8 @@ def cmd_buildcomp(args):
         ctx_log.ctxlogStart()
 
     # Prepare all
-    cview       = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=bool(args.repo_validation) )
+    deprecated_validate_repo_warning(args)
+    cview       = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=False )
     components  = expand_list_files( cview, args.components )
 
     bc          = getBuildConfiguration( cview,  args )
@@ -441,7 +451,8 @@ def cmd_build(args):
     absIncDirs = map(os.path.abspath,  args.incdirs)
 
     # Prepare all
-    cview   = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=bool(args.repo_validation) )
+    deprecated_validate_repo_warning(args)
+    cview   = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=False )
     bc      = getBuildConfiguration( cview,  args )
     bc.buildParams.incPaths.extend(     absIncDirs ) #TODO: accessing 'private' data?
     bc.buildParams.ldDirs.extend(args.libdirs)
@@ -543,7 +554,8 @@ def cmd_export(args):
         oldEnv    = switchEnvironment( envLayout, True )
 
     # Prepare all
-    cview   = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=bool(args.repo_validation) )
+    deprecated_validate_repo_warning(args)
+    cview   = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=False )
     bc      = getBuildConfiguration( cview,  args )
     deprecated_tolerate_missing_headers_warning(args)
     depmgr  = CTXDepMgr ( cview.getItemPaths('modules'),  args.fail_on_missing_headers, bc.getArchPath() )
@@ -603,7 +615,8 @@ def cmd_updateview(args):
     if args.updates_only == True and args.checkouts_only == True:
         userErrorExit("Options '--updates_only' and '--checkouts-only' are mutually exclusive.")
 
-    cview = ctx_view.CTXView( args.view, getAccessPolicy(args), updating=True, validate=True )
+    deprecated_validate_repo_warning(args)
+    cview = ctx_view.CTXView( args.view, getAccessPolicy(args), updating=True, validate=False )
 
     if args.checkouts_only == False:
         cview.updateRepositories()
@@ -626,15 +639,11 @@ def cmd_freeze(args):
     #from  contexo.ctx_rspec_file_freeze import rspecFileRevisionFreezer
 
     fileOut = sys.stdout
-    cview = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=bool(args.repo_validation) )
+    deprecated_validate_repo_warning(args)
+    cview = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=False )
     if args.output is not None:
         fileOut = open(args.output,  mode = 'wt')
     cview.freeze(output=fileOut)
-#
-#    parser = xml.sax.make_parser()
-#    handler = rspecFileRevisionFreezer(fileOut)
-#    parser.setContentHandler(handler)
-#    parser.parse( open(args.file_to_freeze) )
 
 #------------------------------------------------------------------------------
 def cmd_clean(args):
@@ -648,7 +657,8 @@ def cmd_clean(args):
     # Get Code Module Paths from view.
     #
 
-    cview = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=bool(args.repo_validation) )
+    deprecated_validate_repo_warning(args)
+    cview = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=False )
 
     exp_modules = expand_list_files(cview, args.modules)
     bc      = getBuildConfiguration( cview,  args )
@@ -796,12 +806,12 @@ standard_description = dict({\
     '--tests': "If specified, the unit tests for each processed code module are included as well.",\
      '--view': "The local view directory to use for this operation. If omitted, current working directory is used.",\
   '--logfile': "Name of logfile to generate. Will be created in output folder as defined by the --output option.",\
-'--repo-validation': "Validates all repositories before processing. This usually increases duration but ensures correct repository structure. Repository validation can also be done by running 'ctx view validate' as a separate step.",\
+'--repo-validation': "DEPRECATED: validation is only performed by the subcommands 'ctx freeze', 'ctx view', and 'ctx validate'",\
 '--no-remote-repo-access': "If specified, the system never tries to process items directly from an RSpec repository's remote location (href) even if so is possible. Normally, if a repository is accessible through regular file access, the system always tries to use it from its remote location.",\
 '--force':"Forces building all source files", \
 '--fail-on-missing-headers':"Abort the build if a header is missing.",\
 '--legacy-compiling-mod':"Enables legacy COMPILING_MOD_<MODULENAME> preprocessor defines which may be needed to build code which relied on this previous behaviour (in Contexo 0.8.0 and earlier).", \
-'--tolerate-missing-headers':"print a message about missing headers and go on, relying on the pre processor to resolve the problem"})
+'--tolerate-missing-headers':"DEPRECATED: print a message about missing headers and go on, relying on the pre-processor to resolve the problem"})
 
 
 # info parser

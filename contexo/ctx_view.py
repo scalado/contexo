@@ -37,7 +37,7 @@ default_access_policy = AP_PREFER_REMOTE_ACCESS
 
 #------------------------------------------------------------------------------
 class CTXView:
-    def __init__(self, view_path, access_policy=AP_PREFER_REMOTE_ACCESS, updating=False, validate=True ):
+    def __init__(self, view_path, access_policy=AP_PREFER_REMOTE_ACCESS, updating=False, validate=False ):
         self.localPath = os.path.abspath(view_path)
         self.global_paths = dict() # {section: pathlist}, where 'section' is any of SYSGLOBAL_PATH_SECTIONS
         self.rspec = None

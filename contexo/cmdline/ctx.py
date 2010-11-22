@@ -638,6 +638,7 @@ def cmd_freeze(args):
 
 #------------------------------------------------------------------------------
 def cmd_clean(args):
+    userErrorExit("'ctx clean' is broken and has thus been disabled.")
 
     from contexo import ctx_cmod
     from contexo.ctx_depmgr import CTXDepMgr
@@ -883,7 +884,7 @@ parser_build.add_argument('-l',  '--libs', nargs='*',  default = [],  help = "(l
 
 
 # clean parser
-parser_clean = subparsers.add_parser('clean', help="clean a module(s) ( and optionaly its dependencies)")
+parser_clean = subparsers.add_parser('clean', help="DISABLED: clean a module(s) ( and optionaly its dependencies)")
 parser_clean.set_defaults(func=cmd_clean)
 parser_clean.add_argument('modules', nargs='+', help="list of modules to clean")
 parser_clean.add_argument('-d', '--deps', action='store_true', help=standard_description['--deps'])

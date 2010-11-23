@@ -17,7 +17,7 @@ def findFileInPathList( src_file, pathList ):
             src_path = os.path.join( path, src_file)
             if os.path.exists(src_path):
                 return src_path
-        errorMessage("'%s' cannot be resolved in current path list."%( src_file) )
+        warningMessage("'%s' cannot be resolved in current path list."%( src_file) )
         infoMessage("%s"%"\n".join(pathList), msgVerboseLevel=8)
     return None
 

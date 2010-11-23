@@ -68,7 +68,7 @@ def deprecated_tolerate_missing_headers_warning(args):
 
 # --repo-validaiton caused excessive round trips to the revision control server - bad for usage on vpn - and also exposed a bug with .env switching in ctx export that would cause ctx unable to find git if the path has been set in an .env file.
 # A further motivation for removing repo-validation was that it's only needed when communicating with an rcs, not so much when building and exporting to build plugins.
-def deprecated_validate_repo_warning(args):
+def deprecated_repo_validation_warning(args):
     if args.repo_validation:
         warningMessage('--repo-validation is deprecated. Please run \'ctx view validate\' manually to validate the view.')
 
@@ -314,7 +314,7 @@ def cmd_buildmod(args):
         ctx_log.ctxlogStart()
 
     # Prepare all
-    deprecated_validate_repo_warning(args)
+    deprecated_repo_validation_warning(args)
     cview   = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=False )
     modules = expand_list_files(cview, args.modules)
     bc      = getBuildConfiguration( cview,  args )
@@ -373,7 +373,7 @@ def cmd_buildcomp(args):
         ctx_log.ctxlogStart()
 
     # Prepare all
-    deprecated_validate_repo_warning(args)
+    deprecated_repo_validation_warning(args)
     cview       = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=False )
     components  = expand_list_files( cview, args.components )
 
@@ -451,7 +451,7 @@ def cmd_build(args):
     absIncDirs = map(os.path.abspath,  args.incdirs)
 
     # Prepare all
-    deprecated_validate_repo_warning(args)
+    deprecated_repo_validation_warning(args)
     cview   = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=False )
     bc      = getBuildConfiguration( cview,  args )
     bc.buildParams.incPaths.extend(     absIncDirs ) #TODO: accessing 'private' data?
@@ -554,7 +554,7 @@ def cmd_export(args):
         oldEnv    = switchEnvironment( envLayout, True )
 
     # Prepare all
-    deprecated_validate_repo_warning(args)
+    deprecated_repo_validation_warning(args)
     cview   = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=False )
     bc      = getBuildConfiguration( cview,  args )
     deprecated_tolerate_missing_headers_warning(args)
@@ -615,8 +615,7 @@ def cmd_updateview(args):
     if args.updates_only == True and args.checkouts_only == True:
         userErrorExit("Options '--updates_only' and '--checkouts-only' are mutually exclusive.")
 
-    deprecated_validate_repo_warning(args)
-    cview = ctx_view.CTXView( args.view, getAccessPolicy(args), updating=True, validate=False )
+    cview = ctx_view.CTXView( args.view, getAccessPolicy(args), updating=True, validate=True )
 
     if args.checkouts_only == False:
         cview.updateRepositories()
@@ -639,7 +638,7 @@ def cmd_freeze(args):
     #from  contexo.ctx_rspec_file_freeze import rspecFileRevisionFreezer
 
     fileOut = sys.stdout
-    deprecated_validate_repo_warning(args)
+    deprecated_repo_validation_warning(args)
     cview = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=False )
     if args.output is not None:
         fileOut = open(args.output,  mode = 'wt')
@@ -658,7 +657,7 @@ def cmd_clean(args):
     # Get Code Module Paths from view.
     #
 
-    deprecated_validate_repo_warning(args)
+    deprecated_repo_validation_warning(args)
     cview = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=False )
 
     exp_modules = expand_list_files(cview, args.modules)

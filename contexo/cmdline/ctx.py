@@ -291,7 +291,7 @@ def cmd_info(args):
 
 #------------------------------------------------------------------------------
 def cmd_buildmod(args):
-    output_dir = args.view + '.ctx/obj'
+    output_dir = args.view + os.sep + '.ctx/obj'
 
     from contexo import ctx_cmod
     from contexo import ctx_base
@@ -428,7 +428,7 @@ def cmd_buildcomp(args):
 
 
 def cmd_build(args):
-    output_dir = args.view + '.ctx/obj'
+    output_dir = args.view + os.sep + '.ctx/obj'
     from contexo import ctx_cmod
     from contexo import ctx_base
     from contexo import ctx_envswitch
@@ -533,7 +533,7 @@ def cmd_build(args):
 
 #------------------------------------------------------------------------------
 def cmd_export(args):
-    output_dir = args.view + '.ctx/obj'
+    output_dir = args.view + os.sep + '.ctx/obj'
     from contexo import ctx_cmod
     from contexo import ctx_base
     from contexo import ctx_envswitch

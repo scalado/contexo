@@ -194,6 +194,8 @@ def moduleMk(module, build_params, modules, incPaths, depMgr, lclDstDir, args, u
     prepDefSuffix = ""
     for ctxMod in module['MODULELIST']:
         localFlags.append(prepDefPrefix + "COMPILING_MOD_" + ctxMod["MODNAME"].upper() + prepDefSuffix)
+    localFlags.extend ( build_params.cflags.split() )
+    localFlags.extend ( build_params.asmflags.split() )
     for prepDef in build_params.prepDefines:
         localFlags.append(prepDefPrefix + prepDef + prepDefSuffix)
     outData.append((" \\\n" + 16 * " ").join(localFlags))

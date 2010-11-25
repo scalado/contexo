@@ -144,12 +144,12 @@ def getAccessPolicy( args ):
 # of code module names. Unit tests are only enables for main modules (not for
 # dependencies)
 #------------------------------------------------------------------------------
-def create_components( comp_filenames, component_paths ):
+def create_components( comp_filenames, component_paths_, output_dir ):
 
     # Construct and validate component objects
     components = list()
-    for comp_file in comp_filenames:
-        comp = COMPFile( comp_file, component_paths )
+    for comp_file_ in comp_filenames:
+        comp = COMPFile( comp_file = comp_file_, component_paths = component_paths_, globalOutputDir = output_dir )
         components.append( comp )
 
     return components
@@ -291,6 +291,8 @@ def cmd_info(args):
 
 #------------------------------------------------------------------------------
 def cmd_buildmod(args):
+    output_dir = args.view + '.ctx/obj'
+
     from contexo import ctx_cmod
     from contexo import ctx_base
     from contexo import ctx_envswitch
@@ -381,7 +383,7 @@ def cmd_buildcomp(args):
                                   "N/A" )
 
     # Process components
-    components = create_components( components, cview.getItemPaths('comp') )
+    components = create_components( components, cview.getItemPaths('comp'), output_dir )
     for comp in components:
         ctx_log.ctxlogBeginComponent( comp.name )
 
@@ -389,8 +391,8 @@ def cmd_buildcomp(args):
         lib_dir = os.path.join( outputPath, args.libdir )
         header_dir = os.path.join( outputPath, args.headerdir )
 
-	# TODO: this is unused, what does it fix?
-	# Workaround to get header export to work
+        # TODO: this is unused, what does it fix?
+        # Workaround to get header export to work
         #codemodule_map = dict()
 
         # Build component modules.
@@ -426,6 +428,7 @@ def cmd_buildcomp(args):
 
 
 def cmd_build(args):
+    output_dir = args.view + '.ctx/obj'
     from contexo import ctx_cmod
     from contexo import ctx_base
     from contexo import ctx_envswitch
@@ -449,7 +452,7 @@ def cmd_build(args):
     archPath = list()
     archPath = bc.getArchPath()
     deprecated_tolerate_missing_headers_warning(args)
-    depmgr = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), additionalIncDirs = absIncDirs, legacyCompilingMod = args.legacy_compiling_mod )
+    depmgr = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), additionalIncDirs = absIncDirs, legacyCompilingMod = args.legacy_compiling_mod, globalOutputDir = output_dir )
     session = ctx_base.CTXBuildSession( bc )
     session.setDependencyManager( depmgr )
 
@@ -478,7 +481,7 @@ def cmd_build(args):
     # Process components
     if component_build:
         infoMessage("building components",  6)
-        components = create_components( items, cview.getItemPaths('comp') )
+        components = create_components( items, cview.getItemPaths('comp'), output_dir )
 
         for comp in components:
             ctx_log.ctxlogBeginComponent( comp.name )
@@ -530,6 +533,7 @@ def cmd_build(args):
 
 #------------------------------------------------------------------------------
 def cmd_export(args):
+    output_dir = args.view + '.ctx/obj'
     from contexo import ctx_cmod
     from contexo import ctx_base
     from contexo import ctx_envswitch
@@ -546,7 +550,8 @@ def cmd_export(args):
     cview   = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=bool(args.repo_validation) )
     bc      = getBuildConfiguration( cview,  args )
     deprecated_tolerate_missing_headers_warning(args)
-    depmgr  = CTXDepMgr ( cview.getItemPaths('modules'),  args.fail_on_missing_headers, bc.getArchPath() )
+    # def __init__(self, codeModulePaths = list(), failOnMissingHeaders = False, archPath = list() , additionalIncDirs = None, legacyCompilingMod = False, globalOutputDir = None):
+    depmgr  = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), globalOutputDir = output_dir )
     session = ctx_base.CTXBuildSession( bc )
     session.setDependencyManager( depmgr )
 
@@ -565,7 +570,7 @@ def cmd_export(args):
     main_modules = list() # Excluding dependency modules
     if component_export:
         # Construct and validate component objects
-        components = create_components( export_items, cview.getItemPaths('comp') )
+        components = create_components( export_items, cview.getItemPaths('comp'), output_dir )
         for comp in components:
             for library, compmodules in comp.libraries.items():
                 depmgr.addCodeModules( compmodules, args.tests )

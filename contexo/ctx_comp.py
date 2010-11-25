@@ -41,26 +41,28 @@ comp_result        = {'TITLE':str(), 'DESCRIPTION':str(), 'NAME':str(), 'LIBRARI
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 class COMPFile:
-    def __init__( self, compFilePath, comp_paths):
+    def __init__( self, comp_file = str(), component_paths = str(), globalOutputDir = str()):
         self.displayTitle    = str()
         self.description     = str()
         self.name            = str()
         self.libraries       = dict() # Dictionary where each key is a library name accessing a list of code module names.
         self.publicHeaders   = list()
-        self.path            = compFilePath
+        self.path            = comp_file
         self.buildParams     = ctx_base.CTXBuildParams()
         self.msgSender       = 'COMPFile'
         self.moduleCache     = list()
         self.staticObjects   = dict() # The most recently built static objects, arranged under the library they produce.
+        # TODO: this is needed due to an ugly data dependency in CTXCodeModule - where CTXCodeModule builds and clean while keeping track of the source code - more obvious would be to let buildsession handling the building and CTXCodeModule only the keeping track of source thingy. Remove when CTXCodeModule is sane again.
+        self.globalOutputDir = str()
         #
 
-        self.__resolveCompFileLocation(comp_paths)
+        self.__resolveCompFileLocation(component_paths)
         self.__processCompFile()
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     #   Resolves the location of the comp file by searching in the given paths 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    def __resolveCompFileLocation( self,  comp_paths ):
+    def __resolveCompFileLocation( self,  component_paths ):
 
         tried       = list()
 
@@ -86,10 +88,10 @@ class COMPFile:
         # Now try in system variable
         #
 
-        if type(comp_paths) != list:
-            comp_paths = [comp_paths,]
+        if type(component_paths) != list:
+            component_paths = [component_paths,]
 
-        for path in comp_paths:
+        for path in component_paths:
             candidate = os.path.join( path, self.path )
             if os.path.exists( candidate ):
                 self.path = candidate
@@ -205,7 +207,7 @@ class COMPFile:
         if len(self.moduleCache) == 0:
             for library, modules in self.libraries.items():
                 for module in modules:
-                    cm = ctx_cmod.CTXCodeModule( module, pathlist = None, buildUnitTests = False, forceRebuild = False )
+                    cm = ctx_cmod.CTXCodeModule( module, pathlist = None, buildUnitTests = False, forceRebuild = False, outputDir = self.globalOutputDir )
                     cm.addBuildParams( self.buildParams )
                     self.moduleCache.append( cm )
 
@@ -249,7 +251,7 @@ class COMPFile:
             self.staticObjects[library] = list()
 
             for module in modules:
-                cm = ctx_cmod.CTXCodeModule( module, pathlist = None, buildUnitTests = False, forceRebuild = False )
+                cm = ctx_cmod.CTXCodeModule( module, pathlist = None, buildUnitTests = False, forceRebuild = False, outputDir = self.globalOutputDir )
                 cm.addBuildParams( self.buildParams )
                 self.moduleCache.append( cm )
 

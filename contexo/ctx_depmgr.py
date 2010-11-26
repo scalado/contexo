@@ -221,9 +221,6 @@ class CTXDepMgr: # The dependency manager class.
 #------------------------------------------------------------------------------
     def __init__(self, codeModulePaths = list(), failOnMissingHeaders = False, archPath = list() , additionalIncDirs = None, legacyCompilingMod = False, globalOutputDir = None):
         self.globalOutputDir          = globalOutputDir
-        if globalOutputDir == None: 
-            import pdb
-            pdb.set_trace()
         self.failOnMissingHeaders = failOnMissingHeaders
         self.msgSender                = 'CTXDepMgr'
         self.depRoots                 = list()
@@ -680,9 +677,6 @@ class CTXDepMgr: # The dependency manager class.
 
         for mod in set(input_modules):
             modPath = self.resolveCodeModulePath( mod )
-            if self.globalOutputDir == None:
-                import pdb
-                pdb.set_trace()
             codeModules.append( CTXCodeModule(modPath,
                                               pathlist=None,
                                               buildUnitTests = buildTests,

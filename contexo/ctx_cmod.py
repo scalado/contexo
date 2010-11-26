@@ -210,9 +210,6 @@ class CTXRawCodeModule:
         self.archPath       = archPath
         self.legacyCompilingMod = legacyCompilingMod
         # TODO: cmod should not know about output dir, nor how to build itself. This data dependency should be removed in the future
-        if outputDir == None:
-            import pdb
-            pdb.set_trace()
         self.globalOutputDir = outputDir
 
         assert( os.path.isabs(moduleRoot) )
@@ -364,9 +361,6 @@ class CTXCodeModule( CTXRawCodeModule ):
     #
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     def __init__( self, moduleRoot, pathlist = None, buildUnitTests = False, forceRebuild = False, archPath = list(), legacyCompilingMod = False, outputDir = None ):
-        if outputDir == None:
-            import pdb
-            pdb.set_trace()
         outputDir_ = outputDir
         # def __init__( self, moduleRoot, pathlist = None, buildUnitTests = False ,archPath = list(), legacyCompilingMod = False, outputDir = None):
         CTXRawCodeModule.__init__( self, moduleRoot, pathlist, buildUnitTests, archPath, False, outputDir_ )

@@ -334,7 +334,7 @@ class CTXDepMgr: # The dependency manager class.
             paths.update( assureList( CTXCodeModule(moduleRoot = cmod.modRoot,
                                                     pathlist = None,
                                                     buildUnitTests = False,
-                                                    archPath = self.archPath).resolveExternalDeps() ) )
+                                                    archPath = self.archPath, outputDir = self.globalOutputDir).resolveExternalDeps() ) )
 
         if len(paths) == 0:
             infoMessage("WARNING: List of dependency search paths is empty.", 2)

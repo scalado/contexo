@@ -500,26 +500,3 @@ class CTXCodeModule( CTXRawCodeModule ):
 
         return objlist
 
-    #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-    def clean( self, buildDir = None ):
-        imDirs = list()
-        outputDir = self.getOutputDir()
-
-        if buildDir == None:
-            imDirs = os.listdir( outputDir )
-        else:
-            imDirs = [buildDir,]
-
-        for imDir in imDirs:
-
-            if imDir == '.svn':
-                continue
-
-            imPath = os.path.join( outputDir, imDir )
-
-            if os.path.exists( imPath ):
-                infoMessage("Removing %s"%imPath, 2)
-                if os.path.isfile(imPath):
-                    os.remove( imPath )
-                else:
-                    shutil.rmtree( imPath )

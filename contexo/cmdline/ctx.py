@@ -643,46 +643,17 @@ def cmd_freeze(args):
 
 #------------------------------------------------------------------------------
 def cmd_clean(args):
-
-    from contexo import ctx_cmod
-    from contexo.ctx_depmgr import CTXDepMgr
-    from contexo import ctx_base
-    from contexo import ctx_envswitch
-
-    #
-    # Get Code Module Paths from view.
-    #
-
-    cview = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=bool(args.repo_validation) )
-
-    exp_modules = expand_list_files(cview, args.modules)
-    bc      = getBuildConfiguration( cview,  args )
-    
-    depmgr  = CTXDepMgr ( cview.getItemPaths('modules'),  args.tolerate_missing_headers, bc.getArchPath(), args.legacy_compiling_mod )
-    deprecated_tolerate_missing_headers_warning(args)
-    depmgr = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), legacyCompilingMod = args.legacy_compiling_mod )
-    depmgr.addCodeModules( exp_modules, args.tests )
-
-    session = ctx_base.CTXBuildSession( bc )
-
-    session.setDependencyManager( depmgr )
-
-    #
-    # Determine which modules to clean.
-    #
-
-    if args.deps:
-        module_names = depmgr.getCodeModulesWithDependencies ()
+    output_dir = args.view + os.sep + '.ctx/obj'
+    if args.all == True:
+       import shutil
+       try:
+           shutil.rmtree(output_dir)
+           infoMessage("All objects successfully removed.")
+       except:
+           warningMessage("No objects removed.")
+           pass
     else:
-        module_names = exp_modules
-
-    modules = depmgr.createCodeModules( set(exp_modules) | (set(module_names) - set(exp_modules) ) )
-
-    print "cleaning modules:"
-
-    for module in modules:
-        print " " + module.getName()
-        module.clean (bc.getTitle())
+        errorMessage("Only 'ctx clean --all' can currently be used.")
 
 #------------------------------------------------------------------------------
 def cmd_importview(args):
@@ -890,9 +861,10 @@ parser_build.add_argument('-l',  '--libs', nargs='*',  default = [],  help = "(l
 # clean parser
 parser_clean = subparsers.add_parser('clean', help="clean a module(s) ( and optionaly its dependencies)")
 parser_clean.set_defaults(func=cmd_clean)
-parser_clean.add_argument('modules', nargs='+', help="list of modules to clean")
+parser_clean.add_argument('-a', '--all', action='store_true', help='clean all object files')
+# parser_clean.add_argument('modules', nargs='+', help="DISABLED: list of modules to clean")
 parser_clean.add_argument('-d', '--deps', action='store_true', help=standard_description['--deps'])
-parser_clean.add_argument('-b', '--bconf', help="only clean target files produced from this build configuration.")
+parser_clean.add_argument('-b', '--bconf', help="DISABLED: only clean target files produced from this build configuration.")
 parser_clean.add_argument('-t', '--tests', action='store_true', help=standard_description['--tests'])
 parser_clean.add_argument('-v', '--view', default=os.getcwd(), help=standard_description['--view'])
 parser_clean.add_argument('-rv', '--repo-validation', action='store_true', help=standard_description['--repo-validation'])

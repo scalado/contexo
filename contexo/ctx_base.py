@@ -93,7 +93,7 @@ def prepareCommandFile( commandline,  commandfileName, cdefPath ):
         userErrorExit("Multiple '%s' symbols in ARCOM field is currently not supported.\n    File: %s"%(marker, cdefPath))
 
     #cmdfilename = time.strftime("%y%H%M%S.txt", time.localtime())
-    cmdfilename = os.path.abspath( '' ) + os.sep + commandfileName
+    cmdfilename = commandfileName
 
     # Extract the contents for the commandfile from commandline (everything superceeding the %@ symbol)
     sep = "\"\n\"" # CURRENTLY A HACK FOR IAR!

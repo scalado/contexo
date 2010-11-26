@@ -152,12 +152,12 @@ def getAccessPolicy( args ):
 # of code module names. Unit tests are only enables for main modules (not for
 # dependencies)
 #------------------------------------------------------------------------------
-def create_components( comp_filenames, component_paths ):
+def create_components( comp_filenames, component_paths_, output_dir ):
 
     # Construct and validate component objects
     components = list()
-    for comp_file in comp_filenames:
-        comp = COMPFile( comp_file, component_paths )
+    for comp_file_ in comp_filenames:
+        comp = COMPFile( comp_file = comp_file_, component_paths = component_paths_, globalOutputDir = output_dir )
         components.append( comp )
 
     return components
@@ -299,6 +299,8 @@ def cmd_info(args):
 
 #------------------------------------------------------------------------------
 def cmd_buildmod(args):
+    output_dir = args.view + os.sep + '.ctx/obj'
+
     from contexo import ctx_cmod
     from contexo import ctx_base
     from contexo import ctx_envswitch
@@ -391,7 +393,7 @@ def cmd_buildcomp(args):
                                   "N/A" )
 
     # Process components
-    components = create_components( components, cview.getItemPaths('comp') )
+    components = create_components( components, cview.getItemPaths('comp'), output_dir )
     for comp in components:
         ctx_log.ctxlogBeginComponent( comp.name )
 
@@ -399,8 +401,8 @@ def cmd_buildcomp(args):
         lib_dir = os.path.join( outputPath, args.libdir )
         header_dir = os.path.join( outputPath, args.headerdir )
 
-	# TODO: this is unused, what does it fix?
-	# Workaround to get header export to work
+        # TODO: this is unused, what does it fix?
+        # Workaround to get header export to work
         #codemodule_map = dict()
 
         # Build component modules.
@@ -436,6 +438,7 @@ def cmd_buildcomp(args):
 
 
 def cmd_build(args):
+    output_dir = args.view + os.sep + '.ctx/obj'
     from contexo import ctx_cmod
     from contexo import ctx_base
     from contexo import ctx_envswitch
@@ -460,7 +463,7 @@ def cmd_build(args):
     archPath = list()
     archPath = bc.getArchPath()
     deprecated_tolerate_missing_headers_warning(args)
-    depmgr = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), additionalIncDirs = absIncDirs, legacyCompilingMod = args.legacy_compiling_mod )
+    depmgr = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), additionalIncDirs = absIncDirs, legacyCompilingMod = args.legacy_compiling_mod, globalOutputDir = output_dir )
     session = ctx_base.CTXBuildSession( bc )
     session.setDependencyManager( depmgr )
 
@@ -489,7 +492,7 @@ def cmd_build(args):
     # Process components
     if component_build:
         infoMessage("building components",  6)
-        components = create_components( items, cview.getItemPaths('comp') )
+        components = create_components( items, cview.getItemPaths('comp'), output_dir )
 
         for comp in components:
             ctx_log.ctxlogBeginComponent( comp.name )
@@ -541,6 +544,7 @@ def cmd_build(args):
 
 #------------------------------------------------------------------------------
 def cmd_export(args):
+    output_dir = args.view + os.sep + '.ctx/obj'
     from contexo import ctx_cmod
     from contexo import ctx_base
     from contexo import ctx_envswitch
@@ -558,7 +562,8 @@ def cmd_export(args):
     cview   = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=False )
     bc      = getBuildConfiguration( cview,  args )
     deprecated_tolerate_missing_headers_warning(args)
-    depmgr  = CTXDepMgr ( cview.getItemPaths('modules'),  args.fail_on_missing_headers, bc.getArchPath() )
+    # def __init__(self, codeModulePaths = list(), failOnMissingHeaders = False, archPath = list() , additionalIncDirs = None, legacyCompilingMod = False, globalOutputDir = None):
+    depmgr  = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), globalOutputDir = output_dir )
     session = ctx_base.CTXBuildSession( bc )
     session.setDependencyManager( depmgr )
 
@@ -577,7 +582,7 @@ def cmd_export(args):
     main_modules = list() # Excluding dependency modules
     if component_export:
         # Construct and validate component objects
-        components = create_components( export_items, cview.getItemPaths('comp') )
+        components = create_components( export_items, cview.getItemPaths('comp'), output_dir )
         for comp in components:
             for library, compmodules in comp.libraries.items():
                 depmgr.addCodeModules( compmodules, args.tests )
@@ -646,48 +651,17 @@ def cmd_freeze(args):
 
 #------------------------------------------------------------------------------
 def cmd_clean(args):
-    userErrorExit("'ctx clean' is broken and has thus been disabled.")
-
-    from contexo import ctx_cmod
-    from contexo.ctx_depmgr import CTXDepMgr
-    from contexo import ctx_base
-    from contexo import ctx_envswitch
-
-    #
-    # Get Code Module Paths from view.
-    #
-
-    deprecated_repo_validation_warning(args)
-    cview = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=False )
-
-    exp_modules = expand_list_files(cview, args.modules)
-    bc      = getBuildConfiguration( cview,  args )
-    
-    depmgr  = CTXDepMgr ( cview.getItemPaths('modules'),  args.tolerate_missing_headers, bc.getArchPath(), args.legacy_compiling_mod )
-    deprecated_tolerate_missing_headers_warning(args)
-    depmgr = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), legacyCompilingMod = args.legacy_compiling_mod )
-    depmgr.addCodeModules( exp_modules, args.tests )
-
-    session = ctx_base.CTXBuildSession( bc )
-
-    session.setDependencyManager( depmgr )
-
-    #
-    # Determine which modules to clean.
-    #
-
-    if args.deps:
-        module_names = depmgr.getCodeModulesWithDependencies ()
+    output_dir = args.view + os.sep + '.ctx/obj'
+    if args.all == True:
+       import shutil
+       try:
+           shutil.rmtree(output_dir)
+           infoMessage("All objects successfully removed.")
+       except:
+           warningMessage("No objects removed.")
+           pass
     else:
-        module_names = exp_modules
-
-    modules = depmgr.createCodeModules( set(exp_modules) | (set(module_names) - set(exp_modules) ) )
-
-    print "cleaning modules:"
-
-    for module in modules:
-        print " " + module.getName()
-        module.clean (bc.getTitle())
+        errorMessage("Only 'ctx clean --all' can currently be used.")
 
 #------------------------------------------------------------------------------
 def cmd_importview(args):
@@ -895,9 +869,10 @@ parser_build.add_argument('-l',  '--libs', nargs='*',  default = [],  help = "(l
 # clean parser
 parser_clean = subparsers.add_parser('clean', help="DISABLED: clean a module(s) ( and optionaly its dependencies)")
 parser_clean.set_defaults(func=cmd_clean)
-parser_clean.add_argument('modules', nargs='+', help="list of modules to clean")
+parser_clean.add_argument('-a', '--all', action='store_true', help='clean all object files')
+# parser_clean.add_argument('modules', nargs='+', help="DISABLED: list of modules to clean")
 parser_clean.add_argument('-d', '--deps', action='store_true', help=standard_description['--deps'])
-parser_clean.add_argument('-b', '--bconf', help="only clean target files produced from this build configuration.")
+parser_clean.add_argument('-b', '--bconf', help="DISABLED: only clean target files produced from this build configuration.")
 parser_clean.add_argument('-t', '--tests', action='store_true', help=standard_description['--tests'])
 parser_clean.add_argument('-v', '--view', default=os.getcwd(), help=standard_description['--view'])
 parser_clean.add_argument('-rv', '--repo-validation', action='store_true', help=standard_description['--repo-validation'])

@@ -195,7 +195,7 @@ class CTXRawCodeModule:
     # The constructor aborts execution with an error if the path doesn't
     # qualify as a code module when passing it to isContexoCodeModule().
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
-    def __init__( self, moduleRoot, pathlist = None, buildUnitTests = False ,archPath = list(), legacyCompilingMod = False):
+    def __init__( self, moduleRoot, pathlist = None, buildUnitTests = False ,archPath = list(), legacyCompilingMod = False, outputDir = None):
         self.modName        = str()
         self.modRoot        = str()
         self.srcFiles       = list()
@@ -209,6 +209,11 @@ class CTXRawCodeModule:
         self.buildUnitTests = buildUnitTests
         self.archPath       = archPath
         self.legacyCompilingMod = legacyCompilingMod
+        # TODO: cmod should not know about output dir, nor how to build itself. This data dependency should be removed in the future
+        if outputDir == None:
+            import pdb
+            pdb.set_trace()
+        self.globalOutputDir = outputDir
 
         assert( os.path.isabs(moduleRoot) )
         moduleRoot = os.path.normpath(moduleRoot)
@@ -342,8 +347,9 @@ class CTXRawCodeModule:
     def getDocDir(self):
         return os.path.join( self.modRoot, doc_dirname )
     #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+	# TODO: cmod should not know about output dir, nor how to build itself. This data dependency should be removed in the future
     def getOutputDir(self):
-        return os.path.join( self.modRoot, output_dirname )
+        return self.globalOutputDir
     #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     def hasExternalDependencies( self ):
         xdepends_file = os.path.join( self.getContexoDir(), 'xdepends' )
@@ -357,14 +363,21 @@ class CTXCodeModule( CTXRawCodeModule ):
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     #
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
-    def __init__( self, moduleRoot, pathlist = None, buildUnitTests = False, forceRebuild = False, archPath = list(), legacyCompilingMod = False ):
-        CTXRawCodeModule.__init__( self, moduleRoot, pathlist, buildUnitTests, archPath )
+    def __init__( self, moduleRoot, pathlist = None, buildUnitTests = False, forceRebuild = False, archPath = list(), legacyCompilingMod = False, outputDir = None ):
+        if outputDir == None:
+            import pdb
+            pdb.set_trace()
+        outputDir_ = outputDir
+        # def __init__( self, moduleRoot, pathlist = None, buildUnitTests = False ,archPath = list(), legacyCompilingMod = False, outputDir = None):
+        CTXRawCodeModule.__init__( self, moduleRoot, pathlist, buildUnitTests, archPath, False, outputDir_ )
         self.moduleTag     = str()
         self.buildParams   = ctx_base.CTXBuildParams()
         self.buildDir      = str()
         self.rebuildAll    = forceRebuild
         self.msgSender     = 'CTXCodeModule'
         self.legacyCompilingMod = legacyCompilingMod
+        # TODO: cmod should not know about output dir, nor how to build itself. This data dependency should be removed in the future
+        self.globalOutputDir = outputDir
 
         # the preprocessor define COMPILING_MOD_ is a legacy definition,
         # initially created to make sure private headers were not included in a project.
@@ -487,26 +500,3 @@ class CTXCodeModule( CTXRawCodeModule ):
 
         return objlist
 
-    #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-    def clean( self, buildDir = None ):
-        imDirs = list()
-        outputDir = self.getOutputDir()
-
-        if buildDir == None:
-            imDirs = os.listdir( outputDir )
-        else:
-            imDirs = [buildDir,]
-
-        for imDir in imDirs:
-
-            if imDir == '.svn':
-                continue
-
-            imPath = os.path.join( outputDir, imDir )
-
-            if os.path.exists( imPath ):
-                infoMessage("Removing %s"%imPath, 2)
-                if os.path.isfile(imPath):
-                    os.remove( imPath )
-                else:
-                    shutil.rmtree( imPath )

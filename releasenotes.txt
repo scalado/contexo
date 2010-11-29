@@ -1,3 +1,6 @@
+Contexo 0.10.3
+Bugfix: buildcomp fixed
+
 Contexo 0.10.2
 New Feature: 'ctx clean -a' and 'ctx clean --all' cleans all object files.All other cleaning features are disabled due to some internal refactoring.
 Bugfix: deprecated '--repo-validation','-rv' which caused some extra roundtrips (bad over vpn) and caused some problems when the PATH was set and Contexo couldn't find git. This makes Contexo significally faster at building and exporting. Validation can still be manually performed with 'ctx view validate' and 'ctx view update'.

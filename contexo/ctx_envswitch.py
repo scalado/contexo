@@ -122,6 +122,9 @@ def switchEnvironment( newEnvLayout, preserve = True ):
     newEnvDict = curEnv.getEnv()
     for key, value in newEnvDict.iteritems():
         os.environ[key] = value
+        # Don't mangle the PATH for git, but instead append it to the env-set PATH
+        if key == 'PATH':
+            os.environ[key] = value + os.pathsep + oldEnv.getVar(key)
 
     remKeys = list()
     for key, value in os.environ.iteritems():

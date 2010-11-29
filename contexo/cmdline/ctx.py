@@ -383,7 +383,7 @@ def cmd_buildcomp(args):
 
     bc          = getBuildConfiguration( cview,  args )
     deprecated_tolerate_missing_headers_warning(args)
-    depmgr = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), legacyCompilingMod = args.legacy_compiling_mod )
+    depmgr = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), legacyCompilingMod = args.legacy_compiling_mod, globalOutputDir = output_dir )
     session     = ctx_base.CTXBuildSession( bc )
     session.setDependencyManager( depmgr )
 

@@ -251,6 +251,7 @@ def buildmodules( depmgr, session, modules, args, output_path, build_dir,  libra
 
 #------------------------------------------------------------------------------
 def cmd_info(args):
+    output_dir = args.view + os.sep + '.ctx/obj'
     from contexo.ctx_depmgr import CTXDepMgr
 
     #
@@ -360,6 +361,7 @@ def cmd_buildmod(args):
 
 #------------------------------------------------------------------------------
 def cmd_buildcomp(args):
+    output_dir = args.view + os.sep + '.ctx/obj'
     from contexo import ctx_cmod
     from contexo import ctx_base
     from contexo import ctx_envswitch
@@ -714,6 +716,7 @@ def cmd_view(args):
 
 #------------------------------------------------------------------------------
 def cmd_prop(args):
+    output_dir = args.view + os.sep + '.ctx/obj'
 
     available_properties = ['bconf','rspec','verb','bconf_paths', \
                             'cdef_paths', 'env_paths']

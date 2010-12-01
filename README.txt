@@ -3,6 +3,7 @@ Installation prerequisites
 Python
 ------
 Contexo II requires Python version 2.5 or later but not the 3.x series.
+Problems have been encountered with the Python 2.7 series, please do not use these releases until noted otherwise.
 http://www.python.org/download/
 
 pysvn

@@ -1,3 +1,7 @@
+Contexo 0.11.0-testing
+CR: Contexo now has a constant working directory relative to the root, this makes it possible to use relative PATHs in .bc files, to eg, put a toolchain in the repository for easy setting up and access.
+The relative PATH that may be used to access the view root is '../../../'.
+
 Contexo 0.10.3
 Bugfix: environment problems such as the one below should be resolved now:
 10:00:36 ERROR     (C:\Python26\lib\site-packages\contexo\ctx_repo_git.py:25):

@@ -152,12 +152,12 @@ def getAccessPolicy( args ):
 # of code module names. Unit tests are only enables for main modules (not for
 # dependencies)
 #------------------------------------------------------------------------------
-def create_components( comp_filenames, component_paths_, output_dir ):
+def create_components( comp_filenames, component_paths_, obj_dir ):
 
     # Construct and validate component objects
     components = list()
     for comp_file_ in comp_filenames:
-        comp = COMPFile( comp_file = comp_file_, component_paths = component_paths_, globalOutputDir = output_dir )
+        comp = COMPFile( comp_file = comp_file_, component_paths = component_paths_, globalOutputDir = obj_dir )
         components.append( comp )
 
     return components
@@ -251,14 +251,15 @@ def buildmodules( depmgr, session, modules, args, output_path, build_dir,  libra
 
 #------------------------------------------------------------------------------
 def cmd_info(args):
-    output_dir = args.view + os.sep + '.ctx/obj'
+    view_dir = os.path.abspath(args.view)
+    obj_dir = view_dir + os.sep + '.ctx/obj'
     from contexo.ctx_depmgr import CTXDepMgr
 
     #
     # Get Code Module Paths from view.
     #
 
-    cview = ctx_view.CTXView(args.view, ctx_view.AP_NO_REMOTE_ACCESS, False, False)
+    cview = ctx_view.CTXView(view_dir, ctx_view.AP_NO_REMOTE_ACCESS, False, False)
 
     #
     # Show info
@@ -300,7 +301,9 @@ def cmd_info(args):
 
 #------------------------------------------------------------------------------
 def cmd_buildmod(args):
-    output_dir = args.view + os.sep + '.ctx/obj'
+    view_dir = os.path.abspath(args.view)
+    obj_dir = view_dir + os.sep + '.ctx/obj'
+    lib_output_dir = os.path.abspath(args.output)
 
     from contexo import ctx_cmod
     from contexo import ctx_base
@@ -318,7 +321,7 @@ def cmd_buildmod(args):
 
     # Prepare all
     deprecated_repo_validation_warning(args)
-    cview   = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=False )
+    cview   = ctx_view.CTXView( view_dir, getAccessPolicy(args), validate=False )
     modules = expand_list_files(cview, args.modules)
     bc      = getBuildConfiguration( cview,  args )
     deprecated_tolerate_missing_headers_warning(args)
@@ -339,16 +342,16 @@ def cmd_buildmod(args):
                                   bc.getBuildParams().prepDefines,
                                   "N/A" )
 
-    output_path = os.path.join( args.output, args.libdir )
+    output_path = os.path.join( lib_output_dir, args.libdir )
 
     buildmodules( depmgr, session, modules, args, output_path, bc.getTitle(),  libraryName = args.lib)
 
-    header_path = os.path.join(args.output, args.headerdir )
+    header_path = os.path.join(lib_output_dir, args.headerdir )
     export_public_module_headers( depmgr, modules, header_path )
 
     # Write log if requested
     if args.logfile != None:
-        logfilepath = os.path.join( args.output, args.logfile )
+        logfilepath = os.path.join( lib_output_dir, args.logfile )
         logpath     = os.path.normpath(os.path.dirname( logfilepath ))
         if len(logpath) and not os.path.isdir(logpath):
             os.makedirs( logpath )
@@ -361,7 +364,9 @@ def cmd_buildmod(args):
 
 #------------------------------------------------------------------------------
 def cmd_buildcomp(args):
-    output_dir = args.view + os.sep + '.ctx/obj'
+    view_dir = os.path.abspath(args.view)
+    obj_dir = view_dir + os.sep + '.ctx/obj'
+    lib_output_dir = os.path.abspath(args.output)
     from contexo import ctx_cmod
     from contexo import ctx_base
     from contexo import ctx_envswitch
@@ -378,12 +383,12 @@ def cmd_buildcomp(args):
 
     # Prepare all
     deprecated_repo_validation_warning(args)
-    cview       = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=False )
+    cview       = ctx_view.CTXView( view_dir, getAccessPolicy(args), validate=False )
     components  = expand_list_files( cview, args.components )
 
     bc          = getBuildConfiguration( cview,  args )
     deprecated_tolerate_missing_headers_warning(args)
-    depmgr = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), legacyCompilingMod = args.legacy_compiling_mod, globalOutputDir = output_dir )
+    depmgr = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), legacyCompilingMod = args.legacy_compiling_mod, globalOutputDir = obj_dir )
     session     = ctx_base.CTXBuildSession( bc )
     session.setDependencyManager( depmgr )
 
@@ -395,11 +400,11 @@ def cmd_buildcomp(args):
                                   "N/A" )
 
     # Process components
-    components = create_components( components, cview.getItemPaths('comp'), output_dir )
+    components = create_components( components, cview.getItemPaths('comp'), obj_dir )
     for comp in components:
         ctx_log.ctxlogBeginComponent( comp.name )
 
-        outputPath = args.output
+        outputPath = lib_output_dir
         lib_dir = os.path.join( outputPath, args.libdir )
         header_dir = os.path.join( outputPath, args.headerdir )
 
@@ -426,7 +431,7 @@ def cmd_buildcomp(args):
 
     # Write log if requested
     if args.logfile != None:
-        logfilepath = os.path.join( args.output, args.logfile )
+        logfilepath = os.path.join( lib_output_dir, args.logfile )
         logpath     = os.path.normpath(os.path.dirname( logfilepath ))
         if len(logpath) and not os.path.isdir(logpath):
             os.makedirs( logpath )
@@ -440,7 +445,11 @@ def cmd_buildcomp(args):
 
 
 def cmd_build(args):
-    output_dir = args.view + os.sep + '.ctx/obj'
+    view_dir = os.path.abspath(args.view)
+    obj_dir = view_dir + os.sep + '.ctx/obj'
+    lib_output_dir = os.path.abspath(args.output)
+    lib_dirs = map(os.path.abspath, args.libdirs)
+
     from contexo import ctx_cmod
     from contexo import ctx_base
     from contexo import ctx_envswitch
@@ -457,15 +466,15 @@ def cmd_build(args):
 
     # Prepare all
     deprecated_repo_validation_warning(args)
-    cview   = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=False )
+    cview   = ctx_view.CTXView( view_dir, getAccessPolicy(args), validate=False )
     bc      = getBuildConfiguration( cview,  args )
     bc.buildParams.incPaths.extend(     absIncDirs ) #TODO: accessing 'private' data?
-    bc.buildParams.ldDirs.extend(args.libdirs)
+    bc.buildParams.ldDirs.extend(lib_dirs)
     bc.buildParams.ldLibs.extend(args.libs)
     archPath = list()
     archPath = bc.getArchPath()
     deprecated_tolerate_missing_headers_warning(args)
-    depmgr = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), additionalIncDirs = absIncDirs, legacyCompilingMod = args.legacy_compiling_mod, globalOutputDir = output_dir )
+    depmgr = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), additionalIncDirs = absIncDirs, legacyCompilingMod = args.legacy_compiling_mod, globalOutputDir = obj_dir )
     session = ctx_base.CTXBuildSession( bc )
     session.setDependencyManager( depmgr )
 
@@ -487,14 +496,14 @@ def cmd_build(args):
                                   bc.getBuildParams().cflags,
                                   bc.getBuildParams().prepDefines,
                                   "N/A" )
-    outputPath = args.output
+    outputPath = lib_output_dir
     bin_dir = os.path.join( outputPath, args.bindir )
     header_dir = os.path.join( outputPath, args.headerdir )
     objs = list()
     # Process components
     if component_build:
         infoMessage("building components",  6)
-        components = create_components( items, cview.getItemPaths('comp'), output_dir )
+        components = create_components( items, cview.getItemPaths('comp'), obj_dir )
 
         for comp in components:
             ctx_log.ctxlogBeginComponent( comp.name )
@@ -512,7 +521,7 @@ def cmd_build(args):
                 objs += buildmodules( depmgr, session,  modules,  args, bin_dir, session.bc.getTitle(),  args.library_name)
 
                 if (args.all_headers):
-                    header_path = os.path.join(args.output, args.headerdir )
+                    header_path = os.path.join(lib_output_dir, args.headerdir )
                     export_public_module_headers( depmgr, modules, header_path )
 
                 depmgr.emptyCodeModules()
@@ -531,7 +540,7 @@ def cmd_build(args):
 
     # Write log if requested
     if args.logfile != None:
-        logfilepath = os.path.join( args.output, args.logfile )
+        logfilepath = os.path.join( lib_output_dir, args.logfile )
         logpath     = os.path.normpath(os.path.dirname( logfilepath ))
         if len(logpath) and not os.path.isdir(logpath):
             os.makedirs( logpath )
@@ -546,7 +555,8 @@ def cmd_build(args):
 
 #------------------------------------------------------------------------------
 def cmd_export(args):
-    output_dir = args.view + os.sep + '.ctx/obj'
+    view_dir = os.path.abspath(args.view)
+    obj_dir = view_dir + os.sep + '.ctx/obj'
     from contexo import ctx_cmod
     from contexo import ctx_base
     from contexo import ctx_envswitch
@@ -561,11 +571,11 @@ def cmd_export(args):
 
     # Prepare all
     deprecated_repo_validation_warning(args)
-    cview   = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=False )
+    cview   = ctx_view.CTXView( view_dir, getAccessPolicy(args), validate=False )
     bc      = getBuildConfiguration( cview,  args )
     deprecated_tolerate_missing_headers_warning(args)
     # def __init__(self, codeModulePaths = list(), failOnMissingHeaders = False, archPath = list() , additionalIncDirs = None, legacyCompilingMod = False, globalOutputDir = None):
-    depmgr  = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), globalOutputDir = output_dir )
+    depmgr  = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), globalOutputDir = obj_dir )
     session = ctx_base.CTXBuildSession( bc )
     session.setDependencyManager( depmgr )
 
@@ -584,7 +594,7 @@ def cmd_export(args):
     main_modules = list() # Excluding dependency modules
     if component_export:
         # Construct and validate component objects
-        components = create_components( export_items, cview.getItemPaths('comp'), output_dir )
+        components = create_components( export_items, cview.getItemPaths('comp'), obj_dir )
         for comp in components:
             for library, compmodules in comp.libraries.items():
                 depmgr.addCodeModules( compmodules, args.tests )
@@ -622,7 +632,7 @@ def cmd_updateview(args):
     if args.updates_only == True and args.checkouts_only == True:
         userErrorExit("Options '--updates_only' and '--checkouts-only' are mutually exclusive.")
 
-    cview = ctx_view.CTXView( args.view, getAccessPolicy(args), updating=True, validate=True )
+    cview = ctx_view.CTXView( view_dir, getAccessPolicy(args), updating=True, validate=True )
 
     if args.checkouts_only == False:
         cview.updateRepositories()
@@ -634,30 +644,32 @@ def cmd_updateview(args):
 def cmd_validateview(args):
 
     # The view will validate itself in the constructor
-    cview = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=True )
+    cview = ctx_view.CTXView( view_dir, getAccessPolicy(args), validate=True )
 
     infoMessage("Validation complete", 1)
 
 #------------------------------------------------------------------------------
 def cmd_freeze(args):
+    lib_output_dir = os.path.abspath(args.output)
     import xml.sax
     import sys
     #from  contexo.ctx_rspec_file_freeze import rspecFileRevisionFreezer
 
     fileOut = sys.stdout
     deprecated_repo_validation_warning(args)
-    cview = ctx_view.CTXView( args.view, getAccessPolicy(args), validate=False )
-    if args.output is not None:
-        fileOut = open(args.output,  mode = 'wt')
+    cview = ctx_view.CTXView( view_dir, getAccessPolicy(args), validate=False )
+    if lib_output_dir is not None:
+        fileOut = open(lib_output_dir,  mode = 'wt')
     cview.freeze(output=fileOut)
 
 #------------------------------------------------------------------------------
 def cmd_clean(args):
-    output_dir = args.view + os.sep + '.ctx/obj'
+    view_dir = os.path.abspath(args.view)
+    obj_dir = view_dir + os.sep + '.ctx/obj'
     if args.all == True:
        import shutil
        try:
-           shutil.rmtree(output_dir)
+           shutil.rmtree(obj_dir)
            infoMessage("All objects successfully removed.")
        except:
            warningMessage("No objects removed.")
@@ -689,12 +701,12 @@ def cmd_view(args):
     #if args.fromfile.__len__() > 0:
 
 
-    cview = getViewDefinition(args.view)
+    cview = getViewDefinition(view_dir)
 
     if args.switch:
         default_view = cfgFile.getDefaultView()
 
-        new_default_view = os.path.abspath (args.view)
+        new_default_view = os.path.abspath (view_dir)
 
         cfgFile.setDefaultView ( new_default_view )
 
@@ -716,7 +728,8 @@ def cmd_view(args):
 
 #------------------------------------------------------------------------------
 def cmd_prop(args):
-    output_dir = args.view + os.sep + '.ctx/obj'
+    view_dir = os.path.abspath(args.view)
+    obj_dir = view_dir + os.sep + '.ctx/obj'
 
     available_properties = ['bconf','rspec','verb','bconf_paths', \
                             'cdef_paths', 'env_paths']

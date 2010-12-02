@@ -7,7 +7,8 @@
 #                                                                             #
 #   ------------                                                              #
 #                                                                             #
-#   Implementation of CTXRepository for regular file systems                  #                                                                             #                                                                             #
+#   Implementation of CTXRepository for regular file systems                  #
+#                                                                             #
 ###############################################################################
 
 from ctx_repo import *
@@ -81,44 +82,31 @@ class CTXRepositoryFS(CTXRepository):
        return ''
     #--------------------------------------------------------------------------
     def update(self):
-        import ctx_view
+        if not treesAreEqual( self.getAbsLocalPath(), self.getHref() ):
 
-        ctxAssert( self.isLocal(), "This method should not be called without first checking for an existing local copy." )
-        ctxAssert( self.getAccessPolicy() != None, "No access policy has been set for repository '%s'"%(self.getID()) )
+            print '\n'
+            infoMessage("Regular file repository '%s' is out of sync.\n'%s' and '%s' doesn't match. The system is unable to\nperform intelligent synchronization of non-revisioned repositories.\nDo you want to overwrite (delete and replace) the local copy '%s'\nwith the contents of the remote copy '%s'?"\
+                %(self.getID(), self.getAbsLocalPath(), self.getHref(), self.getAbsLocalPath(), self.getHref() ), 0)
+            choice = raw_input( "> yes/no: " ).lower()
 
-        if self.getAccessPolicy() == ctx_view.AP_PREFER_REMOTE_ACCESS:
-            infoMessage("Repository '%s' (%s) is accessed from its remote location, skipping update."%(self.getID(), self.getHref()), 1)
-
-        elif self.getAccessPolicy() == ctx_view.AP_NO_REMOTE_ACCESS:
-
-            if not treesAreEqual( self.getAbsLocalPath(), self.getHref() ):
-
-                print '\n'
-                infoMessage("Regular file repository '%s' is out of sync.\n'%s' and '%s' doesn't match. The system is unable to\nperform intelligent synchronization of non-revisioned repositories.\nDo you want to overwrite (delete and replace) the local copy '%s'\nwith the contents of the remote copy '%s'?"\
-                             %(self.getID(), self.getAbsLocalPath(), self.getHref(), self.getAbsLocalPath(), self.getHref() ), 0)
+            while choice not in ['yes','no']:
+                infoMessage("Invalid choice, try again.", 0)
                 choice = raw_input( "> yes/no: " ).lower()
 
-                while choice not in ['yes','no']:
-                    infoMessage("Invalid choice, try again.", 0)
-                    choice = raw_input( "> yes/no: " ).lower()
+            if choice == 'yes':
+                infoMessage("Updating (replacing) local copy '%s' with '%s'"\
+                    %(self.getAbsLocalPath(), self.getHref()), 1)
 
-                if   choice == 'yes':
-                    infoMessage("Updating (replacing) local copy '%s' with '%s'"\
-                                 %(self.getAbsLocalPath(), self.getHref()), 1)
+                shutil.rmtree( self.getAbsLocalPath() )
+                shutil.copytree( self.getHref(), self.getAbsLocalPath() )
 
-                    shutil.rmtree( self.getAbsLocalPath() )
-                    shutil.copytree( self.getHref(), self.getAbsLocalPath() )
+            elif choice == 'no':
+                infoMessage("Skipping update of repository '%s'"%self.getID(), 2)
 
-                elif choice == 'no':
-                    infoMessage("Skipping update of repository '%s'"%self.getID(), 2)
-
-                else:
-                    ctxAssert( False, "Unhandled choice" )
             else:
-                infoMessage("Repository '%s' (%s) is up to date"%(self.getID(), self.getHref()), 1)
-
+                ctxAssert( False, "Unhandled choice" )
         else:
-            ctxAssert( False, "Unhandled access policy '%d'"%self.getAccessPolicy() )
+            infoMessage("Repository '%s' (%s) is up to date"%(self.getID(), self.getHref()), 1)
 
     #--------------------------------------------------------------------------
     def checkout(self):
@@ -127,17 +115,9 @@ class CTXRepositoryFS(CTXRepository):
         ctxAssert( self.isLocal() == False,
                    "This method should not be called without first checking for an existing local copy." )
 
-        if self.getAccessPolicy() == ctx_view.AP_PREFER_REMOTE_ACCESS:
-            infoMessage("Repository '%s' (%s) is accessible from its remote location, skipping checkout."
-                         %(self.getID(), self.getHref()), 1)
-
-        elif self.getAccessPolicy() == ctx_view.AP_NO_REMOTE_ACCESS:
-            infoMessage("Checking out repository '%s' (%s) to '%s'"
-                         %(self.getID(), self.getHref(), self.getAbsLocalPath()), 1)
-            shutil.copytree( self.getHref(), self.getAbsLocalPath() )
-
-        else:
-            ctxAssert( False, "Unhandled access policy '%d'"%self.getAccessPolicy() )
+        infoMessage("Checking out repository '%s' (%s) to '%s'"
+            %(self.getID(), self.getHref(), self.getAbsLocalPath()), 1)
+        shutil.copytree( self.getHref(), self.getAbsLocalPath() )
 
     #--------------------------------------------------------------------------
     def checkValidRevision(self):

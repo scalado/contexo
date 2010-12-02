@@ -72,6 +72,13 @@ def deprecated_repo_validation_warning(args):
     if args.repo_validation:
         warningMessage('--repo-validation is deprecated. Please run \'ctx view validate\' manually to validate the view.')
 
+#------------------------------------------------------------------------------
+def deprecated_nra_warning( args ):
+
+    if args.no_remote_repo_access == True:
+        warningMessage("--no-repo-access is deprecated. remote access will always be performed when running 'ctx view update' and 'ctx view validate'. At other times, there will be no network communication and .rspecs will be cached.")
+
+
 
 #------------------------------------------------------------------------------
 def getBuildConfiguration( cview ,  args):
@@ -135,16 +142,6 @@ def expand_list_files( view, item_list ):
 
     return expanded_item_list
 
-
-#------------------------------------------------------------------------------
-def getAccessPolicy( args ):
-
-    if args.no_remote_repo_access == True:
-        ap = ctx_view.AP_NO_REMOTE_ACCESS
-    else:
-        ap = ctx_view.AP_PREFER_REMOTE_ACCESS
-
-    return ap
 
 
 #------------------------------------------------------------------------------
@@ -259,7 +256,7 @@ def cmd_info(args):
     # Get Code Module Paths from view.
     #
 
-    cview = ctx_view.CTXView(view_dir, ctx_view.AP_NO_REMOTE_ACCESS, False, False)
+    cview = ctx_view.CTXView(view_path=view_dir, updating=False, validate=False)
 
     #
     # Show info
@@ -320,8 +317,9 @@ def cmd_buildmod(args):
         ctx_log.ctxlogStart()
 
     # Prepare all
+    deprecated_nra_warning( args )
     deprecated_repo_validation_warning(args)
-    cview   = ctx_view.CTXView( view_dir, getAccessPolicy(args), validate=False )
+    cview   = ctx_view.CTXView( view_dir, validate=False )
     modules = expand_list_files(cview, args.modules)
     bc      = getBuildConfiguration( cview,  args )
 
@@ -396,8 +394,9 @@ def cmd_buildcomp(args):
         ctx_log.ctxlogStart()
 
     # Prepare all
+    deprecated_nra_warning( args )
     deprecated_repo_validation_warning(args)
-    cview       = ctx_view.CTXView( view_dir, getAccessPolicy(args), validate=False )
+    cview       = ctx_view.CTXView( view_dir, validate=False )
     components  = expand_list_files( cview, args.components )
 
     bc          = getBuildConfiguration( cview,  args )
@@ -488,8 +487,9 @@ def cmd_build(args):
     absIncDirs = map(os.path.abspath,  args.incdirs)
 
     # Prepare all
+    deprecated_nra_warning( args )
     deprecated_repo_validation_warning(args)
-    cview   = ctx_view.CTXView( view_dir, getAccessPolicy(args), validate=False )
+    cview   = ctx_view.CTXView( view_dir, validate=False )
     bc      = getBuildConfiguration( cview,  args )
     bc.buildParams.incPaths.extend(     absIncDirs ) #TODO: accessing 'private' data?
     bc.buildParams.ldDirs.extend(lib_dirs)
@@ -604,8 +604,9 @@ def cmd_export(args):
         oldEnv    = switchEnvironment( envLayout, True )
 
     # Prepare all
+    deprecated_nra_warning(args)
     deprecated_repo_validation_warning(args)
-    cview   = ctx_view.CTXView( view_dir, getAccessPolicy(args), validate=False )
+    cview   = ctx_view.CTXView( view_dir, validate=False )
     bc      = getBuildConfiguration( cview,  args )
     deprecated_tolerate_missing_headers_warning(args)
     # def __init__(self, codeModulePaths = list(), failOnMissingHeaders = False, archPath = list() , additionalIncDirs = None, legacyCompilingMod = False, globalOutputDir = None):
@@ -665,8 +666,8 @@ def cmd_updateview(args):
 
     if args.updates_only == True and args.checkouts_only == True:
         userErrorExit("Options '--updates_only' and '--checkouts-only' are mutually exclusive.")
-
-    cview = ctx_view.CTXView( view_dir, getAccessPolicy(args), updating=True, validate=True )
+    deprecated_nra_warning(args)
+    cview = ctx_view.CTXView( view_dir, updating=True, validate=True )
 
     if args.checkouts_only == False:
         cview.updateRepositories()
@@ -678,7 +679,8 @@ def cmd_updateview(args):
 def cmd_validateview(args):
 
     # The view will validate itself in the constructor
-    cview = ctx_view.CTXView( view_dir, getAccessPolicy(args), validate=True )
+    deprecated_nra_warning(args)
+    cview = ctx_view.CTXView( args.view, validate=True )
 
     infoMessage("Validation complete", 1)
 
@@ -690,8 +692,9 @@ def cmd_freeze(args):
     #from  contexo.ctx_rspec_file_freeze import rspecFileRevisionFreezer
 
     fileOut = sys.stdout
+    deprecated_nra_warning(args)
     deprecated_repo_validation_warning(args)
-    cview = ctx_view.CTXView( view_dir, getAccessPolicy(args), validate=False )
+    cview = ctx_view.CTXView( view_dir, validate=False )
     if lib_output_dir is not None:
         fileOut = open(lib_output_dir,  mode = 'wt')
     cview.freeze(output=fileOut)
@@ -708,8 +711,6 @@ def cmd_clean(args):
        except:
            warningMessage("No objects removed.")
            pass
-    else:
-        errorMessage("Only 'ctx clean --all' can currently be used.")
 
 #------------------------------------------------------------------------------
 def cmd_importview(args):
@@ -831,7 +832,7 @@ standard_description = dict({\
      '--view': "The local view directory to use for this operation. If omitted, current working directory is used.",\
   '--logfile': "Name of logfile to generate. Will be created in output folder as defined by the --output option.",\
 '--repo-validation': "DEPRECATED: validation is only performed by the subcommands 'ctx freeze', 'ctx view', and 'ctx validate'",\
-'--no-remote-repo-access': "If specified, the system never tries to process items directly from an RSpec repository's remote location (href) even if so is possible. Normally, if a repository is accessible through regular file access, the system always tries to use it from its remote location.",\
+'--no-remote-repo-access': "DEPRECATED: this option is ignored. remote access will always be performed when running ctx view update. At all other times: .rspecs will be cached.",\
 '--force':"Forces building all source files", \
 '--fail-on-missing-headers':"Abort the build if a header is missing.",\
 '--legacy-compiling-mod':"Enables legacy COMPILING_MOD_<MODULENAME> preprocessor defines which may be needed to build code which relied on this previous behaviour (in Contexo 0.8.0 and earlier).", \

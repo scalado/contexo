@@ -119,23 +119,13 @@ class CTXRepository:
 
     #--------------------------------------------------------------------------
     def getFullPaths( self, path_section ):
-        from ctx_view import AP_PREFER_REMOTE_ACCESS, AP_NO_REMOTE_ACCESS
-
         ctxAssert( path_section in REPO_PATH_SECTIONS, "Unknown path section '%s'"%(path_section) )
-        ctxAssert( self.access_policy != None, "No access policy was set for repository '%s'"%self.getID() )
         ctxAssert( self.view_root != None, "No view root path was set for repository '%s'"%self.getID() )
 
         full_paths = set()
 
-        if self.access_policy == AP_PREFER_REMOTE_ACCESS and self.isVersionControlled() == False:
-            for path in self.relative_paths[path_section]:
-                full_paths.add( os.path.normpath( os.path.join( os.path.abspath( self.getHref() ), path) ) )
-
-        elif self.access_policy == AP_NO_REMOTE_ACCESS or self.isVersionControlled() == True:
-            for path in self.relative_paths[path_section]:
-                full_paths.add( os.path.normpath( os.path.join( self.getAbsLocalPath() , path   ) ) )
-        else:
-            ctxAssert( False, "Unhandled access policy" )
+        for path in self.relative_paths[path_section]:
+            full_paths.add( os.path.normpath( os.path.join( self.getAbsLocalPath() , path   ) ) )
 
         return list(full_paths)
 
@@ -158,20 +148,6 @@ class CTXRepository:
     #--------------------------------------------------------------------------
     def isVersionControlled( self ):
         return self.version_control
-
-    #--------------------------------------------------------------------------
-    def setAccessPolicy( self, access_policy ):
-        from ctx_view import AP_PREFER_REMOTE_ACCESS, AP_NO_REMOTE_ACCESS, AP_FLAGS
-
-        self.access_policy = access_policy
-
-        if not self.isVersionControlled() and self.access_policy == AP_PREFER_REMOTE_ACCESS:
-            infoMessage("Repository '%s' will be used (built and/or accessed) from its remote source location '%s'.\n(Use option '%s' to force the system to access this repository from the local view)"\
-                         %(self.getID(), self.getHref(), AP_FLAGS[AP_NO_REMOTE_ACCESS] ), 2)
-
-    #--------------------------------------------------------------------------
-    def getAccessPolicy(self):
-        return self.access_policy
 
     #--------------------------------------------------------------------------
     def setViewRoot( self, view_root ):

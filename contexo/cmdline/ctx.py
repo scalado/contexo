@@ -324,6 +324,8 @@ def cmd_buildmod(args):
     cview   = ctx_view.CTXView( view_dir, getAccessPolicy(args), validate=False )
     modules = expand_list_files(cview, args.modules)
     bc      = getBuildConfiguration( cview,  args )
+
+
     deprecated_tolerate_missing_headers_warning(args)
     depmgr = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), legacyCompilingMod = args.legacy_compiling_mod )
 
@@ -344,10 +346,22 @@ def cmd_buildmod(args):
 
     output_path = os.path.join( lib_output_dir, args.libdir )
 
+    ## TODO: place this in CTXCompiler where it belongs when the spaghetti code is gone
+    ## changing working directory to .ctx/obj/[BUILDCONFIGNAME]
+    dest_wd = os.path.join(obj_dir, bc.getTitle())
+    try:
+        os.makedirs(dest_wd)
+    except:
+        pass
+    old_path = os.path.abspath('')
+    os.chdir(dest_wd)
+ 
     buildmodules( depmgr, session, modules, args, output_path, bc.getTitle(),  libraryName = args.lib)
+    old_path = os.path.abspath('')
 
     header_path = os.path.join(lib_output_dir, args.headerdir )
     export_public_module_headers( depmgr, modules, header_path )
+
 
     # Write log if requested
     if args.logfile != None:
@@ -398,7 +412,16 @@ def cmd_buildcomp(args):
                                   bc.getBuildParams().cflags,
                                   bc.getBuildParams().prepDefines,
                                   "N/A" )
-
+    ## TODO: place this in CTXCompiler where it belongs when the spaghetti code is gone
+    ## changing working directory to .ctx/obj/[BUILDCONFIGNAME]
+    dest_wd = os.path.join(obj_dir, bc.getTitle())
+    try:
+        os.makedirs(dest_wd)
+    except:
+        pass
+    old_path = os.path.abspath('')
+    os.chdir(dest_wd)
+ 
     # Process components
     components = create_components( components, cview.getItemPaths('comp'), obj_dir )
     for comp in components:
@@ -437,7 +460,7 @@ def cmd_buildcomp(args):
             os.makedirs( logpath )
 
         ctx_log.ctxlogWriteToFile( logfilepath, appendToExisting=False )
-
+    os.chdir(old_path)
 
     # Restore environment
     if args.env != None:
@@ -500,6 +523,16 @@ def cmd_build(args):
     bin_dir = os.path.join( outputPath, args.bindir )
     header_dir = os.path.join( outputPath, args.headerdir )
     objs = list()
+    ## TODO: place this in CTXCompiler where it belongs when the spaghetti code is gone
+    ## changing working directory to .ctx/obj/[BUILDCONFIGNAME]
+    dest_wd = os.path.join(obj_dir, bc.getTitle())
+    try:
+        os.makedirs(dest_wd)
+    except:
+        pass
+    old_path = os.path.abspath('')
+    os.chdir(dest_wd)
+ 
     # Process components
     if component_build:
         infoMessage("building components",  6)
@@ -547,6 +580,7 @@ def cmd_build(args):
 
         ctx_log.ctxlogWriteToFile( logfilepath, appendToExisting=False )
 
+    os.chdir(old_path)
 
     # Restore environment
     if args.env != None:

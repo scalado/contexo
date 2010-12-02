@@ -1,4 +1,5 @@
 Contexo 0.11.0
+NOTE: .bc files using relative search path for compiler toolchain may require this release, thus it's marked a major release although not urgent.
 CR: Contexo now has a constant working directory relative to the root, this makes it possible to use relative PATHs in .bc files, to eg, put a toolchain in the repository for easy setting up and access.
 The relative PATH that may be used to access the view root is '../../../'.
 CR: caching of .rspecs using the ctx-import directive, to only update rspecs when using 'ctx view update'

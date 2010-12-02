@@ -667,7 +667,7 @@ def cmd_updateview(args):
     if args.updates_only == True and args.checkouts_only == True:
         userErrorExit("Options '--updates_only' and '--checkouts-only' are mutually exclusive.")
     deprecated_nra_warning(args)
-    cview = ctx_view.CTXView( view_dir, updating=True, validate=True )
+    cview = ctx_view.CTXView( args.view, updating=True, validate=True )
 
     if args.checkouts_only == False:
         cview.updateRepositories()

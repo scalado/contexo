@@ -4,6 +4,7 @@ CR: Contexo now has a constant working directory relative to the root, this make
 The relative PATH that may be used to access the view root is '../../../'.
 CR: caching of .rspecs using the ctx-import directive, to only update rspecs when using 'ctx view update'
 Bugfix: The '--no-remote-access' option has been deprecated and ignored since Contexo would be unable to determine a view which used 'ctx-import' if used together with --no-remote-access. Incidently Contexo now only use remote access with 'ctx view validate' and 'ctx view update'.
+TOOLS-14: fixed friendlier reporting when source file extension does not match the .cdef file.
 
 Contexo 0.10.3
 Bugfix: environment problems such as the one below should be resolved now:

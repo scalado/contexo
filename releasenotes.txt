@@ -1,6 +1,8 @@
-Contexo 0.11.0-testing
+Contexo 0.11.0
 CR: Contexo now has a constant working directory relative to the root, this makes it possible to use relative PATHs in .bc files, to eg, put a toolchain in the repository for easy setting up and access.
 The relative PATH that may be used to access the view root is '../../../'.
+CR: caching of .rspecs using the ctx-import directive, to only update rspecs when using 'ctx view update'
+Bugfix: The '--no-remote-access' option has been deprecated and ignored since Contexo would be unable to determine a view which used 'ctx-import' if used together with --no-remote-access. Incidently Contexo now only use remote access with 'ctx view validate' and 'ctx view update'.
 
 Contexo 0.10.3
 Bugfix: environment problems such as the one below should be resolved now:

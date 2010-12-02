@@ -315,6 +315,7 @@ class CTXCompiler:
     def makeStaticObjectCommandline( self, sourceFile, buildParams, outputDir, objFilename ):
 
         cmdline = str()
+        tool = 'UNKNOWN'
         if self.isSourceType(self.cdef['CXXFILESUFFIX'], sourceFile ):
             cmdline = self.cdef['CXXCOM']
             tool = 'CXX'
@@ -324,6 +325,11 @@ class CTXCompiler:
         elif self.isSourceType(self.cdef['ASMFILESUFFIX'], sourceFile):
             cmdline = self.cdef['ASMCOM']
             tool = 'ASM'
+
+        if tool == 'UNKNOWN':
+            print 'Unknown source type of file: '+sourceFile
+            print 'Please update your .cdef files CXXFILESUFFIX, CFILESUFFIX or ASMFILESUFFIX field'
+            userErrorExit('Cannot continue, unknown source file.')
 
         #
         # Prepare preproessor definitions

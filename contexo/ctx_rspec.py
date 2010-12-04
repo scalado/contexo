@@ -48,11 +48,12 @@ def createRepoFromRCS( rcs, id, path, href, rev ):
 
 #------------------------------------------------------------------------------
 class rspecXmlHandler(ContentHandler):
-    def __init__ (self, rspecFile):
+    def __init__ (self, rspecFile=str(),view=None):
         self.rspecFile = rspecFile
         self.default_version = "1"
         self.current_repo = None
         self.id_list = list()
+        self.view = view
         self.parent_element = LIFOStack()
         self.msgSender = "rspecXmlHandler"
 
@@ -88,7 +89,7 @@ class rspecXmlHandler(ContentHandler):
                 rev = 'HEAD'
 
             # Prepare locator object and add import to current RSpec
-            rspecFileLocator = RSpecFileLocator( rcs, href, rev )
+            rspecFileLocator = RSpecFileLocator( rcs=rcs, href=href, revision=rev, updating = False, wipe_cache=False, view=self.view )
             self.rspecFile.addImport( rspecFileLocator ) # POINT OF RECURSION
 
         # .....................................................................
@@ -161,14 +162,21 @@ class rspecXmlHandler(ContentHandler):
 
 #------------------------------------------------------------------------------
 class RSpecFileLocator:
-    def __init__(self, rcs=None, href='', revision=None, updating = False, wipe_cache=False ):
+    def __init__(self, rcs=None, href=None, revision=None, updating = False, wipe_cache=False, view = None ):
         self.rcs = rcs
-        if href == '':
-            userErrorExit('href parameter not allowed to be empty')
         self.href = href
+        if type(self.href) != type(str()) and type(self.href) != type(u''):
+            self.href = href.getHref()
+
+        # is the rspec path absolute or network path?
+        if self.href[0:5] == 'svn://' or self.href[0:7] == 'https://' or self.href[0:6] == 'http://' or self.href[0] == '/' or self.href[0] == '\\' or self.href[1:2] == ':\\':
+            pass
+        else:
+            self.href = os.path.normpath(view.getRoot() + os.sep + self.href)
+
         self.revision = revision
         self.updating = updating
-        self.rspec_cache_dir = os.path.dirname(self.href) + os.sep + '.ctx' + os.sep + 'rspec-cache' + os.sep
+        self.rspec_cache_dir = view.getRoot() + os.sep + '.ctx' + os.sep + 'rspec-cache' + os.sep
         if wipe_cache == True and os.path.exists(self.rspec_cache_dir):
             shutil.rmtree(self.rspec_cache_dir)
         self.msgSender = 'RSpecFileLocator'
@@ -246,19 +254,19 @@ class RSpecFile:
  
         if type(rspec_file) is str:
             self.wipe_cache = True
-            self.rspecFileLocator = RSpecFileLocator( rcs=None, href=rspec_file, revision=None, updating=view.updating, wipe_cache=True )
+            self.rspecFileLocator = RSpecFileLocator( rcs=None, href=rspec_file, revision=None, updating=view.updating, wipe_cache=True, view=self.view )
         else:
             self.rspecFileLocator = rspec_file
 
         _wipe_cache=False
         if parent == None:
             _wipe_cache=True
-        self.rspecFileLocator = RSpecFileLocator( rcs=None, href=rspec_file, revision=None, updating=view.updating, wipe_cache=_wipe_cache )
+        self.rspecFileLocator = RSpecFileLocator( rcs=None, href=rspec_file, revision=None, updating=view.updating, wipe_cache=_wipe_cache, view=self.view )
 
         localPath = self.rspecFileLocator.getLocalAccessPath()
 
         parser = make_parser()
-        handler = rspecXmlHandler(self)
+        handler = rspecXmlHandler(self, view=view)
         parser.setContentHandler(handler)
         parser.parse( open(localPath) ) # POINT OF RECURSION
 

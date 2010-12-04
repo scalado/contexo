@@ -161,13 +161,14 @@ class rspecXmlHandler(ContentHandler):
 
 #------------------------------------------------------------------------------
 class RSpecFileLocator:
-    def __init__(self, rcs=None, href=None, revision=None, updating = False, wipe_cache=False ):
+    def __init__(self, rcs=None, href='', revision=None, updating = False, wipe_cache=False ):
         self.rcs = rcs
+        if href == '':
+            userErrorExit('href parameter not allowed to be empty'
         self.href = href
         self.revision = revision
         self.updating = updating
-        # TODO: what about -v ../.. style paths?
-        self.rspec_cache_dir = os.path.abspath('') + os.sep + '.ctx' + os.sep + 'rspec-cache' + os.sep
+        self.rspec_cache_dir = os.path.dirname(self.href) + os.sep + '.ctx' + os.sep + 'rspec-cache' + os.sep
         if wipe_cache == True and os.path.exists(self.rspec_cache_dir):
             shutil.rmtree(self.rspec_cache_dir)
         self.msgSender = 'RSpecFileLocator'

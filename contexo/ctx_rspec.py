@@ -164,7 +164,7 @@ class RSpecFileLocator:
     def __init__(self, rcs=None, href='', revision=None, updating = False, wipe_cache=False ):
         self.rcs = rcs
         if href == '':
-            userErrorExit('href parameter not allowed to be empty'
+            userErrorExit('href parameter not allowed to be empty')
         self.href = href
         self.revision = revision
         self.updating = updating

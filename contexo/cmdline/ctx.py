@@ -78,8 +78,6 @@ def deprecated_nra_warning( args ):
     if args.no_remote_repo_access == True:
         warningMessage("--no-repo-access is deprecated. remote access will always be performed when running 'ctx view update' and 'ctx view validate'. At other times, there will be no network communication and .rspecs will be cached.")
 
-
-
 #------------------------------------------------------------------------------
 def getBuildConfiguration( cview ,  args):
     from contexo import ctx_bc
@@ -300,7 +298,11 @@ def cmd_info(args):
 def cmd_buildmod(args):
     view_dir = os.path.abspath(args.view)
     obj_dir = view_dir + os.sep + '.ctx/obj'
-    lib_output_dir = os.path.abspath(args.output)
+    if args.output[0] != '/' and args.output[0] != '\\' and args.output[1:2] != ':\\':
+        lib_output = args.output
+    else:
+        # relative to view root
+        lib_output = os.path.join( view_dir, args.output)
 
     from contexo import ctx_cmod
     from contexo import ctx_base
@@ -378,7 +380,12 @@ def cmd_buildmod(args):
 def cmd_buildcomp(args):
     view_dir = os.path.abspath(args.view)
     obj_dir = view_dir + os.sep + '.ctx/obj'
-    lib_output_dir = os.path.abspath(args.output)
+    if args.output[0] != '/' and args.output[0] != '\\' and args.output[1:2] != ':\\':
+        lib_output = args.output
+    else:
+        # relative to view root
+        lib_output = os.path.join(view_dir,args.output)
+
     from contexo import ctx_cmod
     from contexo import ctx_base
     from contexo import ctx_envswitch
@@ -469,7 +476,12 @@ def cmd_buildcomp(args):
 def cmd_build(args):
     view_dir = os.path.abspath(args.view)
     obj_dir = view_dir + os.sep + '.ctx/obj'
-    lib_output_dir = os.path.abspath(args.output)
+    # test if not absolute path
+    if args.output[0] != '/' and args.output[0] != '\\' and args.output[1:2] != ':\\':
+        lib_output = os.path.join(view_dir,args.output)
+    else:
+        lib_output = args.output
+
     lib_dirs = map(os.path.abspath, args.libdirs)
 
     from contexo import ctx_cmod
@@ -519,7 +531,7 @@ def cmd_build(args):
                                   bc.getBuildParams().cflags,
                                   bc.getBuildParams().prepDefines,
                                   "N/A" )
-    outputPath = lib_output_dir
+    outputPath = lib_output
     bin_dir = os.path.join( outputPath, args.bindir )
     header_dir = os.path.join( outputPath, args.headerdir )
     objs = list()
@@ -686,6 +698,7 @@ def cmd_validateview(args):
 
 #------------------------------------------------------------------------------
 def cmd_freeze(args):
+
     lib_output_dir = os.path.abspath(args.output)
     import xml.sax
     import sys

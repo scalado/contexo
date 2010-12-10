@@ -276,7 +276,7 @@ def cmd_info(args):
 
     if args.module != None:
         deprecated_tolerate_missing_headers_warning(args)
-        depmgr = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), legacyCompilingMod = args.legacy_compiling_mod )
+        depmgr = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), legacyCompilingMod = args.legacy_compiling_mod, globalOutputDir = output_dir )
         depmgr.addCodeModules( args.module )
         module_names = depmgr.getCodeModulesWithDependencies ()
         module_names.sort ()
@@ -322,7 +322,7 @@ def cmd_buildmod(args):
     modules = expand_list_files(cview, args.modules)
     bc      = getBuildConfiguration( cview,  args )
     deprecated_tolerate_missing_headers_warning(args)
-    depmgr = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), legacyCompilingMod = args.legacy_compiling_mod )
+    depmgr = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), legacyCompilingMod = args.legacy_compiling_mod, globalOutputDir = output_dir  )
 
     depmgr.addCodeModules( modules, args.tests )
 

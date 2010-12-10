@@ -1,0 +1,1744 @@
+12:56:40 INFO      (ctx.py:54):  Using config file '/Users/thomase/.contexo/contexo.cfg'
+
+12:56:40 INFO      (ctx_view.py:36):  Using view: /Users/thomase/Work/inhouse/contexo/tests/test_cpp 
+
+12:56:40 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'modules' in view
+
+12:56:40 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'cdef' in view
+
+12:56:40 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'bconf' in view
+
+12:56:40 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'comp' in view
+
+12:56:40 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'misc' in view
+
+12:56:40 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test_cpp/test.rspec', attempting regular file access
+
+12:56:40 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/rspec-cache/test.rspec
+
+12:56:40 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test_cpp/_rspecs/test2.rspec', attempting regular file access
+
+12:56:40 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/rspec-cache/test2.rspec
+
+12:56:40 INFO      (ctx_repo.py:39):  
+
+
+12:56:40 INFO      (ctx_repo.py:45):  Repository added:
+                   ID: test_view
+                 HREF: 
+           Local path: test_view
+       RSpec revision: None
+   Version controlled: No
+
+
+12:56:40 INFO      (ctx_repo.py:118):  Path './test_modules' added to section 'modules' in repository 'test_view'
+
+
+--- RSpec hierarchy -----------------
+
+[ctx-rspec: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test.rspec]
+
+   
+[ctx-rspec: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/_rspecs/test2.rspec]
+    [ctx-repo: test_view]
+      [ctx-path type='modules': /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules]
+      [ctx-path type='modules': /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view]
+
+
+------------------------------------
+12:56:40 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test_cpp/test.rspec', attempting regular file access
+
+12:56:40 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/rspec-cache/test.rspec
+
+12:56:40 INFO      (ctx_view.py:123):  Using RSpec: 'test.rspec'
+
+12:56:40 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo/bconf' added to section 'bconf' in view
+
+12:56:40 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo/cdef' added to section 'cdef' in view
+
+12:56:40 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo' added to section 'misc' in view
+
+12:56:40 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'misc' in view
+
+12:56:40 INFO      (ctx_view.py:48):  Skipping repository validation
+
+12:56:40 INFO      (ctx_view.py:200):  Item 'gcc_osx_i386_rel.bc' was not found in RSpec repositories.
+Trying system global locations.
+
+12:56:40 INFO      (ctx_view.py:215):  Located 'gcc_osx_i386_rel.bc' at '/Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc'
+
+12:56:40 INFO      (ctx_view.py:200):  Item 'gcc_osx.cdef' was not found in RSpec repositories.
+Trying system global locations.
+
+12:56:40 INFO      (ctx_view.py:215):  Located 'gcc_osx.cdef' at '/Users/thomase/.contexo/cdef/gcc_osx.cdef'
+
+12:56:40 INFO      (ctx_bc.py:88):  Trying BC: /Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc
+
+12:56:40 INFO      (ctx_bc.py:91):  Using BC: /Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc
+
+12:56:40 INFO      (ctx_bc.py:235):  Trying CDEF: /Users/thomase/.contexo/cdef/gcc_osx.cdef
+
+12:56:40 INFO      (ctx_bc.py:238):  Using CDEF: /Users/thomase/.contexo/cdef/gcc_osx.cdef
+
+12:56:40 INFO      (ctx_view.py:157):  Item paths in section 'modules' returned from view:
+  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules
+  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view
+
+12:56:40 INFO      (ctx.py:578):  building modules
+
+12:56:40 INFO      (ctx_cmod.py:449):  Building module 'bare_hello'
+
+12:56:40 INFO      (ctx_cmod.py:432):  Module bare_hello has no external depenencies.
+
+12:56:40 INFO      (ctx_base.py:731):  Joined include paths: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules/bare_hello/src
+
+12:56:40 INFO      (ctx_base.py:751):  Object 'hello.o' invalidated by checksum.
+New: c3cfaa7c8004cb2802b6512253dc6baf
+Old: 0
+
+12:56:40 INFO      (ctx_platform.py:22):  Executing: gcc  -pipe -Wall -W -O2 -std=c99 -funroll-loops -fstrict-aliasing -arch i386    -DBYTE_ORDER_LITTLE_ENDIAN -DSCB_CHARENC_ASCII  -I"/Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules/bare_hello/src" -c  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules/bare_hello/src/hello.c -o /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/obj/32bitRelease/hello.o
+
+12:56:40 INFO      (ctx_base.py:286):  Tool defined by 'AR' resolved at '/usr/bin/ar'
+
+12:56:40 INFO      (ctx_platform.py:22):  Executing: ar r /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/bare_hello.a  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/obj/32bitRelease/hello.o
+
+ar: creating archive /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/bare_hello.a
+12:56:40 INFO      (ctx_base.py:286):  Tool defined by 'RANLIB' resolved at '/usr/bin/ranlib'
+
+12:56:40 INFO      (ctx_platform.py:22):  Executing: ranlib /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/bare_hello.a
+
+12:56:41 INFO      (ctx.py:54):  Using config file '/Users/thomase/.contexo/contexo.cfg'
+
+12:56:41 INFO      (ctx_view.py:36):  Using view: /Users/thomase/Work/inhouse/contexo/tests/test_cpp 
+
+12:56:41 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'modules' in view
+
+12:56:41 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'cdef' in view
+
+12:56:41 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'bconf' in view
+
+12:56:41 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'comp' in view
+
+12:56:41 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'misc' in view
+
+12:56:41 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test_cpp/test.rspec', attempting regular file access
+
+12:56:41 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/rspec-cache/test.rspec
+
+12:56:41 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test_cpp/_rspecs/test2.rspec', attempting regular file access
+
+12:56:41 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/rspec-cache/test2.rspec
+
+12:56:41 INFO      (ctx_repo.py:39):  
+
+
+12:56:41 INFO      (ctx_repo.py:45):  Repository added:
+                   ID: test_view
+                 HREF: 
+           Local path: test_view
+       RSpec revision: None
+   Version controlled: No
+
+
+12:56:41 INFO      (ctx_repo.py:118):  Path './test_modules' added to section 'modules' in repository 'test_view'
+
+
+--- RSpec hierarchy -----------------
+
+[ctx-rspec: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test.rspec]
+
+   
+[ctx-rspec: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/_rspecs/test2.rspec]
+    [ctx-repo: test_view]
+      [ctx-path type='modules': /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules]
+      [ctx-path type='modules': /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view]
+
+
+------------------------------------
+12:56:41 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test_cpp/test.rspec', attempting regular file access
+
+12:56:41 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/rspec-cache/test.rspec
+
+12:56:41 INFO      (ctx_view.py:123):  Using RSpec: 'test.rspec'
+
+12:56:41 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo/bconf' added to section 'bconf' in view
+
+12:56:41 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo/cdef' added to section 'cdef' in view
+
+12:56:41 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo' added to section 'misc' in view
+
+12:56:41 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'misc' in view
+
+12:56:41 INFO      (ctx_view.py:48):  Skipping repository validation
+
+12:56:41 INFO      (ctx_view.py:200):  Item 'gcc_osx_i386_rel.bc' was not found in RSpec repositories.
+Trying system global locations.
+
+12:56:41 INFO      (ctx_view.py:215):  Located 'gcc_osx_i386_rel.bc' at '/Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc'
+
+12:56:41 INFO      (ctx_view.py:200):  Item 'gcc_osx.cdef' was not found in RSpec repositories.
+Trying system global locations.
+
+12:56:41 INFO      (ctx_view.py:215):  Located 'gcc_osx.cdef' at '/Users/thomase/.contexo/cdef/gcc_osx.cdef'
+
+12:56:41 INFO      (ctx_bc.py:88):  Trying BC: /Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc
+
+12:56:41 INFO      (ctx_bc.py:91):  Using BC: /Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc
+
+12:56:41 INFO      (ctx_bc.py:235):  Trying CDEF: /Users/thomase/.contexo/cdef/gcc_osx.cdef
+
+12:56:41 INFO      (ctx_bc.py:238):  Using CDEF: /Users/thomase/.contexo/cdef/gcc_osx.cdef
+
+12:56:41 INFO      (ctx_view.py:157):  Item paths in section 'modules' returned from view:
+  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules
+  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view
+
+12:56:41 INFO      (ctx.py:578):  building modules
+
+12:56:41 INFO      (ctx_cmod.py:449):  Building module 'bare_hello'
+
+12:56:41 INFO      (ctx_cmod.py:432):  Module bare_hello has no external depenencies.
+
+12:56:41 INFO      (ctx_base.py:731):  Joined include paths: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules/bare_hello/src
+
+12:56:41 INFO      (ctx_base.py:751):  Object 'hello.o' invalidated by checksum.
+New: c3cfaa7c8004cb2802b6512253dc6baf
+Old: 0
+
+12:56:41 INFO      (ctx_platform.py:22):  Executing: gcc  -pipe -Wall -W -O2 -std=c99 -funroll-loops -fstrict-aliasing -arch i386    -DBYTE_ORDER_LITTLE_ENDIAN -DSCB_CHARENC_ASCII  -I"/Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules/bare_hello/src" -c  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules/bare_hello/src/hello.c -o /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/obj/32bitRelease/hello.o
+
+12:56:41 INFO      (ctx_base.py:286):  Tool defined by 'AR' resolved at '/usr/bin/ar'
+
+12:56:41 INFO      (ctx_platform.py:22):  Executing: ar r /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_output/bare_hello.a  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/obj/32bitRelease/hello.o
+
+ar: creating archive /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_output/bare_hello.a
+12:56:41 INFO      (ctx_base.py:286):  Tool defined by 'RANLIB' resolved at '/usr/bin/ranlib'
+
+12:56:41 INFO      (ctx_platform.py:22):  Executing: ranlib /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_output/bare_hello.a
+
+12:57:22 INFO      (ctx.py:54):  Using config file '/Users/thomase/.contexo/contexo.cfg'
+
+12:57:22 INFO      (ctx_view.py:36):  Using view: /Users/thomase/Work/inhouse/contexo/tests/test_cpp 
+
+12:57:22 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'modules' in view
+
+12:57:22 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'cdef' in view
+
+12:57:22 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'bconf' in view
+
+12:57:22 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'comp' in view
+
+12:57:22 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'misc' in view
+
+12:57:22 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test_cpp/test.rspec', attempting regular file access
+
+12:57:22 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/rspec-cache/test.rspec
+
+12:57:22 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test_cpp/_rspecs/test2.rspec', attempting regular file access
+
+12:57:22 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/rspec-cache/test2.rspec
+
+12:57:22 INFO      (ctx_repo.py:39):  
+
+
+12:57:22 INFO      (ctx_repo.py:45):  Repository added:
+                   ID: test_view
+                 HREF: 
+           Local path: test_view
+       RSpec revision: None
+   Version controlled: No
+
+
+12:57:22 INFO      (ctx_repo.py:118):  Path './test_modules' added to section 'modules' in repository 'test_view'
+
+
+--- RSpec hierarchy -----------------
+
+[ctx-rspec: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test.rspec]
+
+   
+[ctx-rspec: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/_rspecs/test2.rspec]
+    [ctx-repo: test_view]
+      [ctx-path type='modules': /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules]
+      [ctx-path type='modules': /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view]
+
+
+------------------------------------
+12:57:22 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test_cpp/test.rspec', attempting regular file access
+
+12:57:22 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/rspec-cache/test.rspec
+
+12:57:22 INFO      (ctx_view.py:123):  Using RSpec: 'test.rspec'
+
+12:57:22 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo/bconf' added to section 'bconf' in view
+
+12:57:22 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo/cdef' added to section 'cdef' in view
+
+12:57:22 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo' added to section 'misc' in view
+
+12:57:22 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'misc' in view
+
+12:57:22 INFO      (ctx_view.py:48):  Skipping repository validation
+
+12:57:22 INFO      (ctx_view.py:200):  Item 'gcc_osx_i386_rel.bc' was not found in RSpec repositories.
+Trying system global locations.
+
+12:57:22 INFO      (ctx_view.py:215):  Located 'gcc_osx_i386_rel.bc' at '/Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc'
+
+12:57:22 INFO      (ctx_view.py:200):  Item 'gcc_osx.cdef' was not found in RSpec repositories.
+Trying system global locations.
+
+12:57:22 INFO      (ctx_view.py:215):  Located 'gcc_osx.cdef' at '/Users/thomase/.contexo/cdef/gcc_osx.cdef'
+
+12:57:22 INFO      (ctx_bc.py:88):  Trying BC: /Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc
+
+12:57:22 INFO      (ctx_bc.py:91):  Using BC: /Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc
+
+12:57:22 INFO      (ctx_bc.py:235):  Trying CDEF: /Users/thomase/.contexo/cdef/gcc_osx.cdef
+
+12:57:22 INFO      (ctx_bc.py:238):  Using CDEF: /Users/thomase/.contexo/cdef/gcc_osx.cdef
+
+12:57:22 INFO      (ctx_view.py:157):  Item paths in section 'modules' returned from view:
+  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules
+  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view
+
+12:57:22 INFO      (ctx.py:578):  building modules
+
+12:57:22 INFO      (ctx_cmod.py:449):  Building module 'bare_hello'
+
+12:57:22 INFO      (ctx_cmod.py:432):  Module bare_hello has no external depenencies.
+
+12:57:22 INFO      (ctx_base.py:731):  Joined include paths: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules/bare_hello/src
+
+12:57:22 INFO      (ctx_base.py:751):  Object 'hello.o' invalidated by checksum.
+New: c3cfaa7c8004cb2802b6512253dc6baf
+Old: 0
+
+12:57:22 INFO      (ctx_platform.py:22):  Executing: gcc  -pipe -Wall -W -O2 -std=c99 -funroll-loops -fstrict-aliasing -arch i386    -DBYTE_ORDER_LITTLE_ENDIAN -DSCB_CHARENC_ASCII  -I"/Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules/bare_hello/src" -c  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules/bare_hello/src/hello.c -o /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/obj/32bitRelease/hello.o
+
+12:57:22 INFO      (ctx_base.py:286):  Tool defined by 'AR' resolved at '/usr/bin/ar'
+
+12:57:22 INFO      (ctx_platform.py:22):  Executing: ar r /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/bare_hello.a  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/obj/32bitRelease/hello.o
+
+ar: creating archive /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/bare_hello.a
+12:57:22 INFO      (ctx_base.py:286):  Tool defined by 'RANLIB' resolved at '/usr/bin/ranlib'
+
+12:57:22 INFO      (ctx_platform.py:22):  Executing: ranlib /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/bare_hello.a
+
+12:57:22 INFO      (ctx.py:54):  Using config file '/Users/thomase/.contexo/contexo.cfg'
+
+12:57:22 INFO      (ctx_view.py:36):  Using view: /Users/thomase/Work/inhouse/contexo/tests/test_cpp 
+
+12:57:22 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'modules' in view
+
+12:57:22 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'cdef' in view
+
+12:57:22 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'bconf' in view
+
+12:57:22 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'comp' in view
+
+12:57:22 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'misc' in view
+
+12:57:22 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test_cpp/test.rspec', attempting regular file access
+
+12:57:22 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/rspec-cache/test.rspec
+
+12:57:22 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test_cpp/_rspecs/test2.rspec', attempting regular file access
+
+12:57:22 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/rspec-cache/test2.rspec
+
+12:57:22 INFO      (ctx_repo.py:39):  
+
+
+12:57:22 INFO      (ctx_repo.py:45):  Repository added:
+                   ID: test_view
+                 HREF: 
+           Local path: test_view
+       RSpec revision: None
+   Version controlled: No
+
+
+12:57:22 INFO      (ctx_repo.py:118):  Path './test_modules' added to section 'modules' in repository 'test_view'
+
+
+--- RSpec hierarchy -----------------
+
+[ctx-rspec: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test.rspec]
+
+   
+[ctx-rspec: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/_rspecs/test2.rspec]
+    [ctx-repo: test_view]
+      [ctx-path type='modules': /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules]
+      [ctx-path type='modules': /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view]
+
+
+------------------------------------
+12:57:22 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test_cpp/test.rspec', attempting regular file access
+
+12:57:22 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/rspec-cache/test.rspec
+
+12:57:22 INFO      (ctx_view.py:123):  Using RSpec: 'test.rspec'
+
+12:57:22 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo/bconf' added to section 'bconf' in view
+
+12:57:22 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo/cdef' added to section 'cdef' in view
+
+12:57:22 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo' added to section 'misc' in view
+
+12:57:22 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'misc' in view
+
+12:57:22 INFO      (ctx_view.py:48):  Skipping repository validation
+
+12:57:22 INFO      (ctx_view.py:200):  Item 'gcc_osx_i386_rel.bc' was not found in RSpec repositories.
+Trying system global locations.
+
+12:57:22 INFO      (ctx_view.py:215):  Located 'gcc_osx_i386_rel.bc' at '/Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc'
+
+12:57:22 INFO      (ctx_view.py:200):  Item 'gcc_osx.cdef' was not found in RSpec repositories.
+Trying system global locations.
+
+12:57:22 INFO      (ctx_view.py:215):  Located 'gcc_osx.cdef' at '/Users/thomase/.contexo/cdef/gcc_osx.cdef'
+
+12:57:22 INFO      (ctx_bc.py:88):  Trying BC: /Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc
+
+12:57:22 INFO      (ctx_bc.py:91):  Using BC: /Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc
+
+12:57:22 INFO      (ctx_bc.py:235):  Trying CDEF: /Users/thomase/.contexo/cdef/gcc_osx.cdef
+
+12:57:22 INFO      (ctx_bc.py:238):  Using CDEF: /Users/thomase/.contexo/cdef/gcc_osx.cdef
+
+12:57:22 INFO      (ctx_view.py:157):  Item paths in section 'modules' returned from view:
+  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules
+  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view
+
+12:57:22 INFO      (ctx.py:578):  building modules
+
+12:57:22 INFO      (ctx_cmod.py:449):  Building module 'bare_hello'
+
+12:57:22 INFO      (ctx_cmod.py:432):  Module bare_hello has no external depenencies.
+
+12:57:22 INFO      (ctx_base.py:731):  Joined include paths: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules/bare_hello/src
+
+12:57:22 INFO      (ctx_base.py:751):  Object 'hello.o' invalidated by checksum.
+New: c3cfaa7c8004cb2802b6512253dc6baf
+Old: 0
+
+12:57:22 INFO      (ctx_platform.py:22):  Executing: gcc  -pipe -Wall -W -O2 -std=c99 -funroll-loops -fstrict-aliasing -arch i386    -DBYTE_ORDER_LITTLE_ENDIAN -DSCB_CHARENC_ASCII  -I"/Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules/bare_hello/src" -c  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules/bare_hello/src/hello.c -o /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/obj/32bitRelease/hello.o
+
+12:57:22 INFO      (ctx_base.py:286):  Tool defined by 'AR' resolved at '/usr/bin/ar'
+
+12:57:22 INFO      (ctx_platform.py:22):  Executing: ar r /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_output/bare_hello.a  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/obj/32bitRelease/hello.o
+
+ar: creating archive /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_output/bare_hello.a
+12:57:22 INFO      (ctx_base.py:286):  Tool defined by 'RANLIB' resolved at '/usr/bin/ranlib'
+
+12:57:22 INFO      (ctx_platform.py:22):  Executing: ranlib /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_output/bare_hello.a
+
+12:57:45 INFO      (ctx.py:54):  Using config file '/Users/thomase/.contexo/contexo.cfg'
+
+12:57:45 INFO      (ctx_view.py:36):  Using view: /Users/thomase/Work/inhouse/contexo/tests/test_cpp 
+
+12:57:45 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'modules' in view
+
+12:57:45 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'cdef' in view
+
+12:57:45 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'bconf' in view
+
+12:57:45 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'comp' in view
+
+12:57:45 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'misc' in view
+
+12:57:45 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test_cpp/test.rspec', attempting regular file access
+
+12:57:45 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/rspec-cache/test.rspec
+
+12:57:45 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test_cpp/_rspecs/test2.rspec', attempting regular file access
+
+12:57:45 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/rspec-cache/test2.rspec
+
+12:57:45 INFO      (ctx_repo.py:39):  
+
+
+12:57:45 INFO      (ctx_repo.py:45):  Repository added:
+                   ID: test_view
+                 HREF: 
+           Local path: test_view
+       RSpec revision: None
+   Version controlled: No
+
+
+12:57:45 INFO      (ctx_repo.py:118):  Path './test_modules' added to section 'modules' in repository 'test_view'
+
+
+--- RSpec hierarchy -----------------
+
+[ctx-rspec: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test.rspec]
+
+   
+[ctx-rspec: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/_rspecs/test2.rspec]
+    [ctx-repo: test_view]
+      [ctx-path type='modules': /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules]
+      [ctx-path type='modules': /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view]
+
+
+------------------------------------
+12:57:45 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test_cpp/test.rspec', attempting regular file access
+
+12:57:45 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/rspec-cache/test.rspec
+
+12:57:45 INFO      (ctx_view.py:123):  Using RSpec: 'test.rspec'
+
+12:57:45 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo/bconf' added to section 'bconf' in view
+
+12:57:45 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo/cdef' added to section 'cdef' in view
+
+12:57:45 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo' added to section 'misc' in view
+
+12:57:45 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'misc' in view
+
+12:57:45 INFO      (ctx_view.py:48):  Skipping repository validation
+
+12:57:45 INFO      (ctx_view.py:200):  Item 'gcc_osx_i386_rel.bc' was not found in RSpec repositories.
+Trying system global locations.
+
+12:57:45 INFO      (ctx_view.py:215):  Located 'gcc_osx_i386_rel.bc' at '/Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc'
+
+12:57:45 INFO      (ctx_view.py:200):  Item 'gcc_osx.cdef' was not found in RSpec repositories.
+Trying system global locations.
+
+12:57:45 INFO      (ctx_view.py:215):  Located 'gcc_osx.cdef' at '/Users/thomase/.contexo/cdef/gcc_osx.cdef'
+
+12:57:45 INFO      (ctx_bc.py:88):  Trying BC: /Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc
+
+12:57:45 INFO      (ctx_bc.py:91):  Using BC: /Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc
+
+12:57:45 INFO      (ctx_bc.py:235):  Trying CDEF: /Users/thomase/.contexo/cdef/gcc_osx.cdef
+
+12:57:45 INFO      (ctx_bc.py:238):  Using CDEF: /Users/thomase/.contexo/cdef/gcc_osx.cdef
+
+12:57:45 INFO      (ctx_view.py:157):  Item paths in section 'modules' returned from view:
+  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules
+  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view
+
+12:57:45 INFO      (ctx.py:578):  building modules
+
+12:57:45 INFO      (ctx_cmod.py:449):  Building module 'bare_hello'
+
+12:57:45 INFO      (ctx_cmod.py:432):  Module bare_hello has no external depenencies.
+
+12:57:45 INFO      (ctx_base.py:731):  Joined include paths: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules/bare_hello/src
+
+12:57:45 INFO      (ctx_base.py:751):  Object 'hello.o' invalidated by checksum.
+New: c3cfaa7c8004cb2802b6512253dc6baf
+Old: 0
+
+12:57:45 INFO      (ctx_platform.py:22):  Executing: gcc  -pipe -Wall -W -O2 -std=c99 -funroll-loops -fstrict-aliasing -arch i386    -DBYTE_ORDER_LITTLE_ENDIAN -DSCB_CHARENC_ASCII  -I"/Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules/bare_hello/src" -c  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules/bare_hello/src/hello.c -o /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/obj/32bitRelease/hello.o
+
+12:57:45 INFO      (ctx_base.py:286):  Tool defined by 'AR' resolved at '/usr/bin/ar'
+
+12:57:45 INFO      (ctx_platform.py:22):  Executing: ar r /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/bare_hello.a  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/obj/32bitRelease/hello.o
+
+ar: creating archive /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/bare_hello.a
+12:57:45 INFO      (ctx_base.py:286):  Tool defined by 'RANLIB' resolved at '/usr/bin/ranlib'
+
+12:57:45 INFO      (ctx_platform.py:22):  Executing: ranlib /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/bare_hello.a
+
+12:57:45 INFO      (ctx.py:54):  Using config file '/Users/thomase/.contexo/contexo.cfg'
+
+12:57:45 INFO      (ctx_view.py:36):  Using view: /Users/thomase/Work/inhouse/contexo/tests/test_cpp 
+
+12:57:45 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'modules' in view
+
+12:57:45 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'cdef' in view
+
+12:57:45 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'bconf' in view
+
+12:57:45 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'comp' in view
+
+12:57:45 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'misc' in view
+
+12:57:45 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test_cpp/test.rspec', attempting regular file access
+
+12:57:45 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/rspec-cache/test.rspec
+
+12:57:45 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test_cpp/_rspecs/test2.rspec', attempting regular file access
+
+12:57:45 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/rspec-cache/test2.rspec
+
+12:57:45 INFO      (ctx_repo.py:39):  
+
+
+12:57:45 INFO      (ctx_repo.py:45):  Repository added:
+                   ID: test_view
+                 HREF: 
+           Local path: test_view
+       RSpec revision: None
+   Version controlled: No
+
+
+12:57:45 INFO      (ctx_repo.py:118):  Path './test_modules' added to section 'modules' in repository 'test_view'
+
+
+--- RSpec hierarchy -----------------
+
+[ctx-rspec: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test.rspec]
+
+   
+[ctx-rspec: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/_rspecs/test2.rspec]
+    [ctx-repo: test_view]
+      [ctx-path type='modules': /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules]
+      [ctx-path type='modules': /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view]
+
+
+------------------------------------
+12:57:45 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test_cpp/test.rspec', attempting regular file access
+
+12:57:45 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/rspec-cache/test.rspec
+
+12:57:45 INFO      (ctx_view.py:123):  Using RSpec: 'test.rspec'
+
+12:57:45 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo/bconf' added to section 'bconf' in view
+
+12:57:45 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo/cdef' added to section 'cdef' in view
+
+12:57:45 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo' added to section 'misc' in view
+
+12:57:45 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'misc' in view
+
+12:57:45 INFO      (ctx_view.py:48):  Skipping repository validation
+
+12:57:45 INFO      (ctx_view.py:200):  Item 'gcc_osx_i386_rel.bc' was not found in RSpec repositories.
+Trying system global locations.
+
+12:57:45 INFO      (ctx_view.py:215):  Located 'gcc_osx_i386_rel.bc' at '/Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc'
+
+12:57:45 INFO      (ctx_view.py:200):  Item 'gcc_osx.cdef' was not found in RSpec repositories.
+Trying system global locations.
+
+12:57:45 INFO      (ctx_view.py:215):  Located 'gcc_osx.cdef' at '/Users/thomase/.contexo/cdef/gcc_osx.cdef'
+
+12:57:45 INFO      (ctx_bc.py:88):  Trying BC: /Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc
+
+12:57:45 INFO      (ctx_bc.py:91):  Using BC: /Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc
+
+12:57:45 INFO      (ctx_bc.py:235):  Trying CDEF: /Users/thomase/.contexo/cdef/gcc_osx.cdef
+
+12:57:45 INFO      (ctx_bc.py:238):  Using CDEF: /Users/thomase/.contexo/cdef/gcc_osx.cdef
+
+12:57:45 INFO      (ctx_view.py:157):  Item paths in section 'modules' returned from view:
+  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules
+  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view
+
+12:57:45 INFO      (ctx.py:578):  building modules
+
+12:57:45 INFO      (ctx_cmod.py:449):  Building module 'bare_hello'
+
+12:57:45 INFO      (ctx_cmod.py:432):  Module bare_hello has no external depenencies.
+
+12:57:45 INFO      (ctx_base.py:731):  Joined include paths: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules/bare_hello/src
+
+12:57:45 INFO      (ctx_base.py:751):  Object 'hello.o' invalidated by checksum.
+New: c3cfaa7c8004cb2802b6512253dc6baf
+Old: 0
+
+12:57:45 INFO      (ctx_platform.py:22):  Executing: gcc  -pipe -Wall -W -O2 -std=c99 -funroll-loops -fstrict-aliasing -arch i386    -DBYTE_ORDER_LITTLE_ENDIAN -DSCB_CHARENC_ASCII  -I"/Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules/bare_hello/src" -c  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules/bare_hello/src/hello.c -o /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/obj/32bitRelease/hello.o
+
+12:57:45 INFO      (ctx_base.py:286):  Tool defined by 'AR' resolved at '/usr/bin/ar'
+
+12:57:45 INFO      (ctx_platform.py:22):  Executing: ar r /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_output/bare_hello.a  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/obj/32bitRelease/hello.o
+
+ar: creating archive /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_output/bare_hello.a
+12:57:45 INFO      (ctx_base.py:286):  Tool defined by 'RANLIB' resolved at '/usr/bin/ranlib'
+
+12:57:45 INFO      (ctx_platform.py:22):  Executing: ranlib /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_output/bare_hello.a
+
+12:58:23 INFO      (ctx.py:54):  Using config file '/Users/thomase/.contexo/contexo.cfg'
+
+12:58:23 INFO      (ctx_view.py:36):  Using view: /Users/thomase/Work/inhouse/contexo/tests/test_cpp 
+
+12:58:23 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'modules' in view
+
+12:58:23 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'cdef' in view
+
+12:58:23 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'bconf' in view
+
+12:58:23 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'comp' in view
+
+12:58:23 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'misc' in view
+
+12:58:23 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test_cpp/test.rspec', attempting regular file access
+
+12:58:23 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/rspec-cache/test.rspec
+
+12:58:23 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test_cpp/_rspecs/test2.rspec', attempting regular file access
+
+12:58:23 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/rspec-cache/test2.rspec
+
+12:58:23 INFO      (ctx_repo.py:39):  
+
+
+12:58:23 INFO      (ctx_repo.py:45):  Repository added:
+                   ID: test_view
+                 HREF: 
+           Local path: test_view
+       RSpec revision: None
+   Version controlled: No
+
+
+12:58:23 INFO      (ctx_repo.py:118):  Path './test_modules' added to section 'modules' in repository 'test_view'
+
+
+--- RSpec hierarchy -----------------
+
+[ctx-rspec: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test.rspec]
+
+   
+[ctx-rspec: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/_rspecs/test2.rspec]
+    [ctx-repo: test_view]
+      [ctx-path type='modules': /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules]
+      [ctx-path type='modules': /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view]
+
+
+------------------------------------
+12:58:23 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test_cpp/test.rspec', attempting regular file access
+
+12:58:23 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/rspec-cache/test.rspec
+
+12:58:23 INFO      (ctx_view.py:123):  Using RSpec: 'test.rspec'
+
+12:58:23 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo/bconf' added to section 'bconf' in view
+
+12:58:23 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo/cdef' added to section 'cdef' in view
+
+12:58:23 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo' added to section 'misc' in view
+
+12:58:23 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'misc' in view
+
+12:58:23 INFO      (ctx_view.py:48):  Skipping repository validation
+
+12:58:23 INFO      (ctx_view.py:200):  Item 'gcc_osx_i386_rel.bc' was not found in RSpec repositories.
+Trying system global locations.
+
+12:58:23 INFO      (ctx_view.py:215):  Located 'gcc_osx_i386_rel.bc' at '/Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc'
+
+12:58:23 INFO      (ctx_view.py:200):  Item 'gcc_osx.cdef' was not found in RSpec repositories.
+Trying system global locations.
+
+12:58:23 INFO      (ctx_view.py:215):  Located 'gcc_osx.cdef' at '/Users/thomase/.contexo/cdef/gcc_osx.cdef'
+
+12:58:23 INFO      (ctx_bc.py:88):  Trying BC: /Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc
+
+12:58:23 INFO      (ctx_bc.py:91):  Using BC: /Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc
+
+12:58:23 INFO      (ctx_bc.py:235):  Trying CDEF: /Users/thomase/.contexo/cdef/gcc_osx.cdef
+
+12:58:23 INFO      (ctx_bc.py:238):  Using CDEF: /Users/thomase/.contexo/cdef/gcc_osx.cdef
+
+12:58:23 INFO      (ctx_view.py:157):  Item paths in section 'modules' returned from view:
+  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules
+  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view
+
+12:58:23 INFO      (ctx.py:578):  building modules
+
+12:58:23 INFO      (ctx_cmod.py:449):  Building module 'bare_hello'
+
+12:58:23 INFO      (ctx_cmod.py:432):  Module bare_hello has no external depenencies.
+
+12:58:23 INFO      (ctx_base.py:731):  Joined include paths: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules/bare_hello/src
+
+12:58:23 INFO      (ctx_base.py:751):  Object 'hello.o' invalidated by checksum.
+New: c3cfaa7c8004cb2802b6512253dc6baf
+Old: 0
+
+12:58:23 INFO      (ctx_platform.py:22):  Executing: gcc  -pipe -Wall -W -O2 -std=c99 -funroll-loops -fstrict-aliasing -arch i386    -DBYTE_ORDER_LITTLE_ENDIAN -DSCB_CHARENC_ASCII  -I"/Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules/bare_hello/src" -c  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules/bare_hello/src/hello.c -o /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/obj/32bitRelease/hello.o
+
+12:58:23 INFO      (ctx_base.py:286):  Tool defined by 'AR' resolved at '/usr/bin/ar'
+
+12:58:23 INFO      (ctx_platform.py:22):  Executing: ar r /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/bare_hello.a  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/obj/32bitRelease/hello.o
+
+ar: creating archive /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/bare_hello.a
+12:58:23 INFO      (ctx_base.py:286):  Tool defined by 'RANLIB' resolved at '/usr/bin/ranlib'
+
+12:58:23 INFO      (ctx_platform.py:22):  Executing: ranlib /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/bare_hello.a
+
+12:58:23 INFO      (ctx.py:54):  Using config file '/Users/thomase/.contexo/contexo.cfg'
+
+12:58:23 INFO      (ctx_view.py:36):  Using view: /Users/thomase/Work/inhouse/contexo/tests/test_cpp 
+
+12:58:23 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'modules' in view
+
+12:58:23 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'cdef' in view
+
+12:58:23 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'bconf' in view
+
+12:58:23 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'comp' in view
+
+12:58:23 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'misc' in view
+
+12:58:23 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test_cpp/test.rspec', attempting regular file access
+
+12:58:23 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/rspec-cache/test.rspec
+
+12:58:23 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test_cpp/_rspecs/test2.rspec', attempting regular file access
+
+12:58:23 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/rspec-cache/test2.rspec
+
+12:58:23 INFO      (ctx_repo.py:39):  
+
+
+12:58:23 INFO      (ctx_repo.py:45):  Repository added:
+                   ID: test_view
+                 HREF: 
+           Local path: test_view
+       RSpec revision: None
+   Version controlled: No
+
+
+12:58:23 INFO      (ctx_repo.py:118):  Path './test_modules' added to section 'modules' in repository 'test_view'
+
+
+--- RSpec hierarchy -----------------
+
+[ctx-rspec: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test.rspec]
+
+   
+[ctx-rspec: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/_rspecs/test2.rspec]
+    [ctx-repo: test_view]
+      [ctx-path type='modules': /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules]
+      [ctx-path type='modules': /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view]
+
+
+------------------------------------
+12:58:23 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test_cpp/test.rspec', attempting regular file access
+
+12:58:23 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/rspec-cache/test.rspec
+
+12:58:23 INFO      (ctx_view.py:123):  Using RSpec: 'test.rspec'
+
+12:58:23 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo/bconf' added to section 'bconf' in view
+
+12:58:23 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo/cdef' added to section 'cdef' in view
+
+12:58:23 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo' added to section 'misc' in view
+
+12:58:23 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'misc' in view
+
+12:58:23 INFO      (ctx_view.py:48):  Skipping repository validation
+
+12:58:23 INFO      (ctx_view.py:200):  Item 'gcc_osx_i386_rel.bc' was not found in RSpec repositories.
+Trying system global locations.
+
+12:58:23 INFO      (ctx_view.py:215):  Located 'gcc_osx_i386_rel.bc' at '/Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc'
+
+12:58:23 INFO      (ctx_view.py:200):  Item 'gcc_osx.cdef' was not found in RSpec repositories.
+Trying system global locations.
+
+12:58:23 INFO      (ctx_view.py:215):  Located 'gcc_osx.cdef' at '/Users/thomase/.contexo/cdef/gcc_osx.cdef'
+
+12:58:23 INFO      (ctx_bc.py:88):  Trying BC: /Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc
+
+12:58:23 INFO      (ctx_bc.py:91):  Using BC: /Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc
+
+12:58:23 INFO      (ctx_bc.py:235):  Trying CDEF: /Users/thomase/.contexo/cdef/gcc_osx.cdef
+
+12:58:23 INFO      (ctx_bc.py:238):  Using CDEF: /Users/thomase/.contexo/cdef/gcc_osx.cdef
+
+12:58:23 INFO      (ctx_view.py:157):  Item paths in section 'modules' returned from view:
+  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules
+  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view
+
+12:58:23 INFO      (ctx.py:578):  building modules
+
+12:58:23 INFO      (ctx_cmod.py:449):  Building module 'bare_hello'
+
+12:58:23 INFO      (ctx_cmod.py:432):  Module bare_hello has no external depenencies.
+
+12:58:23 INFO      (ctx_base.py:731):  Joined include paths: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules/bare_hello/src
+
+12:58:23 INFO      (ctx_base.py:751):  Object 'hello.o' invalidated by checksum.
+New: c3cfaa7c8004cb2802b6512253dc6baf
+Old: 0
+
+12:58:23 INFO      (ctx_platform.py:22):  Executing: gcc  -pipe -Wall -W -O2 -std=c99 -funroll-loops -fstrict-aliasing -arch i386    -DBYTE_ORDER_LITTLE_ENDIAN -DSCB_CHARENC_ASCII  -I"/Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules/bare_hello/src" -c  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules/bare_hello/src/hello.c -o /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/obj/32bitRelease/hello.o
+
+12:58:23 INFO      (ctx_base.py:286):  Tool defined by 'AR' resolved at '/usr/bin/ar'
+
+12:58:23 INFO      (ctx_platform.py:22):  Executing: ar r /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_output/bare_hello.a  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/obj/32bitRelease/hello.o
+
+ar: creating archive /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_output/bare_hello.a
+12:58:23 INFO      (ctx_base.py:286):  Tool defined by 'RANLIB' resolved at '/usr/bin/ranlib'
+
+12:58:23 INFO      (ctx_platform.py:22):  Executing: ranlib /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_output/bare_hello.a
+
+12:59:09 INFO      (ctx.py:54):  Using config file '/Users/thomase/.contexo/contexo.cfg'
+
+12:59:09 INFO      (ctx_view.py:36):  Using view: /Users/thomase/Work/inhouse/contexo/tests/test_cpp 
+
+12:59:09 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'modules' in view
+
+12:59:09 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'cdef' in view
+
+12:59:09 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'bconf' in view
+
+12:59:09 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'comp' in view
+
+12:59:09 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'misc' in view
+
+12:59:09 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test_cpp/test.rspec', attempting regular file access
+
+12:59:09 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/rspec-cache/test.rspec
+
+12:59:09 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test_cpp/_rspecs/test2.rspec', attempting regular file access
+
+12:59:09 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/rspec-cache/test2.rspec
+
+12:59:09 INFO      (ctx_repo.py:39):  
+
+
+12:59:09 INFO      (ctx_repo.py:45):  Repository added:
+                   ID: test_view
+                 HREF: 
+           Local path: test_view
+       RSpec revision: None
+   Version controlled: No
+
+
+12:59:09 INFO      (ctx_repo.py:118):  Path './test_modules' added to section 'modules' in repository 'test_view'
+
+
+--- RSpec hierarchy -----------------
+
+[ctx-rspec: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test.rspec]
+
+   
+[ctx-rspec: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/_rspecs/test2.rspec]
+    [ctx-repo: test_view]
+      [ctx-path type='modules': /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules]
+      [ctx-path type='modules': /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view]
+
+
+------------------------------------
+12:59:09 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test_cpp/test.rspec', attempting regular file access
+
+12:59:09 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/rspec-cache/test.rspec
+
+12:59:09 INFO      (ctx_view.py:123):  Using RSpec: 'test.rspec'
+
+12:59:09 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo/bconf' added to section 'bconf' in view
+
+12:59:09 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo/cdef' added to section 'cdef' in view
+
+12:59:09 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo' added to section 'misc' in view
+
+12:59:09 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'misc' in view
+
+12:59:09 INFO      (ctx_view.py:48):  Skipping repository validation
+
+12:59:09 INFO      (ctx_view.py:200):  Item 'gcc_osx_i386_rel.bc' was not found in RSpec repositories.
+Trying system global locations.
+
+12:59:09 INFO      (ctx_view.py:215):  Located 'gcc_osx_i386_rel.bc' at '/Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc'
+
+12:59:09 INFO      (ctx_view.py:200):  Item 'gcc_osx.cdef' was not found in RSpec repositories.
+Trying system global locations.
+
+12:59:09 INFO      (ctx_view.py:215):  Located 'gcc_osx.cdef' at '/Users/thomase/.contexo/cdef/gcc_osx.cdef'
+
+12:59:09 INFO      (ctx_bc.py:88):  Trying BC: /Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc
+
+12:59:09 INFO      (ctx_bc.py:91):  Using BC: /Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc
+
+12:59:09 INFO      (ctx_bc.py:235):  Trying CDEF: /Users/thomase/.contexo/cdef/gcc_osx.cdef
+
+12:59:09 INFO      (ctx_bc.py:238):  Using CDEF: /Users/thomase/.contexo/cdef/gcc_osx.cdef
+
+12:59:09 INFO      (ctx_view.py:157):  Item paths in section 'modules' returned from view:
+  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules
+  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view
+
+12:59:09 INFO      (ctx.py:578):  building modules
+
+12:59:09 INFO      (ctx_cmod.py:449):  Building module 'bare_hello'
+
+12:59:09 INFO      (ctx_cmod.py:432):  Module bare_hello has no external depenencies.
+
+12:59:09 INFO      (ctx_base.py:731):  Joined include paths: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules/bare_hello/src
+
+12:59:09 INFO      (ctx_base.py:751):  Object 'hello.o' invalidated by checksum.
+New: c3cfaa7c8004cb2802b6512253dc6baf
+Old: 0
+
+12:59:09 INFO      (ctx_platform.py:22):  Executing: gcc  -pipe -Wall -W -O2 -std=c99 -funroll-loops -fstrict-aliasing -arch i386    -DBYTE_ORDER_LITTLE_ENDIAN -DSCB_CHARENC_ASCII  -I"/Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules/bare_hello/src" -c  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules/bare_hello/src/hello.c -o /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/obj/32bitRelease/hello.o
+
+12:59:09 INFO      (ctx_base.py:286):  Tool defined by 'AR' resolved at '/usr/bin/ar'
+
+12:59:09 INFO      (ctx_platform.py:22):  Executing: ar r /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/bare_hello.a  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/obj/32bitRelease/hello.o
+
+ar: creating archive /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/bare_hello.a
+12:59:09 INFO      (ctx_base.py:286):  Tool defined by 'RANLIB' resolved at '/usr/bin/ranlib'
+
+12:59:09 INFO      (ctx_platform.py:22):  Executing: ranlib /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/bare_hello.a
+
+12:59:09 INFO      (ctx.py:54):  Using config file '/Users/thomase/.contexo/contexo.cfg'
+
+12:59:09 INFO      (ctx_view.py:36):  Using view: /Users/thomase/Work/inhouse/contexo/tests/test_cpp 
+
+12:59:09 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'modules' in view
+
+12:59:09 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'cdef' in view
+
+12:59:09 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'bconf' in view
+
+12:59:09 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'comp' in view
+
+12:59:09 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'misc' in view
+
+12:59:09 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test_cpp/test.rspec', attempting regular file access
+
+12:59:09 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/rspec-cache/test.rspec
+
+12:59:09 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test_cpp/_rspecs/test2.rspec', attempting regular file access
+
+12:59:09 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/rspec-cache/test2.rspec
+
+12:59:09 INFO      (ctx_repo.py:39):  
+
+
+12:59:09 INFO      (ctx_repo.py:45):  Repository added:
+                   ID: test_view
+                 HREF: 
+           Local path: test_view
+       RSpec revision: None
+   Version controlled: No
+
+
+12:59:09 INFO      (ctx_repo.py:118):  Path './test_modules' added to section 'modules' in repository 'test_view'
+
+
+--- RSpec hierarchy -----------------
+
+[ctx-rspec: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test.rspec]
+
+   
+[ctx-rspec: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/_rspecs/test2.rspec]
+    [ctx-repo: test_view]
+      [ctx-path type='modules': /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules]
+      [ctx-path type='modules': /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view]
+
+
+------------------------------------
+12:59:09 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test_cpp/test.rspec', attempting regular file access
+
+12:59:09 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/rspec-cache/test.rspec
+
+12:59:09 INFO      (ctx_view.py:123):  Using RSpec: 'test.rspec'
+
+12:59:09 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo/bconf' added to section 'bconf' in view
+
+12:59:09 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo/cdef' added to section 'cdef' in view
+
+12:59:09 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo' added to section 'misc' in view
+
+12:59:09 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'misc' in view
+
+12:59:09 INFO      (ctx_view.py:48):  Skipping repository validation
+
+12:59:09 INFO      (ctx_view.py:200):  Item 'gcc_osx_i386_rel.bc' was not found in RSpec repositories.
+Trying system global locations.
+
+12:59:09 INFO      (ctx_view.py:215):  Located 'gcc_osx_i386_rel.bc' at '/Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc'
+
+12:59:09 INFO      (ctx_view.py:200):  Item 'gcc_osx.cdef' was not found in RSpec repositories.
+Trying system global locations.
+
+12:59:09 INFO      (ctx_view.py:215):  Located 'gcc_osx.cdef' at '/Users/thomase/.contexo/cdef/gcc_osx.cdef'
+
+12:59:09 INFO      (ctx_bc.py:88):  Trying BC: /Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc
+
+12:59:09 INFO      (ctx_bc.py:91):  Using BC: /Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc
+
+12:59:09 INFO      (ctx_bc.py:235):  Trying CDEF: /Users/thomase/.contexo/cdef/gcc_osx.cdef
+
+12:59:09 INFO      (ctx_bc.py:238):  Using CDEF: /Users/thomase/.contexo/cdef/gcc_osx.cdef
+
+12:59:09 INFO      (ctx_view.py:157):  Item paths in section 'modules' returned from view:
+  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules
+  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view
+
+12:59:09 INFO      (ctx.py:578):  building modules
+
+12:59:09 INFO      (ctx_cmod.py:449):  Building module 'bare_hello'
+
+12:59:09 INFO      (ctx_cmod.py:432):  Module bare_hello has no external depenencies.
+
+12:59:09 INFO      (ctx_base.py:731):  Joined include paths: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules/bare_hello/src
+
+12:59:09 INFO      (ctx_base.py:751):  Object 'hello.o' invalidated by checksum.
+New: c3cfaa7c8004cb2802b6512253dc6baf
+Old: 0
+
+12:59:09 INFO      (ctx_platform.py:22):  Executing: gcc  -pipe -Wall -W -O2 -std=c99 -funroll-loops -fstrict-aliasing -arch i386    -DBYTE_ORDER_LITTLE_ENDIAN -DSCB_CHARENC_ASCII  -I"/Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules/bare_hello/src" -c  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules/bare_hello/src/hello.c -o /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/obj/32bitRelease/hello.o
+
+12:59:09 INFO      (ctx_base.py:286):  Tool defined by 'AR' resolved at '/usr/bin/ar'
+
+12:59:09 INFO      (ctx_platform.py:22):  Executing: ar r /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_output/bare_hello.a  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/obj/32bitRelease/hello.o
+
+ar: creating archive /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_output/bare_hello.a
+12:59:09 INFO      (ctx_base.py:286):  Tool defined by 'RANLIB' resolved at '/usr/bin/ranlib'
+
+12:59:09 INFO      (ctx_platform.py:22):  Executing: ranlib /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_output/bare_hello.a
+
+12:59:44 INFO      (ctx.py:54):  Using config file '/Users/thomase/.contexo/contexo.cfg'
+
+12:59:44 INFO      (ctx_view.py:36):  Using view: /Users/thomase/Work/inhouse/contexo/tests/test_cpp 
+
+12:59:44 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'modules' in view
+
+12:59:44 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'cdef' in view
+
+12:59:44 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'bconf' in view
+
+12:59:44 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'comp' in view
+
+12:59:44 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'misc' in view
+
+12:59:44 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test_cpp/test.rspec', attempting regular file access
+
+12:59:44 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/rspec-cache/test.rspec
+
+12:59:44 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test_cpp/_rspecs/test2.rspec', attempting regular file access
+
+12:59:44 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/rspec-cache/test2.rspec
+
+12:59:44 INFO      (ctx_repo.py:39):  
+
+
+12:59:44 INFO      (ctx_repo.py:45):  Repository added:
+                   ID: test_view
+                 HREF: 
+           Local path: test_view
+       RSpec revision: None
+   Version controlled: No
+
+
+12:59:44 INFO      (ctx_repo.py:118):  Path './test_modules' added to section 'modules' in repository 'test_view'
+
+
+--- RSpec hierarchy -----------------
+
+[ctx-rspec: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test.rspec]
+
+   
+[ctx-rspec: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/_rspecs/test2.rspec]
+    [ctx-repo: test_view]
+      [ctx-path type='modules': /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules]
+      [ctx-path type='modules': /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view]
+
+
+------------------------------------
+12:59:44 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test_cpp/test.rspec', attempting regular file access
+
+12:59:44 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/rspec-cache/test.rspec
+
+12:59:44 INFO      (ctx_view.py:123):  Using RSpec: 'test.rspec'
+
+12:59:44 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo/bconf' added to section 'bconf' in view
+
+12:59:44 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo/cdef' added to section 'cdef' in view
+
+12:59:44 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo' added to section 'misc' in view
+
+12:59:44 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'misc' in view
+
+12:59:44 INFO      (ctx_view.py:48):  Skipping repository validation
+
+12:59:44 INFO      (ctx_view.py:200):  Item 'gcc_osx_i386_rel.bc' was not found in RSpec repositories.
+Trying system global locations.
+
+12:59:44 INFO      (ctx_view.py:215):  Located 'gcc_osx_i386_rel.bc' at '/Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc'
+
+12:59:44 INFO      (ctx_view.py:200):  Item 'gcc_osx.cdef' was not found in RSpec repositories.
+Trying system global locations.
+
+12:59:44 INFO      (ctx_view.py:215):  Located 'gcc_osx.cdef' at '/Users/thomase/.contexo/cdef/gcc_osx.cdef'
+
+12:59:44 INFO      (ctx_bc.py:88):  Trying BC: /Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc
+
+12:59:44 INFO      (ctx_bc.py:91):  Using BC: /Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc
+
+12:59:44 INFO      (ctx_bc.py:235):  Trying CDEF: /Users/thomase/.contexo/cdef/gcc_osx.cdef
+
+12:59:44 INFO      (ctx_bc.py:238):  Using CDEF: /Users/thomase/.contexo/cdef/gcc_osx.cdef
+
+12:59:44 INFO      (ctx_view.py:157):  Item paths in section 'modules' returned from view:
+  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules
+  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view
+
+12:59:44 INFO      (ctx.py:578):  building modules
+
+12:59:44 INFO      (ctx_cmod.py:449):  Building module 'bare_hello'
+
+12:59:44 INFO      (ctx_cmod.py:432):  Module bare_hello has no external depenencies.
+
+12:59:44 INFO      (ctx_base.py:731):  Joined include paths: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules/bare_hello/src
+
+12:59:44 INFO      (ctx_base.py:751):  Object 'hello.o' invalidated by checksum.
+New: c3cfaa7c8004cb2802b6512253dc6baf
+Old: 0
+
+12:59:44 INFO      (ctx_platform.py:22):  Executing: gcc  -pipe -Wall -W -O2 -std=c99 -funroll-loops -fstrict-aliasing -arch i386    -DBYTE_ORDER_LITTLE_ENDIAN -DSCB_CHARENC_ASCII  -I"/Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules/bare_hello/src" -c  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules/bare_hello/src/hello.c -o /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/obj/32bitRelease/hello.o
+
+12:59:44 INFO      (ctx_base.py:286):  Tool defined by 'AR' resolved at '/usr/bin/ar'
+
+12:59:44 INFO      (ctx_platform.py:22):  Executing: ar r /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/bare_hello.a  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/obj/32bitRelease/hello.o
+
+ar: creating archive /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/bare_hello.a
+12:59:44 INFO      (ctx_base.py:286):  Tool defined by 'RANLIB' resolved at '/usr/bin/ranlib'
+
+12:59:44 INFO      (ctx_platform.py:22):  Executing: ranlib /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/bare_hello.a
+
+12:59:44 INFO      (ctx.py:54):  Using config file '/Users/thomase/.contexo/contexo.cfg'
+
+12:59:44 INFO      (ctx_view.py:36):  Using view: /Users/thomase/Work/inhouse/contexo/tests/test_cpp 
+
+12:59:44 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'modules' in view
+
+12:59:44 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'cdef' in view
+
+12:59:44 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'bconf' in view
+
+12:59:44 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'comp' in view
+
+12:59:44 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'misc' in view
+
+12:59:44 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test_cpp/test.rspec', attempting regular file access
+
+12:59:44 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/rspec-cache/test.rspec
+
+12:59:44 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test_cpp/_rspecs/test2.rspec', attempting regular file access
+
+12:59:44 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/rspec-cache/test2.rspec
+
+12:59:44 INFO      (ctx_repo.py:39):  
+
+
+12:59:44 INFO      (ctx_repo.py:45):  Repository added:
+                   ID: test_view
+                 HREF: 
+           Local path: test_view
+       RSpec revision: None
+   Version controlled: No
+
+
+12:59:44 INFO      (ctx_repo.py:118):  Path './test_modules' added to section 'modules' in repository 'test_view'
+
+
+--- RSpec hierarchy -----------------
+
+[ctx-rspec: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test.rspec]
+
+   
+[ctx-rspec: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/_rspecs/test2.rspec]
+    [ctx-repo: test_view]
+      [ctx-path type='modules': /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules]
+      [ctx-path type='modules': /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view]
+
+
+------------------------------------
+12:59:44 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test_cpp/test.rspec', attempting regular file access
+
+12:59:44 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/rspec-cache/test.rspec
+
+12:59:44 INFO      (ctx_view.py:123):  Using RSpec: 'test.rspec'
+
+12:59:44 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo/bconf' added to section 'bconf' in view
+
+12:59:44 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo/cdef' added to section 'cdef' in view
+
+12:59:44 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo' added to section 'misc' in view
+
+12:59:44 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests/test_cpp' added to section 'misc' in view
+
+12:59:44 INFO      (ctx_view.py:48):  Skipping repository validation
+
+12:59:44 INFO      (ctx_view.py:200):  Item 'gcc_osx_i386_rel.bc' was not found in RSpec repositories.
+Trying system global locations.
+
+12:59:44 INFO      (ctx_view.py:215):  Located 'gcc_osx_i386_rel.bc' at '/Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc'
+
+12:59:44 INFO      (ctx_view.py:200):  Item 'gcc_osx.cdef' was not found in RSpec repositories.
+Trying system global locations.
+
+12:59:44 INFO      (ctx_view.py:215):  Located 'gcc_osx.cdef' at '/Users/thomase/.contexo/cdef/gcc_osx.cdef'
+
+12:59:44 INFO      (ctx_bc.py:88):  Trying BC: /Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc
+
+12:59:44 INFO      (ctx_bc.py:91):  Using BC: /Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc
+
+12:59:44 INFO      (ctx_bc.py:235):  Trying CDEF: /Users/thomase/.contexo/cdef/gcc_osx.cdef
+
+12:59:44 INFO      (ctx_bc.py:238):  Using CDEF: /Users/thomase/.contexo/cdef/gcc_osx.cdef
+
+12:59:44 INFO      (ctx_view.py:157):  Item paths in section 'modules' returned from view:
+  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules
+  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view
+
+12:59:44 INFO      (ctx.py:578):  building modules
+
+12:59:44 INFO      (ctx_cmod.py:449):  Building module 'bare_hello'
+
+12:59:44 INFO      (ctx_cmod.py:432):  Module bare_hello has no external depenencies.
+
+12:59:44 INFO      (ctx_base.py:731):  Joined include paths: /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules/bare_hello/src
+
+12:59:44 INFO      (ctx_base.py:751):  Object 'hello.o' invalidated by checksum.
+New: c3cfaa7c8004cb2802b6512253dc6baf
+Old: 0
+
+12:59:44 INFO      (ctx_platform.py:22):  Executing: gcc  -pipe -Wall -W -O2 -std=c99 -funroll-loops -fstrict-aliasing -arch i386    -DBYTE_ORDER_LITTLE_ENDIAN -DSCB_CHARENC_ASCII  -I"/Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules/bare_hello/src" -c  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_view/test_modules/bare_hello/src/hello.c -o /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/obj/32bitRelease/hello.o
+
+12:59:45 INFO      (ctx_base.py:286):  Tool defined by 'AR' resolved at '/usr/bin/ar'
+
+12:59:45 INFO      (ctx_platform.py:22):  Executing: ar r /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_output/bare_hello.a  /Users/thomase/Work/inhouse/contexo/tests/test_cpp/.ctx/obj/32bitRelease/hello.o
+
+ar: creating archive /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_output/bare_hello.a
+12:59:45 INFO      (ctx_base.py:286):  Tool defined by 'RANLIB' resolved at '/usr/bin/ranlib'
+
+12:59:45 INFO      (ctx_platform.py:22):  Executing: ranlib /Users/thomase/Work/inhouse/contexo/tests/test_cpp/test_output/bare_hello.a
+
+13:25:11 INFO      (ctx.py:54):  Using config file '/Users/thomase/.contexo/contexo.cfg'
+
+13:25:11 INFO      (ctx_view.py:36):  Using view: /Users/thomase/Work/inhouse/contexo/tests 
+
+13:25:11 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests' added to section 'modules' in view
+
+13:25:11 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests' added to section 'cdef' in view
+
+13:25:11 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests' added to section 'bconf' in view
+
+13:25:11 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests' added to section 'comp' in view
+
+13:25:11 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests' added to section 'misc' in view
+
+13:25:11 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test.rspec', attempting regular file access
+
+13:25:11 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/.ctx/rspec-cache/test.rspec
+
+13:25:11 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/_rspecs/test2.rspec', attempting regular file access
+
+13:25:11 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/.ctx/rspec-cache/test2.rspec
+
+13:25:11 INFO      (ctx_repo.py:39):  
+
+
+13:25:11 INFO      (ctx_repo.py:45):  Repository added:
+                   ID: test_view
+                 HREF: 
+           Local path: test_view
+       RSpec revision: None
+   Version controlled: No
+
+
+13:25:11 INFO      (ctx_repo.py:118):  Path './test_modules' added to section 'modules' in repository 'test_view'
+
+
+--- RSpec hierarchy -----------------
+
+[ctx-rspec: /Users/thomase/Work/inhouse/contexo/tests/test.rspec]
+
+   
+[ctx-rspec: /Users/thomase/Work/inhouse/contexo/tests/_rspecs/test2.rspec]
+    [ctx-repo: test_view]
+      [ctx-path type='modules': /Users/thomase/Work/inhouse/contexo/tests/test_view]
+      [ctx-path type='modules': /Users/thomase/Work/inhouse/contexo/tests/test_view/test_modules]
+
+
+------------------------------------
+13:25:11 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test.rspec', attempting regular file access
+
+13:25:11 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/.ctx/rspec-cache/test.rspec
+
+13:25:11 INFO      (ctx_view.py:123):  Using RSpec: 'test.rspec'
+
+13:25:11 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo/bconf' added to section 'bconf' in view
+
+13:25:11 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo/cdef' added to section 'cdef' in view
+
+13:25:11 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo' added to section 'misc' in view
+
+13:25:11 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests' added to section 'misc' in view
+
+13:25:11 INFO      (ctx_view.py:48):  Skipping repository validation
+
+13:25:11 INFO      (ctx_view.py:200):  Item 'gcc_osx_i386_rel.bc' was not found in RSpec repositories.
+Trying system global locations.
+
+13:25:11 INFO      (ctx_view.py:215):  Located 'gcc_osx_i386_rel.bc' at '/Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc'
+
+13:25:11 INFO      (ctx_view.py:200):  Item 'gcc_osx.cdef' was not found in RSpec repositories.
+Trying system global locations.
+
+13:25:11 INFO      (ctx_view.py:215):  Located 'gcc_osx.cdef' at '/Users/thomase/.contexo/cdef/gcc_osx.cdef'
+
+13:25:11 INFO      (ctx_bc.py:88):  Trying BC: /Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc
+
+13:25:11 INFO      (ctx_bc.py:91):  Using BC: /Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc
+
+13:25:11 INFO      (ctx_bc.py:235):  Trying CDEF: /Users/thomase/.contexo/cdef/gcc_osx.cdef
+
+13:25:11 INFO      (ctx_bc.py:238):  Using CDEF: /Users/thomase/.contexo/cdef/gcc_osx.cdef
+
+13:25:11 INFO      (ctx_view.py:157):  Item paths in section 'modules' returned from view:
+  /Users/thomase/Work/inhouse/contexo/tests/test_view
+  /Users/thomase/Work/inhouse/contexo/tests/test_view/test_modules
+
+13:25:11 INFO      (ctx.py:578):  building modules
+
+13:25:11 INFO      (ctx_cmod.py:449):  Building module 'bare_hello'
+
+13:25:11 INFO      (ctx_cmod.py:432):  Module bare_hello has no external depenencies.
+
+13:25:11 INFO      (ctx_base.py:730):  Joined include paths: /Users/thomase/Work/inhouse/contexo/tests/test_view/test_modules/bare_hello/src
+
+13:25:11 INFO      (ctx_base.py:750):  Object 'hello.o' invalidated by checksum.
+New: e8a850dde1c3c0dc39ec0519d93d6a5b
+Old: 0
+
+13:25:11 INFO      (ctx_platform.py:22):  Executing: gcc  -pipe -Wall -W -O2 -std=c99 -funroll-loops -fstrict-aliasing -arch i386    -DBYTE_ORDER_LITTLE_ENDIAN -DSCB_CHARENC_ASCII  -I"/Users/thomase/Work/inhouse/contexo/tests/test_view/test_modules/bare_hello/src" -c  /Users/thomase/Work/inhouse/contexo/tests/test_view/test_modules/bare_hello/src/hello.c -o /Users/thomase/Work/inhouse/contexo/tests/.ctx/obj/32bitRelease/hello.o
+
+13:25:11 INFO      (ctx_base.py:285):  Tool defined by 'AR' resolved at '/usr/bin/ar'
+
+13:25:11 INFO      (ctx_platform.py:22):  Executing: ar r /Users/thomase/Work/inhouse/contexo/tests/test_view/bare_hello.a  /Users/thomase/Work/inhouse/contexo/tests/.ctx/obj/32bitRelease/hello.o
+
+ar: creating archive /Users/thomase/Work/inhouse/contexo/tests/test_view/bare_hello.a
+13:25:11 INFO      (ctx_base.py:285):  Tool defined by 'RANLIB' resolved at '/usr/bin/ranlib'
+
+13:25:11 INFO      (ctx_platform.py:22):  Executing: ranlib /Users/thomase/Work/inhouse/contexo/tests/test_view/bare_hello.a
+
+13:25:11 INFO      (ctx.py:54):  Using config file '/Users/thomase/.contexo/contexo.cfg'
+
+13:25:11 INFO      (ctx_view.py:36):  Using view: /Users/thomase/Work/inhouse/contexo/tests 
+
+13:25:11 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests' added to section 'modules' in view
+
+13:25:11 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests' added to section 'cdef' in view
+
+13:25:11 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests' added to section 'bconf' in view
+
+13:25:11 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests' added to section 'comp' in view
+
+13:25:11 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests' added to section 'misc' in view
+
+13:25:11 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test.rspec', attempting regular file access
+
+13:25:11 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/.ctx/rspec-cache/test.rspec
+
+13:25:11 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/_rspecs/test2.rspec', attempting regular file access
+
+13:25:11 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/.ctx/rspec-cache/test2.rspec
+
+13:25:11 INFO      (ctx_repo.py:39):  
+
+
+13:25:11 INFO      (ctx_repo.py:45):  Repository added:
+                   ID: test_view
+                 HREF: 
+           Local path: test_view
+       RSpec revision: None
+   Version controlled: No
+
+
+13:25:11 INFO      (ctx_repo.py:118):  Path './test_modules' added to section 'modules' in repository 'test_view'
+
+
+--- RSpec hierarchy -----------------
+
+[ctx-rspec: /Users/thomase/Work/inhouse/contexo/tests/test.rspec]
+
+   
+[ctx-rspec: /Users/thomase/Work/inhouse/contexo/tests/_rspecs/test2.rspec]
+    [ctx-repo: test_view]
+      [ctx-path type='modules': /Users/thomase/Work/inhouse/contexo/tests/test_view]
+      [ctx-path type='modules': /Users/thomase/Work/inhouse/contexo/tests/test_view/test_modules]
+
+
+------------------------------------
+13:25:11 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test.rspec', attempting regular file access
+
+13:25:11 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/.ctx/rspec-cache/test.rspec
+
+13:25:11 INFO      (ctx_view.py:123):  Using RSpec: 'test.rspec'
+
+13:25:11 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo/bconf' added to section 'bconf' in view
+
+13:25:11 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo/cdef' added to section 'cdef' in view
+
+13:25:11 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo' added to section 'misc' in view
+
+13:25:11 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests' added to section 'misc' in view
+
+13:25:11 INFO      (ctx_view.py:48):  Skipping repository validation
+
+13:25:11 INFO      (ctx_view.py:200):  Item 'gcc_osx_i386_rel.bc' was not found in RSpec repositories.
+Trying system global locations.
+
+13:25:11 INFO      (ctx_view.py:215):  Located 'gcc_osx_i386_rel.bc' at '/Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc'
+
+13:25:11 INFO      (ctx_view.py:200):  Item 'gcc_osx.cdef' was not found in RSpec repositories.
+Trying system global locations.
+
+13:25:11 INFO      (ctx_view.py:215):  Located 'gcc_osx.cdef' at '/Users/thomase/.contexo/cdef/gcc_osx.cdef'
+
+13:25:11 INFO      (ctx_bc.py:88):  Trying BC: /Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc
+
+13:25:11 INFO      (ctx_bc.py:91):  Using BC: /Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc
+
+13:25:11 INFO      (ctx_bc.py:235):  Trying CDEF: /Users/thomase/.contexo/cdef/gcc_osx.cdef
+
+13:25:11 INFO      (ctx_bc.py:238):  Using CDEF: /Users/thomase/.contexo/cdef/gcc_osx.cdef
+
+13:25:11 INFO      (ctx_view.py:157):  Item paths in section 'modules' returned from view:
+  /Users/thomase/Work/inhouse/contexo/tests/test_view
+  /Users/thomase/Work/inhouse/contexo/tests/test_view/test_modules
+
+13:25:11 INFO      (ctx.py:578):  building modules
+
+13:25:11 INFO      (ctx_cmod.py:449):  Building module 'bare_hello'
+
+13:25:11 INFO      (ctx_cmod.py:432):  Module bare_hello has no external depenencies.
+
+13:25:11 INFO      (ctx_base.py:730):  Joined include paths: /Users/thomase/Work/inhouse/contexo/tests/test_view/test_modules/bare_hello/src
+
+13:25:11 INFO      (ctx_base.py:750):  Object 'hello.o' invalidated by checksum.
+New: e8a850dde1c3c0dc39ec0519d93d6a5b
+Old: 0
+
+13:25:11 INFO      (ctx_platform.py:22):  Executing: gcc  -pipe -Wall -W -O2 -std=c99 -funroll-loops -fstrict-aliasing -arch i386    -DBYTE_ORDER_LITTLE_ENDIAN -DSCB_CHARENC_ASCII  -I"/Users/thomase/Work/inhouse/contexo/tests/test_view/test_modules/bare_hello/src" -c  /Users/thomase/Work/inhouse/contexo/tests/test_view/test_modules/bare_hello/src/hello.c -o /Users/thomase/Work/inhouse/contexo/tests/.ctx/obj/32bitRelease/hello.o
+
+13:25:11 INFO      (ctx_base.py:285):  Tool defined by 'AR' resolved at '/usr/bin/ar'
+
+13:25:11 INFO      (ctx_platform.py:22):  Executing: ar r /Users/thomase/Work/inhouse/contexo/tests/test_output/bare_hello.a  /Users/thomase/Work/inhouse/contexo/tests/.ctx/obj/32bitRelease/hello.o
+
+ar: creating archive /Users/thomase/Work/inhouse/contexo/tests/test_output/bare_hello.a
+13:25:11 INFO      (ctx_base.py:285):  Tool defined by 'RANLIB' resolved at '/usr/bin/ranlib'
+
+13:25:11 INFO      (ctx_platform.py:22):  Executing: ranlib /Users/thomase/Work/inhouse/contexo/tests/test_output/bare_hello.a
+
+13:29:48 INFO      (ctx.py:54):  Using config file '/Users/thomase/.contexo/contexo.cfg'
+
+13:29:48 INFO      (ctx_view.py:36):  Using view: /Users/thomase/Work/inhouse/contexo/tests 
+
+13:29:48 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests' added to section 'modules' in view
+
+13:29:48 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests' added to section 'cdef' in view
+
+13:29:48 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests' added to section 'bconf' in view
+
+13:29:48 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests' added to section 'comp' in view
+
+13:29:48 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests' added to section 'misc' in view
+
+13:29:48 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test.rspec', attempting regular file access
+
+13:29:48 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/.ctx/rspec-cache/test.rspec
+
+13:29:49 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/_rspecs/test2.rspec', attempting regular file access
+
+13:29:49 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/.ctx/rspec-cache/test2.rspec
+
+13:29:49 INFO      (ctx_repo.py:39):  
+
+
+13:29:49 INFO      (ctx_repo.py:45):  Repository added:
+                   ID: test_view
+                 HREF: 
+           Local path: test_view
+       RSpec revision: None
+   Version controlled: No
+
+
+13:29:49 INFO      (ctx_repo.py:118):  Path './test_modules' added to section 'modules' in repository 'test_view'
+
+
+--- RSpec hierarchy -----------------
+
+[ctx-rspec: /Users/thomase/Work/inhouse/contexo/tests/test.rspec]
+
+   
+[ctx-rspec: /Users/thomase/Work/inhouse/contexo/tests/_rspecs/test2.rspec]
+    [ctx-repo: test_view]
+      [ctx-path type='modules': /Users/thomase/Work/inhouse/contexo/tests/test_view]
+      [ctx-path type='modules': /Users/thomase/Work/inhouse/contexo/tests/test_view/test_modules]
+
+
+------------------------------------
+13:29:49 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test.rspec', attempting regular file access
+
+13:29:49 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/.ctx/rspec-cache/test.rspec
+
+13:29:49 INFO      (ctx_view.py:123):  Using RSpec: 'test.rspec'
+
+13:29:49 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo/bconf' added to section 'bconf' in view
+
+13:29:49 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo/cdef' added to section 'cdef' in view
+
+13:29:49 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo' added to section 'misc' in view
+
+13:29:49 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests' added to section 'misc' in view
+
+13:29:49 INFO      (ctx_view.py:48):  Skipping repository validation
+
+13:29:49 INFO      (ctx_view.py:200):  Item 'gcc_osx_i386_rel.bc' was not found in RSpec repositories.
+Trying system global locations.
+
+13:29:49 INFO      (ctx_view.py:215):  Located 'gcc_osx_i386_rel.bc' at '/Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc'
+
+13:29:49 INFO      (ctx_view.py:200):  Item 'gcc_osx.cdef' was not found in RSpec repositories.
+Trying system global locations.
+
+13:29:49 INFO      (ctx_view.py:215):  Located 'gcc_osx.cdef' at '/Users/thomase/.contexo/cdef/gcc_osx.cdef'
+
+13:29:49 INFO      (ctx_bc.py:88):  Trying BC: /Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc
+
+13:29:49 INFO      (ctx_bc.py:91):  Using BC: /Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc
+
+13:29:49 INFO      (ctx_bc.py:235):  Trying CDEF: /Users/thomase/.contexo/cdef/gcc_osx.cdef
+
+13:29:49 INFO      (ctx_bc.py:238):  Using CDEF: /Users/thomase/.contexo/cdef/gcc_osx.cdef
+
+13:29:49 INFO      (ctx_view.py:157):  Item paths in section 'modules' returned from view:
+  /Users/thomase/Work/inhouse/contexo/tests/test_view
+  /Users/thomase/Work/inhouse/contexo/tests/test_view/test_modules
+
+13:29:49 INFO      (ctx.py:578):  building modules
+
+13:29:49 INFO      (ctx_cmod.py:449):  Building module 'bare_hello'
+
+13:29:49 INFO      (ctx_cmod.py:432):  Module bare_hello has no external depenencies.
+
+13:29:49 INFO      (ctx_base.py:730):  Joined include paths: /Users/thomase/Work/inhouse/contexo/tests/test_view/test_modules/bare_hello/src
+
+13:29:49 INFO      (ctx_base.py:750):  Object 'hello.o' invalidated by checksum.
+New: e8a850dde1c3c0dc39ec0519d93d6a5b
+Old: 0
+
+13:29:49 INFO      (ctx_platform.py:22):  Executing: gcc  -pipe -Wall -W -O2 -std=c99 -funroll-loops -fstrict-aliasing -arch i386    -DBYTE_ORDER_LITTLE_ENDIAN -DSCB_CHARENC_ASCII  -I"/Users/thomase/Work/inhouse/contexo/tests/test_view/test_modules/bare_hello/src" -c  /Users/thomase/Work/inhouse/contexo/tests/test_view/test_modules/bare_hello/src/hello.c -o /Users/thomase/Work/inhouse/contexo/tests/.ctx/obj/32bitRelease/hello.o
+
+13:29:49 INFO      (ctx_base.py:285):  Tool defined by 'AR' resolved at '/usr/bin/ar'
+
+13:29:49 INFO      (ctx_platform.py:22):  Executing: ar r /Users/thomase/Work/inhouse/contexo/tests/test_view/bare_hello.a  /Users/thomase/Work/inhouse/contexo/tests/.ctx/obj/32bitRelease/hello.o
+
+ar: creating archive /Users/thomase/Work/inhouse/contexo/tests/test_view/bare_hello.a
+13:29:49 INFO      (ctx_base.py:285):  Tool defined by 'RANLIB' resolved at '/usr/bin/ranlib'
+
+13:29:49 INFO      (ctx_platform.py:22):  Executing: ranlib /Users/thomase/Work/inhouse/contexo/tests/test_view/bare_hello.a
+
+13:29:49 INFO      (ctx.py:54):  Using config file '/Users/thomase/.contexo/contexo.cfg'
+
+13:29:49 INFO      (ctx_view.py:36):  Using view: /Users/thomase/Work/inhouse/contexo/tests 
+
+13:29:49 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests' added to section 'modules' in view
+
+13:29:49 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests' added to section 'cdef' in view
+
+13:29:49 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests' added to section 'bconf' in view
+
+13:29:49 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests' added to section 'comp' in view
+
+13:29:49 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests' added to section 'misc' in view
+
+13:29:49 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test.rspec', attempting regular file access
+
+13:29:49 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/.ctx/rspec-cache/test.rspec
+
+13:29:49 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/_rspecs/test2.rspec', attempting regular file access
+
+13:29:49 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/.ctx/rspec-cache/test2.rspec
+
+13:29:49 INFO      (ctx_repo.py:39):  
+
+
+13:29:49 INFO      (ctx_repo.py:45):  Repository added:
+                   ID: test_view
+                 HREF: 
+           Local path: test_view
+       RSpec revision: None
+   Version controlled: No
+
+
+13:29:49 INFO      (ctx_repo.py:118):  Path './test_modules' added to section 'modules' in repository 'test_view'
+
+
+--- RSpec hierarchy -----------------
+
+[ctx-rspec: /Users/thomase/Work/inhouse/contexo/tests/test.rspec]
+
+   
+[ctx-rspec: /Users/thomase/Work/inhouse/contexo/tests/_rspecs/test2.rspec]
+    [ctx-repo: test_view]
+      [ctx-path type='modules': /Users/thomase/Work/inhouse/contexo/tests/test_view]
+      [ctx-path type='modules': /Users/thomase/Work/inhouse/contexo/tests/test_view/test_modules]
+
+
+------------------------------------
+13:29:49 INFO      (ctx_rspec.py:196):  No RCS specified for RSpec '/Users/thomase/Work/inhouse/contexo/tests/test.rspec', attempting regular file access
+
+13:29:49 INFO      (ctx_rspec.py:236):  RSpec local access path resolved to: /Users/thomase/Work/inhouse/contexo/tests/.ctx/rspec-cache/test.rspec
+
+13:29:49 INFO      (ctx_view.py:123):  Using RSpec: 'test.rspec'
+
+13:29:49 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo/bconf' added to section 'bconf' in view
+
+13:29:49 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo/cdef' added to section 'cdef' in view
+
+13:29:49 INFO      (ctx_view.py:141):  System global path '/Users/thomase/.contexo' added to section 'misc' in view
+
+13:29:49 INFO      (ctx_view.py:141):  System global path '/Users/thomase/Work/inhouse/contexo/tests' added to section 'misc' in view
+
+13:29:49 INFO      (ctx_view.py:48):  Skipping repository validation
+
+13:29:49 INFO      (ctx_view.py:200):  Item 'gcc_osx_i386_rel.bc' was not found in RSpec repositories.
+Trying system global locations.
+
+13:29:49 INFO      (ctx_view.py:215):  Located 'gcc_osx_i386_rel.bc' at '/Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc'
+
+13:29:49 INFO      (ctx_view.py:200):  Item 'gcc_osx.cdef' was not found in RSpec repositories.
+Trying system global locations.
+
+13:29:49 INFO      (ctx_view.py:215):  Located 'gcc_osx.cdef' at '/Users/thomase/.contexo/cdef/gcc_osx.cdef'
+
+13:29:49 INFO      (ctx_bc.py:88):  Trying BC: /Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc
+
+13:29:49 INFO      (ctx_bc.py:91):  Using BC: /Users/thomase/.contexo/bconf/gcc_osx_i386_rel.bc
+
+13:29:49 INFO      (ctx_bc.py:235):  Trying CDEF: /Users/thomase/.contexo/cdef/gcc_osx.cdef
+
+13:29:49 INFO      (ctx_bc.py:238):  Using CDEF: /Users/thomase/.contexo/cdef/gcc_osx.cdef
+
+13:29:49 INFO      (ctx_view.py:157):  Item paths in section 'modules' returned from view:
+  /Users/thomase/Work/inhouse/contexo/tests/test_view
+  /Users/thomase/Work/inhouse/contexo/tests/test_view/test_modules
+
+13:29:49 INFO      (ctx.py:578):  building modules
+
+13:29:49 INFO      (ctx_cmod.py:449):  Building module 'bare_hello'
+
+13:29:49 INFO      (ctx_cmod.py:432):  Module bare_hello has no external depenencies.
+
+13:29:49 INFO      (ctx_base.py:730):  Joined include paths: /Users/thomase/Work/inhouse/contexo/tests/test_view/test_modules/bare_hello/src
+
+13:29:49 INFO      (ctx_base.py:750):  Object 'hello.o' invalidated by checksum.
+New: e8a850dde1c3c0dc39ec0519d93d6a5b
+Old: 0
+
+13:29:49 INFO      (ctx_platform.py:22):  Executing: gcc  -pipe -Wall -W -O2 -std=c99 -funroll-loops -fstrict-aliasing -arch i386    -DBYTE_ORDER_LITTLE_ENDIAN -DSCB_CHARENC_ASCII  -I"/Users/thomase/Work/inhouse/contexo/tests/test_view/test_modules/bare_hello/src" -c  /Users/thomase/Work/inhouse/contexo/tests/test_view/test_modules/bare_hello/src/hello.c -o /Users/thomase/Work/inhouse/contexo/tests/.ctx/obj/32bitRelease/hello.o
+
+13:29:49 INFO      (ctx_base.py:285):  Tool defined by 'AR' resolved at '/usr/bin/ar'
+
+13:29:49 INFO      (ctx_platform.py:22):  Executing: ar r /Users/thomase/Work/inhouse/contexo/tests/test_output/bare_hello.a  /Users/thomase/Work/inhouse/contexo/tests/.ctx/obj/32bitRelease/hello.o
+
+ar: creating archive /Users/thomase/Work/inhouse/contexo/tests/test_output/bare_hello.a
+13:29:49 INFO      (ctx_base.py:285):  Tool defined by 'RANLIB' resolved at '/usr/bin/ranlib'
+
+13:29:49 INFO      (ctx_platform.py:22):  Executing: ranlib /Users/thomase/Work/inhouse/contexo/tests/test_output/bare_hello.a
+

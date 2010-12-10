@@ -1,5 +1,5 @@
 #!/bin/bash
-CTX=$PWD/../../contexo/cmdline/inplace/ctx.py
+CTX=$PWD/../contexo/cmdline/inplace/ctx.py
 cleanup(){
     rm -rf .ctx
     rm -rf test_output
@@ -41,8 +41,7 @@ test -d "test_output"|| fail
 cleanup
 
 echo "build standard with c++"
-$CTX build -b "$BCONF" cpp_hello 
-#1>/dev/null 2>>out
+$CTX build -b "$BCONF" cpp_hello 1>/dev/null 2>>out
 test -f "cpp_hello.a"|| fail
 cleanup
 

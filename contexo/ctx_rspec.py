@@ -169,7 +169,7 @@ class RSpecFileLocator:
             self.href = href.getHref()
 
         # is the rspec path absolute or network path?
-        if self.href[0:5] == 'svn://' or self.href[0:7] == 'https://' or self.href[0:6] == 'http://' or self.href[0] == '/' or self.href[0] == '\\' or self.href[1:2] == ':\\':
+        if self.href[0:5] == 'svn://' or self.href[0:7] == 'https://' or self.href[0:6] == 'http://' or self.href[0] == '/' or self.href[0] == '\\' or self.href[1:3] == ':\\':
             pass
         else:
             self.href = os.path.normpath(view.getRoot() + os.sep + self.href)

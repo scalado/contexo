@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<ctx-rspec>
+    <!-- import rspec from relative file location -->
+    <ctx-import href="_rspecs/test2.rspec"/>
+    <!-- import rspec from absolute file location -->
+    <ctx-import href="/tmp/test3.rspec"/>
+</ctx-rspec>
+
+
+

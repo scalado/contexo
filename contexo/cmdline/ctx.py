@@ -251,52 +251,7 @@ def buildmodules( depmgr, session, modules, args, output_path, build_dir,  libra
 
 #------------------------------------------------------------------------------
 def cmd_info(args):
-    output_dir = args.view + os.sep + '.ctx/obj'
-    from contexo.ctx_depmgr import CTXDepMgr
-
-    #
-    # Get Code Module Paths from view.
-    #
-
-    cview = ctx_view.CTXView(args.view, ctx_view.AP_NO_REMOTE_ACCESS, False, False)
-
-    #
-    # Show info
-    #
-
-    print "Contexo version: ", ctx_sysinfo.CTX_DISPLAYVERSION
-    print "Using build config file: ", CTX_DEFAULT_BCONF
-
-    #
-    # Module
-    #
-
-    # Prepare all
-    bc      = getBuildConfiguration( cview,  args )
-
-    if args.module != None:
-        deprecated_tolerate_missing_headers_warning(args)
-        depmgr = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), legacyCompilingMod = args.legacy_compiling_mod, globalOutputDir = output_dir )
-        depmgr.addCodeModules( args.module )
-        module_names = depmgr.getCodeModulesWithDependencies ()
-        module_names.sort ()
-        if len ( module_names ) > 0:
-            print "\nModules '" + args.module[0] + "' depends on:\n"
-            for module in module_names:
-                print "\t",module
-
-        pub_headers = depmgr.getPublicHeaders ( args.module)
-        pub_headers.sort()
-        if len ( pub_headers ) > 0:
-            print "\nPublic headers '" + args.module[0] + "' depends on:\n"
-            for header in pub_headers:
-                print "\t",header
-
-        module_names = depmgr.getDependentModules( args.module[0] )
-        if len ( module_names ) > 0:
-            print "\nModule(s) that depend(s) on '" + args.module[0] + "':\n"
-            for module in module_names:
-                print "\t",module
+    userErrorExit("info is deprecated")
 
 #------------------------------------------------------------------------------
 def cmd_buildmod(args):
@@ -792,12 +747,10 @@ standard_description = dict({\
 
 
 # info parser
-parser_info = subparsers.add_parser('info', help="Displays information of contexo modules")
+parser_info = subparsers.add_parser('info', help="DEPRECATED: info is no longer supported")
 parser_info.set_defaults(func=cmd_info)
-parser_info.add_argument('module', nargs=1, help="Module to show info for")
-#parser_info.add_argument('-t', action='store_true', help="Show info on both module and unit tests")
-parser_info.add_argument('-v', '--view', default=os.getcwd(), help=standard_description['--view'])
-#parser_build.add_argument('--tolerate-missing-headers',  action='store_true',  help = standard_description['--tolerate-missing-headers'])
+parser_info.add_argument('module', nargs=1, help="DEPRECATED")
+parser_info.add_argument('-v', '--view', default=os.getcwd(), help="DEPRECATED")
 
 # buildmod parser
 parser_build = subparsers.add_parser('buildmod', help="build contexo modules." )

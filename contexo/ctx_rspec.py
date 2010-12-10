@@ -261,7 +261,7 @@ class RSpecFile:
         _wipe_cache=False
         if parent == None:
             _wipe_cache=True
-        self.rspecFileLocator = RSpecFileLocator( rcs=None, href=rspec_file, revision=None, updating=view.updating, wipe_cache=_wipe_cache, view=self.view )
+        # self.rspecFileLocator = RSpecFileLocator( rcs=None, href=rspec_file, revision=None, updating=view.updating, wipe_cache=_wipe_cache, view=self.view )
 
         localPath = self.rspecFileLocator.getLocalAccessPath()
 

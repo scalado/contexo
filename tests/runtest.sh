@@ -6,7 +6,7 @@ cleanup(){
     rm -rf test_output
     rm -rf test_repo/test_output
     rm -f *.a test_repo/*.a test_repo/*.h *.h
-    rm $OUT
+    rm -f $OUT
 }
 fail() {
     cat $OUT
@@ -14,7 +14,6 @@ fail() {
     exit 42
 }
 BCONF=gcc_osx_i386_rel.bc
-rm $OUT
 
 cp _rspecs/test3.rspec /tmp/
 cleanup

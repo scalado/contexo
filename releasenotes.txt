@@ -1,3 +1,8 @@
+Contexo 0.10.4
+TOOLS-14: this fixes some incorrect distributed cdef files which would cause trouble mostly on gcc but not visual studio. The CXXFILESUFFIX was duplicated and set to an empty string.
+Regression: ctx buildcomp did not work correctly in earlier 0.10 releases.
+Depreciation: "ctx info" is deprecated.
+
 Contexo 0.10.3
 Bugfix: environment problems such as the one below should be resolved now:
 10:00:36 ERROR     (C:\Python26\lib\site-packages\contexo\ctx_repo_git.py:25):

@@ -61,4 +61,12 @@ $CTX build -b "$BCONF" cpp_hello 1>/dev/null 2>>out || fail
 test -f "cpp_hello.a"|| fail
 cleanup
 
+echo "validate standard"
+$CTX view validate 1>/dev/null 2>>out || fail
+cleanup
+
+echo "info standard"
+$CTX view info  1>/dev/null 2>>out && fail
+cleanup
+
 

@@ -13,7 +13,8 @@ fail() {
     echo FAIL
     exit 42
 }
-BCONF=gcc_osx_i386_rel.bc
+
+BCONF=gcc.bc
 
 cp _rspecs/test3.rspec /tmp/
 cleanup

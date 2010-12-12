@@ -3,7 +3,7 @@
     <!-- import rspec from relative file location -->
     <ctx-import href="_rspecs/test2.rspec"/>
     <!-- import rspec from absolute file location -->
-    <ctx-import href="/tmp/test3.rspec"/>
+    <ctx-import rcs="svn" href="file:///tmp/testrepo.svn/test3.rspec" rev="HEAD" />
 </ctx-rspec>
 
 

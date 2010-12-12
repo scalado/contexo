@@ -1,0 +1,17 @@
+##############################################################################
+#                                                                            #
+#                                                                            #
+##############################################################################
+
+[meta]
+TITLE           = Hello
+DESCRIPTION     = Hello World for Contexo.
+
+[general]
+NAME            = Hello
+
+[libraries]
+hello      = bare_hello;foo
+
+[exports]
+PUBLIC_HEADERS  = helloworld.h

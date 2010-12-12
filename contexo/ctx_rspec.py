@@ -169,7 +169,7 @@ class RSpecFileLocator:
             self.href = href.getHref()
 
         # is the rspec path absolute or network path?
-        if self.href[0:5] == 'svn://' or self.href[0:7] == 'https://' or self.href[0:6] == 'http://' or self.href[0] == '/' or self.href[0] == '\\' or self.href[1:2] == ':\\':
+        if self.href[0:5] == 'svn://' or self.href[0:7] == 'https://' or self.href[0:6] == 'http://' or self.href[0] == '/' or self.href[0] == '\\' or self.href[1:3] == ':\\':
             pass
         else:
             self.href = os.path.normpath(view.getRoot() + os.sep + self.href)
@@ -261,7 +261,7 @@ class RSpecFile:
         _wipe_cache=False
         if parent == None:
             _wipe_cache=True
-        self.rspecFileLocator = RSpecFileLocator( rcs=None, href=rspec_file, revision=None, updating=view.updating, wipe_cache=_wipe_cache, view=self.view )
+        # self.rspecFileLocator = RSpecFileLocator( rcs=None, href=rspec_file, revision=None, updating=view.updating, wipe_cache=_wipe_cache, view=self.view )
 
         localPath = self.rspecFileLocator.getLocalAccessPath()
 

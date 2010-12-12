@@ -18,5 +18,4 @@ RANLIB             = "arm-none-symbianelf-ranlib"
 LIBPREFIX          = ''
 LIBSUFFIX          = ".a"
 INCPREFIX          = '-I"'
-CXXFILESUFFIX      = ""
 ARCOM              = "%AR r %TARGET %SOURCES"

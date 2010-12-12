@@ -41,7 +41,8 @@ comp_result        = {'TITLE':str(), 'DESCRIPTION':str(), 'NAME':str(), 'LIBRARI
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 class COMPFile:
-    def __init__( self, comp_file = str(), component_paths = str(), globalOutputDir = str()):
+    def __init__( self, comp_file = str(), component_paths = str(), globalOutputDir = str(), launchPath = str()):
+        self.launchPath      = launchPath
         self.displayTitle    = str()
         self.description     = str()
         self.name            = str()
@@ -77,7 +78,7 @@ class COMPFile:
         # First try at calling location
         #
 
-        candidate = os.path.abspath( self.path )
+        candidate = os.path.join( self.launchPath, self.path )
         if os.path.exists( candidate ):
             self.path = candidate
             return
@@ -103,7 +104,8 @@ class COMPFile:
         #
         # If we reach this point we have tried everything we can and failed.
         #
-
+        import pdb
+        pdb.set_trace()
         errorMessage("COMP file '%s' not found."%self.path)
         infoMessage("Attempted following locations:", 0)
         for loc in tried:

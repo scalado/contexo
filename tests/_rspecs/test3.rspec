@@ -2,10 +2,9 @@
 <ctx-rspec>
 
     <!-- Import subsystem repositories -->
-    <ctx-repo id="test_view">
-      <ctx-path type="modules" spec="./test_modules" />
+    <ctx-repo id="test2_repo">
+      <ctx-path type="modules" spec="./test2_modules" />
     </ctx-repo>
-
 </ctx-rspec>
 
 

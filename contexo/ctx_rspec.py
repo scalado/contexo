@@ -25,7 +25,7 @@ from ctx_common         import userErrorExit, warningMessage, infoMessage
 from ctx_common         import getVerboseLevel, ctxAssert, getUserTempDir
 import ctx_repo
 import os.path
-
+import shutil
 #------------------------------------------------------------------------------
 class LIFOStack( list ):
     def __init__ (self):
@@ -48,11 +48,12 @@ def createRepoFromRCS( rcs, id, path, href, rev ):
 
 #------------------------------------------------------------------------------
 class rspecXmlHandler(ContentHandler):
-    def __init__ (self, rspecFile):
+    def __init__ (self, rspecFile=str(),view=None):
         self.rspecFile = rspecFile
         self.default_version = "1"
         self.current_repo = None
         self.id_list = list()
+        self.view = view
         self.parent_element = LIFOStack()
         self.msgSender = "rspecXmlHandler"
 
@@ -88,7 +89,7 @@ class rspecXmlHandler(ContentHandler):
                 rev = 'HEAD'
 
             # Prepare locator object and add import to current RSpec
-            rspecFileLocator = RSpecFileLocator( rcs, href, rev )
+            rspecFileLocator = RSpecFileLocator( rcs=rcs, href=href, revision=rev, updating = False, wipe_cache=False, view=self.view )
             self.rspecFile.addImport( rspecFileLocator ) # POINT OF RECURSION
 
         # .....................................................................
@@ -161,12 +162,23 @@ class rspecXmlHandler(ContentHandler):
 
 #------------------------------------------------------------------------------
 class RSpecFileLocator:
-    def __init__(self, _rcs, _href, _revision ):
-        self.rcs = _rcs
-        self.href = _href
-        self.revision = _revision
-        self.msgSender = 'RSpecFileLocator'
+    def __init__(self, rcs=None, href=None, revision=None, updating = False, wipe_cache=False, view = None ):
+        self.rcs = rcs
+        self.href = href
+        if type(self.href) != type(str()) and type(self.href) != type(u''):
+            self.href = href.getHref()
+        # is the rspec path absolute or network path?
+        if self.href[0:7] == 'file://' or self.href[0:6] == 'svn://' or self.href[0:8] == 'https://' or self.href[0:7] == 'http://' or self.href[0] == '/' or self.href[0:1] == '\\' or self.href[1:3] == ':\\':
+            pass
+        else:
+            self.href = os.path.normpath(view.getRoot() + os.sep + self.href)
 
+        self.revision = revision
+        self.updating = updating
+        self.rspec_cache_dir = view.getRoot() + os.sep + '.ctx' + os.sep + 'rspec-cache' + os.sep
+        if wipe_cache == True and updating == True and os.path.exists(self.rspec_cache_dir):
+             shutil.rmtree(self.rspec_cache_dir)
+        self.msgSender = 'RSpecFileLocator'
 
     #--------------------------------------------------------------------------
     # Returns a guaranteed local path to the RSpec file. The returned path might
@@ -174,44 +186,46 @@ class RSpecFileLocator:
     # guaranteed to be available during the entire build session.
     #--------------------------------------------------------------------------
     def getLocalAccessPath(self):
+        # TODO: wipe cache if root element and first export ok
+        src = str()
 
-        local_access_path = None
-
+        local_access_path = os.path.join( self.rspec_cache_dir, os.path.basename(self.getHref()))
+        if not os.path.exists(self.rspec_cache_dir):
+            os.makedirs(self.rspec_cache_dir)
+ 
         if self.rcs == None:
-
-            infoMessage("No RCS specified for RSpec '%s', attempting regular file access"\
+            if not os.path.exists( local_access_path ):
+                infoMessage("No RCS specified for RSpec '%s', attempting regular file access"\
                          %(self.getHref()), 4)
-
-            if not os.path.exists(self.href):
-                userErrorExit("RSpec unreachable with regular file access: \n  %s"%(self.href))
-
-            local_access_path = self.getHref()
+                if not os.path.exists(self.href):
+                    userErrorExit("RSpec unreachable with regular file access: \n  %s"%(self.href))
+                shutil.copyfile( self.getHref(), local_access_path )
 
         else:
+            if self.updating == True or not os.path.exists( local_access_path ):
+                temp_dir = getUserTempDir()
+                rspec_name = os.path.basename(self.getHref())
+                temp_rspec = os.path.join( temp_dir, rspec_name )
 
-            temp_dir = getUserTempDir()
-            rspec_name = os.path.basename(self.getHref())
-            temp_rspec = os.path.join( temp_dir, rspec_name )
-
-            infoMessage("Downloading (svn-exporting) RSpec from '%s' to '%s' using RCS '%s'"\
+                infoMessage("Downloading (svn-exporting) RSpec from '%s' to '%s' using RCS '%s'"\
                          %(str(self.getHref()), str(temp_rspec), str(self.rcs)), 1)
 
-            if os.path.exists(temp_rspec):
-                os.remove( temp_rspec )
+                if os.path.exists(temp_rspec):
+                    os.remove( temp_rspec )
 
-            # rspec access is still handled by svn
-            if self.rcs == 'svn' or self.rcs == 'git':
+                # rspec access is still handled by svn
+                if self.rcs == 'svn' or self.rcs == 'git':
 
-                svn = ctx_svn_client.CTXSubversionClient()
-                svn.export( self.getHref(), temp_dir, self.revision )
-                local_access_path = temp_rspec
+                    svn = ctx_svn_client.CTXSubversionClient()
+                    # does this fail if rspec cannot be fetched?
+                    svn.export( self.getHref(), temp_dir, self.revision )
+                    if not os.path.exists( os.path.join(temp_dir, os.path.basename(self.getHref()))):
+                        userErrorExit("RSpec unreachable with remote Subversion access: \n  %s"%(self.getHref()))
 
-            #elif self.rcs == 'git':
-                #git = ctx_git_client.CTXGitClient()
-
-            else:
-                userErrorExit("Unsupported RCS: %s"%(self.rcs))
-
+                else:
+                    userErrorExit("Unsupported RCS: %s"%(self.rcs))
+                src = os.path.join( temp_dir, rspec_name)
+                shutil.copyfile( src, local_access_path )
 
         infoMessage("RSpec local access path resolved to: %s"\
                      %(local_access_path), 4)
@@ -224,24 +238,30 @@ class RSpecFileLocator:
 
 #------------------------------------------------------------------------------
 class RSpecFile:
-    def __init__(self, rspec_file, parent, view):
+    def __init__(self, rspec_file=None, parent=None, view=str(), wipe_cache=False ):
         self.repositories       = dict()
         self.rspecFileLocator   = None
         self.imports            = list() # List of RSpecFile objects, note the recursion.
         self.view               = view
         self.msgSender          = 'RSpecFile'
+        self.wipe_cache         = wipe_cache
         #---
-
+ 
         if type(rspec_file) is str:
-            self.rspecFileLocator = RSpecFileLocator( _rcs=None, _href=rspec_file, _revision=None )
+            self.wipe_cache = True
+            self.rspecFileLocator = RSpecFileLocator( rcs=None, href=rspec_file, revision=None, updating=view.updating, wipe_cache=True, view=self.view )
         else:
             self.rspecFileLocator = rspec_file
 
+        _wipe_cache=False
+        if parent == None:
+            _wipe_cache=True
+        # self.rspecFileLocator = RSpecFileLocator( rcs=None, href=rspec_file, revision=None, updating=view.updating, wipe_cache=_wipe_cache, view=self.view )
 
         localPath = self.rspecFileLocator.getLocalAccessPath()
 
         parser = make_parser()
-        handler = rspecXmlHandler(self)
+        handler = rspecXmlHandler(self, view=view)
         parser.setContentHandler(handler)
         parser.parse( open(localPath) ) # POINT OF RECURSION
 

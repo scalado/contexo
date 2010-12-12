@@ -113,8 +113,7 @@ class CTXView:
             if ext.lower() == '.rspec':
                 rspec_path = os.path.join(self.getRoot(), f )
 		if rspec == None:
-                    # TODO: wipe_cache parameter here?
-                    rspec = RSpecFile( rspec_path, parent=None, view=self)
+                    rspec = RSpecFile( rspec_path, parent=None, view=self, wipe_cache=True)
 		else:
                     userErrorExit("Only one rspec is allowed at the root of the view.")
 			

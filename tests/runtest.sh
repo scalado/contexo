@@ -16,8 +16,8 @@ fail() {
 
 BCONF=gcc.bc
 
-cp _rspecs/test3.rspec /tmp/
-cleanup
+echo "creating dummy repository"
+ln -s $PWD/testrepo.svn /tmp/testrepo.svn || fail
 
 
 echo "build standard"
@@ -68,6 +68,15 @@ echo "build comp standard"
 $CTX build -b "$BCONF" hello.comp 1>/dev/null 2>>$OUT|| fail
 test -f "hello.a"|| fail
 test -f "helloworld.h"|| fail
+cleanup
+
+echo "test disconnected operation"
+rm /tmp/testrepo.svn
+ln -s $PWD/testrepo.svn /tmp/testrepo.svn || fail
+$CTX view update 1>/dev/null 2>>$OUT || fail
+rm /tmp/testrepo.svn
+$CTX build -b "$BCONF" bare_hello 1>/dev/null 2>>$OUT || fail
+test -f "bare_hello.a"|| fail
 cleanup
 
 

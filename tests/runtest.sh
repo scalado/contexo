@@ -25,6 +25,12 @@ $CTX build -b "$BCONF" bare_hello 1>/dev/null 2>>$OUT || fail
 test -f "bare_hello.a"|| fail
 cleanup
 
+echo "testing clean -a after build"
+$CTX build -b "$BCONF" bare_hello 1>/dev/null 2>>$OUT || fail
+test -f "bare_hello.a"|| fail
+$CTX clean -a  1>/dev/null 2>>$OUT || fail
+cleanup
+
 
 echo "buildmod standard"
 $CTX buildmod -b "$BCONF" bare_hello 1>/dev/null 2>>$OUT || fail

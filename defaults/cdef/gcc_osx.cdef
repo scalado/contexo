@@ -18,6 +18,7 @@ RANLIB             = "ranlib"
 LIBPREFIX          = ''
 LIBSUFFIX          = '.a'
 INCPREFIX          = '-I"'
+CXXFILESUFFIX      = ""
 ARCOM              = "%AR r %TARGET %SOURCES"
 
 ECHO_SOURCES	   = YES

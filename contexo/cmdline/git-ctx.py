@@ -51,7 +51,7 @@ class GITCtx:
             self.view_dir = os.path.abspath('')
         # ctxview default args: view_path, access_policy=AP_PREFER_REMOTE_ACCESS, updating=False, validate=True
         # keep the validate=False if there is any repo under svn control, otherwise things will be very slow
-        ctxview = ctx_view.CTXView(view_path=self.view_dir, updating=False, validate=False)
+        ctxview = ctx_view.CTXView(self.view_dir, 1, False, False)
 
         for repo in ctxview.getRSpec().getRepositories():
             if repo.getRcs() == 'git':
@@ -104,12 +104,14 @@ Subversion repos are ignored.
         from colorama import Fore, Back, Style
         statusdict = dict()
         statusdict['M'] = set()
+        statusdict['M '] = set()
         statusdict['??'] = set()
         statusdict['A'] = set()
         statusdict['U'] = set()
         statusdict['R'] = set()
         statusdict['D'] = set()
         statusdict['C'] = set()
+        statusdict['MM'] = set()
 
         for repo in self.git_repos:
             repo_path = repo.getAbsLocalPath()
@@ -139,20 +141,23 @@ Subversion repos are ignored.
                             statusdict[ key ].add( os.path.basename(repo_path) + '/' + split_line[1] )
         print '#'
 
-        if len(statusdict['A']) > 0:
+        if len(statusdict['A']) > 0 or len(statusdict['MM']) > 0 or len(statusdict['M ']) >0:
             print """# Changes to be committed:
 #   (use "git ctx reset HEAD <file>..." to unstage)
 #            """
             for new_file in statusdict['A']:
                 print '#' + '\t' + 'new file:' + '\t' + Fore.GREEN + new_file + Style.RESET_ALL
+            for modified_file in statusdict['MM']:
+                print '#' + '\t' + 'modified:' + '\t' + Fore.GREEN + modified_file + Style.RESET_ALL
+            for modified_file in statusdict['M ']:
+                print '#' + '\t' + 'modified:' + '\t' + Fore.GREEN + modified_file + Style.RESET_ALL
             print '#'
         if len(statusdict['M']) > 0 or len(statusdict['D']) > 0 or len(statusdict['R']) > 0 or len(statusdict['C']) > 0:
-            print """#
-# Changed but not updated:
+            print """# Changed but not updated:
 #   (use "git ctx add/rm <file>..." to update what will be committed)
 #   (use "git ctx checkout -- <file>..." to discard changes in working directory)"""
 
-            for modified_file in statusdict['M']:
+            for modified_file in statusdict['M'] - statusdict['M ']:
                 print '#' + '\t' + 'modified:' + '\t' + Fore.RED + modified_file + Style.RESET_ALL
             for deleted_file in statusdict['D']:
                 print '#' + '\t' + 'deleted:' + '\t' + Fore.RED + deleted_file + Style.RESET_ALL
@@ -178,7 +183,7 @@ Subversion repos are ignored.
 
             for untracked_file in statusdict['??']:
                 print '#' + '\t' + Fore.RED + untracked_file + Style.RESET_ALL
-            print """no changes added to commit (use "git ctx add" and/or "git ctx commit -a")"""
+            #print """no changes added to commit (use "git ctx add" and/or "git ctx commit -a")"""
 
     def generic( self, git_cmd, git_argv, translate_arguments = False, continue_on_error = False ):
         if git_cmd not in ['add', 'rm']:
@@ -225,7 +230,7 @@ Subversion repos are ignored.
             if git_cmd == 'checkout' and git_argv.count('-b') != 0:
                 translate_arguments = False
 
-            if translate_arguments == True and len(valid_git_argv) != 0:
+            if translate_arguments == True:
                 args = [self.git, git_cmd ]
                 args.extend(valid_git_argv)
                 msg = ' executing \'' + self.git + ' ' + git_cmd

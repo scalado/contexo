@@ -652,6 +652,7 @@ def cmd_validateview(args):
 
 #------------------------------------------------------------------------------
 def cmd_freeze(args):
+    view_dir = os.path.abspath(args.view)
 
     import xml.sax
     import sys

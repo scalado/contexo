@@ -2,9 +2,10 @@ Contexo 0.11.0
 NOTE: .bc files using relative search path for compiler toolchain may require this release, thus it's marked a major release although not urgent.
 CR: Contexo now has a constant working directory relative to the root, this makes it possible to use relative PATHs in .bc files, to eg, put a toolchain in the repository for easy setting up and access.
 The relative PATH that may be used to access the view root is '../../../'.
-CR: caching of .rspecs using the ctx-import directive, to only update rspecs when using 'ctx view update'
-CR: relative rspec paths may now be used
+CR: caching of .rspecs using the ctx-import directive, rspecs are only updated when using 'ctx view update' in order to keep a repository consistent between ctx view updates.
+CR: relative rspec paths may now be used.
 Bugfix: The '--no-remote-access' option has been deprecated and ignored since Contexo would be unable to determine a view which used 'ctx-import' if used together with --no-remote-access. Incidently Contexo now only use remote access with 'ctx view validate' and 'ctx view update'.
+TOOLS-20: ctx freeze was broken on win32.
 
 Contexo 0.10.3
 Bugfix: environment problems such as the one below should be resolved now:

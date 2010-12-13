@@ -5,7 +5,7 @@ cleanup(){
     rm -rf .ctx
     rm -rf test_output
     rm -rf test_repo/test_output
-    rm -f *.a test_repo/*.a test_repo/*.h *.h
+    rm -f *.a test_repo/*.a test_repo/*.h *.h freeze.rspec
     rm -f $OUT
 }
 fail() {
@@ -14,11 +14,11 @@ fail() {
     exit 42
 }
 
-BCONF=gcc.bc
-
+#BCONF=gcc.bc
+BCONF=gcc_osx_i386_rel.bc
 echo "creating dummy repository"
+rm -f /tmp/testrepo.svn
 ln -s $PWD/testrepo.svn /tmp/testrepo.svn || fail
-
 
 echo "build standard"
 $CTX build -b "$BCONF" bare_hello 1>/dev/null 2>>$OUT || fail
@@ -83,6 +83,13 @@ $CTX view update 1>/dev/null 2>>$OUT || fail
 rm /tmp/testrepo.svn
 $CTX build -b "$BCONF" bare_hello 1>/dev/null 2>>$OUT || fail
 test -f "bare_hello.a"|| fail
+cleanup
+
+echo "ctx freeze"
+rm -f /tmp/testrepo.svn
+ln -s $PWD/testrepo.svn /tmp/testrepo.svn || fail
+$CTX freeze -o freeze.rspec 1>/dev/null 2>>$OUT || fail
+test -f "freeze.rspec"|| fail
 cleanup
 
 

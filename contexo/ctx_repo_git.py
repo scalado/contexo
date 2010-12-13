@@ -220,14 +220,6 @@ class CTXRepositoryGIT(CTXRepository):
             warningMessage("rspec href is set to %s, but the git repository origin is set to %s. Using git repository origin"%(self.href, origin_href))
 
         os.chdir(self.destpath)
-        infoMessage("Running 'git fetch' in '%s'"%(self.id_name))
-        p = subprocess.Popen([self.git, 'fetch'], bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        retcode = p.wait()
-        if retcode != 0:
-            print p.stderr.read()
-            errorMessage("could not fetch from %s"%(self.href))
-            exit(retcode)
-
         infoMessage("Running 'git checkout %s' in '%s'"%(self.rev, self.id_name),1)
         p = subprocess.Popen([self.git, 'checkout', self.rev], bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         retcode = p.wait()

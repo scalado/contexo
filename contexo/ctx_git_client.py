@@ -12,12 +12,14 @@
 ###############################################################################
 
 from ctx_common import ctxAssert, userErrorExit, infoMessage, errorMessage
+from ctx_repo_git import old_git_error, locate_git
 import os
 
 #------------------------------------------------------------------------------
 class CTXGitClient():
     def __init__(self):
-        self.git = 'git'
+        self.git = locate_git()
+        old_git_error()
         self.msgSender = "CTXGitClient"
 
     #--------------------------------------------------------------------------

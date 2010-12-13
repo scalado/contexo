@@ -24,6 +24,20 @@ def locate_git():
                 return git_cand
     userErrorExit("Git cannot be found in your PATH. Please re-install Git and make sure the git.cmd, git.exe or git binary can be found in your PATH")
 
+def old_git_error():
+    import subprocess
+    import os
+
+    git = locate_git()
+    p = subprocess.Popen([git, '--version'], bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    retcode = p.wait()
+    stdout = p.stdout.read()
+    version = stdout.split()
+    if len(version) != 3:
+        userErrorExit('git version check failed')
+    if int(version[2].split('.')[0]) >= 1 and int(version[2].split('.')[0]) >= 7:
+        userErrorExit('your git version is too old. Git version needs to be at least of version 1.7')
+
 #------------------------------------------------------------------------------
 class CTXRepositoryGIT(CTXRepository):
     def __init__(self, id_name, local_path, href, rev):
@@ -32,6 +46,8 @@ class CTXRepositoryGIT(CTXRepository):
         self.id_name = id_name
         self.git = locate_git()
         self.rev = rev
+        old_git_error() 
+
 
         if href == None:
             userErrorExit("No HREF specified for repository '%s'. Failed to aquire HREF from local copy '%s'"\

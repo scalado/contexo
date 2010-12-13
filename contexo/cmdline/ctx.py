@@ -957,12 +957,12 @@ parser_view_update.set_defaults(func=cmd_updateview)
 parser_view_update.add_argument('view', nargs='?', default=os.getcwd(), help="Relative or absolute path to a view directory. If omitted, current working directory is used.")
 parser_view_update.add_argument('-co', '--checkouts-only', action='store_true', help="Checkout missing repositories only. Don't update existing repositories.")
 parser_view_update.add_argument('-uo', '--updates-only', action='store_true', help="Update existing repositories only. Don't checkout missing repositories.")
-parser_view_update.add_argument('-nra', '--no-remote-repo-access', action='store_true', help="Always checkout/update repositories into the local view, even if they are accessible from their remote location. If this flag is used with other commands, it may conveniently be used here as well to avoid having to update such repositories manually.")
+parser_view_update.add_argument('-nra', '--no-remote-repo-access', action='store_true', help="DEPRECATED: will emit a warning..")
 
 parser_view_validate = view_subparsers.add_parser('validate', help="Validate consistency of view structure")
 parser_view_validate.set_defaults(func=cmd_validateview)
 parser_view_validate.add_argument('view', nargs='?', default=os.getcwd(), help="Relative or absolute path to a view directory. If omitted, current working directory is used.")
-parser_view_validate.add_argument('-nra', '--no-remote-repo-access', action='store_true', help="Repositories which can be remotely accessed are still invalidated if not present in view.")
+parser_view_validate.add_argument('-nra', '--no-remote-repo-access', action='store_true', help="DEPRECATED: will emit a warning.")
 
 ###############################################################################
 

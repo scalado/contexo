@@ -104,8 +104,6 @@ class COMPFile:
         #
         # If we reach this point we have tried everything we can and failed.
         #
-        import pdb
-        pdb.set_trace()
         errorMessage("COMP file '%s' not found."%self.path)
         infoMessage("Attempted following locations:", 0)
         for loc in tried:

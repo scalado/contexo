@@ -13,7 +13,7 @@ import os.path
 ###############################################################################
 
 from ctx_repo import *
-from ctx_common import userErrorExit
+from ctx_common import userErrorExit, warningMessage
 import os
 
 #, infoMessage, ctxAssert
@@ -22,6 +22,11 @@ def locate_git():
         for path in os.environ["PATH"].split(os.pathsep):
             if os.path.exists(os.path.join( path, git_cand)) and os.access( os.path.join( path, git_cand), os.X_OK):
                 return git_cand
+        warningMessage("Falling back to hardcoded git paths")
+        for path in ['C:\\Program Files\\Git\cmd', 'C:\\Program Files (x86)\\Git\\cmd', '/usr/bin', '/usr/local/bin']:
+            if os.path.exists(os.path.join( path, git_cand)) and os.access( os.path.join( path, git_cand), os.X_OK):
+                return git_cand
+ 
     userErrorExit("Git cannot be found in your PATH. Please re-install Git and make sure the git.cmd, git.exe or git binary can be found in your PATH")
 
 def old_git_error():

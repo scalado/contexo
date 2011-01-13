@@ -200,6 +200,10 @@ class RSpecFileLocator:
                 if not os.path.exists(self.href):
                     userErrorExit("RSpec unreachable with regular file access: \n  %s"%(self.href))
                 shutil.copyfile( self.getHref(), local_access_path )
+            # access the local rspec if accessable
+            # otherwise the user may be confused why changes in a locally modified would not be applied.
+            if os.path.exists(self.href):
+                local_access_path = self.getHref()
 
         else:
             if self.updating == True or not os.path.exists( local_access_path ):

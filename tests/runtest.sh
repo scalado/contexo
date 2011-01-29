@@ -14,8 +14,8 @@ fail() {
     exit 42
 }
 
-#BCONF=gcc.bc
-BCONF=gcc_osx_i386_rel.bc
+BCONF=gcc.bc
+#BCONF=gcc_osx_i386_rel.bc
 echo "creating dummy repository"
 rm -f /tmp/testrepo.svn
 ln -s $PWD/testrepo.svn /tmp/testrepo.svn || fail

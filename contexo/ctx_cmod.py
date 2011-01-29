@@ -52,7 +52,7 @@ test_dirname        = 'test'
 dep_filename        = 'depends'
 xdep_filename       = 'xdepends'
 srclist_filename    = 'sourcefiles'
-
+unresolvedXdepends  = set()
 criteriaDirs = [contexo_dirname, 'doc', inc_dirname, src_dirname, test_dirname]
 
 #------------------------------------------------------------------------------
@@ -370,6 +370,7 @@ class CTXCodeModule( CTXRawCodeModule ):
         self.rebuildAll    = forceRebuild
         self.msgSender     = 'CTXCodeModule'
         self.legacyCompilingMod = legacyCompilingMod
+
         # TODO: cmod should not know about output dir, nor how to build itself. This data dependency should be removed in the future
         self.globalOutputDir = outputDir
 
@@ -414,7 +415,9 @@ class CTXCodeModule( CTXRawCodeModule ):
                     #xdep_not_found = False
 
                 if include_path_candidates == None:
-                    warningMessage("Cannot resolve item '%s' specified in '%s'"%( xdep_var, xdep_filepath))
+                    if xdep_var not in unresolvedXdepends:
+                        unresolvedXdepends.add(xdep_var)
+                        warningMessage("Cannot resolve item '%s' specified in '%s', ignoring further occurances."%( xdep_var, xdep_filepath))
 
                 include_path_candidates = assureList( include_path_candidates )
 

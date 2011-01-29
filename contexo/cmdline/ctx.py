@@ -215,7 +215,7 @@ def export_headers( depmgr, headers, headerDir ):
     if not os.path.exists( headerDir ):
         os.makedirs( headerDir )
 
-    infoMessage("Exporting headers", 1)
+    #infoMessage("Exporting headers", 1)
     for header in headers:
         src = depmgr.getFullPathname ( header )
         if src != None:

@@ -28,6 +28,8 @@ SYSGLOBAL_PATH_SECTIONS = ['modules',
 class CTXView:
     def __init__(self, view_path=str(), updating=False, validate=False ):
         self.localPath = os.path.abspath(view_path)
+        if self.localPath.find(" ") > 0:
+            userErrorExit("View dir name or any of it's subdirectories cannot contain space characters. View dir resolved to: \"" + self.localPath + "\"")
         self.global_paths = dict() # {section: pathlist}, where 'section' is any of SYSGLOBAL_PATH_SECTIONS
         self.rspec = None
         self.updating = updating # True when the view is being updated instead of used for building

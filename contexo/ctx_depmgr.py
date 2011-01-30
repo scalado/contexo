@@ -106,7 +106,7 @@ class CTXDepMgr: # The dependency manager class.
             if inputFilePath == None:
                 dependencies = self.findFilesDependingOn(inputFile)
                 assert(dependencies)
-                msg = "Dependency manager cannot locate input file: %s (from %s)"%(inputFile, ",".join(dependencies))
+                msg = "Cannot locate input file: %s (from %s)"%(inputFile, ",".join(dependencies))
                 if ( self.failOnMissingHeaders):
                     userErrorExit( msg )
                 else:
@@ -258,7 +258,7 @@ class CTXDepMgr: # The dependency manager class.
                 if os.path.exists(src_path):
                     return src_path
             if src_file not in self.unresolved_headers:
-                warningMessage("'%s' cannot be resolved in current path list."%( src_file) )
+                # warningMessage("'%s' cannot be resolved in current path list."%( src_file) )
                 self.unresolved_headers.add(src_file)
                 infoMessage("%s"%"\n".join(pathList), msgVerboseLevel=8)
         return None

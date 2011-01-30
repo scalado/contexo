@@ -385,6 +385,7 @@ def cmd_buildcomp(args):
  
     # Process components
     components = create_components( components, cview.getItemPaths('comp'), obj_dir, launch_path )
+    infoMessage("Building components...", 1)
     for comp in components:
         ctx_log.ctxlogBeginComponent( comp.name )
 
@@ -500,7 +501,7 @@ def cmd_build(args):
  
     # Process components
     if component_build:
-        infoMessage("building components",  6)
+        infoMessage("Building components...",  1)
         components = create_components( items, cview.getItemPaths('comp'), obj_dir, launch_path )
 
         for comp in components:
@@ -528,7 +529,7 @@ def cmd_build(args):
 
     #Process modules
     else:
-        infoMessage("building modules",  6)
+        infoMessage("Building modules...",  1)
         depmgr.addCodeModules( items, args.tests )
         objs += buildmodules( depmgr, session, items, args, outputPath, bc.getTitle(),  libraryName=args.library_name)
         export_public_module_headers( depmgr, items, header_dir )
@@ -969,3 +970,4 @@ parser_view_validate.add_argument('-nra', '--no-remote-repo-access', action='sto
 # Parse cmdline
 argsa=parser.parse_args()
 argsa.func(argsa)
+infoMessage("Contexo finished successfully.", 1)

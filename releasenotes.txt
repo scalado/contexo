@@ -11,6 +11,7 @@ Bugfix: fallback on hardcoded git path if git cannot be resolved in path.
 Bugfix: the widely misunderstood cryptic "Missing export header" error meassage has been reformulated.
 Bugfix: Missing headers are now only reported once.
 Bugfix: since contexo handles space characters in paths badly, contexo now checks for spaces in paths and gives an error message if the view is located in such a directory.
+Bugfix: error_handler not defined in ctx_common
 
 Contexo 0.10.4
 TOOLS-14: this fixes some incorrect distributed cdef files which would cause trouble mostly on gcc but not visual studio. The CXXFILESUFFIX was duplicated and set to an empty string.

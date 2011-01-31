@@ -25,7 +25,7 @@ def locate_git():
         warningMessage("Falling back to hardcoded git paths")
         for path in ['C:\\Program Files\\Git\cmd', 'C:\\Program Files (x86)\\Git\\cmd', '/usr/bin', '/usr/local/bin']:
             if os.path.exists(os.path.join( path, git_cand)) and os.access( os.path.join( path, git_cand), os.X_OK):
-                return git_cand
+                return os.path.join(path, git_cand)
  
     userErrorExit("Git cannot be found in your PATH. Please re-install Git and make sure the git.cmd, git.exe or git binary can be found in your PATH")
 

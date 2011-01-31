@@ -18,11 +18,14 @@ import os
 
 #, infoMessage, ctxAssert
 def locate_git():
+    warn_hardcoded_git_path = False
     for git_cand in ['git', 'git.cmd', 'git.exe', 'git.bat']:
         for path in os.environ["PATH"].split(os.pathsep):
             if os.path.exists(os.path.join( path, git_cand)) and os.access( os.path.join( path, git_cand), os.X_OK):
                 return git_cand
-        warningMessage("Falling back to hardcoded git paths")
+        if not warn_hardcoded_git_path:
+            warn_hardcoded_git_path = True
+            warningMessage("Falling back to hardcoded git paths")
         for path in ['C:\\Program Files\\Git\cmd', 'C:\\Program Files (x86)\\Git\\cmd', '/usr/bin', '/usr/local/bin']:
             if os.path.exists(os.path.join( path, git_cand)) and os.access( os.path.join( path, git_cand), os.X_OK):
                 return os.path.join(path, git_cand)

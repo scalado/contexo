@@ -148,7 +148,7 @@ class COMPFile:
         if cfg.has_section( cur_section ):
             compsec_libraries  = cfg.get_section( cur_section  )
         else:
-            error_output( "Missing mandatory COMP section: %s"%cur_section, 'COMPFile' )
+            errorMessage( "Missing mandatory COMP section: %s"%cur_section, 'COMPFile' )
             ctxExit(1)
 
         cur_section = 'exports'

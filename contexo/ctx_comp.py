@@ -41,7 +41,8 @@ comp_result        = {'TITLE':str(), 'DESCRIPTION':str(), 'NAME':str(), 'LIBRARI
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 class COMPFile:
-    def __init__( self, comp_file = str(), component_paths = str(), globalOutputDir = str()):
+    def __init__( self, comp_file = str(), component_paths = str(), globalOutputDir = str(), launchPath = str()):
+        self.launchPath      = launchPath
         self.displayTitle    = str()
         self.description     = str()
         self.name            = str()
@@ -77,7 +78,7 @@ class COMPFile:
         # First try at calling location
         #
 
-        candidate = os.path.abspath( self.path )
+        candidate = os.path.join( self.launchPath, self.path )
         if os.path.exists( candidate ):
             self.path = candidate
             return
@@ -103,7 +104,6 @@ class COMPFile:
         #
         # If we reach this point we have tried everything we can and failed.
         #
-
         errorMessage("COMP file '%s' not found."%self.path)
         infoMessage("Attempted following locations:", 0)
         for loc in tried:
@@ -148,7 +148,7 @@ class COMPFile:
         if cfg.has_section( cur_section ):
             compsec_libraries  = cfg.get_section( cur_section  )
         else:
-            error_output( "Missing mandatory COMP section: %s"%cur_section, 'COMPFile' )
+            errorMessage( "Missing mandatory COMP section: %s"%cur_section, 'COMPFile' )
             ctxExit(1)
 
         cur_section = 'exports'
@@ -187,9 +187,6 @@ class COMPFile:
             self.publicHeaders = expandLstFilesInList( self.publicHeaders, self.msgSender, os.path.dirname(compfile_path) )
 
         # Handle libraries section specially
-
-        if len(compsec_libraries) == 0:
-            userErrorExit("No library entries given in component definition.")
 
         libdict = compsec_libraries
 

@@ -13,7 +13,7 @@ import os.path
 ###############################################################################
 
 from ctx_repo import *
-from ctx_common import userErrorExit
+from ctx_common import userErrorExit, warningMessage
 import os
 
 #, infoMessage, ctxAssert
@@ -22,7 +22,26 @@ def locate_git():
         for path in os.environ["PATH"].split(os.pathsep):
             if os.path.exists(os.path.join( path, git_cand)) and os.access( os.path.join( path, git_cand), os.X_OK):
                 return git_cand
+        warningMessage("Falling back to hardcoded git paths")
+        for path in ['C:\\Program Files\\Git\cmd', 'C:\\Program Files (x86)\\Git\\cmd', '/usr/bin', '/usr/local/bin']:
+            if os.path.exists(os.path.join( path, git_cand)) and os.access( os.path.join( path, git_cand), os.X_OK):
+                return git_cand
+ 
     userErrorExit("Git cannot be found in your PATH. Please re-install Git and make sure the git.cmd, git.exe or git binary can be found in your PATH")
+
+def old_git_error():
+    import subprocess
+    import os
+
+    git = locate_git()
+    p = subprocess.Popen([git, '--version'], bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    retcode = p.wait()
+    stdout = p.stdout.read()
+    version = stdout.split()
+    if len(version) != 3:
+        userErrorExit('git version check failed')
+    if int(version[2].split('.')[0]) >= 1 and int(version[2].split('.')[0]) >= 7:
+        userErrorExit('your git version is too old. Git version needs to be at least of version 1.7')
 
 #------------------------------------------------------------------------------
 class CTXRepositoryGIT(CTXRepository):
@@ -32,6 +51,8 @@ class CTXRepositoryGIT(CTXRepository):
         self.id_name = id_name
         self.git = locate_git()
         self.rev = rev
+        old_git_error() 
+
 
         if href == None:
             userErrorExit("No HREF specified for repository '%s'. Failed to aquire HREF from local copy '%s'"\
@@ -179,12 +200,8 @@ class CTXRepositoryGIT(CTXRepository):
             while failcount < max_failures:
                 try:
                     shutil.rmtree(tmpdir)
-                    print 'success: removed after'
-                    print failcount
-                    print 'tries'
                     failcount = max_failures
                 except:
-                    print 'could not remove temporary dir ' + tmpdir + ': retrying...'
                     failcount = failcount + 1
                     time.sleep(0.1)
                     pass
@@ -204,14 +221,6 @@ class CTXRepositoryGIT(CTXRepository):
             warningMessage("rspec href is set to %s, but the git repository origin is set to %s. Using git repository origin"%(self.href, origin_href))
 
         os.chdir(self.destpath)
-        infoMessage("Running 'git fetch' in '%s'"%(self.id_name))
-        p = subprocess.Popen([self.git, 'fetch'], bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        retcode = p.wait()
-        if retcode != 0:
-            print p.stderr.read()
-            errorMessage("could not fetch from %s"%(self.href))
-            exit(retcode)
-
         infoMessage("Running 'git checkout %s' in '%s'"%(self.rev, self.id_name),1)
         p = subprocess.Popen([self.git, 'checkout', self.rev], bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         retcode = p.wait()

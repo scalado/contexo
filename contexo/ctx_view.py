@@ -24,30 +24,18 @@ SYSGLOBAL_PATH_SECTIONS = ['modules',
                            'comp',
                            'misc']
 
-AP_PREFER_REMOTE_ACCESS = 0 # If a repository is accessible through regular file system access, Contexo will try to use it from its remote location.
-AP_NO_REMOTE_ACCESS     = 1 # Contexo always assumes repositories to be accessible through the local view.
-
-AP_TEXT  = dict({ AP_PREFER_REMOTE_ACCESS: 'AP_PREFER_REMOTE_ACCESS',
-                  AP_NO_REMOTE_ACCESS:     'AP_NO_REMOTE_ACCESS' })
-
-AP_FLAGS = dict( {AP_PREFER_REMOTE_ACCESS: 'default behaviour',
-                  AP_NO_REMOTE_ACCESS:     '--no-remote-repo-access' })
-
-default_access_policy = AP_PREFER_REMOTE_ACCESS
-
 #------------------------------------------------------------------------------
 class CTXView:
-    def __init__(self, view_path, access_policy=AP_PREFER_REMOTE_ACCESS, updating=False, validate=False ):
+    def __init__(self, view_path=str(), updating=False, validate=False ):
         self.localPath = os.path.abspath(view_path)
+        if self.localPath.find(" ") > 0:
+            userErrorExit("View dir name or any of it's subdirectories cannot contain space characters. View dir resolved to: \"" + self.localPath + "\"")
         self.global_paths = dict() # {section: pathlist}, where 'section' is any of SYSGLOBAL_PATH_SECTIONS
         self.rspec = None
-        self.access_policy = access_policy
         self.updating = updating # True when the view is being updated instead of used for building
         self.msgSender = "CTXView"
 
         infoMessage("Using view: %s "%(self.getRoot()), 2)
-
-        infoMessage("Using repository access policy: %s"%AP_TEXT[self.access_policy], 2)
 
         for sec in SYSGLOBAL_PATH_SECTIONS:
             self.global_paths[sec] = list()
@@ -60,6 +48,10 @@ class CTXView:
             self.validateRepositories()
         else:
             infoMessage("Skipping repository validation", 2);
+
+    #--------------------------------------------------------------------------
+    def getModulePaths(self):
+        return self.rspec.getRepoPaths('modules')
 
     #--------------------------------------------------------------------------
     def set_global_config( self ):
@@ -86,13 +78,6 @@ class CTXView:
 
         # Process RSpecs and extract all additional paths introduced
         self.process_rspecs()
-        #rspec = self.getRSpec()
-        #if rspec != None:
-        #    for repo in rspec.getRepositories():
-        #        self.paths[section].extend( repo.getPaths(section) ) for section in VIEW_PATH_SECTIONS
-
-
-        #
 
     #--------------------------------------------------------------------------
     def validateRepositories( self ):
@@ -121,50 +106,21 @@ class CTXView:
         # Collect all rspecs
         rspec_path_list = list()
         root_files = os.listdir( self.localPath )
+        rspec = None
         for f in root_files:
             root, ext = os.path.splitext( f )
             if ext.lower() == '.rspec':
-                rspec_path_list.append( os.path.join(self.getRoot(), f ) )
+                rspec_path = os.path.join(self.getRoot(), f )
+		if rspec == None:
+                    rspec = RSpecFile( rspec_path, parent=None, view=self, wipe_cache=True)
+		else:
+                    userErrorExit("Only one rspec is allowed at the root of the view.")
+			
+        if rspec == None:
+            userErrorExit("No RSpec found in view")
 
-        if len(rspec_path_list) != 0:
-            infoMessage("RSpecs detected in view: \n   %s"%("\n   ".join(rspec_path_list)), 2)
-
-        # Determine the import relationship between the RSpecs
-        if len(rspec_path_list):
-            #
-            candidate_rspecs = list()
-            for rspec_path in rspec_path_list:
-
-                rspec = RSpecFile( rspec_path, parent=None, view=self )
-                remainder = False
-
-                for potential_import in rspec_path_list:
-                    if potential_import == rspec_path:
-                        continue # skip checking if we import ourselves
-
-                    if potential_import not in rspec.getImportPaths( recursive=True ):
-                        remainder = True
-                        break # we found an RSpec not imported so move on to the next one
-
-                # remainder is False if all other RSpecs could be found in the
-                # import tree of 'rspec', or if 'rspec' is the only one present
-                # in the view.
-                if remainder == False:
-                    candidate_rspecs.append( rspec )
-
-            # We should have exactly ONE candidate rspec. If we have zero candidates, it
-            # means no single rspec imports all the others.
-            # If we have multiple candidates, it means more than one rspec imports all
-            # the others. Both these cases are terminal errors since we have no logic
-            # way of selecting one of the candidates.
-            if len(candidate_rspecs) != 1:
-                userErrorExit("RSpec selection is ambiguous. Only one RSpec is allowed in a view. If multiple RSpecs exist, at least one of them must directly or indirectly import the others")
-            else:
-                infoMessage("Using RSpec: '%s'"%(candidate_rspecs[0].getFilename()), 2)
-                self.setRSpec( candidate_rspecs[0] )
-
-        else:
-            infoMessage("No RSpec found in view", 2)
+        infoMessage("Using RSpec: '%s'"%(rspec.getFilename()), 2)
+        self.setRSpec( rspec )
 
     #--------------------------------------------------------------------------
     def setRSpec( self, _rspec ):
@@ -202,22 +158,6 @@ class CTXView:
         return item_paths
 
     #--------------------------------------------------------------------------
-    def getAccessPolicy( self ):
-        return self.access_policy
-
-    #--------------------------------------------------------------------------
-    #def getRSpecPaths(self, path_section ):
-    #    ctxAssert( self.hasRSpec(), "Caller should check if view has RSpec prior to this call" )
-    #
-    #    full_paths = list()
-    #    for path in self.getRSpec().getRepoPaths( path_section ):
-    #        full_path = os.path.join(self.getRoot(), path)
-    #        ctxAssert( os.path.exists(full_path) and os.path.isdir(full_path), "Non existing path detected by view handler: %s"%(full_path) )
-    #        full_paths.append( full_path )
-    #
-    #    return full_paths
-
-    #--------------------------------------------------------------------------
     # Used to query the location of a certain build item which belongs
     # to a certain path section (module, bconf, cdef, etc).
     # This method implements the rules for how paths are prioritized between
@@ -244,15 +184,7 @@ class CTXView:
             elif len(candidate_locations) > 1:
                 userErrorExit("Multiple occurances of '%s' was found. Unable to determine which one to use: \n   %s"\
                                %(item, "\n   ".join(candidate_locations)))
-
-        # Item not present in any repository, be clear to the user..
-        if self.getRSpec() != None:
-            if self.getAccessPolicy() == AP_NO_REMOTE_ACCESS:
-                infoMessage("Item '%s' was not found in RSpec repositories.\nNote that the system is set to search for repository items in the local view only (%s).\nTrying system global locations."%(item, AP_FLAGS[self.getAccessPolicy()]), 2)
-            elif self.getAccessPolicy() == AP_PREFER_REMOTE_ACCESS:
-                infoMessage("Item '%s' was not found in RSpec repositories.\nNote that the system is set to search for repository items at the repository source location only (%s).\nTrying system global locations."%(item, AP_FLAGS[self.getAccessPolicy()]), 2)
-            else:
-                infoMessage("Item '%s' was not found in RSpec repositories.\nTrying system global locations."%(item), 2)
+            infoMessage("Item '%s' was not found in RSpec repositories.\nTrying system global locations."%(item), 2) 
 
         for path_section in path_sections:
             # File was not found in RSpec repositories, look in view

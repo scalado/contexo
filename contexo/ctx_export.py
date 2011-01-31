@@ -113,7 +113,7 @@ class CTXExportData:
         if i == -1:
             print data_buffer #Most likely errors from main system
             infoMessage("\n********** Export handler entry point **********\n\n", 2)
-            userErrorExit("Unable to receive export package. Export header not found.\nThis is commonly the consequence of a terminal error raised by Contexo.")
+            userErrorExit("Ctx export failed because of previous errors! Check the log for previous errors.")
             
         #
         # Extract package size

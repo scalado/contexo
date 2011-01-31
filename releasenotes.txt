@@ -1,3 +1,19 @@
+Contexo 0.11.0
+NOTE: .bc files using relative search path for compiler toolchain may require this release, thus it's marked a major release although not urgent.
+CR: Contexo now has a constant working directory relative to the root, this makes it possible to use relative PATHs in .bc files, to eg, put a toolchain in the repository for easy setting up and access.
+The relative PATH that may be used to access the view root is '../../../'.
+CR: caching of .rspecs using the ctx-import directive, rspecs are only updated when using 'ctx view update' in order to keep a repository consistent between ctx view updates.
+CR: relative rspec paths may now be used.
+Bugfix: The '--no-remote-access' option has been deprecated and ignored since Contexo would be unable to determine a view which used 'ctx-import' if used together with --no-remote-access. Incidently Contexo now only use remote access with 'ctx view validate' and 'ctx view update'.
+TOOLS-20: ctx freeze was broken on win32.
+CR: [libraries] section is now option in .comp files
+CR: removed git fetch operation for increased performance since it did not offer any significant benefits.
+Bugfix: fallback on hardcoded git path if git cannot be resolved in path.
+Bugfix: the widely misunderstood cryptic "Missing export header" error meassage has been reformulated.
+Bugfix: Missing headers are now only reported once.
+Bugfix: since contexo handles space characters in paths badly, contexo now checks for spaces in paths and gives an error message if the view is located in such a directory.
+Bugfix: error_handler not defined in ctx_common
+
 Contexo 0.10.4
 TOOLS-14: this fixes some incorrect distributed cdef files which would cause trouble mostly on gcc but not visual studio. The CXXFILESUFFIX was duplicated and set to an empty string.
 Regression: ctx buildcomp did not work correctly in earlier 0.10 releases.

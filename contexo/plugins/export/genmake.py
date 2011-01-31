@@ -50,14 +50,17 @@ import contexo.ctx_cmod
 # but may be needed for netbeans
 allincludes = False
 exearg = False
+buildTests = False
 exe = str()
 
 for arg in sys.argv:
-	if arg == '-h':
-		print 'help:'
-		print '-a, --allincludes: same include path for all build directives'
-	if arg == '-a' or arg == '--allincludes':
-		allincludes = True
+    if arg == '-h':
+        print 'help:'
+        print '-a, --allincludes: same include path for all build directives'
+    if arg == '-a' or arg == '--allincludes':
+        allincludes = True
+    if arg == '-t':
+        buildTests = True
 
 #------------------------------------------------------------------------------
 def create_module_mapping_from_module_list( ctx_module_list, depMgr):
@@ -143,6 +146,8 @@ if not os.path.isfile("Makefile.cfg"):
 	cfgmakefile.write("CC=gcc\n")
 	cfgmakefile.write("CFLAGS="+build_params.cflags+"\n")
 	cfgmakefile.write("LDFLAGS=\n")
+	cfgmakefile.write("\n# Additional compiler parameters, such as include paths\n")
+	cfgmakefile.write("ADDFLAGS=\n")
 	cfgmakefile.write("\n")
 	cfgmakefile.write("AR=ar\n")
 	cfgmakefile.write("RANLIB=ranlib\n")
@@ -244,8 +249,9 @@ for comp in package.export_data['COMPONENTS']:
 		for libs in comp.libraries[lib]:
 			for srcFile in modules[libs].getSourceFilenames():
 				objectfiles.append("$(OBJDIR)/" + srcFile[:-2]+".o ")
-			for testFile in modules[libs].getTestSourceFilenames():
-				objectfiles.append("$(OBJDIR)/" + testFile[:-2]+".o ")
+                        if buildTests == True:
+            			for testFile in modules[libs].getTestSourceFilenames():
+	        			objectfiles.append("$(OBJDIR)/" + testFile[:-2]+".o ")
 
 		makefile.write("$(LIBDIR)/"+libfilename+": ")
 		for objfile in objectfiles:
@@ -278,32 +284,32 @@ for mod in module_map:
 		for hdr in mod['DEPHDRS']:
 			makefile.write(" " + hdr)
 		makefile.write("\n")
-		makefile.write("\t$(CC) $(CFLAGS)")
+		makefile.write("\t$(CC) $(CFLAGS) $(ADDFLAGS)")
 		if allincludes == True:
 			makefile.write(" $(INCLUDES)")
 		else:
 			for hdrdir in mod['DEPHDRS']:
 				makefile.write(" -I"+os.path.dirname( hdrdir))
 		makefile.write(" $(PREP_DEFS) -c "+srcFile+" -o $@\n");
-
-	for testFile in mod['TESTSOURCES']:
-		objfile = os.path.basename(testFile)[:-2]+".o"
-		privInclude = module.getName().upper()+"_PRIV"
+        if buildTests == True:
+        	for testFile in mod['TESTSOURCES']:
+	        	objfile = os.path.basename(testFile)[:-2]+".o"
+		        privInclude = module.getName().upper()+"_PRIV"
 		
-		makefile.write("$(OBJDIR)/" + objfile + ": " + testFile + " ")
-		for hdr in mod['DEPHDRS']:
-			makefile.write( " " + hdr)
-		makefile.write("\n")
-		makefile.write("\t$(CC) $(CFLAGS)")
-		if allincludes == True:
-			makefile.write(" $(INCLUDES)")
-		else:
-			for hdrdir in mod['DEPHDRS']:
-				makefile.write(" -I"+os.path.dirname( hdrdir))
-		makefile.write(" $(PREP_DEFS)")
-		for hdrdir in mod['DEPHDRS']:
-			makefile.write(" -I"+os.path.dirname( hdrdir))
-		makefile.write(" -I"+module.getRootPath()+"/test/ -c "+testFile+" -o $@\n")
+		        makefile.write("$(OBJDIR)/" + objfile + ": " + testFile + " ")
+		        for hdr in mod['DEPHDRS']:
+			        makefile.write( " " + hdr)
+        		makefile.write("\n")
+	        	makefile.write("\t$(CC) $(CFLAGS) $(ADDFLAGS)")
+		        if allincludes == True:
+			        makefile.write(" $(INCLUDES)")
+        		else:
+	        		for hdrdir in mod['DEPHDRS']:
+		        		makefile.write(" -I"+os.path.dirname( hdrdir))
+        		makefile.write(" $(PREP_DEFS)")
+	        	for hdrdir in mod['DEPHDRS']:
+		        	makefile.write(" -I"+os.path.dirname( hdrdir))
+        		makefile.write(" -I"+module.getRootPath()+"/test/ -c "+testFile+" -o $@\n")
 makefile.write("### End of Makefile\n")
 makefile.write("\n")
 

@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <ctx-rspec>
-    <!-- Import subsystem repositories -->
-    <ctx-repo id="test_view">
-      <ctx-path type="modules" spec="./test_modules" />
-    </ctx-repo>
+    <!-- import rspec from relative file location -->
+    <ctx-import href="_rspecs/test2.rspec"/>
+    <!-- import rspec from absolute file location -->
+    <ctx-import rcs="svn" href="file:///tmp/testrepo.svn/test3.rspec" rev="HEAD" />
 </ctx-rspec>
 
 

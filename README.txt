@@ -3,6 +3,7 @@ Installation prerequisites
 Python
 ------
 Contexo II requires Python version 2.5 or later but not the 3.x series.
+Problems have been encountered with the Python 2.7 series, please do not use these releases until noted otherwise.
 http://www.python.org/download/
 
 pysvn
@@ -23,6 +24,11 @@ Without a compiler Contexo cannot build projects!
 -------------------------
 Python binding to win32api. Its version should match your Python.
 http://sourceforge.net/projects/pywin32/files/
+
+Vista / Windows 7 Notes
+-----------------------
+To install on Windows 7 and Vista, navigate with explorer to the folder where contexo has been extracted. Right click on install.bat and select "Run as", and further select Administrator.
+The installer require writing to some system wide registry keys which Windows UAC does not allow for users.
 
 (optional) git support
 ----------------------

@@ -49,9 +49,9 @@ class GITCtx:
                 errorMessage('rspec not found, git ctx must be launched from a valid Contexo view')
                 exit(2)
             self.view_dir = os.path.abspath('')
-        # ctxview default args: view_path, access_policy=AP_PREFER_REMOTE_ACCESS, updating=False, validate=True
+        # ctxview default args: view_path, updating=False, validate=True
         # keep the validate=False if there is any repo under svn control, otherwise things will be very slow
-        ctxview = ctx_view.CTXView(self.view_dir, 1, False, False)
+        ctxview = ctx_view.CTXView(self.view_dir, False, False)
 
         for repo in ctxview.getRSpec().getRepositories():
             if repo.getRcs() == 'git':
@@ -225,7 +225,7 @@ Subversion repos are ignored.
             if git_cmd == 'checkout' and git_argv.count('-b') != 0:
                 translate_arguments = False
 
-            if translate_arguments == True and len(valid_git_argv) != 0:
+            if translate_arguments == True:
                 args = [self.git, git_cmd ]
                 args.extend(valid_git_argv)
                 msg = ' executing \'' + self.git + ' ' + git_cmd

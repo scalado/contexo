@@ -188,9 +188,6 @@ class COMPFile:
 
         # Handle libraries section specially
 
-        if len(compsec_libraries) == 0:
-            userErrorExit("No library entries given in component definition.")
-
         libdict = compsec_libraries
 
         for libtitle in libdict.keys():

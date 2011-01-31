@@ -210,20 +210,43 @@ def export_public_module_headers ( depmgr, modules, headerPath ):
         shutil.copyfile( src, dst )
 
 #------------------------------------------------------------------------------
-def export_headers( depmgr, headers, headerDir ):
+def export_headers( depmgr, headers, headerDir, cview ):
 
     if not os.path.exists( headerDir ):
         os.makedirs( headerDir )
 
     #infoMessage("Exporting headers", 1)
     for header in headers:
+        hdr_found = False
         src = depmgr.getFullPathname ( header )
+        dst = os.path.join( headerDir, header )
         if src != None:
-            dst = os.path.join( headerDir, header )
             infoMessage("%s -> %s"%(src, dst), 2)
             if not os.path.abspath(dst) == os.path.abspath(src):
                 shutil.copyfile( src, dst )
+                header_found = True
         else:
+            header_extensions = [ '.h' ]
+            module_paths = cview.getItemPaths('modules')
+            for module_path in module_paths:
+                if not os.path.isdir( module_path ):
+                    continue
+                diritems = os.listdir( module_path )
+                for modname in diritems:
+                    if not os.path.isdir( os.path.join(module_path, modname) ):
+                        continue
+                    moddir = os.path.join(module_path, modname)
+                    for hdrcand in os.listdir( moddir ):
+                        if hdrcand != header:
+                            continue
+                        root, ext = os.path.splitext( hdrcand )
+                        if header_extensions.count( ext ) != 0:
+                            src = os.path.join( moddir, hdrcand)
+                            shutil.copyfile( src , dst )
+                            header_found = True
+            # infoMessage("Exporting header: %s   (from %s)"%(os.path.basename(src), os.path.dirname(src)))
+ 
+        if not header_found:
             warningMessage("Unable to locate header '%s' for export"%(header))
 
 #------------------------------------------------------------------------------
@@ -406,7 +429,7 @@ def cmd_buildcomp(args):
 
             depmgr.emptyCodeModules()
 
-        export_headers( depmgr, comp.publicHeaders, header_dir )
+        export_headers( depmgr, comp.publicHeaders, header_dir, cview )
 
         ctx_log.ctxlogEndComponent()
 
@@ -524,7 +547,7 @@ def cmd_build(args):
                     export_public_module_headers( depmgr, modules, header_path )
 
                 depmgr.emptyCodeModules()
-            export_headers( depmgr, comp.publicHeaders, header_dir )
+            export_headers( depmgr, comp.publicHeaders, header_dir, cview )
             ctx_log.ctxlogEndComponent()
 
     #Process modules

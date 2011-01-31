@@ -202,19 +202,6 @@ class CTXDepMgr: # The dependency manager class.
 
         self.moduleDependencies[cmod.getName()] = set()
 
-        #
-        # Add private header dir of the current module to path list.
-        # Also add external dependency paths if any.
-        #
-        #pathList  = assureList ( self.depPaths )
-        #pathList += assureList ( cmod.getPubHeaderDir() )
-        #pathList += assureList ( cmod.getPrivHeaderDir() )
-        #pathList += assureList ( cmod.getSourceDir () )
-
-        #self.depPaths.update ( assureList ( cmod.getPubHeaderDir() ) )
-        #self.depPaths.update ( assureList ( cmod.getPrivHeaderDir() ) )
-        #self.depPaths.update ( assureList ( cmod.getSourceDir () ) )
-
         if cmod.buildUnitTests:
             self.depPaths.update (assureList ( cmod.getTestDir () ) )
 

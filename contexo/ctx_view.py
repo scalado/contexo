@@ -50,6 +50,10 @@ class CTXView:
             infoMessage("Skipping repository validation", 2);
 
     #--------------------------------------------------------------------------
+    def getModulePaths(self):
+        return self.rspec.getRepoPaths('modules')
+
+    #--------------------------------------------------------------------------
     def set_global_config( self ):
         import ctx_cfg
         import ctx_common
@@ -74,13 +78,6 @@ class CTXView:
 
         # Process RSpecs and extract all additional paths introduced
         self.process_rspecs()
-        #rspec = self.getRSpec()
-        #if rspec != None:
-        #    for repo in rspec.getRepositories():
-        #        self.paths[section].extend( repo.getPaths(section) ) for section in VIEW_PATH_SECTIONS
-
-
-        #
 
     #--------------------------------------------------------------------------
     def validateRepositories( self ):
@@ -159,18 +156,6 @@ class CTXView:
                      %(path_section, "\n  ".join(item_paths)), 3)
 
         return item_paths
-
-    #--------------------------------------------------------------------------
-    #def getRSpecPaths(self, path_section ):
-    #    ctxAssert( self.hasRSpec(), "Caller should check if view has RSpec prior to this call" )
-    #
-    #    full_paths = list()
-    #    for path in self.getRSpec().getRepoPaths( path_section ):
-    #        full_path = os.path.join(self.getRoot(), path)
-    #        ctxAssert( os.path.exists(full_path) and os.path.isdir(full_path), "Non existing path detected by view handler: %s"%(full_path) )
-    #        full_paths.append( full_path )
-    #
-    #    return full_paths
 
     #--------------------------------------------------------------------------
     # Used to query the location of a certain build item which belongs

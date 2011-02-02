@@ -217,7 +217,7 @@ def export_headers( depmgr, headers, headerDir, cview ):
 
     #infoMessage("Exporting headers", 1)
     for header in headers:
-        hdr_found = False
+        header_found = False
         src = depmgr.getFullPathname ( header )
         dst = os.path.join( headerDir, header )
         if src != None:

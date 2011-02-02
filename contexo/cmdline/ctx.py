@@ -555,6 +555,10 @@ def cmd_build(args):
     else:
         infoMessage("Building modules...",  1)
         depmgr.addCodeModules( items, args.tests )
+
+        if args.deps:
+            print "Dependencies for " + items + ":"
+            print depmgr.getCodeModulesWithDependencies()
         objs += buildmodules( depmgr, session, items, args, outputPath, bc.getTitle(),  libraryName=args.library_name)
         export_public_module_headers( depmgr, items, header_dir )
 

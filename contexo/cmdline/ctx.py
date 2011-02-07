@@ -468,7 +468,12 @@ def cmd_buildcomp(args):
                 infoMessage("Removing private include directory: " + incdir, 1)
             except:
                 pass
-
+            try:
+                testdir = os.path.join(modpath, 'test')
+                shutil.rmtree(testdir)
+                infoMessage("Removing test source directory: " + testdir, 1)
+            except:
+                pass
 
 
 def cmd_build(args):

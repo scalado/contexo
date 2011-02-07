@@ -7,7 +7,8 @@ cleanup(){
     rm -rf test_repo/test_output
     rm -rf delete_view/delete_repo/delete_modules/delete/inc
     rm -rf delete_view/delete_repo/delete_modules/delete/src
-    rm -f *.a test_repo/*.a test_repo/*.h *.h freeze.rspec
+    rm -rf delete_view/.ctx
+    rm -f *.a test_repo/*.a test_repo/*.h *.h freeze.rspec delete_view/*.a
     rm -f $OUT
 }
 fail() {
@@ -107,3 +108,4 @@ test -f delete_repo/delete_modules/delete/delete.h || fail
 test -f "delete.a"||fail
 cd ..
 cleanup
+

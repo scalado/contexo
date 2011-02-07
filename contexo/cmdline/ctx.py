@@ -406,6 +406,8 @@ def cmd_buildcomp(args):
         pass
     old_path = os.path.abspath('')
     os.chdir(dest_wd)
+
+    deleteModuleSources = set()
  
     # Process components
     components = create_components( components, cview.getItemPaths('comp'), obj_dir, launch_path )
@@ -428,17 +430,8 @@ def cmd_buildcomp(args):
             buildmodules( depmgr, session,  modules,  args, lib_dir, session.bc.getTitle(),  libraryName = args.lib)
             if args.deletesources == True:
                 for module in modules:
-                    try:
-                        shutil.rmtree(module.getSourceDir())
-                        infoMessage("Removing source directory: " + module.getSourceDir(), 1)
-                    except:
-                        pass
-                    try:
-                        shutil.rmtree(module.getPrivHeaderDir())
-                        infoMessage("Removing private include directory: " + module.getPrivHeaderDir(), 1)
-                    except:
-                        pass
-
+                    modPath = depmgr.resolveCodeModulePath(module)
+                    deleteModuleSources.add(modPath)
 
             depmgr.emptyCodeModules()
 
@@ -459,6 +452,24 @@ def cmd_buildcomp(args):
     # Restore environment
     if args.env != None:
         switchEnvironment( oldEnv, False )
+
+    if args.deletesources == True:
+        modPath = depmgr.resolveCodeModulePath(module)
+        for modpath in deleteModuleSources:
+            try:
+                srcdir = os.path.join(modpath, 'src')
+                shutil.rmtree(srcdir)
+                infoMessage("Removing source directory: " + srcdir, 1)
+            except:
+                pass
+            try:
+                incdir = os.path.join(modpath, 'inc')
+                shutil.rmtree(incdir)
+                infoMessage("Removing private include directory: " + incdir, 1)
+            except:
+                pass
+
+
 
 def cmd_build(args):
     launch_path = os.path.abspath('.')

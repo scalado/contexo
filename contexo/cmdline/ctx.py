@@ -16,6 +16,7 @@ import logging
 import logging.handlers
 import os
 import os.path
+import sys
 import shutil
 #import string
 from argparse import ArgumentParser

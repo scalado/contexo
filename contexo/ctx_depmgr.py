@@ -110,7 +110,9 @@ class CTXDepMgr: # The dependency manager class.
                 if ( self.failOnMissingHeaders):
                     userErrorExit( msg )
                 else:
-                    warningMessage( msg )
+                    if inputFile not in self.unresolved_headers:
+                        warningMessage( msg )
+                        self.unresolved_headers.add(inputFile)
                 continue #return
 
             #

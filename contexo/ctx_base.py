@@ -16,7 +16,6 @@ import sys
 #import string
 #import shutil
 import config
-from platform.ctx_platform import *
 from ctx_common import *
 from ctx_log import *
 #import ctx_depmgr
@@ -243,6 +242,59 @@ class CTXCompiler:
 
         if self.cdef['ASMCOM'].find( '%ASM' ) == -1:
             warningMessage("CDEF field 'ASM' not found in field 'ASMCOM'")
+    def executeCommandline( self, commandline ):
+        infoMessage("Executing: %s"%commandline, 5)
+        self.setColor('yellow')
+        ret = os.system( commandline )
+        self.setColor(None)
+        return ret
+
+
+    #def _out_handle(self):
+    #    import ctypes
+    #     return ctypes.windll.kernel32.GetStdHandle(self.STD_OUTPUT_HANDLE)
+    # out_handle = property(_out_handle)
+
+    #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+    def _win32_set_color(self, code):
+        import ctypes
+        # Constants from the Windows API
+        self.STD_OUTPUT_HANDLE = -11
+        hdl = ctypes.windll.kernel32.GetStdHandle(self.STD_OUTPUT_HANDLE)
+        ctypes.windll.kernel32.SetConsoleTextAttribute(hdl, code)
+
+    #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+    def setColor( self, color):
+        if sys.platform == 'win32':
+            FOREGROUND_BLUE      = 0x0001 # text color contains blue.
+            FOREGROUND_GREEN     = 0x0002 # text color contains green.
+            FOREGROUND_RED       = 0x0004 # text color contains red.
+            FOREGROUND_INTENSITY = 0x0008 # text color is intensified.
+            FOREGROUND_WHITE     = FOREGROUND_BLUE|FOREGROUND_GREEN |FOREGROUND_RED
+            FOREGROUND_YELLOW    = 0x0006
+            # winbase.h
+            STD_INPUT_HANDLE = -10
+            STD_OUTPUT_HANDLE = -11
+            STD_ERROR_HANDLE = -12
+
+            code=FOREGROUND_WHITE
+            if color == 'yellow':
+                code=FOREGROUND_YELLOW
+            if color == 'green':
+                code=FOREGROUND_GREEN
+            import ctypes
+            # Constants from the Windows API
+            self.STD_OUTPUT_HANDLE = -11
+            hdl = ctypes.windll.kernel32.GetStdHandle(self.STD_OUTPUT_HANDLE)
+            ctypes.windll.kernel32.SetConsoleTextAttribute(hdl, code)
+        else:
+            if color == 'yellow':
+                print '\x1b[33m'# green
+            elif color == 'green':
+                print '\x1b[32m'# green
+            else:
+                print '\x1b[0m' # reset
+
 
     #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     def validateTool( self, cdefItem ):
@@ -438,12 +490,14 @@ class CTXCompiler:
             userErrorExit("Sourcefile not found: %s"%sourceFile)
 
         if self.cdef['ECHO_SOURCES'] == True:
+            self.setColor('green')
             print os.path.basename( sourceFile )
+            self.setColor(None)
 
         objFileName = self.makeObjFileName( sourceFile, objFileTitle )
         commandline = self.makeStaticObjectCommandline(sourceFile, buildParams, outputDir, objFileName )
-
-        ret = executeCommandline( commandline )
+        
+        ret = self.executeCommandline( commandline )
         if ret != 0:
             userErrorExit("\nFailed to create static object '%s'\nCompiler return code: %d"%(objFileName, ret))
 
@@ -458,7 +512,6 @@ class CTXCompiler:
         objfiles_cmdline = str()
         for objectFile in objectFiles:
             objPath = os.path.normpath(os.path.join(objectFile.filepath, objectFile.filename))
-            objPath = shortenPathIfPossible( objPath )  #TODO: shortenPath is disabled now. Investigate the effects and possibly find out a portable way of doing this.
             objfiles_cmdline += " %s"%objPath
 
         # Prepare library
@@ -495,13 +548,13 @@ class CTXCompiler:
 
             for objectFile in objectFiles:
                 commandline = self.makeStaticLibraryCommandline( [objectFile,], libraryTitle, outputDir )
-                ret = executeCommandline( commandline )
+                ret = self.executeCommandline( commandline )
                 if ret != 0:
                     userErrorExit("\nFailed to append '%s' to static library '%s'\nar return code: %d"%(objectFile.filename, libPath, ret))
 
         elif self.cdef['ARCOM_METHOD'].upper() == 'REPLACE':
             commandline = self.makeStaticLibraryCommandline( objectFiles, libraryTitle, outputDir )
-            ret = executeCommandline( commandline )
+            ret = self.executeCommandline( commandline )
             if ret != 0:
                 userErrorExit("\nFailed to create static library '%s'\nar command line:\n%s\nar return code: %d"%(libPath, commandline,  ret))
         else:
@@ -514,7 +567,7 @@ class CTXCompiler:
 
             commandline = "%s %s"%(self.cdef['RANLIB'], libPath)
             # Returnvalue is ignored since RANLIB by "de facto" always returns 0.
-            executeCommandline( commandline )
+            self.executeCommandline( commandline )
 
         if os.path.exists( self.stdCommandfileName ):
             os.remove( self.stdCommandfileName )
@@ -653,7 +706,7 @@ class CTXBuildSession:
         infoMessage('from ' + os.getcwd() + ' executing: ' + cmdline,  6)
         linkCommandFileName = 'linkCmdFileName096848hf434qas.file'
         cmdline = prepareCommandFile( cmdline,  linkCommandFileName, self.cdefPath)
-        ret = executeCommandline( cmdline )
+        ret = self.executeCommandline( cmdline )
         if ret != 0:
             userErrorExit("\nFailed to link: '%s'\nCompiler return code: %d"%(cmdline, ret))
         if os.path.exists(linkCommandFileName):
@@ -662,59 +715,6 @@ class CTXBuildSession:
 
         pass
 
-
-#    #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-#    def buildStaticObjects( self, srcFiles, outputDir, buildParams, forceRebuild ):
-#        objectFileList = list()
-#        objFileTitle = None
-#
-#        srcFiles = assureList( srcFiles )
-#
-#        joinedBuildParams = CTXBuildParams()
-#        joinedBuildParams.add( self.buildParams )
-#        if buildParams != None:
-#            joinedBuildParams.add( buildParams )
-#
-#        #
-#        # Build
-#        #
-#
-#        buildParamsChecksum = joinedBuildParams.makeChecksum()
-#
-#        for srcFile in srcFiles:
-#            needRebuild     = True
-#
-#            objChecksum     = self.makeStaticObjectChecksum( srcFile, buildParamsChecksum )
-#            objectFilename  = self.compiler.makeObjFileName( srcFile, objFileTitle )
-#
-#            #
-#            # If rebuild detectiobuildStaticObjectsn is to be used, read the old object file checksum
-#            # and see if anything has changed.
-#            #
-#            if forceRebuild == False:
-#                objectFilePath  = os.path.join( outputDir, objectFilename )
-#                oldChecksum     = self.readStaticObjectChecksum( objectFilePath )
-#                if oldChecksum == objChecksum:
-#                    needRebuild = False
-#                    infoMessage("Reusing '%s'"%(objectFilename), 3)
-#                else:
-#                    infoMessage("Object '%s' invalidated by checksum.\nNew: %s\nOld: %s"\
-#                                    %(objectFilename, objChecksum, oldChecksum), 4)
-#
-#                #
-#                # Rebuild if needed, and write the fresh checksum regardless.
-#                #
-#            if needRebuild:
-#                obj = self.compiler.staticObject( srcFile, joinedBuildParams, outputDir, objFileTitle )
-#                objectFileList.append( obj )
-#                self.writeStaticObjectChecksum( os.path.join(obj.filepath,obj.filename), objChecksum )
-#            else:
-#                # Even if wee haven't built the source file we need to produce
-#                # a CTXStaticObject item to return.
-#                obj = self.compiler.wrapStaticObject( srcFile, objectFilename, outputDir, buildParams, "n/a" )
-#                objectFileList.append( obj )
-#
-#        return objectFileList
 
     #
     # Builds a source file and returns a CTXStaticObject.

@@ -39,18 +39,169 @@ def ctxExit( exitcode ):
         func()
     sys.exit( exitcode )
 
+# encoding: utf-8
+# from: http://stackoverflow.com/questions/384076/how-can-i-make-the-python-logging-output-to-be-colored
+# by http://stackoverflow.com/users/99834/sorin-sbarnea
+# and http://stackoverflow.com/users/720/peter-hoffmann
+# no further licensing conditions apply.
+
+# now we patch Python code to add color support to logging.StreamHandler
+def add_windows_warn_color(fn):
+        # add methods we need to the class
+    def _out_handle(self):
+        import ctypes
+        return ctypes.windll.kernel32.GetStdHandle(self.STD_OUTPUT_HANDLE)
+    out_handle = property(_out_handle)
+
+    def _set_color(self, code):
+        import ctypes
+        # Constants from the Windows API
+        self.STD_OUTPUT_HANDLE = -11
+        hdl = ctypes.windll.kernel32.GetStdHandle(self.STD_OUTPUT_HANDLE)
+        ctypes.windll.kernel32.SetConsoleTextAttribute(hdl, code)
+
+    setattr(logging.StreamHandler, '_set_color', _set_color)
+
+    def new(*args):
+        FOREGROUND_BLUE      = 0x0001 # text color contains blue.
+        FOREGROUND_GREEN     = 0x0002 # text color contains green.
+        FOREGROUND_RED       = 0x0004 # text color contains red.
+        FOREGROUND_INTENSITY = 0x0008 # text color is intensified.
+        FOREGROUND_WHITE     = FOREGROUND_BLUE|FOREGROUND_GREEN |FOREGROUND_RED
+       # winbase.h
+        STD_INPUT_HANDLE = -10
+        STD_OUTPUT_HANDLE = -11
+        STD_ERROR_HANDLE = -12
+
+        # wincon.h
+        FOREGROUND_BLACK     = 0x0000
+        FOREGROUND_BLUE      = 0x0001
+        FOREGROUND_GREEN     = 0x0002
+        FOREGROUND_CYAN      = 0x0003
+        FOREGROUND_RED       = 0x0004
+        FOREGROUND_MAGENTA   = 0x0005
+        FOREGROUND_YELLOW    = 0x0006
+        FOREGROUND_GREY      = 0x0007
+        FOREGROUND_INTENSITY = 0x0008 # foreground color is intensified.
+
+        BACKGROUND_BLACK     = 0x0000
+        BACKGROUND_BLUE      = 0x0010
+        BACKGROUND_GREEN     = 0x0020
+        BACKGROUND_CYAN      = 0x0030
+        BACKGROUND_RED       = 0x0040
+        BACKGROUND_MAGENTA   = 0x0050
+        BACKGROUND_YELLOW    = 0x0060
+        BACKGROUND_GREY      = 0x0070
+        BACKGROUND_INTENSITY = 0x0080 # background color is intensified.     
+
+        args[0]._set_color( FOREGROUND_YELLOW )
+
+        ret = fn(*args)
+        args[0]._set_color( FOREGROUND_WHITE )
+        #print "after"
+        return ret
+    return new
+
+# now we patch Python code to add color support to logging.StreamHandler
+def add_windows_err_color(fn):
+        # add methods we need to the class
+    def _out_handle(self):
+        import ctypes
+        return ctypes.windll.kernel32.GetStdHandle(self.STD_OUTPUT_HANDLE)
+    out_handle = property(_out_handle)
+
+    def _set_color(self, code):
+        import ctypes
+        # Constants from the Windows API
+        self.STD_OUTPUT_HANDLE = -11
+        hdl = ctypes.windll.kernel32.GetStdHandle(self.STD_OUTPUT_HANDLE)
+        ctypes.windll.kernel32.SetConsoleTextAttribute(hdl, code)
+
+    setattr(logging.StreamHandler, '_set_color', _set_color)
+
+    def new(*args):
+        FOREGROUND_BLUE      = 0x0001 # text color contains blue.
+        FOREGROUND_GREEN     = 0x0002 # text color contains green.
+        FOREGROUND_RED       = 0x0004 # text color contains red.
+        FOREGROUND_INTENSITY = 0x0008 # text color is intensified.
+        FOREGROUND_WHITE     = FOREGROUND_BLUE|FOREGROUND_GREEN |FOREGROUND_RED
+        # winbase.h
+        STD_INPUT_HANDLE = -10
+        STD_OUTPUT_HANDLE = -11
+        STD_ERROR_HANDLE = -12
+
+        # wincon.h
+        FOREGROUND_BLACK     = 0x0000
+        FOREGROUND_BLUE      = 0x0001
+        FOREGROUND_GREEN     = 0x0002
+        FOREGROUND_CYAN      = 0x0003
+        FOREGROUND_RED       = 0x0004
+        FOREGROUND_MAGENTA   = 0x0005
+        FOREGROUND_YELLOW    = 0x0006
+        FOREGROUND_GREY      = 0x0007
+        FOREGROUND_INTENSITY = 0x0008 # foreground color is intensified.
+
+        BACKGROUND_BLACK     = 0x0000
+        BACKGROUND_BLUE      = 0x0010
+        BACKGROUND_GREEN     = 0x0020
+        BACKGROUND_CYAN      = 0x0030
+        BACKGROUND_RED       = 0x0040
+        BACKGROUND_MAGENTA   = 0x0050
+        BACKGROUND_YELLOW    = 0x0060
+        BACKGROUND_GREY      = 0x0070
+        BACKGROUND_INTENSITY = 0x0080 # background color is intensified.     
+
+        args[0]._set_color( FOREGROUND_RED )
+
+        ret = fn(*args)
+        args[0]._set_color( FOREGROUND_WHITE )
+        #print "after"
+        return ret
+    return new
+
+
+def add_ansi_warn_color(fn):
+    # add methods we need to the class
+    def new(*args):
+        color = '\x1b[33m' # yellow
+        args[1].msg = color + args[1].msg +  '\x1b[0m'  # normal
+        #print "after"
+        return fn(*args)
+    return new
+
+def add_ansi_err_color(fn):
+    # add methods we need to the class
+    def new(*args):
+        args[1].msg = '\x1b[31m' + args[1].msg +  '\x1b[0m'  # normal
+        #print "after"
+        return fn(*args)
+    return new
+
+
 #------------------------------------------------------------------------------
 #
 #------------------------------------------------------------------------------
 def errorMessage(errstr,  filename = None,  lineno = None ):
     import ctx_log
+    import sys
 
     if lineno == None:
         lineno = inspect.currentframe().f_back.f_lineno
     if filename == None:
         filename = inspect.currentframe().f_back.f_code.co_filename
     msg = " (%s:%d):  %s\n"%(filename,  lineno, errstr)
+
+    emitHandler = logging.StreamHandler.emit
+    if sys.platform == 'win32':
+        # Windows does not support ANSI escapes and we are using API calls to set the console color
+        logging.StreamHandler.emit = add_windows_err_color(logging.StreamHandler.emit)
+    else:
+        # all non-Windows platforms are supporting ANSI escapes so we use them
+        logging.StreamHandler.emit = add_ansi_err_color(logging.StreamHandler.emit)
+
     logging.error( msg )
+    # reset emithandler
+    logging.StreamHandler.emit = emitHandler
 
     # Include error messages in logfile
     ctx_log.ctxlogAddError( msg )
@@ -64,7 +215,19 @@ def warningMessage(warningstr):
     lineno = inspect.currentframe().f_back.f_lineno
     filename = inspect.currentframe().f_back.f_code.co_filename
     msg = " (%s:%d):  %s\n"%(os.path.basename(filename),  lineno, warningstr)
+    emitHandler = logging.StreamHandler.emit
+    if sys.platform == 'win32':
+        # Windows does not support ANSI escapes and we are using API calls to set the console color
+        logging.StreamHandler.emit = add_windows_warn_color(logging.StreamHandler.emit)
+    else:
+        # all non-Windows platforms are supporting ANSI escapes so we use them
+        logging.StreamHandler.emit = add_ansi_warn_color(logging.StreamHandler.emit)
+
+
     logging.warning(msg)
+
+    # reset emithandler
+    logging.StreamHandler.emit = emitHandler
 
 
     # Include warning messages in logfile

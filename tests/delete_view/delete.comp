@@ -1,0 +1,17 @@
+##############################################################################
+#                                                                            #
+#                                                                            #
+##############################################################################
+
+[meta]
+TITLE           = Delete
+DESCRIPTION     = Test delete c files functionality
+
+[general]
+NAME            = delete
+
+[libraries]
+delete      = delete
+
+[exports]
+PUBLIC_HEADERS  = delete.h

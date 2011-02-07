@@ -5,6 +5,7 @@ cleanup(){
     rm -rf .ctx
     rm -rf test_output
     rm -rf test_repo/test_output
+    rm -rf delete_view/delete_repo/delete_modules/delete/src
     rm -f *.a test_repo/*.a test_repo/*.h *.h freeze.rspec
     rm -f $OUT
 }
@@ -92,4 +93,11 @@ $CTX freeze -o freeze.rspec 1>/dev/null 2>>$OUT || fail
 test -f "freeze.rspec"|| fail
 cleanup
 
-
+echo "test delete c files"
+cp -rf delete_view/delete_repo/delete_modules/delete/src-orig delete_view/delete_repo/delete_modules/delete/src
+cd delete_view
+$CTX buildcomp --bconf $BCONF -delete delete.comp 1>&2 2>>$OUT || fail
+test -f delete_view/delete_modules/delete/src/delete.c|| fail
+test -f "delete.a"||fail
+cd ..
+cleanup

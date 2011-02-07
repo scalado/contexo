@@ -482,8 +482,15 @@ class CTXCodeModule( CTXRawCodeModule ):
 
         objlist = list()
         for src in srcFiles:
+            session.delete_files.add(src)
             obj = session.buildStaticObject( os.path.normpath( src ), os.path.normpath( outputDir ), buildParams, self.rebuildAll )
             objlist.append( obj )
+        for src in srcFiles:
+            includeFiles = session.depMgr.getDependencies( src )
+            for incFile in includeFiles:
+                if incFile.find("inc") != -1:
+                    session.delete_files.add(incFile)
+ 
         for prebuiltObjectFile in self.prebuiltObjFiles:
             obj = session.copyPrebuiltObject( os.path.normpath( prebuiltObjectFile), outputDir)
             objlist.append( obj)

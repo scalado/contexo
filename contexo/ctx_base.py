@@ -541,7 +541,7 @@ class CTXBuildSession:
         self.depMgr         = None #ctx_depmgr.CTXDepMgr()
         #self.sysVars        = getSystemConfig()
         #self.msgSender      = 'CTXBuildSession'
-        self.delete_files   = set()
+        self.delete_dirs   = set()
         self.setBuildParams( bc.getBuildParams() )
 
     #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::

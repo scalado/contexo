@@ -482,7 +482,7 @@ class CTXCodeModule( CTXRawCodeModule ):
 
         objlist = list()
         for src in srcFiles:
-            session.delete_files.add(src)
+            session.delete_dirs.add(os.path.dirname(src))
             obj = session.buildStaticObject( os.path.normpath( src ), os.path.normpath( outputDir ), buildParams, self.rebuildAll )
             objlist.append( obj )
         for src in srcFiles:

@@ -419,7 +419,6 @@ def cmd_buildcomp(args):
 
         # Build component modules.
         for library, modules in comp.libraries.items():
-
             modules = expand_list_files( cview, modules )
 
             depmgr.addCodeModules( modules, args.tests )
@@ -427,6 +426,19 @@ def cmd_buildcomp(args):
             args.lib = library
             infoMessage('args: %s'%args,  6)
             buildmodules( depmgr, session,  modules,  args, lib_dir, session.bc.getTitle(),  libraryName = args.lib)
+            if args.deletesources == True:
+                for module in modules:
+                    try:
+                        shutil.rmtree(module.getSourceDir())
+                        infoMessage("Removing source directory: " + module.getSourceDir(), 1)
+                    except:
+                        pass
+                    try:
+                        shutil.rmtree(module.getPrivHeaderDir())
+                        infoMessage("Removing private include directory: " + module.getPrivHeaderDir(), 1)
+                    except:
+                        pass
+
 
             depmgr.emptyCodeModules()
 
@@ -447,25 +459,6 @@ def cmd_buildcomp(args):
     # Restore environment
     if args.env != None:
         switchEnvironment( oldEnv, False )
-
-    if args.deletecfiles == True:
-        for file in session.delete_files:
-            if(os.path.exists(os.path.normpath(file)) and os.path.splitext(file)[1] != ".h"):
-                 parent_dir = os.path.split(os.path.split(file)[0])[0]
-                 for subdir, dirs, files in os.walk(parent_dir):
-                    for dir in dirs:
-                        if(dir != ".svn"):
-                            for subdir, dirs, files in os.walk(parent_dir + "/" + dir):
-                                for file in files:
-                                    if(file != "contexo" and os.path.exists(parent_dir + "/" + dir + "/" + file)):
-                                      print "Deleting file: " + parent_dir + "/" + dir + "/" + file
-                                      os.remove(parent_dir + "/" + dir + "/" + file)       
-        for file in session.delete_files:
-            if(os.path.exists(os.path.normpath(file))):
-                os.remove(os.path.normpath(file))
-                print "Deleting File: " + os.path.normpath(file)
-
-
 
 def cmd_build(args):
     launch_path = os.path.abspath('.')
@@ -889,7 +882,7 @@ parser_build.add_argument('-b', '--bconf', help=standard_description['--bconf'])
 parser_build.add_argument('-e', '--env', help=standard_description['--env'])
 parser_build.add_argument('-o', '--output', default=os.getcwd(), help=standard_description['--output'])
 parser_build.add_argument('-ld','--libdir', default="", help=standard_description['--libdir'])
-parser_build.add_argument('-delete', '--deletecfiles', action='store_true', help="Delete c files after compilation")
+parser_build.add_argument('-delete', '--deletesources', action='store_true', help="Delete private headers and the src dir of compiled modules.)")
 parser_build.add_argument('-hd','--headerdir', default="", help=standard_description['--headerdir'])
 parser_build.add_argument('-d', '--deps', action='store_true', help=standard_description['--deps'])
 parser_build.add_argument('-t', '--tests', action='store_true', help=standard_description['--tests'])

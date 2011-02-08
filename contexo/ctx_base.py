@@ -242,6 +242,7 @@ class CTXCompiler:
 
         if self.cdef['ASMCOM'].find( '%ASM' ) == -1:
             warningMessage("CDEF field 'ASM' not found in field 'ASMCOM'")
+
     def executeCommandline( self, commandline ):
         infoMessage("Executing: %s"%commandline, 5)
         self.setColor('yellow')
@@ -289,11 +290,11 @@ class CTXCompiler:
             ctypes.windll.kernel32.SetConsoleTextAttribute(hdl, code)
         else:
             if color == 'yellow':
-                print '\x1b[33m'# green
+                print '\x1b[33m'# yellow
             elif color == 'green':
                 print '\x1b[32m'# green
             else:
-                print '\x1b[0m' # reset
+                print '\x1b[0m'# reset
 
 
     #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -652,6 +653,47 @@ class CTXBuildSession:
             oldChecksum = '0'
 
         return oldChecksum
+
+    #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+    def setColor( self, color):
+        if sys.platform == 'win32':
+            FOREGROUND_BLUE      = 0x0001 # text color contains blue.
+            FOREGROUND_GREEN     = 0x0002 # text color contains green.
+            FOREGROUND_RED       = 0x0004 # text color contains red.
+            FOREGROUND_INTENSITY = 0x0008 # text color is intensified.
+            FOREGROUND_WHITE     = FOREGROUND_BLUE|FOREGROUND_GREEN |FOREGROUND_RED
+            FOREGROUND_YELLOW    = 0x0006
+            # winbase.h
+            STD_INPUT_HANDLE = -10
+            STD_OUTPUT_HANDLE = -11
+            STD_ERROR_HANDLE = -12
+
+            code=FOREGROUND_WHITE
+            if color == 'yellow':
+                code=FOREGROUND_YELLOW
+            if color == 'green':
+                code=FOREGROUND_GREEN
+            import ctypes
+            # Constants from the Windows API
+            self.STD_OUTPUT_HANDLE = -11
+            hdl = ctypes.windll.kernel32.GetStdHandle(self.STD_OUTPUT_HANDLE)
+            ctypes.windll.kernel32.SetConsoleTextAttribute(hdl, code)
+        else:
+            if color == 'yellow':
+                print '\x1b[33m',# green
+            elif color == 'green':
+                print '\x1b[32m',# green
+            else:
+                print '\x1b[0m', # reset
+
+
+    #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+    def executeCommandline( self, commandline ):
+        infoMessage("Executing: %s"%commandline, 5)
+        self.setColor('yellow')
+        ret = os.system( commandline )
+        self.setColor(None)
+        return ret
 
     #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     def writeStaticObjectChecksum( self, objectFilename, checksum ):

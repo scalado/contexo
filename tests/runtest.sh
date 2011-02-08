@@ -105,6 +105,17 @@ test -f "hello.exe"|| fail
 cd ..
 cleanup
 
+echo "ctx buildcomp --output"
+rm -f /tmp/testrepo.svn
+ln -s $PWD/testrepo.svn /tmp/testrepo.svn || fail
+$CTX buildcomp hello.comp --output test_output 1>/dev/null 2>>$OUT || fail
+echo test out dir
+test -d test_output || fail
+echo test out lib
+test -f test_output/hello.a || fail
+cleanup
+
+
 echo "test delete c files"
 cp -rf delete_view/delete_repo/delete_modules/delete/src-orig delete_view/delete_repo/delete_modules/delete/src
 cp -rf delete_view/delete_repo/delete_modules/delete/inc-orig delete_view/delete_repo/delete_modules/delete/inc

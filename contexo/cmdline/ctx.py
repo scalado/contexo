@@ -360,7 +360,7 @@ def cmd_buildcomp(args):
     launch_path = os.path.abspath('.')
     view_dir = os.path.abspath(args.view)
     obj_dir = view_dir + os.sep + '.ctx/obj'
-    if args.output[0] != '/' and args.output[0] != '\\' and args.output[1:3] != ':\\':
+    if args.output[0] == '/' or args.output[0] == '\\' or args.output[1:3] == ':\\':
         lib_output = args.output
     else:
         # relative to view root
@@ -416,9 +416,8 @@ def cmd_buildcomp(args):
     for comp in components:
         ctx_log.ctxlogBeginComponent( comp.name )
 
-        outputPath = lib_output
-        lib_dir = os.path.join( outputPath, args.libdir )
-        header_dir = os.path.join( outputPath, args.headerdir )
+        lib_dir = os.path.join( lib_output, args.libdir )
+        header_dir = os.path.join( lib_output, args.headerdir )
 
         # Build component modules.
         for library, modules in comp.libraries.items():

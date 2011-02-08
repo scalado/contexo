@@ -1,3 +1,7 @@
+Contexo 0.12.1
+Bugfix: buildcomp output regression solved
+Bugfix: build -exe linker flag regression solved
+
 Contexo 0.12.0
 CR: ctx buildcomp has gotten a new flag: -delete / --deletesources which deletes the utilized sources after they have been compiled.
 Feature: Contexo now has colored output. Warnings will be printed in yellow, errors in red. Infomessages will still be grey/uncolored.

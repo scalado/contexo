@@ -729,6 +729,12 @@ class CTXBuildSession:
 
         # Expand all commandline mask variables to the corresponding items we prepared.
         cmdline = self.compiler.cdef['LDCOM']
+        # this is a fix for gcc, where compiler arguments may include , which the python config doesn't seem to handle
+        if type(section[ option_name ]) == list and len( section[ option_name ]) > 1:
+            cmdline = (''.join("%s," % (k) for k in self.compiler.cdef['LDCOM']))[0:-1]
+        else:
+            cmdline = self.compiler.cdef['LDCOM']
+
         # Require all mandatory variables in commandline mask
 
         for var in ['%LD', '%SOURCES']:

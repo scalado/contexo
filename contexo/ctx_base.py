@@ -290,11 +290,13 @@ class CTXCompiler:
             ctypes.windll.kernel32.SetConsoleTextAttribute(hdl, code)
         else:
             if color == 'yellow':
+                print '\x1b[A',
                 print '\x1b[33m'# yellow
             elif color == 'green':
-                print '\x1b[32m'# green
+                print '\x1b[A',
+                print '\x1b[32m' # green
             else:
-                print '\x1b[0m'# reset
+                print '\x1b[0m' # reset
 
 
     #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -728,7 +730,6 @@ class CTXBuildSession:
             objfiles_cmdline += " %s"%( os.path.normpath(os.path.join( object.filepath,  object.filename )) )
 
         # Expand all commandline mask variables to the corresponding items we prepared.
-        cmdline = self.compiler.cdef['LDCOM']
         # this is a fix for gcc, where compiler arguments may include , which the python config doesn't seem to handle
         if type(section[ option_name ]) == list and len( section[ option_name ]) > 1:
             cmdline = (''.join("%s," % (k) for k in self.compiler.cdef['LDCOM']))[0:-1]

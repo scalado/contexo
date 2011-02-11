@@ -3,6 +3,7 @@ build/
 .eric4project/
 contexo.e4p
 *.pyc
+tags
 *~
 private/
 examples/hello.h

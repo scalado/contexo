@@ -71,7 +71,7 @@ class RspecFreezer():
                 if str(curr_rev) != rev:
                     warningMessage('%s: Overwriting strict revision nr %s with %s'%(id, str(rev),  str(curr_rev)))
             self.xmlgenerator.characters("\t")
-            self.xmlgenerator.startElement('ctx-repo',  attrs = {'id':id,'rcs':rcs, 'href': href,  'rev': str(curr_rev),  'path':path })
+            self.xmlgenerator.startElement('ctx-repo',  attrs = {'id':id,'rcs':rcs, 'href': href,  'rev': str(curr_rev),  'path':path.replace('\\','/') })
             self.xmlgenerator.characters("\n")
         else:
             warningMessage("Currently only supporting freeze for svn-repos, skipping '%s'"%repo_path)
@@ -80,7 +80,7 @@ class RspecFreezer():
         for path_type in paths:
             for  path_spec in paths[path_type]:
                 self.xmlgenerator.characters("\t\t")
-                self.xmlgenerator.startElement('ctx-path',  attrs = {'type':path_type,  'spec':path_spec})
+                self.xmlgenerator.startElement('ctx-path',  attrs = {'type':path_type,  'spec':path_spec.replace('\\','/') })
                 self.xmlgenerator.endElement('ctx-path')
                 self.xmlgenerator.characters("\n")
         self.xmlgenerator.characters("\t")

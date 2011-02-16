@@ -133,7 +133,7 @@ class rspecXmlHandler(ContentHandler):
                 userErrorExit("Missing mandatory attribute '%s' in element '<%s>'"%(attribute, name))
 
             ctx_path_type = attrs.get( 'type' ).lower()
-            self.current_repo.addPath( ctx_path_type, attrs.get('spec') )
+            self.current_repo.addPath( ctx_path_type, attrs.get('spec').replace('\\','/') )
 
         # .....................................................................
         else:

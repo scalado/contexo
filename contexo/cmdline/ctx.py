@@ -60,6 +60,15 @@ setInfoMessageVerboseLevel( int(cfgFile.getVerboseLevel()) )
 
 CTX_DEFAULT_BCONF = cfgFile.getDefaultBConf().strip(" '")
 
+
+def dir_has_rspec(view_dir):
+    view_filelist = os.listdir(view_dir)
+    for entry in view_filelist:
+        if entry.endswith('.rspec'):
+            return True
+    return False
+
+
 #TODO: make args not global in ctx.py
 #------------------------------------------------------------------------------
 # tolerate missing headers was removed since contexo assumed that external headers would be set up correctly, no one bothered to do this, and the compiler didn't complain so this option was mainly a nuicence.
@@ -272,7 +281,7 @@ def cmd_info(args):
 #------------------------------------------------------------------------------
 def cmd_buildmod(args):
     launch_path = os.path.abspath('.')
-    view_dir = os.path.abspath(args.view)
+    view_dir = get_view_dir(args.view)
     obj_dir = view_dir + os.sep + '.ctx/obj'
     if args.output[0] != '/' and args.output[0] != '\\' and args.output[1:3] != ':\\':
         lib_output = args.output
@@ -355,7 +364,7 @@ def cmd_buildmod(args):
 #------------------------------------------------------------------------------
 def cmd_buildcomp(args):
     launch_path = os.path.abspath('.')
-    view_dir = os.path.abspath(args.view)
+    view_dir = get_view_dir(args.view)
     obj_dir = view_dir + os.sep + '.ctx/obj'
     if args.output[0] == '/' or args.output[0] == '\\' or args.output[1:3] == ':\\':
         lib_output = args.output
@@ -472,11 +481,24 @@ def cmd_buildcomp(args):
             except:
                 pass
 
-
+def get_view_dir( args_view):
+    caller_dir = os.path.abspath('.')
+    view_dir = os.path.abspath(args_view)
+    os.chdir(view_dir)
+    view_dir = os.path.abspath('')
+    while not dir_has_rspec(view_dir):
+        os.chdir('..')
+        if view_dir == os.path.abspath(''):
+            userErrorMessage('ctx could not find an rspec in the supplied argument or any subdirectory')
+            exit(2)
+        view_dir = os.path.abspath('')
+    os.chdir(caller_dir)
+    return view_dir
+ 
 def cmd_build(args):
     launch_path = os.path.abspath('.')
 
-    view_dir = os.path.abspath(args.view)
+    view_dir = get_view_dir(args.view)
     obj_dir = view_dir + os.sep + '.ctx/obj'
     # test if not absolute path
     if args.output[0] != '/' and args.output[0] != '\\' and args.output[1:3] != ':\\':
@@ -605,7 +627,7 @@ def cmd_build(args):
 #------------------------------------------------------------------------------
 def cmd_export(args):
     launch_path = os.path.abspath('.')
-    view_dir = os.path.abspath(args.view)
+    view_dir = get_view_dir(args.view)
     obj_dir = view_dir + os.sep + '.ctx/obj'
     from contexo import ctx_cmod
     from contexo import ctx_base
@@ -683,7 +705,9 @@ def cmd_updateview(args):
     if args.updates_only == True and args.checkouts_only == True:
         userErrorExit("Options '--updates_only' and '--checkouts-only' are mutually exclusive.")
     deprecated_nra_warning(args)
-    cview = ctx_view.CTXView( args.view, updating=True, validate=True )
+    view_dir = get_view_dir(args.view)
+
+    cview = ctx_view.CTXView( view_dir, updating=True, validate=True )
 
     if args.checkouts_only == False:
         cview.updateRepositories()
@@ -696,13 +720,14 @@ def cmd_validateview(args):
 
     # The view will validate itself in the constructor
     deprecated_nra_warning(args)
-    cview = ctx_view.CTXView( args.view, validate=True )
+    view_dir = get_view_dir(args.view)
+    cview = ctx_view.CTXView( view_dir, validate=True )
 
     infoMessage("Validation complete", 1)
 
 #------------------------------------------------------------------------------
 def cmd_freeze(args):
-    view_dir = os.path.abspath(args.view)
+    view_dir = get_view_dir(args.view)
 
     import xml.sax
     import sys
@@ -718,7 +743,7 @@ def cmd_freeze(args):
 
 #------------------------------------------------------------------------------
 def cmd_clean(args):
-    view_dir = os.path.abspath(args.view)
+    view_dir = get_view_dir(args.view)
     obj_dir = view_dir + os.sep + '.ctx/obj'
     if args.all == True:
        import shutil

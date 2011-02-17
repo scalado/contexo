@@ -18,13 +18,10 @@ import os
 import os.path
 import sys
 import shutil
-#import string
 from argparse import ArgumentParser
 import argparse
-#from contexo import ctx_rspec
 from contexo import ctx_view
 from contexo import ctx_cfg
-#from contexo import ctx_cmod
 from contexo.ctx_envswitch  import  assureList, EnvironmentLayout, switchEnvironment
 from contexo import ctx_common
 from contexo.ctx_common import setInfoMessageVerboseLevel, infoMessage, userErrorExit, warningMessage, ctxAssert
@@ -47,14 +44,9 @@ except:
     pass
 
 msgSender           = 'ctx.py'
-#logging.basicConfig(format = '%(asctime)s %(levelname)-8s %(filename)s %(lineno)s %(message)s',
 logging.basicConfig(format = '%(asctime)s %(levelname)-8s %(message)s',
                                 datefmt='%H:%M:%S',
                                 level = logging.DEBUG);
-#logger = logging.getLogegr()
-#logger.
-#logging.debug('Starting...')
-
 
 #
 # Get configuration.
@@ -110,8 +102,6 @@ def getBuildConfiguration( cview ,  args):
     # good coding morale and extract it manually from the bc file. Some of this
     # code was copied from BCFile::__process_bc().
 
-    # TODO: Make this a lot more pretty if possible..
-
     bcFilePath = cview.locateItem( bcFile, 'bconf' )
     bcFilename = os.path.basename( bcFilePath )
     bcPath = os.path.dirname( bcFilePath )
@@ -132,7 +122,6 @@ def getBuildConfiguration( cview ,  args):
     return bc
 
 #------------------------------------------------------------------------------
-# TODO: Make recursive
 def expand_list_files( view, item_list ):
 
     expanded_item_list = list()
@@ -566,10 +555,6 @@ def cmd_build(args):
         for comp in components:
             ctx_log.ctxlogBeginComponent( comp.name )
 
-            # TODO: also unused, what does the workaround below fix?
-            # Workaround to get header export to work
-            #codemodule_map = dict()
-
             # Build component modules.
             for library, modules in comp.libraries.items():
                 modules = expand_list_files( cview, modules )
@@ -745,24 +730,6 @@ def cmd_clean(args):
            pass
 
 #------------------------------------------------------------------------------
-def cmd_importview(args):
-
-    for file in args.files:
-        (dummy,  viewdefname)= os.path.split(file)
-        (viewname,  ext) = os.path.splitext(viewdefname)
-        dirname = os.path.join('.', args.destination.pop(),  viewname)
-        if os.path.isdir(dirname ):
-            confirmation = ''
-            while confirmation != 'yes' and confirmation != 'no':
-                confirmation = raw_input('Directory ' + dirname + ' already exists. It will be removed. Continue? [yes/no]: ')
-            if (confirmation == 'yes'):
-                shutil.rmtree(dirname)
-            else:
-                return
-        os.makedirs (dirname,  0755)
-        shutil.copy2(file,  dirname)
-
-#------------------------------------------------------------------------------
 def cmd_view(args):
 
     #if args.fromfile.__len__() > 0:
@@ -792,54 +759,6 @@ def cmd_view(args):
     if args.create:
         cview = ctx_view.CTXView ()
         cview.printView()
-
-#------------------------------------------------------------------------------
-def cmd_prop(args):
-    view_dir = os.path.abspath(args.view)
-    obj_dir = view_dir + os.sep + '.ctx/obj'
-
-    available_properties = ['bconf','rspec','verb','bconf_paths', \
-                            'cdef_paths', 'env_paths']
-
-    if args.property is None:
-        args.property = available_properties
-        args.set = None
-    else:
-        if args.property not in available_properties:
-            print "ctx.py: error: property not available"
-
-    if 'bconf' in args.property:
-        print '"bconf" Current build configuration: ', cfgFile.getDefaultBConf()
-        if args.set is not None:
-            cfgFile.setDefaultBConf ( os.path.normpath (args.set) )
-            print "Changed to: ", args.set
-
-    if 'rspec' in args.property:
-        print '"rspec" Current view : ', cfgFile.getDefaultView()
-        if args.set is not None:
-            cfgFile.setDefaultView ( os.path.normpath (args.set) )
-            print "Changed to: ", args.set
-
-    if 'bconf_paths' in args.property:
-        print '"bconf_paths" Build configuration paths: ', cfgFile.getBConfPaths()
-        if args.set is not None:
-            cfgFile.setBConfPaths ( os.path.normpath (args.set) )
-            print "Changed to: ", args.set
-
-        if args.add is not None:
-            pass
-
-    if 'cdef_paths' in args.property:
-        print '"cdef_paths" Compiler definition paths: ', cfgFile.getCDefPaths()
-
-    if 'env_paths' in args.property:
-        print '"env_paths" Enviroment file paths: ', cfgFile.getEnvPaths()
-
-    if 'verb' in args.property:
-        print '"verb" Verbosity level: ', cfgFile.getVerboseLevel()
-
-    cfgFile.update()
-
 
 ###############################################################################
 # ENTRY POINT

@@ -2,7 +2,9 @@ Installation prerequisites
 ==========================
 Python
 ------
-Contexo II requires Python version 2.5 or later but not the 3.x series.
+Contexo II requires a Python interpreter of version 2.5.x or 2.6.x.
+For Windows 64-bit users, a 32-bit version of Python is required.
+Mac 64-bit users needs to rebuild pysvn from source to enable pysvn to work correctly.
 Problems have been encountered with the Python 2.7 series, please do not use these releases until noted otherwise.
 http://www.python.org/download/
 

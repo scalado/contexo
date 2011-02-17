@@ -489,8 +489,7 @@ def get_view_dir( args_view):
     while not dir_has_rspec(view_dir):
         os.chdir('..')
         if view_dir == os.path.abspath(''):
-            userErrorMessage('ctx could not find an rspec in the supplied argument or any subdirectory')
-            exit(2)
+            userErrorExit('ctx could not find an rspec in the supplied argument or any subdirectory')
         view_dir = os.path.abspath('')
     os.chdir(caller_dir)
     return view_dir

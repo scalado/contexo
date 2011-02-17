@@ -1,3 +1,7 @@
+Contexo 0.12.2
+Bugfix: TOOLS-31: fixes comma usage in LDCOM in CDEFs.
+Bugfix: TOOLS-32: able to read rspecs with backslashes on linux/osx, no longer generates such rspecs when freezing.
+
 Contexo 0.12.1
 Bugfix: buildcomp output regression solved
 Bugfix: build -exe linker flag regression solved

@@ -206,20 +206,28 @@ class CTXRepositoryGIT(CTXRepository):
         import subprocess
 
         origin_href = self.getRemote('origin')
-
+ 
         if origin_href != self.href:
             warningMessage("rspec href is set to %s, but the git repository origin is set to %s. Using git repository origin"%(self.href, origin_href))
 
         os.chdir(self.destpath)
 
-        infoMessage("Running 'git fetch' in '%s'"%(self.id_name))
+        infoMessage("Fetching new tags in '%s': 'git fetch'"%(self.id_name))
         p = subprocess.Popen([self.git, 'fetch'], bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         retcode = p.wait()
         if retcode != 0:
             print p.stderr.read()
             warningMessage("could not fetch from %s"%(self.href))
+        
+        currentBranch = self.getBranch()
+        # getBranch changes dir, go back to git dir
+        os.chdir(self.destpath)
+        if currentBranch == '(no branch)':
+            restoreBranch = False
+        else:
+            restoreBranch = True
 
-        infoMessage("Running 'git checkout %s' in '%s'"%(self.rev, self.id_name),1)
+        infoMessage("Checking out %s in %s 'git checkout %s'"%(self.rev, self.id_name, self.rev),1)
         p = subprocess.Popen([self.git, 'checkout', self.rev], bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         retcode = p.wait()
         stderr = p.stderr.read()
@@ -229,7 +237,7 @@ class CTXRepositoryGIT(CTXRepository):
         # getBranch changes dir, go back to git dir
         os.chdir(self.destpath)
         if localBranch != '' and localBranch != '(no branch)':
-            infoMessage("Running 'git pull %s %s' in '%s''"%('origin', self.rev, self.id_name))
+            infoMessage("Updating branch '%s' in '%s': 'git pull %s %s''"%(self.rev, self.id_name, 'origin', self.rev))
             p = subprocess.Popen([self.git, 'pull', 'origin', self.rev], bufsize=4096, stdin=None)
             retcode = p.wait()
             print ''
@@ -238,6 +246,14 @@ class CTXRepositoryGIT(CTXRepository):
                 errorMessage("could not pull from %s"%(self.href))
                 exit(retcode)
 
+        if restoreBranch == True:
+            infoMessage("Restoring branch: 'git checkout %s' in '%s'"%(currentBranch, self.id_name),1)
+            p = subprocess.Popen([self.git, 'checkout', currentBranch], bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            retcode = p.wait()
+            stderr = p.stderr.read()
+            if retcode != 0:
+                print stderr
+ 
         os.chdir(self.path)
 
     #--------------------------------------------------------------------------

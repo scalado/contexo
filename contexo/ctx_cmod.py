@@ -242,6 +242,16 @@ class CTXRawCodeModule:
             self.srcFiles, self.prebuiltObjFiles = getSourcesFromDir( self, srcDir )
         return self.srcFiles
 
+    def getPreBuiltObjectFilenames(self):
+        if len(self.srcFiles) == 0 or len(self.prebuiltObjFiles) == 0:
+            srcDir = self.getSourceDir()
+            self.srcFiles, self.prebuiltObjFiles = getSourcesFromDir( self, srcDir )
+        return self.prebuiltObjFiles
+
+    def getPreBuiltObjectAbsolutePaths(self):
+        import functools
+        return map ( functools.partial( os.path.join,  self.getSourceDir() ),  self.getPreBuiltObjectFilenames() )
+ 
     def getSourceAbsolutePaths(self):
         import functools
         #functional magic - bind an argument to join and map this bound function to filenames

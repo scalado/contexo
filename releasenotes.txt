@@ -1,7 +1,8 @@
 Contexo 0.12.3
-Feature: Contexo is now restores working branches after running a 'ctx view update'.
+Feature: Contexo now restores working branches after running a 'ctx view update'.
 Bugfix: TOOLS-33: runs 'git fetch' before 'git checkout' in order to fetch new tags.
 Bugfix: andkmk updated.
+Bugfix: Contexo now refuses to run on 64-bit python on Windows x64 in order to avoid errors with pysvn.
 
 Contexo 0.12.2
 Bugfix: TOOLS-31: fixes comma usage in LDCOM in CDEFs.

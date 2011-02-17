@@ -38,6 +38,14 @@ try:
 except:
     pass
 
+try:
+    import platform
+    if platform.architecture()[0] == '64bit' and platform.architecture()[1] == 'WindowsPE':
+        userErrorExit("64-bit Python on Windows does not support 32-bit pysvn. Install 32-bit Python instead.")
+except:
+    # if we have an old Contexo installation we might wind up here due to Contexo previously having a package named 'platform'
+    pass
+
 msgSender           = 'ctx.py'
 #logging.basicConfig(format = '%(asctime)s %(levelname)-8s %(filename)s %(lineno)s %(message)s',
 logging.basicConfig(format = '%(asctime)s %(levelname)-8s %(message)s',

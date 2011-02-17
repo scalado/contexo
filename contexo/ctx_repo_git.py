@@ -92,18 +92,6 @@ class CTXRepositoryGIT(CTXRepository):
             warningMessage("Not a valid GIT repo")
             os.chdir(self.path)
             return False
-        infoMessage("Running 'git checkout %s' in '%s'"%(self.rev, self.id_name),1)
-        args = [self.git, 'checkout', self.rev]
-
-        p = subprocess.Popen(args, bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        retcode = p.wait()
-        stderr = p.stderr.read()
-        stdout = p.stdout.read()
-        if retcode != 0:
-            print stdout
-            print stderr
-            errorMessage("could not checkout %s"%(self.rev))
-            exit(retcode)
         os.chdir(self.path)
 
         return True
@@ -223,6 +211,14 @@ class CTXRepositoryGIT(CTXRepository):
             warningMessage("rspec href is set to %s, but the git repository origin is set to %s. Using git repository origin"%(self.href, origin_href))
 
         os.chdir(self.destpath)
+
+        infoMessage("Running 'git fetch' in '%s'"%(self.id_name))
+        p = subprocess.Popen([self.git, 'fetch'], bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        retcode = p.wait()
+        if retcode != 0:
+            print p.stderr.read()
+            warningMessage("could not fetch from %s"%(self.href))
+
         infoMessage("Running 'git checkout %s' in '%s'"%(self.rev, self.id_name),1)
         p = subprocess.Popen([self.git, 'checkout', self.rev], bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         retcode = p.wait()

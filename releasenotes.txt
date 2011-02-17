@@ -1,5 +1,6 @@
-Contexo 0.12.3
+Contexo 0.13.0
 Feature: Contexo now restores working branches after running a 'ctx view update'.
+Feature: TOOLS-11: Contexo now exports prebuilt object information and assembler files to plugins.
 Bugfix: TOOLS-33: runs 'git fetch' before 'git checkout' in order to fetch new tags.
 Bugfix: andkmk updated.
 Bugfix: Contexo now refuses to run on 64-bit python on Windows x64 in order to avoid errors with pysvn.

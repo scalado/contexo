@@ -1,5 +1,5 @@
 Contexo 0.13.1
-Bugfix: TOOLS-
+Bugfix: fixes TOOLS-34: running ctx view update from subdirectory clones a new set of the reposes in the calling directory
 
 Contexo 0.13.0
 Feature: Contexo now restores working branches after running a 'ctx view update'.

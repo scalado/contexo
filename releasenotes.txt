@@ -1,3 +1,6 @@
+Contexo 0.13.1
+Bugfix: TOOLS-
+
 Contexo 0.13.0
 Feature: Contexo now restores working branches after running a 'ctx view update'.
 Feature: TOOLS-26: Contexo can now be launched in any subdirectory in a view and automatically locate an .rspec if it's in a subdirectory.

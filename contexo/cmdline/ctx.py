@@ -491,7 +491,6 @@ def get_view_dir( args_view):
         if view_dir == os.path.abspath(''):
             userErrorExit('ctx could not find an rspec in the supplied argument or any subdirectory')
         view_dir = os.path.abspath('')
-    os.chdir(caller_dir)
     return view_dir
  
 def cmd_build(args):

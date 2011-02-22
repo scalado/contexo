@@ -84,8 +84,6 @@ class CTXDepMgr: # The dependency manager class.
         self.moduleDependencies       = dict() # { module : set( dep_headers ) } (for a module)
         self.unresolved_headers       = set()  # only report missing headers once
 
-        self.useDiskCaching           = True
-
         self.needUpdate               = True
         self.codeModulePaths          = codeModulePaths
 
@@ -383,14 +381,6 @@ class CTXDepMgr: # The dependency manager class.
                 return pathList
             
             self.depPaths.update(findAllCodeModulePaths( self.depRoots ))
-
-    # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
-    def enableDiskCaching( self ):
-        self.useDiskCache = True
-
-    # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
-    def disableDiskCaching( self ):
-        self.useDiskCache = False
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     def setChecksumMethod( self, method ):

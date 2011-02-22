@@ -102,12 +102,6 @@ class CTXRepository:
         return self.rev
 
     #--------------------------------------------------------------------------
-#    def addAbsolutePath(self, path_section, path):
-#        ctxAssert( path_section in REPO_PATH_SECTIONS, "Unknown path section '%s'"%(path_section) )
-#        self.relative_paths[path_section].append( path )
-#        infoMessage( "Path '%s' added to section '%s' in repository '%s'"%(path, path_section, self.getID()), 2, self.msgSender )
-
-    #--------------------------------------------------------------------------
     def addPath(self, path_section, path):
         ctxAssert( path_section in REPO_PATH_SECTIONS, "Unknown path section '%s'"%(path_section) )
         if os.path.isabs(path):
@@ -136,14 +130,6 @@ class CTXRepository:
 
     def getAllRelativePaths( self):
         return self.relative_paths
-
-    #--------------------------------------------------------------------------
-    #def getAllPaths(self):
-    #    all_paths = list()
-    #    for plist in self.full_paths.values():
-    #        all_paths.extend( plist )
-    #
-    #    return all_paths
 
     #--------------------------------------------------------------------------
     def isVersionControlled( self ):

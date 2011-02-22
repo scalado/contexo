@@ -12,9 +12,6 @@ default_config = {   'cdef-paths': os.path.join(homedir, 'cdef'),
 def getFullConfigFileName():
     return os.path.join(ctx_common.getUserCfgDir(), 'config.py')
 
-def writeCurrentView(path):
-    pass
-
 def serialize(config):
     pass
 

@@ -327,7 +327,6 @@ class CTXDepMgr: # The dependency manager class.
 
             modPath = self.resolveCodeModulePath( mod )
 
-            #def __init__( self, moduleRoot, pathlist = None, buildUnitTests = False , archPath = list()):
             emptyPathList = list()
             rawmod = CTXRawCodeModule(modPath, emptyPathList, unitTests, self.archPath, self.legacyCompilingMod, self.globalOutputDir)
             self.cmods[rawmod.getName()] = rawmod

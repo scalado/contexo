@@ -372,7 +372,6 @@ class CTXCodeModule( CTXRawCodeModule ):
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     def __init__( self, moduleRoot, pathlist = None, buildUnitTests = False, forceRebuild = False, archPath = list(), legacyCompilingMod = False, outputDir = None ):
         outputDir_ = outputDir
-        # def __init__( self, moduleRoot, pathlist = None, buildUnitTests = False ,archPath = list(), legacyCompilingMod = False, outputDir = None):
         CTXRawCodeModule.__init__( self, moduleRoot, pathlist, buildUnitTests, archPath, False, outputDir_ )
         self.moduleTag     = str()
         self.buildParams   = ctx_base.CTXBuildParams()

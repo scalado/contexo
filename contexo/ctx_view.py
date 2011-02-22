@@ -50,10 +50,6 @@ class CTXView:
             infoMessage("Skipping repository validation", 2);
 
     #--------------------------------------------------------------------------
-    def getModulePaths(self):
-        return self.rspec.getRepoPaths('modules')
-
-    #--------------------------------------------------------------------------
     def set_global_config( self ):
         import ctx_cfg
         import ctx_common
@@ -248,12 +244,6 @@ class CTXView:
         output.write(f.read())
         f.close()
         os.remove(fileName)
-
-    #--------------------------------------------------------------------------
-    # unfreezes given repo, or all repos in the view
-    #--------------------------------------------------------------------------
-    #def unfreeze(self, repo_name = None):
-    #    pass
 
     #--------------------------------------------------------------------------
     # prints this view in human readable way

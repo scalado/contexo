@@ -61,14 +61,6 @@ class CFGFile:
     def getDefaultBConf ( self ):
         return self.cfgFile.get_item ('default', 'CTX_DEFAULT_BCONF')
 
-    # Deprecated.
-    #def getDefaultView ( self ):
-    #    self.cfgFile.get_item ('default', 'CTX_DEFAULT_VIEW')
-
-    # Deprecated
-    #def setDefaultView ( self, viewFile ):
-    #    self.cfgFile.add_item ('default', 'CTX_DEFAULT_VIEW', viewFile )
-
     def getBConfPaths ( self ):
         return expanduser_path_list( self.cfgFile.get_item('default', 'CTX_BCONF_PATHS') )
 

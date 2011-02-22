@@ -645,7 +645,6 @@ def cmd_export(args):
     cview   = ctx_view.CTXView( view_dir, validate=False )
     bc      = getBuildConfiguration( cview,  args )
     deprecated_tolerate_missing_headers_warning(args)
-    # def __init__(self, codeModulePaths = list(), failOnMissingHeaders = False, archPath = list() , additionalIncDirs = None, legacyCompilingMod = False, globalOutputDir = None):
     depmgr  = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), globalOutputDir = obj_dir )
     session = ctx_base.CTXBuildSession( bc )
     session.setDependencyManager( depmgr )
@@ -751,37 +750,6 @@ def cmd_clean(args):
        except:
            warningMessage("No objects removed.")
            pass
-
-#------------------------------------------------------------------------------
-def cmd_view(args):
-
-    #if args.fromfile.__len__() > 0:
-
-
-    cview = getViewDefinition(view_dir)
-
-    if args.switch:
-        default_view = cfgFile.getDefaultView()
-
-        new_default_view = os.path.abspath (view_dir)
-
-        cfgFile.setDefaultView ( new_default_view )
-
-        print 'switch view: ', default_view + " -> " + new_default_view
-
-        cfgFile.update()
-
-    if args.i:
-        # Parse rspec file
-        cview.printView ()
-
-    if args.checkout:
-        cview.checkout ()
-        cview.printView ()
-
-    if args.create:
-        cview = ctx_view.CTXView ()
-        cview.printView()
 
 ###############################################################################
 # ENTRY POINT

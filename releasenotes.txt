@@ -1,3 +1,7 @@
+Contexo 0.13.2
+CR: BYTE_ORDER is now optional.
+Maintainence: Tidying and cleanups from unused functions
+
 Contexo 0.13.1
 Bugfix: fixes TOOLS-34: running ctx view update from subdirectory clones a new set of the reposes in the calling directory
 

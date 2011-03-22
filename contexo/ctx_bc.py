@@ -128,8 +128,7 @@ class BCFile:
         elif self.byteOrder == 'BIG_ENDIAN':
             self.buildParams.prepDefines.append('BYTE_ORDER_BIG_ENDIAN')
         else:
-            errorMessage("Invalid byte order: %s"%self.byteOrder)
-            ctxExit(1)
+            warningMessage("Invalid byte order: %s, not defining BYTE_ORDER."%self.byteOrder)
 
         # Update char encoding
         if self.charEncoding == 'ASCII':
@@ -305,15 +304,13 @@ class BCFile:
 
         option_name = 'BYTE_ORDER'
 
-        if not section.has_key( option_name ):
-            userErrorExit("Mandatory BC option '%s' is missing."%option_name)
+        if section.has_key( option_name ):
+            if section[option_name] != 'LITTLE_ENDIAN' and section[option_name] != 'BIG_ENDIAN':
+                userErrorExit("BC option '%s' must be set to either 'LITTLE_ENDIAN' or 'BIG_ENDIAN'"%option_name)
 
-        if section[option_name] != 'LITTLE_ENDIAN' and section[option_name] != 'BIG_ENDIAN':
-            userErrorExit("BC option '%s' must be set to either 'LITTLE_ENDIAN' or 'BIG_ENDIAN'"%option_name)
+            self.byteOrder = section[ option_name ]
 
-        self.byteOrder = section[ option_name ]
-
-        self.__assert_correct_type( option_name, self.byteOrder, [str,] )
+            self.__assert_correct_type( option_name, self.byteOrder, [str,] )
 
         #
 		# ARCH_PATH

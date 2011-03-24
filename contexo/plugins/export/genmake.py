@@ -78,6 +78,7 @@ def create_module_mapping_from_module_list( ctx_module_list, depMgr):
         srcs = rawMod.getSourceAbsolutePaths()
         privHdrs= rawMod.getPrivHeaderAbsolutePaths()
         pubHdrs = rawMod.getPubHeaderAbsolutePaths()
+	prebuiltSrcs = rawMod.getPreBuiltObjectAbsolutePaths()
         testSrcs = rawMod.getTestSourceAbsolutePaths()
         testHdrs = rawMod.getTestHeaderAbsolutePaths()
         modName = rawMod.getName()
@@ -89,7 +90,7 @@ def create_module_mapping_from_module_list( ctx_module_list, depMgr):
                 for hdrpath in hdrpaths:
 					depHdrs.add( hdrpath)
 
-        modDict = { 'MODNAME': rawMod.getName(), 'SOURCES': srcs, 'PRIVHDRS': privHdrs, 'PUBHDRS': pubHdrs, 'PRIVHDRDIR': rawMod.getPrivHeaderDir(), 'TESTSOURCES':testSrcs , 'TESTHDRS':testHdrs, 'DEPHDRS':depHdrs, 'TESTDIR':rawMod.getTestDir()}
+        modDict = { 'MODNAME': rawMod.getName(), 'SOURCES': srcs, 'PRIVHDRS': privHdrs, 'PUBHDRS': pubHdrs, 'PRIVHDRDIR': rawMod.getPrivHeaderDir(), 'TESTSOURCES':testSrcs , 'TESTHDRS':testHdrs, 'DEPHDRS':depHdrs, 'TESTDIR':rawMod.getTestDir(), 'PREBUILTSOURCES': prebuiltSrcs }
         code_module_map.append( modDict )
 
 
@@ -248,10 +249,10 @@ for comp in package.export_data['COMPONENTS']:
 
 		for libs in comp.libraries[lib]:
 			for srcFile in modules[libs].getSourceFilenames():
-				objectfiles.append("$(OBJDIR)/" + srcFile[:-2]+".o ")
+				objectfiles.append("$(OBJDIR)/" + os.path.basename(srcFile[:-2])+".o ")
                         if buildTests == True:
             			for testFile in modules[libs].getTestSourceFilenames():
-	        			objectfiles.append("$(OBJDIR)/" + testFile[:-2]+".o ")
+	        			objectfiles.append("$(OBJDIR)/" + os.path.basename(testFile[:-2])+".o ")
 
 		makefile.write("$(LIBDIR)/"+libfilename+": ")
 		for objfile in objectfiles:
@@ -291,6 +292,11 @@ for mod in module_map:
 			for hdrdir in mod['DEPHDRS']:
 				makefile.write(" -I"+os.path.dirname( hdrdir))
 		makefile.write(" $(PREP_DEFS) -c "+srcFile+" -o $@\n");
+	for prebuiltObjFile in mod['PREBUILTSOURCES']:
+		objfile = os.path.basename(prebuiltObjFile)
+		makefile.write("$(OBJDIR)/" + objfile + ": ")
+		makefile.write("\n")
+		makefile.write("\t$(EXPORT_CMD) " + prebuiltObjFile + " $@\n")
         if buildTests == True:
         	for testFile in mod['TESTSOURCES']:
 	        	objfile = os.path.basename(testFile)[:-2]+".o"

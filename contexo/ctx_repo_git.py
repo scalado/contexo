@@ -219,13 +219,13 @@ class CTXRepositoryGIT(CTXRepository):
             print p.stderr.read()
             warningMessage("could not fetch from %s"%(self.href))
         
-        currentBranch = self.getBranch()
+        workingBranchName = self.getBranch()
         # getBranch changes dir, go back to git dir
         os.chdir(self.destpath)
-        if currentBranch == '(no branch)':
-            restoreBranch = False
+        if workingBranchName == '(no branch)':
+            restoreWorkBranch = False
         else:
-            restoreBranch = True
+            restoreWorkBranch = True
 
         infoMessage("Checking out %s in %s 'git checkout %s'"%(self.rev, self.id_name, self.rev),1)
         p = subprocess.Popen([self.git, 'checkout', self.rev], bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -233,10 +233,10 @@ class CTXRepositoryGIT(CTXRepository):
         stderr = p.stderr.read()
         if retcode != 0:
             print stderr
-        localBranch = self.getBranch()
+        updateBranchName = self.getBranch()
         # getBranch changes dir, go back to git dir
         os.chdir(self.destpath)
-        if localBranch != '' and localBranch != '(no branch)':
+        if updateBranchName != '' and updateBranchName != '(no branch)':
             infoMessage("Updating branch '%s' in '%s': 'git pull %s %s''"%(self.rev, self.id_name, 'origin', self.rev))
             p = subprocess.Popen([self.git, 'pull', 'origin', self.rev], bufsize=4096, stdin=None)
             retcode = p.wait()
@@ -245,10 +245,12 @@ class CTXRepositoryGIT(CTXRepository):
                 #print p.stderr.read()
                 errorMessage("could not pull from %s"%(self.href))
                 exit(retcode)
+        elif updateBranchName == '(no branch)':
+            restoreWorkBranch = False
 
-        if restoreBranch == True:
-            infoMessage("Restoring branch: 'git checkout %s' in '%s'"%(currentBranch, self.id_name),1)
-            p = subprocess.Popen([self.git, 'checkout', currentBranch], bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if restoreWorkBranch == True:
+            infoMessage("Restoring branch: 'git checkout %s' in '%s'"%(workingBranchName, self.id_name),1)
+            p = subprocess.Popen([self.git, 'checkout', workingBranchName], bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             retcode = p.wait()
             stderr = p.stderr.read()
             if retcode != 0:

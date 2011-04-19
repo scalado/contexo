@@ -1,3 +1,7 @@
+Contexo 0.14.0
+Feature: the inplace folder has been moved to the distribution root and wrappers has been created for various contexo tools
+Feature: handle C++ headers .hpp as sources
+
 Contexo 0.13.4
 Bugfix: Correctly handle prebuilt object files for genmake plugin
 

@@ -14,12 +14,11 @@
 
 #/*
 #|-contexo
-#|       |
+#|       |-inplace
+#|       |    '-ctx.py
 #|       |-cmdline*
 #|       |      |-ctx.py
-#|       |      |-[...]
-#|       |      '-inplace
-#|       |            '-ctx.py
+#|       |      '-[...]
 #|       |-platform
 #|       |-plugins
 #|       \-ctx_[modulename].py [...]
@@ -30,10 +29,18 @@
 import sys
 import os.path
 
-(inplacepath,  ignored_path) = os.path.split( os.path.dirname(__file__))  
-(contexopath,  commandlinedir) = os.path.split( inplacepath)
+(contexopath,  filename) = os.path.split( os.path.abspath(__file__))
 (rootpath,  contexodir) = os.path.split( contexopath)
+contexopath = os.path.join( rootpath, 'contexo')
+commandlinedir = os.path.join( contexopath, 'cmdline')
+plugindir = contexopath + os.sep + 'plugins' + os.sep + 'export'
 
+# print 'rootpath: ' + rootpath
+# print 'contexopath: ' + contexopath
+# print 'commandlinedir: ' + commandlinedir
+# print 'plugindir: ' + plugindir
+# print 'filename: ' + filename
+#
 sys.path.insert(1,  str(os.path.join(rootpath, 'otherlibs' ) ) ) #'otherlibs'
 sys.path.insert(1,  rootpath ) #root
-execfile(os.path.join(contexopath,  commandlinedir,  'ctx.py')) #'/path/to/contexo/cmdline/ctx.py'
+execfile(os.path.join(commandlinedir, filename)) #'/path/to/contexo/cmdline/ctx.py'

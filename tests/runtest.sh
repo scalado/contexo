@@ -1,5 +1,5 @@
 #!/bin/bash
-CTX=$PWD/../contexo/cmdline/inplace/ctx.py
+CTX=$PWD/../inplace/ctx.py
 OUT=$PWD/out
 cleanup(){
     rm -rf .ctx

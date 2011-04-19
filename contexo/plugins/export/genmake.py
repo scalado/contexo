@@ -145,6 +145,7 @@ if not os.path.isfile("Makefile.cfg"):
 	cfgmakefile = open("Makefile.cfg", 'w')
 	cfgmakefile.write("### Compiler settings\n")
 	cfgmakefile.write("CC=gcc\n")
+	cfgmakefile.write("CXX=g++\n")
 	cfgmakefile.write("CFLAGS="+build_params.cflags+"\n")
 	cfgmakefile.write("LDFLAGS=\n")
 	cfgmakefile.write("\n# Additional compiler parameters, such as include paths\n")
@@ -285,7 +286,10 @@ for mod in module_map:
 		for hdr in mod['DEPHDRS']:
 			makefile.write(" " + hdr)
 		makefile.write("\n")
-		makefile.write("\t$(CC) $(CFLAGS) $(ADDFLAGS)")
+                if srcFile[-4:] == '.cpp':
+        		makefile.write("\t$(CXX) $(CFLAGS) $(ADDFLAGS)")
+                else:
+        		makefile.write("\t$(CC) $(CFLAGS) $(ADDFLAGS)")
 		if allincludes == True:
 			makefile.write(" $(INCLUDES)")
 		else:
@@ -306,7 +310,10 @@ for mod in module_map:
 		        for hdr in mod['DEPHDRS']:
 			        makefile.write( " " + hdr)
         		makefile.write("\n")
-	        	makefile.write("\t$(CC) $(CFLAGS) $(ADDFLAGS)")
+                        if testFile[-4:] == '.cpp':
+        	        	makefile.write("\t$(CXX) $(CFLAGS) $(ADDFLAGS)")
+                        else:
+                                makefile.write("\t$(CC) $(CFLAGS) $(ADDFLAGS)")
 		        if allincludes == True:
 			        makefile.write(" $(INCLUDES)")
         		else:

@@ -90,7 +90,7 @@ def isContexoCodeModule( path ):
     numPublicHeaderFiles = 0
     for entry in os.listdir( path ):
 	entrypath = os.path.join( path, entry)
-	if os.path.isfile( entrypath ) and ( entrypath.endswith('.h') or entrypath.endswith('.H') ):
+	if os.path.isfile( entrypath ) and ( entrypath.endswith('.h') or entrypath.endswith('.H') or entrypath.endswith('.hpp') ):
 	    numPublicHeaderFiles+=1
 
     numCriteriaDirs = 0
@@ -271,7 +271,7 @@ class CTXRawCodeModule:
         # update if list is empty.
         if len(self.testHeaders) == 0:
             ### Assemble public header files
-            header_extensions = [ '.h',]
+            header_extensions = [ '.h', '.hpp',]
             # Determine the path to the private header directory of the module.
             testHdrDir = self.getTestDir()
             #testHeaders = list( )
@@ -295,7 +295,7 @@ class CTXRawCodeModule:
         # update if list is empty.
         if len( self.privHeaders ) == 0:
             ### Assemble private header files
-            header_extensions = [ '.h',]
+            header_extensions = [ '.h', '.hpp',]
             # Determine the path to the private header directory of the module.
             privHdrDir = self.getPrivHeaderDir()
 	    if not os.path.exists( privHdrDir ):
@@ -318,7 +318,7 @@ class CTXRawCodeModule:
         # update if list is empty.
         if len(self.pubHeaders) == 0:
             ### Assemble public header files
-            header_extensions = [ '.h',]
+            header_extensions = [ '.h','.hpp',]
             # Determine the path to the private header directory of the module.
             pubHdrDir = self.getPubHeaderDir()
 	    if not os.path.exists( pubHdrDir ):

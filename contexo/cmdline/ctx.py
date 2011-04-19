@@ -233,7 +233,7 @@ def export_headers( depmgr, headers, headerDir, cview ):
                 shutil.copyfile( src, dst )
                 header_found = True
         else:
-            header_extensions = [ '.h' ]
+            header_extensions = [ '.h','.hpp', ]
             module_paths = cview.getItemPaths('modules')
             for module_path in module_paths:
                 if not os.path.isdir( module_path ):

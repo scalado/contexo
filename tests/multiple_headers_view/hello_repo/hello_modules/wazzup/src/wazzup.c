@@ -2,5 +2,5 @@
 #include "header.h" 
 
 int main(){
-	printf("Contexo says Hello!\n");
+	printf("Contexo says Wazzup!?\n");
 }

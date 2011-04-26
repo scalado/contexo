@@ -150,23 +150,6 @@ class CTXDepMgr: # The dependency manager class.
         return md.hexdigest()
 
     #------------------------------------------------------------------------------
-    def finAllCodeModules( searchPaths ):
-        from ctx_cmod import isContexoCodeModule, CTXRawCodeModule
-
-        searchPaths = assureList ( searchPaths )
-
-        modules = list ()
-        for path in searchPaths:
-            pathCandidates = os.listdir( path )
-            for candidate in pathCandidates:
-                candPath = os.path.join( path, candidate )
-                if isContexoCodeModule( candPath ) == True:
-                    modules.append( (candidate, candPath) )
-
-        return modules
-
-
-    #------------------------------------------------------------------------------
     def generateChecksum( self, inputFilePath, checksumMethod ):
         global inputFileContents
 
@@ -239,11 +222,23 @@ class CTXDepMgr: # The dependency manager class.
         return ret
     #------------------------------------------------------------------------------
     def findFileInPathList(self, src_file, pathList ):
+        return_path = None
+        traversed = dict()
         if src_file and pathList:
             for path in pathList:
                 src_path = os.path.join( path, src_file)
                 if os.path.exists(src_path):
-                    return src_path
+                    if return_path == None:
+                        return_path = src_path
+                        traversed[src_file] = src_path
+                    else:
+                        if traversed[src_file] != src_path:
+                            userErrorExit('header filenames must be unique: found multiple occurances of ' + src_file)
+
+
+            if return_path != None:
+                return return_path
+
             if src_file not in self.unresolved_headers:
                 # warningMessage("'%s' cannot be resolved in current path list."%( src_file) )
                 self.unresolved_headers.add(src_file)

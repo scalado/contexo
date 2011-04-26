@@ -384,7 +384,7 @@ def ctxAssert( expression, comment=None ):
         print "\n*************************************\n"
         print "Callstack: \n"
         print traceback.print_stack()
-        assert(42 in "answer to life, universe and everything")
+        userErrorExit("contexo fatal error")
         #ctxExit( 42 )
 
 

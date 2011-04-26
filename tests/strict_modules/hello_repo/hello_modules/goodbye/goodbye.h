@@ -1,0 +1,1 @@
+#define GOODBYE 1

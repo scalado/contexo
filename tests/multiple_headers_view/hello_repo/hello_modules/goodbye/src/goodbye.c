@@ -1,8 +1,6 @@
 #include <stdio.h>
-#include "header.h" 
-#ifdef HELLO
-#error wrong header included
-#endif
+#include "header.h"
+#include "hello.h"
 
 int main(){
 	printf("Contexo says Goodbye!\n");

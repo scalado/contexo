@@ -1,4 +1,5 @@
 Contexo 0.14.0
+Bugfix:  TOOLS-41: contexo now explicitly requires unique file names of sources instead of selecting file names ambigiously.
 Feature: the inplace folder has been moved to the distribution root and wrappers has been created for various contexo tools
 Feature: handle C++ headers .hpp as sources
 

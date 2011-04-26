@@ -25,6 +25,14 @@ rm -f /tmp/testrepo.svn
 ln -s $PWD/testrepo.svn /tmp/testrepo.svn || fail
 
 echo "build standard"
+cd multiple_headers_view
+$CTX build -b "$BCONF" hello 1>/dev/null 2>>$OUT || fail
+$CTX build -b "$BCONF" goodbye 1>/dev/null 2>>$OUT || fail
+rm -f hello.a goodbye.a
+cleanup
+cd ..
+
+echo "build standard"
 $CTX build -b "$BCONF" bare_hello 1>/dev/null 2>>$OUT || fail
 test -f "bare_hello.a"|| fail
 cleanup

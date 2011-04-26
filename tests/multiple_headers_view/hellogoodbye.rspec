@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<ctx-rspec>
+
+    <!-- Import subsystem repositories -->
+    <ctx-repo id="hello_repo">
+      <ctx-path type="modules" spec="./hello_modules" />
+    </ctx-repo>
+
+</ctx-rspec>
+
+
+

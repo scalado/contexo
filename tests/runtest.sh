@@ -24,6 +24,23 @@ echo "creating dummy repository"
 rm -f /tmp/testrepo.svn
 ln -s $PWD/testrepo.svn /tmp/testrepo.svn || fail
 
+#echo "fail to build if including header in non-included module"
+#cd strict_modules
+#$CTX build -b "$BCONF" hello
+#rm -f hello.a
+#cleanup
+#cd ..
+#exit 0
+
+#echo "fail to build if including header in non-included module"
+#cd multiple_headers_view
+#$CTX build -b "$BCONF" hello 1>/dev/null 2>>$OUT && fail
+#$CTX build -b "$BCONF" goodbye 1>/dev/null 2>>$OUT && fail
+#rm -f hello.a goodbye.a
+#cleanup
+#cd ..
+#exit 0
+
 echo "build standard"
 $CTX build -b "$BCONF" bare_hello 1>/dev/null 2>>$OUT || fail
 test -f "bare_hello.a"|| fail
@@ -128,5 +145,13 @@ test -f delete_repo/delete_modules/delete/delete.h || fail
 test -f "delete.a"||fail
 cd ..
 cleanup
+
+echo "fail on multiple headers"
+cd multiple_headers_view
+$CTX build -b "$BCONF" wazzup 1>/dev/null 2>>$OUT && fail
+rm -f wazzup.a
+cleanup
+cd ..
+
 
 

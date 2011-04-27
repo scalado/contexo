@@ -230,10 +230,10 @@ class CTXDepMgr: # The dependency manager class.
                 if os.path.exists(src_path):
                     if return_path == None:
                         return_path = src_path
-                        traversed[src_file] = src_path
+                        traversed[src_file] = os.path.normpath(src_path)
                     else:
-                        if traversed[src_file] != src_path:
-                            userErrorExit('header filenames must be unique: found multiple occurances of ' + src_file)
+                        if traversed[src_file] != os.path.normpath(src_path) and src_file[-2:] != '.c' and src_file[-4:] != '.cpp':
+                            userErrorExit('header filenames must be unique: found multiple occurances of ' + os.path.basename(src_file))
 
 
             if return_path != None:
@@ -330,6 +330,34 @@ class CTXDepMgr: # The dependency manager class.
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     #set up the list of paths which are interesting for the dep search. It is the view root and all the code module roots.
+    def findAllCodeModulePaths( self, searchPaths ):
+        from ctx_cmod import isContexoCodeModule, CTXRawCodeModule
+    
+        searchPaths = assureList ( searchPaths )
+    
+        pathList = list ()
+        for path in searchPaths:
+            codeModulePaths = []
+    
+            if len(codeModulePaths) == 0:
+                try:
+                    pathCandidates = os.listdir( path )
+                except OSError, (errno,  errmsg):
+                    userErrorExit("Could not list directory '%s': %s"%(path,  errmsg))
+                for cand in pathCandidates:
+                    candPath = os.path.join( path, cand )
+                    if isContexoCodeModule( candPath ) == True:
+                        emptyPathList = list()
+                        unitTestDummyValue = False
+                        mod = CTXRawCodeModule(candPath, emptyPathList, unitTestDummyValue, self.archPath, self.legacyCompilingMod, self.globalOutputDir)
+                        codeModulePaths.append( mod.getPubHeaderDir() )
+                        codeModulePaths.append( mod.getPrivHeaderDir() )
+                        codeModulePaths.append( mod.getSourceDir () )
+                        codeModulePaths.append( mod.getTestDir () )
+            pathList.extend( codeModulePaths )
+    
+        return pathList
+
     def addDependSearchPaths( self, paths ):
         if len(paths) != 0:
             self.depRoots += assureList( paths )
@@ -346,35 +374,8 @@ class CTXDepMgr: # The dependency manager class.
             #
             #------------------------------------------------------------------------------
             
-            def findAllCodeModulePaths( searchPaths ):
-                from ctx_cmod import isContexoCodeModule, CTXRawCodeModule
-            
-                searchPaths = assureList ( searchPaths )
-            
-                pathList = list ()
-                for path in searchPaths:
-                    codeModulePaths = []
-            
-                    if len(codeModulePaths) == 0:
-                        try:
-                            pathCandidates = os.listdir( path )
-                        except OSError, (errno,  errmsg):
-                            userErrorExit("Could not list directory '%s': %s"%(path,  errmsg))
-                        for cand in pathCandidates:
-                            candPath = os.path.join( path, cand )
-                            if isContexoCodeModule( candPath ) == True:
-                                emptyPathList = list()
-                                unitTestDummyValue = False
-                                mod = CTXRawCodeModule(candPath, emptyPathList, unitTestDummyValue, self.archPath, self.legacyCompilingMod, self.globalOutputDir)
-                                codeModulePaths.append( mod.getPubHeaderDir() )
-                                codeModulePaths.append( mod.getPrivHeaderDir() )
-                                codeModulePaths.append( mod.getSourceDir () )
-                                codeModulePaths.append( mod.getTestDir () )
-                    pathList.extend( codeModulePaths )
-            
-                return pathList
-            
-            self.depPaths.update(findAllCodeModulePaths( self.depRoots ))
+           
+            self.depPaths.update(self.findAllCodeModulePaths( self.depRoots ))
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     def setChecksumMethod( self, method ):
@@ -463,6 +464,25 @@ class CTXDepMgr: # The dependency manager class.
 
         return includeFiles
 
+    def getModuleDependencies( self, modules ):
+        import ctx_cmod
+        dependencies = set()
+        if self.needUpdate:
+            self.updateDependencyHash()
+        for module in modules:
+            if module in self.moduleDependencies:
+                deps = self.moduleDependencies[module]
+                for dep in deps:
+                    depPath = self.locate(dep)
+                    depMod = os.path.dirname(depPath)
+                    if os.path.basename(depMod) in ctx_cmod.criteriaDirs:
+                        depMod = os.path.dirname(depMod)
+                    if ctx_cmod.isContexoCodeModule( depMod ):
+                        print depMod
+                        modName = os.path.basename( depMod )
+                        dependencies.add( modName )
+        return dependencies
+
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     def getDependenciesChecksum( self, inputFile ):
 
@@ -521,11 +541,26 @@ class CTXDepMgr: # The dependency manager class.
         return codeModules
 
 
+    def findAllCodeModules(self, searchPaths ):
+        from ctx_cmod import isContexoCodeModule, CTXRawCodeModule
+
+        searchPaths = assureList ( searchPaths )
+
+        modules = list ()
+        for path in searchPaths:
+            pathCandidates = os.listdir( path )
+            for candidate in pathCandidates:
+                candPath = os.path.join( path, candidate )
+                if isContexoCodeModule( candPath ) == True:
+                    modules.append( (candidate, candPath) )
+
+        return modules
+
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     # Returns a closed set with all modules depending on given module.
     #
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
-    def __getDependentModules( self, module ):
+    def getDependentModules( self, module ):
         from ctx_cmod import CTXRawCodeModule, isContexoCodeModule
 
         modules = list ()

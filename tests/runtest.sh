@@ -26,7 +26,7 @@ ln -s $PWD/testrepo.svn /tmp/testrepo.svn || fail
 
 #echo "fail to build if including header in non-included module"
 #cd strict_modules
-#$CTX build -b "$BCONF" hello
+#$CTX build -b "$BCONF" hello.comp
 #rm -f hello.a
 #cleanup
 #cd ..
@@ -39,7 +39,6 @@ ln -s $PWD/testrepo.svn /tmp/testrepo.svn || fail
 #rm -f hello.a goodbye.a
 #cleanup
 #cd ..
-#exit 0
 
 echo "build standard"
 $CTX build -b "$BCONF" bare_hello 1>/dev/null 2>>$OUT || fail

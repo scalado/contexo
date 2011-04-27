@@ -419,6 +419,19 @@ def cmd_buildcomp(args):
     # Process components
     components = create_components( components, cview.getItemPaths('comp'), obj_dir, launch_path )
     infoMessage("Building components...", 1)
+    allmods = set()
+    for comp in components:
+        for library, modules in comp.libraries.items():
+            mods = expand_list_files( cview, modules )
+            depmgr.addCodeModules( mods, args.tests )
+            allmods |= set(modules)
+
+    depMods = depmgr.getModuleDependencies(allmods)
+    depmgr.emptyCodeModules()
+    if len(depMods - set(allmods))  > 0:
+        for module in depMods - set(allmods):
+            warningMessage('The module \"'+module+'\" was not specified to be built in any specified .comp file, but at least one of its headers were included in another module, linker errors may arise')
+
     for comp in components:
         ctx_log.ctxlogBeginComponent( comp.name )
 
@@ -571,6 +584,19 @@ def cmd_build(args):
     if component_build:
         infoMessage("Building components...",  1)
         components = create_components( items, cview.getItemPaths('comp'), obj_dir, launch_path )
+
+        allmods = set()
+        for comp in components:
+            for library, modules in comp.libraries.items():
+                mods = expand_list_files( cview, modules )
+                depmgr.addCodeModules( mods, args.tests )
+                allmods |= set(modules)
+
+        depMods = depmgr.getModuleDependencies(allmods)
+        depmgr.emptyCodeModules()
+        if len(depMods - set(allmods))  > 0:
+            for module in depMods - set(allmods):
+                warningMessage('The module \"'+module+'\" was not specified to be built in any specified .comp file, but at least one of its headers were included in another module, linker errors may arise')
 
         for comp in components:
             ctx_log.ctxlogBeginComponent( comp.name )

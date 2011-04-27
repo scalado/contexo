@@ -48,19 +48,20 @@ import contexo.ctx_cmod
 # may cause command line overflow
 # may build incorrectly due to wrong header being selected
 # but may be needed for netbeans
-allincludes = False
 exearg = False
 buildTests = False
+linkHeaders = False
 exe = str()
 
 for arg in sys.argv:
     if arg == '-h':
         print 'help:'
-        print '-a, --allincludes: same include path for all build directives'
-    if arg == '-a' or arg == '--allincludes':
-        allincludes = True
+        print '-l, symlink all headers to one directory and use that for include path'
+        print '-t, build tests'
     if arg == '-t':
         buildTests = True
+    if arg == '-l':
+        linkHeaders = True
 
 #------------------------------------------------------------------------------
 def create_module_mapping_from_module_list( ctx_module_list, depMgr):
@@ -95,8 +96,6 @@ def create_module_mapping_from_module_list( ctx_module_list, depMgr):
 
 
     return code_module_map
-
-
 #------------------------------------------------------------------------------
 #-- End of method declaration
 #------------------------------------------------------------------------------
@@ -121,6 +120,44 @@ bc_file = package.export_data['SESSION'].getBCFile()
 build_params = bc_file.getBuildParams()
 
 depMgr = package.export_data['DEPMGR']
+
+includeExtensions = ['.h','.inl','.hpp']
+includes = set()
+
+modules = package.export_data['MODULES']
+
+if linkHeaders:
+    for modulePath in modules:
+        directories = [modulePath]
+        while len(directories)>0:
+            directory = directories.pop()
+            for name in os.listdir(directory):
+                item = os.path.join(directory,name)
+                if name == 'src' and os.path.isdir(item) == True:
+                    depMgr.addCodeModules( os.path.basename(directory), unitTests=True )
+                if name.endswith('.h') and os.path.basename(directory) != 'inc':
+                    depMgr.addCodeModules( os.path.basename(directory), unitTests=True )
+                if os.path.isfile(item):
+                    if item[item.rfind('.'):] in includeExtensions:
+                        includes.add(item)
+                elif os.path.isdir(item):
+                    directories.append(item)
+    depMgr.updateDependencyHash()
+    if os.path.isfile('output'):
+        userErrorExit('output must not be a file if using symlinks')
+    if not os.path.isdir('output'):
+        os.mkdir('output')
+    hdrlinkOutputDir = 'output' + os.sep + 'hdrlinks'
+    if not os.path.isdir(hdrlinkOutputDir):
+        try:
+            shutil.rmtree(hdrlinkOutputDir)
+        except:
+            pass
+        os.mkdir('output' + os.sep + 'hdrlinks')
+    for includeFile in includes:
+        os.symlink(includeFile, 'output' + os.sep + 'hdrlinks' + os.sep + os.path.basename(includeFile))
+
+
 module_map = create_module_mapping_from_module_list( package.export_data['MODULES'], depMgr)
 
 if not os.path.isfile("Makefile.inc"):
@@ -166,16 +203,9 @@ makefile.write("### include user configured settings\n")
 makefile.write("include Makefile.cfg\n")
 makefile.write("\n")
 
-allIncDirs = set()
-for mod in module_map:
-	for hdr in mod['DEPHDRS']:
-		allIncDirs.add( os.path.dirname( hdr))
-
-if allincludes == True:
-	makefile.write("### All include paths\n")
-	makefile.write("INCLUDES=")
-	for incPath in allIncDirs:
-		makefile.write(" -I"+incPath)
+if linkHeaders == True:
+	makefile.write("### symlinked headers output dirn")
+	makefile.write("INCLUDES=-I$(OUTPUT)/hdrlinks/")
 	makefile.write("\n")
 
 # Preprocessor defines
@@ -290,7 +320,7 @@ for mod in module_map:
         		makefile.write("\t$(CXX) $(CFLAGS) $(ADDFLAGS)")
                 else:
         		makefile.write("\t$(CC) $(CFLAGS) $(ADDFLAGS)")
-		if allincludes == True:
+		if linkHeaders == True:
 			makefile.write(" $(INCLUDES)")
 		else:
 			for hdrdir in mod['DEPHDRS']:
@@ -314,7 +344,7 @@ for mod in module_map:
         	        	makefile.write("\t$(CXX) $(CFLAGS) $(ADDFLAGS)")
                         else:
                                 makefile.write("\t$(CC) $(CFLAGS) $(ADDFLAGS)")
-		        if allincludes == True:
+		        if linkHeaders == True:
 			        makefile.write(" $(INCLUDES)")
         		else:
 	        		for hdrdir in mod['DEPHDRS']:

@@ -12,3 +12,6 @@ examples/msvc.pdb
 examples/release
 examples/hello_view/hello_modules/hello/output
 examples/hello_view/hello_modules/hello_dependency/output
+/examples/.ctx/
+/tests/.ctx
+/tests/delete_view/.ctx/

@@ -32,7 +32,7 @@
 # 
 # Continued lines are always of the same type as their predecessor, regardless of what characters they start with.
 
-from argparse import ArgumentParser
+from internal_argparse import ArgumentParser
 import os
 import sys
 import contexo.ctx_export as ctx_export
@@ -41,13 +41,8 @@ import contexo.ctx_sysinfo as ctx_sysinfo
 from contexo.ctx_common import infoMessage, userErrorExit, warningMessage
 import contexo.ctx_cfg as ctx_cfg
 import contexo.ctx_cmod
+import shutil
 
-# use the same include directories for ALL source files when building
-# however, only export public headers
-# defaults to OFF
-# may cause command line overflow
-# may build incorrectly due to wrong header being selected
-# but may be needed for netbeans
 exearg = False
 buildTests = False
 linkHeaders = False
@@ -58,6 +53,7 @@ for arg in sys.argv:
         print 'help:'
         print '-l, symlink all headers to one directory and use that for include path'
         print '-t, build tests'
+        sys.exit(1)
     if arg == '-t':
         buildTests = True
     if arg == '-l':
@@ -122,43 +118,30 @@ build_params = bc_file.getBuildParams()
 depMgr = package.export_data['DEPMGR']
 
 includeExtensions = ['.h','.inl','.hpp']
-includes = set()
 
 modules = package.export_data['MODULES']
 
+
+module_map = create_module_mapping_from_module_list( package.export_data['MODULES'], depMgr)
+
 if linkHeaders:
-    for modulePath in modules:
-        directories = [modulePath]
-        while len(directories)>0:
-            directory = directories.pop()
-            for name in os.listdir(directory):
-                item = os.path.join(directory,name)
-                if name == 'src' and os.path.isdir(item) == True:
-                    depMgr.addCodeModules( os.path.basename(directory), unitTests=True )
-                if name.endswith('.h') and os.path.basename(directory) != 'inc':
-                    depMgr.addCodeModules( os.path.basename(directory), unitTests=True )
-                if os.path.isfile(item):
-                    if item[item.rfind('.'):] in includeExtensions:
-                        includes.add(item)
-                elif os.path.isdir(item):
-                    directories.append(item)
-    depMgr.updateDependencyHash()
+    headers = set()
+    for mod in module_map:
+        headers |= set(mod['PUBHDRS'])
+        headers |= set(mod['PRIVHDRS'])
+        headers |= set(mod['DEPHDRS'])
+        if buildTests:
+            headers |= set(mod['TESTHDRS'])
     if os.path.isfile('output'):
         userErrorExit('output must not be a file if using symlinks')
     if not os.path.isdir('output'):
         os.mkdir('output')
     hdrlinkOutputDir = 'output' + os.sep + 'hdrlinks'
-    if not os.path.isdir(hdrlinkOutputDir):
-        try:
-            shutil.rmtree(hdrlinkOutputDir)
-        except:
-            pass
-        os.mkdir('output' + os.sep + 'hdrlinks')
-    for includeFile in includes:
-        os.symlink(includeFile, 'output' + os.sep + 'hdrlinks' + os.sep + os.path.basename(includeFile))
+    shutil.rmtree(hdrlinkOutputDir,True)
+    os.mkdir('output' + os.sep + 'hdrlinks')
+    for header in headers:
+        os.symlink(header, 'output' + os.sep + 'hdrlinks' + os.sep + os.path.basename(header))
 
-
-module_map = create_module_mapping_from_module_list( package.export_data['MODULES'], depMgr)
 
 if not os.path.isfile("Makefile.inc"):
 	incmakefile = open("Makefile.inc", 'w')
@@ -191,9 +174,10 @@ if not os.path.isfile("Makefile.cfg"):
 	cfgmakefile.write("AR=ar\n")
 	cfgmakefile.write("RANLIB=ranlib\n")
 	cfgmakefile.write("\n")
-	cfgmakefile.write("LIBDIR=output/lib\n")
-	cfgmakefile.write("OBJDIR=output/obj\n")
-	cfgmakefile.write("HDRDIR=output/inc\n")
+	cfgmakefile.write("OUTPUT=output\n")
+	cfgmakefile.write("LIBDIR=$(OUTPUT)/lib\n")
+	cfgmakefile.write("OBJDIR=$(OUTPUT)/obj\n")
+	cfgmakefile.write("HDRDIR=$(OUTPUT)/inc\n")
 	cfgmakefile.write("\n")
 	cfgmakefile.write("EXPORT_CMD=cp\n")
 	cfgmakefile.write("\n")
@@ -204,7 +188,7 @@ makefile.write("include Makefile.cfg\n")
 makefile.write("\n")
 
 if linkHeaders == True:
-	makefile.write("### symlinked headers output dirn")
+	makefile.write("### symlinked headers output dir\n")
 	makefile.write("INCLUDES=-I$(OUTPUT)/hdrlinks/")
 	makefile.write("\n")
 

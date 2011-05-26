@@ -376,6 +376,7 @@ def cmd_buildcomp(args):
     from contexo import ctx_base
     from contexo import ctx_envswitch
     from contexo.ctx_depmgr import CTXDepMgr
+    absIncDirs = map(os.path.abspath,  args.incdirs)
 
     # Switch to specified environment
     oldEnv = None
@@ -393,6 +394,7 @@ def cmd_buildcomp(args):
     components  = expand_list_files( cview, args.components )
 
     bc          = getBuildConfiguration( cview,  args )
+    bc.buildParams.incPaths.extend(     absIncDirs ) #TODO: accessing 'private' data?
     deprecated_tolerate_missing_headers_warning(args)
     depmgr = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), legacyCompilingMod = args.legacy_compiling_mod, globalOutputDir = obj_dir )
     session     = ctx_base.CTXBuildSession( bc )
@@ -848,6 +850,7 @@ parser_build.add_argument('-d', '--deps', action='store_true', help=standard_des
 parser_build.add_argument('-t', '--tests', action='store_true', help=standard_description['--tests'])
 parser_build.add_argument('-v', '--view', default=os.getcwd(), help=standard_description['--view'])
 parser_build.add_argument('-lf', '--logfile', default=None, help=standard_description['--logfile'])
+parser_build.add_argument('-I',  '--incdirs', nargs='*',  default = [],  help = "additional include paths")
 parser_build.add_argument('-rv', '--repo-validation', action='store_true', help=standard_description['--repo-validation'])
 parser_build.add_argument('-nra', '--no-remote-repo-access', action='store_true', help=standard_description['--no-remote-repo-access'])
 parser_build.add_argument('-f', '--force', action='store_true', help=standard_description['--force'])

@@ -18,8 +18,8 @@ import os
 import os.path
 import sys
 import shutil
-from internal_argparse import ArgumentParser
-import internal_argparse
+from argparse import ArgumentParser
+import argparse
 from contexo import ctx_view
 from contexo import ctx_cfg
 from contexo.ctx_envswitch  import  assureList, EnvironmentLayout, switchEnvironment
@@ -935,7 +935,7 @@ ctx export --help | msvc --help
 
 parser_export = subparsers.add_parser('export', help="Export utilities.")
 parser_export.set_defaults(func=cmd_export)
-parser_export.formatter_class = internal_argparse.RawDescriptionHelpFormatter
+parser_export.formatter_class = argparse.RawDescriptionHelpFormatter
 parser_export.description = export_usage
 parser_export.add_argument('export_items', nargs='*', default="", help="List of items to export. Can be omitted if the export plugin doesn't require any items. Code modules and components cannot be mixed in the same export operation.")
 parser_export.add_argument('-b', '--bconf', help=standard_description['--bconf'])

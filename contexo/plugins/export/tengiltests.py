@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 import sys
-from internal_argparse import ArgumentParser
+from argparse import ArgumentParser
 import contexo.ctx_export as ctx_export
 from contexo.ctx_common import infoMessage, userErrorExit, warningMessage
 import os

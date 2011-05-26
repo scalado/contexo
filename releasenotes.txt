@@ -2,7 +2,6 @@ Contexo 0.14.0
 Bugfix:  TOOLS-41: contexo now explicitly requires unique file names of sources instead of selecting file names ambigiously.
 Feature: the inplace folder has been moved to the distribution root and wrappers has been created for various contexo tools
 Feature: handle C++ headers .hpp as sources
-Bugfix: forked argparse.py to internal_argparse.py since it was broken in python 2.7, to allow python 2.7 compatibility.
 
 Contexo 0.13.4
 Bugfix: Correctly handle prebuilt object files for genmake plugin

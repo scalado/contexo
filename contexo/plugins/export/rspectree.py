@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 import sys
-from internal_argparse import ArgumentParser
+from argparse import ArgumentParser
 from contexo.ctx_export import *
 from contexo.ctx_common import *
 import contexo.ctx_bc

@@ -474,13 +474,14 @@ class CTXDepMgr: # The dependency manager class.
                 deps = self.moduleDependencies[module]
                 for dep in deps:
                     depPath = self.locate(dep)
-                    depMod = os.path.dirname(depPath)
-                    if os.path.basename(depMod) in ctx_cmod.criteriaDirs:
-                        depMod = os.path.dirname(depMod)
-                    if ctx_cmod.isContexoCodeModule( depMod ):
-                        print depMod
-                        modName = os.path.basename( depMod )
-                        dependencies.add( modName )
+                    if depPath != None:
+                        depMod = os.path.dirname(depPath)
+                        if os.path.basename(depMod) in ctx_cmod.criteriaDirs:
+                            depMod = os.path.dirname(depMod)
+                        if ctx_cmod.isContexoCodeModule( depMod ):
+                            print depMod
+                            modName = os.path.basename( depMod )
+                            dependencies.add( modName )
         return dependencies
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -

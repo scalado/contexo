@@ -152,5 +152,12 @@ rm -f wazzup.a
 cleanup
 cd ..
 
+echo "continue on multiple headers (legacy compat)"
+cd multiple_headers_view
+$CTX build -b "$BCONF" --legacy-duplicate-sources wazzup 1>/dev/null 2>>$OUT ||fail
+rm -f wazzup.a
+cleanup
+cd ..
+
 
 

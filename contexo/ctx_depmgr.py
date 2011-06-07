@@ -61,7 +61,7 @@ CHECKSUM            = 1
 #------------------------------------------------------------------------------
 class CTXDepMgr: # The dependency manager class.
 #------------------------------------------------------------------------------
-    def __init__(self, codeModulePaths = list(), failOnMissingHeaders = False, archPath = list() , additionalIncDirs = None, legacyCompilingMod = False, globalOutputDir = None):
+    def __init__(self, codeModulePaths = list(), failOnMissingHeaders = False, archPath = list() , additionalIncDirs = None, legacyCompilingMod = False, legacyDuplicateSources = False, globalOutputDir = None):
         self.globalOutputDir          = globalOutputDir
         self.failOnMissingHeaders = failOnMissingHeaders
         self.msgSender                = 'CTXDepMgr'
@@ -70,6 +70,7 @@ class CTXDepMgr: # The dependency manager class.
         self.checksumMethod           = self.supportedChecksumMethods[0]
         self.archPath                 = archPath
         self.legacyCompilingMod       = legacyCompilingMod
+        self.legacyDuplicateSources   = legacyDuplicateSources
 
         self.cmods                    = dict() # Dictionary mapping mod name to raw mod.
         self.additionalIncludeDirs    = assureList(additionalIncDirs)
@@ -233,7 +234,12 @@ class CTXDepMgr: # The dependency manager class.
                         traversed[src_file] = os.path.normpath(src_path)
                     else:
                         if traversed[src_file] != os.path.normpath(src_path) and src_file[-2:] != '.c' and src_file[-4:] != '.cpp':
-                            userErrorExit('header filenames must be unique: found multiple occurances of ' + os.path.basename(src_file))
+                            msg = 'header filenames must be unique: found multiple occurances of ' + os.path.basename(src_file)
+                            if self.legacyDuplicateSources:
+                                warningMessage(msg)
+                            else:
+                                userErrorExit(msg)
+
 
 
             if return_path != None:
@@ -610,12 +616,12 @@ class CTXDepMgr: # The dependency manager class.
                         assert(False)
                     else:
                         header_set.add ( header )
-
-                    for dep_header in self.dependencies[header][0]:
-                        if (full_path):
-                            header_set.add ( self.inputFilePathDict [ dep_header ] )
-                        else:
-                            header_set.add ( dep_header )
+                    if self.dependencies.has_key(header):
+                        for dep_header in self.dependencies[header][0]:
+                            if (full_path):
+                                header_set.add ( self.inputFilePathDict [ dep_header ] )
+                            else:
+                                header_set.add ( dep_header )
 
         return list ( header_set )
 

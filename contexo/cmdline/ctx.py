@@ -312,7 +312,7 @@ def cmd_buildmod(args):
 
 
     deprecated_tolerate_missing_headers_warning(args)
-    depmgr = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), legacyCompilingMod = args.legacy_compiling_mod, globalOutputDir = obj_dir )
+    depmgr = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), legacyCompilingMod = args.legacy_compiling_mod, legacyDuplicateSources = args.legacy_duplicate_sources, globalOutputDir = obj_dir )
 
     depmgr.addCodeModules( modules, args.tests )
 
@@ -396,7 +396,7 @@ def cmd_buildcomp(args):
     bc          = getBuildConfiguration( cview,  args )
     bc.buildParams.incPaths.extend(     absIncDirs ) #TODO: accessing 'private' data?
     deprecated_tolerate_missing_headers_warning(args)
-    depmgr = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), legacyCompilingMod = args.legacy_compiling_mod, globalOutputDir = obj_dir )
+    depmgr = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), legacyCompilingMod = args.legacy_compiling_mod, legacyDuplicateSources = args.legacy_duplicate_sources, globalOutputDir = obj_dir )
     session     = ctx_base.CTXBuildSession( bc )
     session.setDependencyManager( depmgr )
 
@@ -546,7 +546,7 @@ def cmd_build(args):
     archPath = list()
     archPath = bc.getArchPath()
     deprecated_tolerate_missing_headers_warning(args)
-    depmgr = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), additionalIncDirs = absIncDirs, legacyCompilingMod = args.legacy_compiling_mod, globalOutputDir = obj_dir )
+    depmgr = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), additionalIncDirs = absIncDirs, legacyCompilingMod = args.legacy_compiling_mod, legacyDuplicateSources = args.legacy_duplicate_sources, globalOutputDir = obj_dir )
     session = ctx_base.CTXBuildSession( bc )
     session.setDependencyManager( depmgr )
 
@@ -806,6 +806,7 @@ standard_description = dict({\
 '--force':"Forces building all source files", \
 '--fail-on-missing-headers':"Abort the build if a header is missing.",\
 '--legacy-compiling-mod':"Enables legacy COMPILING_MOD_<MODULENAME> preprocessor defines which may be needed to build code which relied on this previous behaviour (in Contexo 0.8.0 and earlier).", \
+'--legacy-duplicate-sources':"Continue the build process even if duplicate build sources has been found in order to build legacy code.",\
 '--tolerate-missing-headers':"DEPRECATED: print a message about missing headers and go on, relying on the pre-processor to resolve the problem"})
 
 # info parser
@@ -832,6 +833,7 @@ parser_build.add_argument('-rv', '--repo-validation', action='store_true', help=
 parser_build.add_argument('-nra', '--no-remote-repo-access', action='store_true', help=standard_description['--no-remote-repo-access'])
 parser_build.add_argument('-f', '--force', action='store_true', help=standard_description['--force'])
 parser_build.add_argument('--legacy-compiling-mod', action='store_true', help=standard_description['--legacy-compiling-mod'])
+parser_build.add_argument('--legacy-duplicate-sources', action='store_true', help=standard_description['--legacy-duplicate-sources'])
 parser_build.add_argument('--tolerate-missing-headers',  action='store_true',  help = standard_description['--tolerate-missing-headers'])
 parser_build.add_argument('--fail-on-missing-headers',  action='store_true',  help = standard_description['--fail-on-missing-headers'])
 
@@ -855,6 +857,7 @@ parser_build.add_argument('-rv', '--repo-validation', action='store_true', help=
 parser_build.add_argument('-nra', '--no-remote-repo-access', action='store_true', help=standard_description['--no-remote-repo-access'])
 parser_build.add_argument('-f', '--force', action='store_true', help=standard_description['--force'])
 parser_build.add_argument('--legacy-compiling-mod', action='store_true', help=standard_description['--legacy-compiling-mod'])
+parser_build.add_argument('--legacy-duplicate-sources', action='store_true', help=standard_description['--legacy-duplicate-sources'])
 parser_build.add_argument('--tolerate-missing-headers',  action='store_true',  help = standard_description['--tolerate-missing-headers'])
 parser_build.add_argument('--fail-on-missing-headers',  action='store_true',  help = standard_description['--fail-on-missing-headers'])
 
@@ -876,6 +879,7 @@ parser_build.add_argument('-rv', '--repo-validation', action='store_true', help=
 parser_build.add_argument('-nra', '--no-remote-repo-access', action='store_true', help=standard_description['--no-remote-repo-access'])
 parser_build.add_argument('-f', '--force', action='store_true', help=standard_description['--force'])
 parser_build.add_argument('--legacy-compiling-mod', action='store_true', help=standard_description['--legacy-compiling-mod'])
+parser_build.add_argument('--legacy-duplicate-sources', action='store_true', help=standard_description['--legacy-duplicate-sources'])
 parser_build.add_argument('--tolerate-missing-headers',  action='store_true',  help = standard_description['--tolerate-missing-headers'])
 parser_build.add_argument('--fail-on-missing-headers',  action='store_true',  help = standard_description['--fail-on-missing-headers'])
 parser_build.add_argument('--all-headers', action='store_true', help = "export all public headers")

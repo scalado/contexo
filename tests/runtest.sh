@@ -116,7 +116,7 @@ echo "ctx build exe"
 rm -f /tmp/testrepo.svn
 ln -s $PWD/testrepo.svn /tmp/testrepo.svn || fail
 cd hello_view
-$CTX build hello -exe hello.exe 1>/dev/null 2>>$OUT || fail
+$CTX build -b "$BCONF" hello -exe hello.exe 1>/dev/null 2>>$OUT || fail
 test -f "hello.exe"|| fail
 cd ..
 cleanup
@@ -124,7 +124,7 @@ cleanup
 echo "ctx buildcomp --output"
 rm -f /tmp/testrepo.svn
 ln -s $PWD/testrepo.svn /tmp/testrepo.svn || fail
-$CTX buildcomp hello.comp --output test_output 1>/dev/null 2>>$OUT || fail
+$CTX buildcomp -b "$BCONF" hello.comp --output test_output 1>/dev/null 2>>$OUT || fail
 echo test out dir
 test -d test_output || fail
 echo test out lib

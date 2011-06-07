@@ -46,7 +46,7 @@ setup(name="Contexo",
       package_dir = { 'contexo.defaults':'defaults' ,'': 'otherlibs', 'colorama':'colorama', 'contexo':'contexo'},  #the '':'otherlibs' is a hack to make it load argparse without a package, from a subdirectory otherlibs
       package_data={ 'contexo': ['cmdline/ctx.bat'],  'contexo.defaults': ['contexo.cfg', 'bconf/*', 'cdef/*' ], 'contexo.plugins.export': ['msvc.bat','rspectree.bat'] },
       packages = [ 'contexo.defaults', 'contexo' ,  'contexo.plugins', 'contexo.plugins.export', 'colorama' ],
-      py_modules = ['argparse']  #this will overwrite argparse if you already have it
+      py_modules = ['internal_argparse']  #this will overwrite argparse if you already have it
     )
 
 

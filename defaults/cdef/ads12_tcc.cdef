@@ -17,7 +17,7 @@ LIBPREFIX          = ''
 AR                 = "armar"
 ARCOM              = "%AR -create %TARGET -via %@ %SOURCES"
 INCPREFIX          = '-I"'
-CXXFILESUFFIX      = ""
+CXXFILESUFFIX      = ".cpp"
 ECHO_SOURCES	   = YES
 
 RANLIB             = ""

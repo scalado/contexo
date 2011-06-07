@@ -18,7 +18,6 @@ RANLIB             = "arm-none-eabi-ranlib"
 LIBPREFIX          = ''
 LIBSUFFIX          = ".a"
 INCPREFIX          = '-I"'
-CXXFILESUFFIX      = ""
 ARCOM              = "%AR r %TARGET %SOURCES"
 LD                 = "arm-none-eabi-gcc"
 LDDIRSUFFIX        = '"'

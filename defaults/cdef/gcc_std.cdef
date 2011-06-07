@@ -18,7 +18,6 @@ RANLIB             = "ranlib"
 LIBPREFIX          = ''
 LIBSUFFIX          = '.a'
 INCPREFIX          = '-I"'
-CXXFILESUFFIX      = ""
 ARCOM              = "%AR r %TARGET @%@ %SOURCES"
 LD                 = "gcc"
 LDDIRSUFFIX        = '"'

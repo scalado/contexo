@@ -17,5 +17,5 @@ LIBPREFIX          = ''
 AR                 = "ar470"
 ARCOM              = ["%AR a %TARGET %SOURCES"]
 INCPREFIX          = '-i"'
-CXXFILESUFFIX      = ""
+CXXFILESUFFIX      = ".cpp"
 RANLIB             = ""

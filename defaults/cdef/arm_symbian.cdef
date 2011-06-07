@@ -18,5 +18,5 @@ RANLIB             = "arm-none-symbianelf-ranlib"
 LIBPREFIX          = ''
 LIBSUFFIX          = ".a"
 INCPREFIX          = '-I"'
-CXXFILESUFFIX      = ""
+CXXFILESUFFIX      = ".cpp"
 ARCOM              = "%AR r %TARGET %SOURCES"

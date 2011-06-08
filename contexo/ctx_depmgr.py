@@ -1,7 +1,6 @@
 import os
 #import sys
 import hashlib
-import cPickle
 
 from stat import *
 
@@ -264,10 +263,6 @@ class CTXDepMgr: # The dependency manager class.
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     def updateDependencyHash( self ):
 
-        #
-        # Try to load dependency dictionary from disk.
-        #
-        self.dependencies = self.loadDependencies()
         self.processed = set()
 
         #
@@ -277,43 +272,7 @@ class CTXDepMgr: # The dependency manager class.
         for cmod in self.cmods.itervalues():
             self.updateModuleDependencies( cmod )
 
-        self.storeDependencies()
         self.needUpdate = False
-
-    # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
-
-    def makeDependenciesPickleFilename( self ):
-        pickleFilenameMD5 = hashlib.md5()
-
-        for path in self.depRoots:
-            pickleFilenameMD5.update( path )
-
-        pickleFilename = "%s.ctx"%pickleFilenameMD5.hexdigest()
-        return pickleFilename
-
-    # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
-    def loadDependencies( self ):
-        dependencies = dict ()
-
-        storageLocation = getUserTempDir()
-
-        p = os.path.join( storageLocation, self.makeDependenciesPickleFilename() )
-        if os.path.exists( p ):
-            f = file( p, "rb" )
-            dependencies = cPickle.load( f )
-            f.close()
-
-        return dependencies
-
-    # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
-    def storeDependencies( self ):
-        storageLocation = getUserTempDir()
-
-        if os.path.exists( storageLocation ):
-            p = os.path.join( storageLocation, self.makeDependenciesPickleFilename())
-            f = file( p, "wb" )
-            cPickle.dump( self.dependencies, f, cPickle.HIGHEST_PROTOCOL )
-            f.close()
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     def addCodeModules( self, codeModulePaths, unitTests = False ):

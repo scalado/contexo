@@ -1,3 +1,7 @@
+Contexo 0.15.2
+Bugfix: The dependency cache has been found to be stale/corrupt on several occations.
+Thus it was removed after verifying that the performance hit was neglible.
+
 Contexo 0.15.1
 Bugfix: Added --legacy-duplicate-headers option to allow building legacy code which duplicate sources, note that the source file selection is ambigious, thus you may not know which source file is included!
 

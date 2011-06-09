@@ -1,3 +1,7 @@
+Contexo TBD
+Cleanup: removed MD5 checksums, contexo may rebuild all sources to update disk format
+Cleanup: 'depends' files are now obsolete
+
 Contexo 0.15.2
 Bugfix: The dependency cache has been found to be stale/corrupt on several occations.
 Thus it was removed after verifying that the performance hit was neglible.

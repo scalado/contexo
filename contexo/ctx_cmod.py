@@ -49,7 +49,6 @@ inc_dirname         = 'inc'
 doc_dirname			= 'doc'
 output_dirname      = 'output'
 test_dirname        = 'test'
-dep_filename        = 'depends'
 xdep_filename       = 'xdepends'
 srclist_filename    = 'sourcefiles'
 unresolvedXdepends  = set()

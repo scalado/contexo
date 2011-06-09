@@ -65,8 +65,6 @@ class CTXDepMgr: # The dependency manager class.
         self.failOnMissingHeaders = failOnMissingHeaders
         self.msgSender                = 'CTXDepMgr'
         self.depRoots                 = list()
-        self.supportedChecksumMethods = ['MTIME', 'MD5']
-        self.checksumMethod           = self.supportedChecksumMethods[0]
         self.archPath                 = archPath
         self.legacyCompilingMod       = legacyCompilingMod
         self.legacyDuplicateSources   = legacyDuplicateSources
@@ -120,7 +118,7 @@ class CTXDepMgr: # The dependency manager class.
 
             assert(os.path.isabs(inputFile) or not inputFile.endswith('.c') )
             if inputFilePath not in self.processed:
-                checksum = self.generateChecksum( inputFilePath, self.checksumMethod )
+                checksum = self.generateChecksum( inputFilePath )
 
                 if inputFilePath in self.dependencies and \
                     self.dependencies[inputFilePath][CHECKSUM] == checksum:
@@ -144,29 +142,14 @@ class CTXDepMgr: # The dependency manager class.
             self.__updateDependencies( incFileList, pathList )
 
     #------------------------------------------------------------------------------
-    def getMD5( self, buf ):
-        md = hashlib.md5()
-        md.update( buf )
-        return md.hexdigest()
-
-    #------------------------------------------------------------------------------
-    def generateChecksum( self, inputFilePath, checksumMethod ):
+    def generateChecksum( self, inputFilePath ):
         global inputFileContents
 
         ctxAssert ( os.path.exists ( inputFilePath ), "inputFilePath: " + inputFilePath )
 
         checksum    = None
-        method      = checksumMethod.upper()
-
-        if method == 'MD5':#.........................
-            if len(inputFileContents) == 0:
-                inputFileContents = self.getFileContents(inputFilePath)
-
-            checksum = self.getMD5( inputFileContents )
-
-        elif method == 'MTIME':#......................
-            modTime = os.stat( inputFilePath )[ST_MTIME]
-            checksum = self.getMD5( str(modTime) )
+        modTime = os.stat( inputFilePath )[ST_MTIME]
+        checksum = str(modTime)
 
         ctxAssert( checksum != None )
         return checksum
@@ -341,14 +324,6 @@ class CTXDepMgr: # The dependency manager class.
             
            
             self.depPaths.update(self.findAllCodeModulePaths( self.depRoots ))
-
-    # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
-    def setChecksumMethod( self, method ):
-        if method not in self.supportedChecksumMethods:
-            userErrorExit("Unsupported checksum method: '%s'"%method)
-
-        self.checksumMethod = method
-        self.needUpdate = True
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     #

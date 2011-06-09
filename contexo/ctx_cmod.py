@@ -117,6 +117,8 @@ def assertValidContexoCodeModule( path, msgSender ):
 def getSourcesFromDir( self, srcDir ):
     srcListDict = dict()
     objListDict = dict()
+    # 'bc name': list()
+    bcSpecificListDict = dict()
     srcList = list ()
     objList = list()
     if not os.path.exists(srcDir):
@@ -165,11 +167,28 @@ def getSourcesFromDir( self, srcDir ):
                         # TODO: If more languages are added to contexo in the future, this may need a cleanup.
                         # for now, bypass the dependency manager and add an absolute path directly
                         objListDict[baseFileName] = os.path.join( srcDir, archFile[len(srcDir)+1:])
+    bcSpec_dir = os.path.join(srcDir, 'sub_bc')
+    if os.path.isdir(bcSpec_dir):
+        for bcSpec in os.listdir(bcSpec_dir):
+            if os.path.isdir(bcSpec):
+                for bcSpec_sourceFile in os.listdir(bcSpec):
+                    baseFileName, ext = os.path.splitext( bcSpec_sourceFile )
+                    # we accept assembly here
+                    if arch_spec_source_extensions.count( ext ) > 0:
+                        for key in srcListDict.keys():
+                            if key == baseFileName:
+                                msg = 'Overriding source file '+os.path.join(srcDir, srcListDict[baseFileName])+' with build configuration specific file: '+bcSpec_sourceFile + '. Specific build configuration: ' + os.path.basename(bcSpec) + '.bc'
+                                infoMessage(msg, 1)
+                            del srcListDict[baseFileName]
+                        if not bcSpecificListDict.has_key(bcSpec):
+                            bcSpecificListDict[bcSpec] = list()
+                        bcSpecificListDict[bcSpec].add(bcSpec_sourceFile)
+
     for srcFile in srcListDict.values():
         srcList.append(srcFile)
     for objFile in objListDict.values():
         objList.append(objFile)
-    return srcList,objList
+    return srcList,objList,bcSpecificListDict
 
 
 #------------------------------------------------------------------------------
@@ -198,7 +217,8 @@ class CTXRawCodeModule:
         self.modName        = str()
         self.modRoot        = str()
         self.srcFiles       = list()
-        self.prebuiltObjFiles       = list()
+        self.prebuiltObjFiles = list()
+        self.bcSpecSrcDict = dict()
         self.testSrcFiles   = list()
         self.testObjFiles   = list()
         self.pubHeaders     = list()
@@ -238,14 +258,21 @@ class CTXRawCodeModule:
     def getSourceFilenames(self):
         if len(self.srcFiles) == 0:
             srcDir = self.getSourceDir()
-            self.srcFiles, self.prebuiltObjFiles = getSourcesFromDir( self, srcDir )
+            self.srcFiles, self.prebuiltObjFiles, self.bcSpecSrcDict = getSourcesFromDir( self, srcDir )
         return self.srcFiles
 
     def getPreBuiltObjectFilenames(self):
         if len(self.srcFiles) == 0 or len(self.prebuiltObjFiles) == 0:
             srcDir = self.getSourceDir()
-            self.srcFiles, self.prebuiltObjFiles = getSourcesFromDir( self, srcDir )
+            self.srcFiles, self.prebuiltObjFiles,self.bcSpecSrcDict = getSourcesFromDir( self, srcDir )
         return self.prebuiltObjFiles
+
+    def getBCSpecificSources(self):
+        if len(self.bcSpecSrcDict) == 0 or len(self.prebuiltObjFiles) == 0:
+            srcDir = self.getSourceDir()
+            self.srcFiles, self.prebuiltObjFiles,self.bcSpecSrcDict = getSourcesFromDir( self, srcDir )
+        return self.prebuiltObjFiles
+
 
     def getPreBuiltObjectAbsolutePaths(self):
         import functools

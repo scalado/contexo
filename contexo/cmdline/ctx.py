@@ -673,7 +673,7 @@ def cmd_export(args):
     cview   = ctx_view.CTXView( view_dir, validate=False )
     bc      = getBuildConfiguration( cview,  args )
     deprecated_tolerate_missing_headers_warning(args)
-    depmgr  = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), globalOutputDir = obj_dir )
+    depmgr  = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, legacyDuplicateSources = args.legacy_duplicate_sources, archPath = bc.getArchPath(), globalOutputDir = obj_dir )
     session = ctx_base.CTXBuildSession( bc )
     session.setDependencyManager( depmgr )
 
@@ -954,6 +954,7 @@ parser_export.add_argument('-rv', '--repo-validation', action='store_true', help
 parser_export.add_argument('-nra', '--no-remote-repo-access', action='store_true', help=standard_description['--no-remote-repo-access'])
 parser_export.add_argument('--tolerate-missing-headers',  action='store_true',  help = standard_description['--tolerate-missing-headers'])
 parser_export.add_argument('--fail-on-missing-headers',  action='store_true',  help = standard_description['--fail-on-missing-headers'])
+parser_export.add_argument('--legacy-duplicate-sources', action='store_true', help=standard_description['--legacy-duplicate-sources'])
 
 #
 #

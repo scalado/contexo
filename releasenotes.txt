@@ -1,4 +1,6 @@
-Contexo TBD
+Contexo 0.15.3
+TOOLS-43: --legacy-duplicate-headers now available for ctx export
+TOOLS-44: genmake works on windows
 Cleanup: removed MD5 checksums, contexo may rebuild all sources to update disk format
 Cleanup: 'depends' files are now obsolete
 

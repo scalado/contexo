@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!C:\Python26\python.exe
 ###############################################################################
 #                                                                             
 #   genmake.py
@@ -175,11 +175,22 @@ if not os.path.isfile("Makefile.cfg"):
 	cfgmakefile.write("RANLIB=ranlib\n")
 	cfgmakefile.write("\n")
 	cfgmakefile.write("OUTPUT=output\n")
-	cfgmakefile.write("LIBDIR=$(OUTPUT)/lib\n")
-	cfgmakefile.write("OBJDIR=$(OUTPUT)/obj\n")
-	cfgmakefile.write("HDRDIR=$(OUTPUT)/inc\n")
+	cfgmakefile.write("LIBDIR=" + os.path.join("$(OUTPUT)", "lib") + "\n")
+	cfgmakefile.write("OBJDIR=" + os.path.join("$(OUTPUT)", "obj") + "\n")
+	cfgmakefile.write("HDRDIR=" + os.path.join("$(OUTPUT)", "inc") + "\n")
 	cfgmakefile.write("\n")
-	cfgmakefile.write("EXPORT_CMD=cp\n")
+    
+	if os.name == 'nt':
+		cfgmakefile.write("EXPORT_CMD=copy\n")
+		cfgmakefile.write("RM=del /S /Q\n")
+		cfgmakefile.write("MKDIR=mkdir\n")
+		cfgmakefile.write("TOUCH=copy nul\n")
+	else:
+		cfgmakefile.write("EXPORT_CMD=cp\n")
+		cfgmakefile.write("RM=rm -rf\n")
+		cfgmakefile.write("MKDIR=mkdir -p\n")
+		cfgmakefile.write("TOUCH=touch\n")
+        
 	cfgmakefile.write("\n")
 
 makefile.write("\n")
@@ -189,7 +200,7 @@ makefile.write("\n")
 
 if linkHeaders == True:
 	makefile.write("### symlinked headers output dir\n")
-	makefile.write("INCLUDES=-I$(OUTPUT)/hdrlinks/")
+	makefile.write("INCLUDES=-I" + os.path.join("$(OUTPUT)", "hdrlinks"))
 	makefile.write("\n")
 
 # Preprocessor defines
@@ -207,7 +218,7 @@ for comp in package.export_data['COMPONENTS']:
 makefile.write("### Build-all definition\n")
 makefile.write("LIBS =")
 for lib in libs:
-	makefile.write(" "+"$(LIBDIR)/"+lib+".a")
+	makefile.write(" " + os.path.join("$(LIBDIR)", lib + ".a"))
 makefile.write("\n")
 
 # "all" definition
@@ -218,9 +229,9 @@ makefile.write("all: $(OBJDIR) $(HDRDIR) $(LIBDIR) $(LIBS)")
 makefile.write(" inc_all")
 makefile.write("\n")
 makefile.write("clean: inc_clean\n")
-makefile.write("\trm -f $(OBJDIR)/*.o\n")
-makefile.write("\trm -f $(LIBDIR)/*.a\n")
-makefile.write("\trm -f $(HDRDIR)/*.h\n")
+makefile.write("\t$(RM) " + os.path.join("$(OBJDIR)", "*.o") + "\n")
+makefile.write("\t$(RM) " + os.path.join("$(LIBDIR)", "*.a") + "\n")
+makefile.write("\t$(RM) " + os.path.join("$(HDRDIR)", "*.h") + "\n")
 makefile.write("\n")
 
 makefile.write("\n")
@@ -242,11 +253,11 @@ for modName in modules:
 makefile.write("\n")
 makefile.write("### create directories\n")
 makefile.write("$(OBJDIR):\n")
-makefile.write("\tmkdir -p $@\n")
+makefile.write("\t$(MKDIR) $@\n")
 makefile.write("$(LIBDIR):\n")
-makefile.write("\tmkdir -p $@\n")
+makefile.write("\t$(MKDIR) $@\n")
 makefile.write("$(HDRDIR):\n")
-makefile.write("\tmkdir -p $@\n")
+makefile.write("\t$(MKDIR) $@\n")
 makefile.write("\n")
 
 # TODO: this matches duplicate libraries (when libraries in components overlap)
@@ -264,12 +275,13 @@ for comp in package.export_data['COMPONENTS']:
 
 		for libs in comp.libraries[lib]:
 			for srcFile in modules[libs].getSourceFilenames():
-				objectfiles.append("$(OBJDIR)/" + os.path.basename(srcFile[:-2])+".o ")
+				objectfiles.append(os.path.join("$(OBJDIR)", os.path.basename(srcFile[:-2])+".o "))
                         if buildTests == True:
             			for testFile in modules[libs].getTestSourceFilenames():
-	        			objectfiles.append("$(OBJDIR)/" + os.path.basename(testFile[:-2])+".o ")
+	        			objectfiles.append(os.path.join("$(OBJDIR)", os.path.basename(testFile[:-2])+".o "))
 
-		makefile.write("$(LIBDIR)/"+libfilename+": ")
+		makefile.write(os.path.join("$(LIBDIR)", libfilename)+": ")
+		makefile.write("$(HDRDIR) $(OBJDIR) $(LIBDIR) ")
 		for objfile in objectfiles:
 			makefile.write(objfile+" ")
 		makefile.write("\n")
@@ -281,10 +293,10 @@ for comp in package.export_data['COMPONENTS']:
 
 		makefile.write("\t$(RANLIB) $@\n")
 
-	makefile.write("\tmkdir -p $(HDRDIR) $(OBJDIR) $(LIBDIR)\n")
+	
 	for headerFile in headerFiles:
                 if headerDict.has_key(headerFile):
-                    makefile.write("\t$(EXPORT_CMD) "+headerDict[headerFile]+" $(HDRDIR)/"+headerFile+"\n")
+                    makefile.write("\t$(EXPORT_CMD) "+headerDict[headerFile]+ " " + os.path.join("$(HDRDIR)", headerFile) + "\n")
                 else:
                     warningMessage('Headerfile '+headerFile+' could not be located')
 	makefile.write("\n")
@@ -296,7 +308,7 @@ for mod in module_map:
 	for srcFile in mod['SOURCES']:
 		objfile = os.path.basename(srcFile)[:-2]+".o"
 		
-		makefile.write("$(OBJDIR)/" + objfile + ": " + srcFile)
+		makefile.write(os.path.join("$(OBJDIR)", objfile) + ": " + srcFile)
 		for hdr in mod['DEPHDRS']:
 			makefile.write(" " + hdr)
 		makefile.write("\n")
@@ -312,7 +324,7 @@ for mod in module_map:
 		makefile.write(" $(PREP_DEFS) -c "+srcFile+" -o $@\n");
 	for prebuiltObjFile in mod['PREBUILTSOURCES']:
 		objfile = os.path.basename(prebuiltObjFile)
-		makefile.write("$(OBJDIR)/" + objfile + ": ")
+		makefile.write(os.path.join("$(OBJDIR)", objfile) + ": ")
 		makefile.write("\n")
 		makefile.write("\t$(EXPORT_CMD) " + prebuiltObjFile + " $@\n")
         if buildTests == True:
@@ -320,7 +332,7 @@ for mod in module_map:
 	        	objfile = os.path.basename(testFile)[:-2]+".o"
 		        privInclude = module.getName().upper()+"_PRIV"
 		
-		        makefile.write("$(OBJDIR)/" + objfile + ": " + testFile + " ")
+		        makefile.write(os.path.join("$(OBJDIR)", objfile) + ": " + testFile + " ")
 		        for hdr in mod['DEPHDRS']:
 			        makefile.write( " " + hdr)
         		makefile.write("\n")
@@ -336,7 +348,7 @@ for mod in module_map:
         		makefile.write(" $(PREP_DEFS)")
 	        	for hdrdir in mod['DEPHDRS']:
 		        	makefile.write(" -I"+os.path.dirname( hdrdir))
-        		makefile.write(" -I"+module.getRootPath()+"/test/ -c "+testFile+" -o $@\n")
+        		makefile.write(" -I" + os.path.join(module.getRootPath(),"test") + os.sep + " -c " + testFile + " -o $@\n")
 makefile.write("### End of Makefile\n")
 makefile.write("\n")
 

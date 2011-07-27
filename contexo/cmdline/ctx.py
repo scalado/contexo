@@ -312,7 +312,7 @@ def cmd_buildmod(args):
 
 
     deprecated_tolerate_missing_headers_warning(args)
-    depmgr = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), legacyCompilingMod = args.legacy_compiling_mod, legacyDuplicateSources = args.legacy_duplicate_sources, globalOutputDir = obj_dir )
+    depmgr = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), legacyCompilingMod = args.legacy_compiling_mod, legacyDuplicateSources = args.legacy_duplicate_sources, globalOutputDir = obj_dir, subBC = bc.getSubBC() )
 
     depmgr.addCodeModules( modules, args.tests )
 
@@ -396,7 +396,7 @@ def cmd_buildcomp(args):
     bc          = getBuildConfiguration( cview,  args )
     bc.buildParams.incPaths.extend(     absIncDirs ) #TODO: accessing 'private' data?
     deprecated_tolerate_missing_headers_warning(args)
-    depmgr = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), legacyCompilingMod = args.legacy_compiling_mod, legacyDuplicateSources = args.legacy_duplicate_sources, globalOutputDir = obj_dir )
+    depmgr = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), legacyCompilingMod = args.legacy_compiling_mod, legacyDuplicateSources = args.legacy_duplicate_sources, globalOutputDir = obj_dir, subBC = bc.getSubBC()  )
     session     = ctx_base.CTXBuildSession( bc )
     session.setDependencyManager( depmgr )
 
@@ -546,7 +546,7 @@ def cmd_build(args):
     archPath = list()
     archPath = bc.getArchPath()
     deprecated_tolerate_missing_headers_warning(args)
-    depmgr = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), additionalIncDirs = absIncDirs, legacyCompilingMod = args.legacy_compiling_mod, legacyDuplicateSources = args.legacy_duplicate_sources, globalOutputDir = obj_dir )
+    depmgr = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, archPath = bc.getArchPath(), additionalIncDirs = absIncDirs, legacyCompilingMod = args.legacy_compiling_mod, legacyDuplicateSources = args.legacy_duplicate_sources, globalOutputDir = obj_dir, subBC = bc.getSubBC()  )
     session = ctx_base.CTXBuildSession( bc )
     session.setDependencyManager( depmgr )
 
@@ -673,7 +673,7 @@ def cmd_export(args):
     cview   = ctx_view.CTXView( view_dir, validate=False )
     bc      = getBuildConfiguration( cview,  args )
     deprecated_tolerate_missing_headers_warning(args)
-    depmgr  = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, legacyDuplicateSources = args.legacy_duplicate_sources, archPath = bc.getArchPath(), globalOutputDir = obj_dir )
+    depmgr  = CTXDepMgr ( codeModulePaths = cview.getItemPaths('modules'), failOnMissingHeaders = args.fail_on_missing_headers, legacyDuplicateSources = args.legacy_duplicate_sources, archPath = bc.getArchPath(), globalOutputDir = obj_dir, subBC = bc.getSubBC()  )
     session = ctx_base.CTXBuildSession( bc )
     session.setDependencyManager( depmgr )
 

@@ -171,7 +171,7 @@ def getSourcesFromDir( self, srcDir ):
     if os.path.isdir(subBC_dir):
         for subBC in os.listdir(subBC_dir):
 	    subBCEntry = srcDir + os.sep + 'sub_bc' + os.sep + subBC
-            if os.path.isdir(subBCEntry):
+            if os.path.isdir(subBCEntry) and self.subBC.keys().count( subBC ) > 0:
                 for subBC_sourceFile in os.listdir(subBCEntry):
                     baseFileName, ext = os.path.splitext( subBC_sourceFile )
                     # we accept assembly here
@@ -400,13 +400,14 @@ class CTXCodeModule( CTXRawCodeModule ):
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     def __init__( self, moduleRoot, pathlist = None, buildUnitTests = False, forceRebuild = False, archPath = list(), legacyCompilingMod = False, outputDir = None, subBC = dict() ):
         outputDir_ = outputDir
-        CTXRawCodeModule.__init__( self, moduleRoot, pathlist, buildUnitTests, archPath, False, outputDir_ )
+        CTXRawCodeModule.__init__( self, moduleRoot, pathlist, buildUnitTests, archPath, False, outputDir_, subBC = subBC )
         self.moduleTag     = str()
         self.buildParams   = ctx_base.CTXBuildParams()
         self.buildDir      = str()
         self.rebuildAll    = forceRebuild
         self.msgSender     = 'CTXCodeModule'
         self.legacyCompilingMod = legacyCompilingMod
+	self.subBC          = subBC
 
         # TODO: cmod should not know about output dir, nor how to build itself. This data dependency should be removed in the future
         self.globalOutputDir = outputDir

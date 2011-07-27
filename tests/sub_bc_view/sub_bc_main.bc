@@ -1,0 +1,18 @@
+#::::::::::::::::::::::::::::::::::::::::::::::::
+# Contexo Build Configuration
+#::::::::::::::::::::::::::::::::::::::::::::::::
+
+[meta]
+TITLE                   = Gcc 
+DESCRIPTION             = Gcc with optimization and no debug info
+
+[config]
+SUB_BC			= sub_bc_other.bc
+DEBUG_BUILD             = NO
+DEBUGMODE_MEMORY		= NO
+DEBUGMODE_FILE          = NO
+CHAR_ENCODING           = ASCII
+BYTE_ORDER              = LITTLE_ENDIAN
+CDEF                    = gcc_std.cdef
+CFLAGS                  = -pipe -Wall -W -O2 -std=c99 -funroll-loops -fstrict-aliasing
+PREP_DEFINES            = 

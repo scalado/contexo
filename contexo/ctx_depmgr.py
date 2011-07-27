@@ -60,12 +60,13 @@ CHECKSUM            = 1
 #------------------------------------------------------------------------------
 class CTXDepMgr: # The dependency manager class.
 #------------------------------------------------------------------------------
-    def __init__(self, codeModulePaths = list(), failOnMissingHeaders = False, archPath = list() , additionalIncDirs = None, legacyCompilingMod = False, legacyDuplicateSources = False, globalOutputDir = None):
+    def __init__(self, codeModulePaths = list(), failOnMissingHeaders = False, archPath = list() , additionalIncDirs = None, legacyCompilingMod = False, legacyDuplicateSources = False, globalOutputDir = None, subBC = dict()):
         self.globalOutputDir          = globalOutputDir
         self.failOnMissingHeaders = failOnMissingHeaders
         self.msgSender                = 'CTXDepMgr'
         self.depRoots                 = list()
         self.archPath                 = archPath
+        self.subBC                    = subBC
         self.legacyCompilingMod       = legacyCompilingMod
         self.legacyDuplicateSources   = legacyDuplicateSources
 
@@ -177,7 +178,7 @@ class CTXDepMgr: # The dependency manager class.
             paths.update( assureList( CTXCodeModule(moduleRoot = cmod.modRoot,
                                                     pathlist = None,
                                                     buildUnitTests = False,
-                                                    archPath = self.archPath, outputDir = self.globalOutputDir).resolveExternalDeps() ) )
+                                                    archPath = self.archPath, outputDir = self.globalOutputDir, subBC = self.subBC ).resolveExternalDeps() ) )
 
         if len(paths) == 0:
             infoMessage("WARNING: List of dependency search paths is empty.", 2)
@@ -271,7 +272,7 @@ class CTXDepMgr: # The dependency manager class.
             modPath = self.resolveCodeModulePath( mod )
 
             emptyPathList = list()
-            rawmod = CTXRawCodeModule(modPath, emptyPathList, unitTests, self.archPath, self.legacyCompilingMod, self.globalOutputDir)
+            rawmod = CTXRawCodeModule(modPath, emptyPathList, unitTests, self.archPath, self.legacyCompilingMod, self.globalOutputDir, subBC = self.subBC)
             self.cmods[rawmod.getName()] = rawmod
 
         self.needUpdate = True
@@ -297,7 +298,7 @@ class CTXDepMgr: # The dependency manager class.
                     if isContexoCodeModule( candPath ) == True:
                         emptyPathList = list()
                         unitTestDummyValue = False
-                        mod = CTXRawCodeModule(candPath, emptyPathList, unitTestDummyValue, self.archPath, self.legacyCompilingMod, self.globalOutputDir)
+                        mod = CTXRawCodeModule(candPath, emptyPathList, unitTestDummyValue, self.archPath, self.legacyCompilingMod, self.globalOutputDir,subBC = self.subBC)
                         codeModulePaths.append( mod.getPubHeaderDir() )
                         codeModulePaths.append( mod.getPrivHeaderDir() )
                         codeModulePaths.append( mod.getSourceDir () )
@@ -373,7 +374,7 @@ class CTXDepMgr: # The dependency manager class.
             self.updateDependencyHash()
 
         if moduleName not in self.moduleDependencies:
-            cmod = CTXCodeModule ( moduleName, self.codeModulePaths, None, False , self.archPath )
+            cmod = CTXCodeModule ( moduleName, self.codeModulePaths, None, False , self.archPath, subBC = self.subBC)
             self.cmods[moduleName] = cmod
             self.updateModuleDependencies ( cmod )
 
@@ -477,7 +478,7 @@ class CTXDepMgr: # The dependency manager class.
                                               pathlist=None,
                                               buildUnitTests = buildTests,
                                               forceRebuild=force,
-                                              archPath = self.archPath, legacyCompilingMod = self.legacyCompilingMod, outputDir = self.globalOutputDir ) )
+                                              archPath = self.archPath, legacyCompilingMod = self.legacyCompilingMod, outputDir = self.globalOutputDir, subBC = self.subBC ) )
 
         return codeModules
 
@@ -510,7 +511,7 @@ class CTXDepMgr: # The dependency manager class.
 
             emptyPathList = list()
             unitTestsDummyValue = False
-            cmod = CTXRawCodeModule( module, emptyPathList, unitTestsDummyValue, self.archPath, self.legacyCompilingMod, self.globalOutputDir )
+            cmod = CTXRawCodeModule( moduleRoot = module, pathlist = emptyPathList, buildUnitTests = unitTestsDummyValue, archPath = self.archPath, legacyCompilingMod = self.legacyCompilingMod, outputDir = self.globalOutputDir, subBC = self.subBC )
             self.updateModuleDependencies( cmod )
 
         modulePubFiles = set(self.cmods[module].getPubHeaderFilenames())

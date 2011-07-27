@@ -345,21 +345,22 @@ class BCFile:
 	option_name = 'SUB_BC'
         if section.has_key( option_name ):
             if type( section[ option_name ] ) == type( str() ):
-		if not section[option_name].endswith(".bc"):
-			bc_name = section[option_name] + ".bc"
+		if section[option_name].endswith(".bc"):
+                        bc_name = section[option_name][:-3]
 		else:
 			bc_name = section[option_name]
+                print bc_name
     		sub_bc = BCFile( bc_name, self.bcFilePaths, self.cdefPaths, self.cfgFile )
-                self.subBC[ section[ option_name ] ] = sub_bc
+                self.subBC[ bc_name ] = sub_bc
             else:
                 for subBCElem in section[ option_name ]:
-       			if not option_name.endswith(".bc"):
-				bc_name = subBCElem + ".bc"
+       			if option_name.endswith(".bc"):
+                                bc_name = subBCElem[:-3]
 			else:
 				bc_name = subBCElem
+                        print bc_name
 			sub_bc = BCFile( bc_name, self.bcFilePaths, self.cdefPaths, self.cfgFile )
-			self.subBC[subBCElem] = sub_bc
-
+			self.subBC[bc_name] = sub_bc
         #
         # Colormodes
         #
@@ -424,5 +425,9 @@ class BCFile:
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - - -
     def getArchPath( self ):
         return self.archPath
+
+    # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - - -
+    def getSubBC( self ):
+        return self.subBC
 
 

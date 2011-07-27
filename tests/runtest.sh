@@ -21,7 +21,7 @@ fail() {
 BCONF=gcc.bc
 #BCONF=gcc_osx_i386_rel.bc
 echo "creating dummy repository"
-rm -f /tmp/testrepo.svn
+rm -f /tmp/testrepo.svn out
 ln -s $PWD/testrepo.svn /tmp/testrepo.svn || fail
 
 #echo "fail to build if including header in non-included module"
@@ -158,6 +158,13 @@ $CTX build -b "$BCONF" --legacy-duplicate-sources wazzup 1>/dev/null 2>>$OUT ||f
 rm -f wazzup.a
 cleanup
 cd ..
+
+echo "build with sub_bc"
+cd sub_bc_view
+$CTX build -b "sub_bc_main.bc" hello 1>/dev/null 2>>$OUT || fail
+test -f "hello.a"|| fail
+cd ..
+cleanup
 
 
 

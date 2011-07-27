@@ -118,12 +118,12 @@ def getSourcesFromDir( self, srcDir ):
     srcListDict = dict()
     objListDict = dict()
     # 'bc name': list()
-    bcSpecificListDict = dict()
+    subBCificListDict = dict()
     srcList = list ()
     objList = list()
     if not os.path.exists(srcDir):
 	    srcList = list()
-	    return srcList, objList
+	    return srcList, objList,subBCificListDict
     source_extensions = [ '.c', '.cpp']
 
     # Collect all source files.
@@ -167,28 +167,29 @@ def getSourcesFromDir( self, srcDir ):
                         # TODO: If more languages are added to contexo in the future, this may need a cleanup.
                         # for now, bypass the dependency manager and add an absolute path directly
                         objListDict[baseFileName] = os.path.join( srcDir, archFile[len(srcDir)+1:])
-    bcSpec_dir = os.path.join(srcDir, 'sub_bc')
-    if os.path.isdir(bcSpec_dir):
-        for bcSpec in os.listdir(bcSpec_dir):
-            if os.path.isdir(bcSpec):
-                for bcSpec_sourceFile in os.listdir(bcSpec):
-                    baseFileName, ext = os.path.splitext( bcSpec_sourceFile )
+    subBC_dir = os.path.join(srcDir, 'sub_bc')
+    if os.path.isdir(subBC_dir):
+        for subBC in os.listdir(subBC_dir):
+	    subBCEntry = srcDir + os.sep + 'sub_bc' + os.sep + subBC
+            if os.path.isdir(subBCEntry):
+                for subBC_sourceFile in os.listdir(subBCEntry):
+                    baseFileName, ext = os.path.splitext( subBC_sourceFile )
                     # we accept assembly here
                     if arch_spec_source_extensions.count( ext ) > 0:
                         for key in srcListDict.keys():
                             if key == baseFileName:
-                                msg = 'Overriding source file '+os.path.join(srcDir, srcListDict[baseFileName])+' with build configuration specific file: '+bcSpec_sourceFile + '. Specific build configuration: ' + os.path.basename(bcSpec) + '.bc'
+                                msg = 'Overriding source file '+os.path.join(srcDir, srcListDict[baseFileName])+' with build configuration specific file: '+subBC_sourceFile + '. Specific build configuration: ' + os.path.basename(subBCEntry) + '.bc'
                                 infoMessage(msg, 1)
-                            del srcListDict[baseFileName]
-                        if not bcSpecificListDict.has_key(bcSpec):
-                            bcSpecificListDict[bcSpec] = list()
-                        bcSpecificListDict[bcSpec].add(bcSpec_sourceFile)
+                            	del srcListDict[baseFileName]
+                        if not subBCificListDict.has_key(subBC):
+                            subBCificListDict[subBC] = list()
+                        subBCificListDict[subBC].append(subBC_sourceFile)
 
     for srcFile in srcListDict.values():
         srcList.append(srcFile)
     for objFile in objListDict.values():
         objList.append(objFile)
-    return srcList,objList,bcSpecificListDict
+    return srcList,objList,subBCificListDict
 
 
 #------------------------------------------------------------------------------
@@ -213,12 +214,12 @@ class CTXRawCodeModule:
     # The constructor aborts execution with an error if the path doesn't
     # qualify as a code module when passing it to isContexoCodeModule().
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
-    def __init__( self, moduleRoot, pathlist = None, buildUnitTests = False ,archPath = list(), legacyCompilingMod = False, outputDir = None):
+    def __init__( self, moduleRoot, pathlist = None, buildUnitTests = False ,archPath = list(), legacyCompilingMod = False, outputDir = None, subBC = dict()):
         self.modName        = str()
         self.modRoot        = str()
         self.srcFiles       = list()
         self.prebuiltObjFiles = list()
-        self.bcSpecSrcDict = dict()
+        self.subBCSrcDict = dict()
         self.testSrcFiles   = list()
         self.testObjFiles   = list()
         self.pubHeaders     = list()
@@ -228,6 +229,7 @@ class CTXRawCodeModule:
         self.buildUnitTests = buildUnitTests
         self.archPath       = archPath
         self.legacyCompilingMod = legacyCompilingMod
+	self.subBC          = subBC
         # TODO: cmod should not know about output dir, nor how to build itself. This data dependency should be removed in the future
         self.globalOutputDir = outputDir
 
@@ -258,19 +260,19 @@ class CTXRawCodeModule:
     def getSourceFilenames(self):
         if len(self.srcFiles) == 0:
             srcDir = self.getSourceDir()
-            self.srcFiles, self.prebuiltObjFiles, self.bcSpecSrcDict = getSourcesFromDir( self, srcDir )
+            self.srcFiles, self.prebuiltObjFiles, self.subBCSrcDict = getSourcesFromDir( self, srcDir )
         return self.srcFiles
 
     def getPreBuiltObjectFilenames(self):
         if len(self.srcFiles) == 0 or len(self.prebuiltObjFiles) == 0:
             srcDir = self.getSourceDir()
-            self.srcFiles, self.prebuiltObjFiles,self.bcSpecSrcDict = getSourcesFromDir( self, srcDir )
+            self.srcFiles, self.prebuiltObjFiles,self.subBCSrcDict = getSourcesFromDir( self, srcDir )
         return self.prebuiltObjFiles
 
     def getBCSpecificSources(self):
-        if len(self.bcSpecSrcDict) == 0 or len(self.prebuiltObjFiles) == 0:
+        if len(self.subBCSrcDict) == 0 or len(self.prebuiltObjFiles) == 0:
             srcDir = self.getSourceDir()
-            self.srcFiles, self.prebuiltObjFiles,self.bcSpecSrcDict = getSourcesFromDir( self, srcDir )
+            self.srcFiles, self.prebuiltObjFiles,self.subBCSrcDict = getSourcesFromDir( self, srcDir )
         return self.prebuiltObjFiles
 
 
@@ -290,7 +292,7 @@ class CTXRawCodeModule:
     def getTestSourceFilenames(self):
         if len(self.testSrcFiles) == 0:
             srcDir = self.getTestDir()
-            self.testSrcFiles, self.testObjFiles = getSourcesFromDir( self, srcDir )
+            self.testSrcFiles, self.testObjFiles,self.subBCSrcDict = getSourcesFromDir( self, srcDir )
         return self.testSrcFiles
 
     def getTestHeaderFilenames(self):
@@ -396,7 +398,7 @@ class CTXCodeModule( CTXRawCodeModule ):
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     #
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
-    def __init__( self, moduleRoot, pathlist = None, buildUnitTests = False, forceRebuild = False, archPath = list(), legacyCompilingMod = False, outputDir = None ):
+    def __init__( self, moduleRoot, pathlist = None, buildUnitTests = False, forceRebuild = False, archPath = list(), legacyCompilingMod = False, outputDir = None, subBC = dict() ):
         outputDir_ = outputDir
         CTXRawCodeModule.__init__( self, moduleRoot, pathlist, buildUnitTests, archPath, False, outputDir_ )
         self.moduleTag     = str()
@@ -523,6 +525,9 @@ class CTXCodeModule( CTXRawCodeModule ):
         for prebuiltObjectFile in self.prebuiltObjFiles:
             obj = session.copyPrebuiltObject( os.path.normpath( prebuiltObjectFile), outputDir)
             objlist.append( obj)
+	if len(self.subBCSrcDict) > 0:
+		for subBCName,subBCSrcFiles in self.subBCSrcDict.iteritems():
+            		obj = session.buildStaticObject( os.path.normpath( src ), os.path.normpath( outputDir ), buildParams, self.rebuildAll )
 
         #LOG
         for obj in objlist:

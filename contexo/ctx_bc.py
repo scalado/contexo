@@ -45,7 +45,11 @@ class BCFile:
         self.cdef            = str()
         self.compiler        = None
         self.msgSender       = 'BCFile'
+        self.subBC           = dict()
         self.archPath        = list()
+	self.bcFilePaths     = bcFilePaths
+	self.cdefPaths       = cdefPaths
+	self.cfgFile         = cfgFile
         #
 
         bcFilePaths = assureList( bcFilePaths )
@@ -337,6 +341,24 @@ class BCFile:
             else:
                 for pathElem in section[ option_name ]:
                     self.archPath.append(pathElem)
+
+	option_name = 'SUB_BC'
+        if section.has_key( option_name ):
+            if type( section[ option_name ] ) == type( str() ):
+		if not section[option_name].endswith(".bc"):
+			bc_name = section[option_name] + ".bc"
+		else:
+			bc_name = section[option_name]
+    		sub_bc = BCFile( bc_name, self.bcFilePaths, self.cdefPaths, self.cfgFile )
+                self.subBC[ section[ option_name ] ] = sub_bc
+            else:
+                for subBCElem in section[ option_name ]:
+       			if not option_name.endswith(".bc"):
+				bc_name = subBCElem + ".bc"
+			else:
+				bc_name = subBCElem
+			sub_bc = BCFile( bc_name, self.bcFilePaths, self.cdefPaths, self.cfgFile )
+			self.subBC[subBCElem] = sub_bc
 
         #
         # Colormodes

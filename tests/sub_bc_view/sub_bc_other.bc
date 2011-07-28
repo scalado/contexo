@@ -12,6 +12,6 @@ DEBUGMODE_MEMORY		= NO
 DEBUGMODE_FILE          = NO
 CHAR_ENCODING           = ASCII
 BYTE_ORDER              = LITTLE_ENDIAN
-CDEF                    = gcc_std.cdef
-CFLAGS                  = -pipe -Wall -W -O2 -std=c99 -funroll-loops -fstrict-aliasing
+CDEF                    = sub_bc_clang.cdef
+CFLAGS                  = -DSUB_BC_COMPILER -pipe -Wall -W -O2 -std=c99 -funroll-loops -fstrict-aliasing
 PREP_DEFINES            = 

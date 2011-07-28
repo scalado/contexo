@@ -772,7 +772,7 @@ class CTXBuildSession:
         buildParams = bc.getBuildParams()
         compiler = bc.getCompiler()
 
-        joinedBuildParams.add( self.buildParams )
+        #joinedBuildParams.add( self.buildParams )
         if buildParams != None:
             joinedBuildParams.add( buildParams )
         infoMessage("Joined include paths: %s"%(", ".join(joinedBuildParams.incPaths)), 7)

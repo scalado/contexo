@@ -80,7 +80,7 @@ CONTEXO_VIEW_FILE   = 'contexo.vdef'
 cfgFile = ctx_cfg.CFGFile (os.path.join ( getUserDir (), CONTEXO_CFG_FILE ))
 
 if len(sys.argv) == 1:
-    print info
+    print >>sys.stderr, info
     ctx_common.ctxExit(0)
 
 

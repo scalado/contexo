@@ -136,18 +136,18 @@ def switchEnvironment( newEnvLayout, preserve = True ):
 
     # Display resulting environment on high verbose level.
     if getVerboseLevel() >= 5:
-        print "---------------------------------------------------"
-        print "| (ctx_envswitch.py): Environment after switch:   |"
-        print "---------------------------------------------------"
+        print >>sys.stderr, "---------------------------------------------------"
+        print >>sys.stderr, "| (ctx_envswitch.py): Environment after switch:   |"
+        print >>sys.stderr, "---------------------------------------------------"
         for var, val in os.environ.iteritems():
             val = val.split( os.pathsep )
             if type(val) == list:
-                print "%24s: %s;"%(var,val[0])
+                print >>sys.stderr, "%24s: %s;"%(var,val[0])
                 for v in val[1:]:
-                    print "%24s  %s;"%("", v)
+                    print >>sys.stderr, "%24s  %s;"%("", v)
             else:
-                print "%24s:\t %s"%(var,val)
-        print "---------------------------------------------------\n\n"
+                print >>sys.stderr, "%24s:\t %s"%(var,val)
+        print >>sys.stderr, "---------------------------------------------------\n\n"
 
     # Return old environment so the user can restore it later.
     return oldEnv

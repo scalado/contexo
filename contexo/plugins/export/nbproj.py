@@ -37,7 +37,7 @@ ctx_common.setInfoMessageVerboseLevel( int(cfgFile.getVerboseLevel()) )
 #------------------------------------------------------------------------------
 def create_module_mapping_from_module_list( ctx_module_list, depMgr):
     code_module_map = list()
-    print 'mapping'
+    print >>sys.stderr, 'mapping'
     for mod in ctx_module_list:
         #srcFiles = list()
         privHdrs = list()

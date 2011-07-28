@@ -204,7 +204,7 @@ def parse_file (filename, section_dict):
     try:
         file = open (filename, "r")
     except IOError, (errno, strerror):
-        print "*** Error opening file %s"%filename
+        print >>sys.stderr, "*** Error opening file %s"%filename
         raise IOError
 
     cur_section = 'default'

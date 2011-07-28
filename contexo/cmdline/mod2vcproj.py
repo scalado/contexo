@@ -59,7 +59,7 @@ msgSender = 'mod2vcproj.py'
 
 
 if len(sys.argv) == 1:
-    print info
+    print >>sys.stderr, info
     ctxExit(0)
 
 

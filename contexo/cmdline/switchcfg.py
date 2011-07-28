@@ -58,7 +58,7 @@ def replaceMatchingLineInFile( file_path, existing, replacement ):
 ##### ENTRY POINT #############################################################
 
 if len(sys.argv) == 1:
-    print info
+    print >>sys.stderr, info
     ctxExit(0)
 
 sysCfgName = sys.argv[1]
@@ -74,6 +74,6 @@ if not os.path.exists( sysCfgPath ):
 configSelector = os.path.join( getUserDir(), 'ctx.cfg' )    
 replaceMatchingLineInFile( configSelector, "CURRENT_SYSCFG", "CURRENT_SYSCFG = %s"%sysCfgName ) 
 
-print "System config switched to '%s'"%sysCfgName
+print >>sys.stderr, "System config switched to '%s'"%sysCfgName
 
 

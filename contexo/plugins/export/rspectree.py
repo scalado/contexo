@@ -71,7 +71,7 @@ def cmd_parse( args ):
     if not args.no_display:
         os.system( "%s"%( filename + '.jpeg') )
     
-    print "Done"
+    print >>sys.stderr, "Done"
     
 ##### ENTRY POINT #############################################################
 

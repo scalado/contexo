@@ -61,7 +61,7 @@ def add_error( error_message ):
 def verify_dir_structure( path, modname ):
     
     if not os.path.exists( path ):
-        print "*** Error, can't find path: '" + path + "'"
+        print >>sys.stderr, "*** Error, can't find path: '" + path + "'"
         sys.exit( 1 )
  
     mod_dir = os.path.basename( path )
@@ -111,9 +111,9 @@ def verify_dir_structure( path, modname ):
 #------------------------------------------------------------------------------
 
 
-### Print info and usage if no arguments given ###
+### print >>sys.stderr, info and usage if no arguments given ###
 if len(sys.argv) <= 1 or sys.argv[1] == '-?' or sys.argv[1] == '/?':
-    print info
+    print >>sys.stderr, info
     sys.exit(1)
 
 arg_modulename = ""
@@ -147,17 +147,17 @@ for arg in sys.argv:
        
     ## Handle unknown commandline item.
     else:
-        print "Unknown option or commandline item: '" + arg + "'"
+        print >>sys.stderr, "Unknown option or commandline item: '" + arg + "'"
         sys.exit(1)
 
 
 
 if len(arg_modulename) == 0:
-    print "Name of module is mandatory input!"
+    print >>sys.stderr, "Name of module is mandatory input!"
     sys.exit(1)
      
 if len(arg_path) == 0:
-    print "Module path is mandatory input!"
+    print >>sys.stderr, "Module path is mandatory input!"
     sys.exit(1)
 
 arg_modulename = arg_modulename.rstrip("\\/")
@@ -175,14 +175,14 @@ verify_dir_structure( arg_path, arg_modulename )
 # Output summary
 #
 
-print "\n- Summary for module: %s -\n"%arg_modulename
+print >>sys.stderr, "\n- Summary for module: %s -\n"%arg_modulename
 
-print "----------- Errors ------------------------------------------"
-if len(error_list) == 0: print "No errors."
+print >>sys.stderr, "----------- Errors ------------------------------------------"
+if len(error_list) == 0: print >>sys.stderr, "No errors."
 for error in error_list:
-    print error
-print "----------- Warnings ----------------------------------------"
-if len(warning_list) == 0: print "No warnings."
+    print >>sys.stderr, error
+print >>sys.stderr, "----------- Warnings ----------------------------------------"
+if len(warning_list) == 0: print >>sys.stderr, "No warnings."
 for warning in warning_list:
-    print warning
-print "-------------------------------------------------------------"
+    print >>sys.stderr, warning
+print >>sys.stderr, "-------------------------------------------------------------"

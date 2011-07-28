@@ -249,18 +249,18 @@ class CTXView:
     # prints this view in human readable way
     #--------------------------------------------------------------------------
     def printView(self):
-        print "\nView", self.rspec.getFilename(), "at", self.rspec.getFilePath(), "\n"
+        print >>sys.stderr, "\nView", self.rspec.getFilename(), "at", self.rspec.getFilePath(), "\n"
 
         repositories = self.rspec.getRepositories()
         for repo in repositories:
-            print "REPOSITORY:", repo.id_name, ", path:", repo.local_path, "url:", repo.href
+            print >>sys.stderr, "REPOSITORY:", repo.id_name, ", path:", repo.local_path, "url:", repo.href
 
             if len(repo.codeModulePaths) > 0:
-                print "Code module paths:"
+                print >>sys.stderr, "Code module paths:"
                 for path in repo.codeModulePaths:
-                    print path
+                    print >>sys.stderr, path
             if len(repo.componentPaths) > 0:
-                print "Component paths:"
+                print >>sys.stderr, "Component paths:"
                 for path in repo.componentPaths:
-                    print path
-            print "----"
+                    print >>sys.stderr, path
+            print >>sys.stderr, "----"

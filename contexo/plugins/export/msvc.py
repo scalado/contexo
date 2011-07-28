@@ -23,7 +23,7 @@ ctx_common.setInfoMessageVerboseLevel( int(cfgFile.getVerboseLevel()) )
 #------------------------------------------------------------------------------
 def create_module_mapping_from_module_list( ctx_module_list, depMgr):
     code_module_map = list()
-    print 'mapping'
+    print >>sys.stderr, 'mapping'
     for mod in ctx_module_list:
         #srcFiles = list()
         privHdrs = list()
@@ -130,7 +130,7 @@ def cmd_parse( args ):
         for inc in user_includepaths:
             incPaths.append(inc)
 
-    #print   'incPaths %s' %incPaths
+    #print >>sys.stderr,   'incPaths %s' %incPaths
 
     libPaths = list()
     if args.additional_libdir != None:

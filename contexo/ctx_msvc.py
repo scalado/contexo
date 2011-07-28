@@ -70,7 +70,7 @@ def make_libvcproj8( projectName, cflags, prepDefs, codeModules, outLib,
     elif configType == 'exe':
         configurationTypeNbr = '1'
     else:
-        print "Erroneous config type. Using 'lib'"
+        print >>sys.stderr, "Erroneous config type. Using 'lib'"
         configType = 'lib'
         configurationTypeNbr = '4'
 

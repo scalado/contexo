@@ -330,7 +330,7 @@ def cmd_buildmod(args):
                                   "N/A" )
 
     output_path = os.path.join( lib_output, args.libdir )
-    print output_path
+    print >>sys.stderr, output_path
 
     ## TODO: place this in CTXCompiler where it belongs when the spaghetti code is gone
     ## changing working directory to .ctx/obj/[BUILDCONFIGNAME]
@@ -625,9 +625,9 @@ def cmd_build(args):
         depmgr.addCodeModules( items, args.tests )
 
         if args.deps:
-            print "Dependencies for:",
-            print items
-            print depmgr.getCodeModulesWithDependencies()
+            print >>sys.stderr, "Dependencies for:",
+            print >>sys.stderr, items
+            print >>sys.stderr, depmgr.getCodeModulesWithDependencies()
         objs += buildmodules( depmgr, session, items, args, outputPath, bc.getTitle(),  libraryName=args.library_name)
         export_public_module_headers( depmgr, items, header_dir )
 

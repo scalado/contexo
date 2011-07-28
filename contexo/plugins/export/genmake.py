@@ -50,9 +50,9 @@ exe = str()
 
 for arg in sys.argv:
     if arg == '-h':
-        print 'help:'
-        print '-l, symlink all headers to one directory and use that for include path'
-        print '-t, build tests'
+        print >>sys.stderr, 'help:'
+        print >>sys.stderr, '-l, symlink all headers to one directory and use that for include path'
+        print >>sys.stderr, '-t, build tests'
         sys.exit(1)
     if arg == '-t':
         buildTests = True
@@ -62,7 +62,7 @@ for arg in sys.argv:
 #------------------------------------------------------------------------------
 def create_module_mapping_from_module_list( ctx_module_list, depMgr):
     code_module_map = list()
-    print 'mapping'
+    print >>sys.stderr, 'mapping'
     for mod in ctx_module_list:
         #srcFiles = list()
         privHdrs = list()

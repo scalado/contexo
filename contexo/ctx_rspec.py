@@ -352,7 +352,7 @@ class RSpecFile:
     #--------------------------------------------------------------------------
     def delRepository(self, name):
         if not name in self.repositories:
-            print "repository %s not found", name
+            print >>sys.stderr, "repository %s not found", name
         del self.repositories[name]
 
     #--------------------------------------------------------------------------

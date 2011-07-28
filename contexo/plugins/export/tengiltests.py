@@ -84,7 +84,7 @@ def cmd_parse( args ):
     for module in module_dicts:
 
         sources = module['SOURCES'] + module['TESTSOURCES']
-        print 'Analysing %s in %s'%( map(os.path.basename,  sources),  module['MODNAME'] )
+        print >>sys.stderr, 'Analysing %s in %s'%( map(os.path.basename,  sources),  module['MODNAME'] )
         def readNames(name):
             from contexo.ctx_cparser import parseTengilTests
             #Get a list of lists of testnames. One list of names for each source file.
@@ -104,7 +104,7 @@ def cmd_parse( args ):
     def writeName( (inname,  outname) ):
         def writeCall( arg ):
             outputfile.write( '%s(%s)\n'%( outname,  arg ) )
-            print ( '   %s(%s)'%( outname,  arg ) )
+            print >>sys.stderr, ( '   %s(%s)'%( outname,  arg ) )
         map(writeCall,  allNames[inname])
     map(writeName,  nameMap.items() )
 

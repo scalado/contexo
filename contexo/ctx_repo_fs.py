@@ -84,7 +84,7 @@ class CTXRepositoryFS(CTXRepository):
     def update(self):
         if not treesAreEqual( self.getAbsLocalPath(), self.getHref() ):
 
-            print '\n'
+            print >>sys.stderr, '\n'
             infoMessage("Regular file repository '%s' is out of sync.\n'%s' and '%s' doesn't match. The system is unable to\nperform intelligent synchronization of non-revisioned repositories.\nDo you want to overwrite (delete and replace) the local copy '%s'\nwith the contents of the remote copy '%s'?"\
                 %(self.getID(), self.getAbsLocalPath(), self.getHref(), self.getAbsLocalPath(), self.getHref() ), 0)
             choice = raw_input( "> yes/no: " ).lower()

@@ -10,7 +10,7 @@ from xml.dom.minidom import Document
 import pysvn
 
 if(len(sys.argv) < 3):
-	print ">convertBDEFtoRSPEC.py BDEF_file.bdef outfile.rspec"
+	print >>sys.stderr, ">convertBDEFtoRSPEC.py BDEF_file.bdef outfile.rspec"
 	exit()
 
 def getChildrenByTagName(node, tagName):

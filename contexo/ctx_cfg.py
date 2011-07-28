@@ -45,8 +45,8 @@ class CFGFile:
             try:
                 shutil.copy( defconfig,  cfgFilePath )
             except IOError, (errno, strerror):
-                print "*** Error copying file %s"%defconfig
-                print strerror
+                print >>sys.stderr, "*** Error copying file %s"%defconfig
+                print >>sys.stderr, strerror
                 raise IOError
 
         self.cfgFile = Config( cfgFilePath )

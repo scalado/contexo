@@ -75,7 +75,7 @@ msgSender = 'buildmod.py'
 # Check for contexo updates ( once a day )
 #
 if len(sys.argv) == 1:
-    print info
+    print >>sys.stderr, info
     ctxExit(0)
 
 timer = time.clock()

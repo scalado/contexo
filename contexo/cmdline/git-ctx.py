@@ -60,7 +60,7 @@ class GITCtx:
                 self.ignored_repos.append(repo)
 
     def help( self ):
-        print """
+        print >>sys.stderr, """
 git ctx is a component of the Contexo build system which integrates with the git toolsuite.
 Any git command supplied to 'git ctx' will be executed for each subrepository in the view as defined by the Contexo .rspec.
 
@@ -71,8 +71,8 @@ usage: git ctx [git-command] [options] [--] <filepattern>...
 git-command may be any of the following:
         """
         for git_command in self.git_commands:
-            print '\t' + git_command
-        print """
+            print >>sys.stderr, '\t' + git_command
+        print >>sys.stderr, """
 other commands are executed in each git repo.
 
 Subversion repos are ignored.
@@ -81,7 +81,7 @@ Subversion repos are ignored.
 
     def ignored_svn_repo_banner( self ):
         for ignored_repo in self.ignored_repos: 
-            print 'git-ctx: ignoring \'svn\' repo: ' + os.path.basename(ignored_repo.getAbsLocalPath())
+            print >>sys.stderr, 'git-ctx: ignoring \'svn\' repo: ' + os.path.basename(ignored_repo.getAbsLocalPath())
     def check_unmerged( self ):
         import subprocess
         for repo in self.git_repos:
@@ -125,60 +125,60 @@ Subversion repos are ignored.
             retcode = p.wait()
 
             if retcode != 0:
-                print stderr
+                print >>sys.stderr, stderr
                 errorMessage("GIT execution failed with error code %d"%(retcode))
                 exit(retcode)
 
             os.chdir(self.view_dir)
-            print "# %s is on branch %s"%(os.path.basename(repo_path), repo.getBranch())
+            print >>sys.stderr, "# %s is on branch %s"%(os.path.basename(repo_path), repo.getBranch())
             for line in stdout.split('\n'):
                 if len(line) > 3:
                     split_line = [ line[:2], line[3:] ]
                     for key in [split_line[0], split_line[0][0], split_line[0][1]]:
                         if statusdict.has_key( key ):
                             statusdict[ key ].add( os.path.basename(repo_path) + '/' + split_line[1] )
-        print '#'
+        print >>sys.stderr, '#'
 
         if len(statusdict['A']) > 0:
-            print """# Changes to be committed:
+            print >>sys.stderr, """# Changes to be committed:
 #   (use "git ctx reset HEAD <file>..." to unstage)
 #            """
             for new_file in statusdict['A']:
-                print '#' + '\t' + 'new file:' + '\t' + Fore.GREEN + new_file + Style.RESET_ALL
-            print '#'
+                print >>sys.stderr, '#' + '\t' + 'new file:' + '\t' + Fore.GREEN + new_file + Style.RESET_ALL
+            print >>sys.stderr, '#'
         if len(statusdict['M']) > 0 or len(statusdict['D']) > 0 or len(statusdict['R']) > 0 or len(statusdict['C']) > 0:
-            print """#
+            print >>sys.stderr, """#
 # Changed but not updated:
 #   (use "git ctx add/rm <file>..." to update what will be committed)
 #   (use "git ctx checkout -- <file>..." to discard changes in working directory)"""
 
             for modified_file in statusdict['M']:
-                print '#' + '\t' + 'modified:' + '\t' + Fore.RED + modified_file + Style.RESET_ALL
+                print >>sys.stderr, '#' + '\t' + 'modified:' + '\t' + Fore.RED + modified_file + Style.RESET_ALL
             for deleted_file in statusdict['D']:
-                print '#' + '\t' + 'deleted:' + '\t' + Fore.RED + deleted_file + Style.RESET_ALL
+                print >>sys.stderr, '#' + '\t' + 'deleted:' + '\t' + Fore.RED + deleted_file + Style.RESET_ALL
             # these two has not been observed in git 1.7, eventhough the git-status(1) documentation
             # mentions them
             for renamed_file in statusdict['R']:
-                print '#' + '\t' + 'renamed:' + '\t' + Fore.RED + renamed_file + Style.RESET_ALL
+                print >>sys.stderr, '#' + '\t' + 'renamed:' + '\t' + Fore.RED + renamed_file + Style.RESET_ALL
             for copied_file in statusdict['C']:
-                print '#' + '\t' + 'copied:' + '\t' + Fore.RED + copied_file + Style.RESET_ALL
-            print '#'
+                print >>sys.stderr, '#' + '\t' + 'copied:' + '\t' + Fore.RED + copied_file + Style.RESET_ALL
+            print >>sys.stderr, '#'
         if len(statusdict['U']) > 0:
-            print """# Unmerged paths:
+            print >>sys.stderr, """# Unmerged paths:
 #   (use "git ctx add/rm <file>..." as appropriate to mark resolution)
 #           """
             for unmerged_file in statusdict['U']:
                 # the Fore.RED is placed here to show similar output to git status
-                print '#' + '\t' + Fore.RED + 'both modified:' + '\t' + unmerged_file + Style.RESET_ALL
-            print '#'
+                print >>sys.stderr, '#' + '\t' + Fore.RED + 'both modified:' + '\t' + unmerged_file + Style.RESET_ALL
+            print >>sys.stderr, '#'
         if len(statusdict['??']) > 0:
-            print """# Untracked files:
+            print >>sys.stderr, """# Untracked files:
 #   (use "git ctx add <file>..." to include in what will be committed)
 #           """
 
             for untracked_file in statusdict['??']:
-                print '#' + '\t' + Fore.RED + untracked_file + Style.RESET_ALL
-            print """no changes added to commit (use "git ctx add" and/or "git ctx commit -a")"""
+                print >>sys.stderr, '#' + '\t' + Fore.RED + untracked_file + Style.RESET_ALL
+            print >>sys.stderr, """no changes added to commit (use "git ctx add" and/or "git ctx commit -a")"""
 
     def generic( self, git_cmd, git_argv, translate_arguments = False, continue_on_error = False ):
         if git_cmd not in ['add', 'rm']:
@@ -232,7 +232,7 @@ Subversion repos are ignored.
                 for arg in valid_git_argv:
                     msg = msg + ' ' +arg
                 msg = msg + '\' in ' + os.path.basename(repo_path)
-                print 'git-ctx: ' + msg
+                print >>sys.stderr, 'git-ctx: ' + msg
                 # TODO: doesn't work...
                 #infoMessage(msg,0)
 
@@ -251,7 +251,7 @@ Subversion repos are ignored.
                 for arg in git_argv:
                     msg = msg + ' ' +arg
                 msg = msg + '\' in ' + os.path.basename(repo_path)
-                print 'git-ctx: ' + msg
+                print >>sys.stderr, 'git-ctx: ' + msg
                 # TODO: doesn't work...
                 #infoMessage(msg,0)
 

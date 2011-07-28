@@ -285,13 +285,13 @@ class CTXCompiler:
             ctypes.windll.kernel32.SetConsoleTextAttribute(hdl, code)
         else:
             if color == 'yellow':
-                print '\x1b[A',
-                print '\x1b[33m'# yellow
+                print >>sys.stderr, '\x1b[A',
+                print >>sys.stderr, '\x1b[33m'# yellow
             elif color == 'green':
-                print '\x1b[A',
-                print '\x1b[32m' # green
+                print >>sys.stderr, '\x1b[A',
+                print >>sys.stderr, '\x1b[32m' # green
             else:
-                print '\x1b[0m' # reset
+                print >>sys.stderr, '\x1b[0m' # reset
 
 
     #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -330,8 +330,8 @@ class CTXCompiler:
         if toolPath == None:
 
             warningMessage("Unresolved tool: '%s'"%(cdefItem))
-            print 'searched:'
-            print cands
+            print >>sys.stderr, 'searched:'
+            print >>sys.stderr, cands
         else:
             infoMessage("Tool defined by '%s' resolved at '%s'"%(cdefItem, toolPath), 2)
 
@@ -377,8 +377,8 @@ class CTXCompiler:
             tool = 'ASM'
 
         if tool == 'UNKNOWN':
-            print 'Unknown source type of file: '+sourceFile
-            print 'Please update your .cdef files CXXFILESUFFIX, CFILESUFFIX or ASMFILESUFFIX field'
+            print >>sys.stderr, 'Unknown source type of file: '+sourceFile
+            print >>sys.stderr, 'Please update your .cdef files CXXFILESUFFIX, CFILESUFFIX or ASMFILESUFFIX field'
             userErrorExit('Cannot continue, unknown source file.')
 
         #
@@ -489,7 +489,7 @@ class CTXCompiler:
 
         if self.cdef['ECHO_SOURCES'] == True:
             self.setColor('green')
-            print os.path.basename( sourceFile )
+            print >>sys.stderr, os.path.basename( sourceFile )
             self.setColor(None)
 
         objFileName = self.makeObjFileName( sourceFile, objFileTitle )
@@ -677,11 +677,11 @@ class CTXBuildSession:
             ctypes.windll.kernel32.SetConsoleTextAttribute(hdl, code)
         else:
             if color == 'yellow':
-                print '\x1b[33m',# green
+                print >>sys.stderr, '\x1b[33m',# green
             elif color == 'green':
-                print '\x1b[32m',# green
+                print >>sys.stderr, '\x1b[32m',# green
             else:
-                print '\x1b[0m', # reset
+                print >>sys.stderr, '\x1b[0m', # reset
 
 
     #:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::

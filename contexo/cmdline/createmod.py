@@ -51,7 +51,7 @@ current_year = "2007"
 def create_module_structure( path, modname, overwrite ):
     
     if not os.path.exists( path ):
-        print "Can't find path: '" + path + "'"
+        print >>sys.stderr, "Can't find path: '" + path + "'"
         sys.exit( 1 )
  
     modroot = os.path.join( path, modname )
@@ -61,7 +61,7 @@ def create_module_structure( path, modname, overwrite ):
         if overwrite == True:
             shutil.rmtree( modroot )
         else:        
-            print "Module already exists: '" + modroot + "'"
+            print >>sys.stderr, "Module already exists: '" + modroot + "'"
             sys.exit( 1 )
     
     os.makedirs( os.path.join( modroot, 'doc'    ))
@@ -161,7 +161,7 @@ extern "C" {
 
 
 if len(sys.argv) == 1:
-    print info
+    print >>sys.stderr, info
     sys.exit(0)
 
 #

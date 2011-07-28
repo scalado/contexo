@@ -98,7 +98,7 @@ def add_windows_warn_color(fn):
 
         ret = fn(*args)
         args[0]._set_color( FOREGROUND_WHITE )
-        #print "after"
+        #print >>sys.stderr, "after"
         return ret
     return new
 
@@ -155,7 +155,7 @@ def add_windows_err_color(fn):
 
         ret = fn(*args)
         args[0]._set_color( FOREGROUND_WHITE )
-        #print "after"
+        #print >>sys.stderr, "after"
         return ret
     return new
 
@@ -165,7 +165,7 @@ def add_ansi_warn_color(fn):
     def new(*args):
         color = '\x1b[33m' # yellow
         args[1].msg = color + args[1].msg +  '\x1b[0m'  # normal
-        #print "after"
+        #print >>sys.stderr, "after"
         return fn(*args)
     return new
 
@@ -173,7 +173,7 @@ def add_ansi_err_color(fn):
     # add methods we need to the class
     def new(*args):
         args[1].msg = '\x1b[31m' + args[1].msg +  '\x1b[0m'  # normal
-        #print "after"
+        #print >>sys.stderr, "after"
         return fn(*args)
     return new
 
@@ -376,14 +376,14 @@ def ctxAssert( expression, comment=None ):
 
 
         # output
-        print "\n***** CONTEXO ASSERTION FAILURE *****"
-        print "          File: %s"%assert_file
-        print "          Line: %d"%assert_line
-        print "    Expression: %s"%assert_expr
-        print "       Comment: %s"%comment
-        print "\n*************************************\n"
-        print "Callstack: \n"
-        print traceback.print_stack()
+        print >>sys.stderr, "\n***** CONTEXO ASSERTION FAILURE *****"
+        print >>sys.stderr, "          File: %s"%assert_file
+        print >>sys.stderr, "          Line: %d"%assert_line
+        print >>sys.stderr, "    Expression: %s"%assert_expr
+        print >>sys.stderr, "       Comment: %s"%comment
+        print >>sys.stderr, "\n*************************************\n"
+        print >>sys.stderr, "Callstack: \n"
+        print >>sys.stderr, traceback.print_stack()
         userErrorExit("contexo fatal error")
         #ctxExit( 42 )
 

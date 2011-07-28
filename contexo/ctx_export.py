@@ -55,7 +55,7 @@ class CTXExportData:
         view_rspec = view.getRSpec()
         if view_rspec != None:
             def recurse_level(rspec, tree):
-                #print tree
+                #print >>sys.stderr, tree
                 tree[rspec.getFilename()] = dict()
                 for imp_rspec in rspec.getImports():
                     tree[rspec.getFilename()] = recurse_level( imp_rspec, tree[rspec.getFilename()] )
@@ -64,7 +64,7 @@ class CTXExportData:
             # 
             self.export_data['RSPEC'] = recurse_level( view_rspec, self.export_data['RSPEC'] )
     
-        #print self.export_data['RSPEC']
+        #print >>sys.stderr, self.export_data['RSPEC']
     #------------------------------------------------------------------------------
     # Sends the export_package as a pickle-dump to stdout. The package is directly
     # preceeded by a header with the following format:
@@ -111,7 +111,7 @@ class CTXExportData:
         i = data_buffer.rfind( export_header )
         
         if i == -1:
-            print data_buffer #Most likely errors from main system
+            print >>sys.stderr, data_buffer #Most likely errors from main system
             infoMessage("\n********** Export handler entry point **********\n\n", 2)
             userErrorExit("Ctx export failed because of previous errors! Check the log for previous errors.")
             
@@ -133,12 +133,12 @@ class CTXExportData:
         package_end   = package_start + package_size
         
         #
-        # Extract package chunk, and print everything else as regular text
+        # Extract package chunk, and print >>sys.stderr, everything else as regular text
         #
         
         package_dump = data_buffer[ package_start : package_end ]
-        print data_buffer[ 0 : package_start - header_len ]
-        print data_buffer[ package_end : -1 ]
+        print >>sys.stderr, data_buffer[ 0 : package_start - header_len ]
+        print >>sys.stderr, data_buffer[ package_end : -1 ]
 
         infoMessage("\n********** Export handler entry point **********\n\n", 2)
         

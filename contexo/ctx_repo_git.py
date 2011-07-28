@@ -88,7 +88,7 @@ class CTXRepositoryGIT(CTXRepository):
 	# git 1.7 returns 0
         if retcode != 0 and retcode != 1:
             stderr = p.stderr.read()
-            print stderr
+            print >>sys.stderr, stderr
             warningMessage("Not a valid GIT repo")
             os.chdir(self.path)
             return False
@@ -115,7 +115,7 @@ class CTXRepositoryGIT(CTXRepository):
         stdout = p.stdout.read()
 
         if retcode != 0:
-            print stderr
+            print >>sys.stderr, stderr
             errorMessage("GIT execution failed with error code %d"%(retcode))
             exit(retcode)
 
@@ -216,7 +216,7 @@ class CTXRepositoryGIT(CTXRepository):
         p = subprocess.Popen([self.git, 'fetch'], bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         retcode = p.wait()
         if retcode != 0:
-            print p.stderr.read()
+            print >>sys.stderr, p.stderr.read()
             warningMessage("could not fetch from %s"%(self.href))
         
         workingBranchName = self.getBranch()
@@ -232,7 +232,7 @@ class CTXRepositoryGIT(CTXRepository):
         retcode = p.wait()
         stderr = p.stderr.read()
         if retcode != 0:
-            print stderr
+            print >>sys.stderr, stderr
         updateBranchName = self.getBranch()
         # getBranch changes dir, go back to git dir
         os.chdir(self.destpath)
@@ -240,9 +240,9 @@ class CTXRepositoryGIT(CTXRepository):
             infoMessage("Updating branch '%s' in '%s': 'git pull %s %s''"%(self.rev, self.id_name, 'origin', self.rev))
             p = subprocess.Popen([self.git, 'pull', 'origin', self.rev], bufsize=4096, stdin=None)
             retcode = p.wait()
-            print ''
+            print >>sys.stderr, ''
             if retcode != 0:
-                #print p.stderr.read()
+                #print >>sys.stderr, p.stderr.read()
                 errorMessage("could not pull from %s"%(self.href))
                 exit(retcode)
         elif updateBranchName == '(no branch)':
@@ -254,7 +254,7 @@ class CTXRepositoryGIT(CTXRepository):
             retcode = p.wait()
             stderr = p.stderr.read()
             if retcode != 0:
-                print stderr
+                print >>sys.stderr, stderr
  
         os.chdir(self.path)
 
@@ -267,7 +267,7 @@ class CTXRepositoryGIT(CTXRepository):
 
         retnum = p.wait()
 	# newline after output
-	print ''
+	print >>sys.stderr, ''
         if retnum != 0:
             errorMessage("Could not clone %s"%(self.href))
             exit(retnum)
@@ -283,8 +283,8 @@ class CTXRepositoryGIT(CTXRepository):
         stderr = p.stderr.read()
         stdout = p.stdout.read()
         if retnum != 0:
-            print stdout
-            print stderr
+            print >>sys.stderr, stdout
+            print >>sys.stderr, stderr
             errorMessage("Could not checkout '%s' in '%s'"%(self.rev, self.id_name))
             exit(retnum)
         os.chdir(self.path)

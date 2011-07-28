@@ -419,7 +419,7 @@ class CTXDepMgr: # The dependency manager class.
                         if os.path.basename(depMod) in ctx_cmod.criteriaDirs:
                             depMod = os.path.dirname(depMod)
                         if ctx_cmod.isContexoCodeModule( depMod ):
-                            print depMod
+                            print >>sys.stderr, depMod
                             modName = os.path.basename( depMod )
                             dependencies.add( modName )
         return dependencies

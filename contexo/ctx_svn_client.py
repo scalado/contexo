@@ -79,7 +79,7 @@ class CTXSubversionClient():
     def get_login( self, realm, username, may_save ):
 
         if realm in self.authenticated_realms:
-            print "Login failed for realm %s" % (realm)
+            print >>sys.stderr, "Login failed for realm %s" % (realm)
             return False, "", "", False
 
         if self.username is None and os.environ.has_key('CTX_SVN_USERNAME'):
@@ -93,7 +93,7 @@ class CTXSubversionClient():
 
         if username is None or password is None:
 
-            print "Subversion login"
+            print >>sys.stderr, "Subversion login"
 
             if username is None:
                 username = raw_input("user: ")
@@ -282,4 +282,4 @@ class CTXSubversionClient():
 
         if msg is not None:
             self.msg_list.append( msg )
-            print msg
+            print >>sys.stderr, msg

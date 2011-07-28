@@ -349,7 +349,6 @@ class BCFile:
                         bc_name = section[option_name][:-3]
 		else:
 			bc_name = section[option_name]
-                print bc_name
     		sub_bc = BCFile( bc_name, self.bcFilePaths, self.cdefPaths, self.cfgFile )
                 self.subBC[ bc_name ] = sub_bc
             else:
@@ -358,7 +357,6 @@ class BCFile:
                                 bc_name = subBCElem[:-3]
 			else:
 				bc_name = subBCElem
-                        print bc_name
 			sub_bc = BCFile( bc_name, self.bcFilePaths, self.cdefPaths, self.cfgFile )
 			self.subBC[bc_name] = sub_bc
         #

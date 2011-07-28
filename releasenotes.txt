@@ -4,6 +4,7 @@ SUB_BC = clang2.9
 in each src directory, you may now put a sub_bc folder with the same name you specified for SUB_BC, the files in this folder will override the files in the src folder.
 This obsoletes the ARCH_PATH directive.
 Multiple sub_bc files may be referenced by separating them with a semicolon.
+Feature: prints all messages to STDERR
 Feature: print version number at exit.
 
 Contexo 0.15.3

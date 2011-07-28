@@ -78,6 +78,7 @@ def create_module_mapping_from_module_list( ctx_module_list, depMgr):
 	prebuiltSrcs = rawMod.getPreBuiltObjectAbsolutePaths()
         testSrcs = rawMod.getTestSourceAbsolutePaths()
         testHdrs = rawMod.getTestHeaderAbsolutePaths()
+        subBCSrcs = rawMod.getSubBCSources()
         modName = rawMod.getName()
         ## moduleDependencies[] only includes the top level includes, we must recurse through those to get all dependencies
         for hdr in  depMgr.moduleDependencies[modName]:
@@ -87,7 +88,7 @@ def create_module_mapping_from_module_list( ctx_module_list, depMgr):
                 for hdrpath in hdrpaths:
 					depHdrs.add( hdrpath)
 
-        modDict = { 'MODNAME': rawMod.getName(), 'SOURCES': srcs, 'PRIVHDRS': privHdrs, 'PUBHDRS': pubHdrs, 'PRIVHDRDIR': rawMod.getPrivHeaderDir(), 'TESTSOURCES':testSrcs , 'TESTHDRS':testHdrs, 'DEPHDRS':depHdrs, 'TESTDIR':rawMod.getTestDir(), 'PREBUILTSOURCES': prebuiltSrcs }
+        modDict = { 'MODNAME': rawMod.getName(), 'SOURCES': srcs, 'PRIVHDRS': privHdrs, 'PUBHDRS': pubHdrs, 'PRIVHDRDIR': rawMod.getPrivHeaderDir(), 'TESTSOURCES':testSrcs , 'TESTHDRS':testHdrs, 'DEPHDRS':depHdrs, 'TESTDIR':rawMod.getTestDir(), 'PREBUILTSOURCES': prebuiltSrcs, 'SUB_BC_SOURCES': subBCSrcs }
         code_module_map.append( modDict )
 
 
@@ -164,10 +165,13 @@ makefile.write("### Makefile generated with contexo plugin.\n")
 if not os.path.isfile("Makefile.cfg"):
 	cfgmakefile = open("Makefile.cfg", 'w')
 	cfgmakefile.write("### Compiler settings\n")
-	cfgmakefile.write("CC=gcc\n")
+	cfgmakefile.write("CC=" + bc_file.getCompiler().cdef['CCCOM'] + "\n")
 	cfgmakefile.write("CXX=g++\n")
 	cfgmakefile.write("CFLAGS="+build_params.cflags+"\n")
 	cfgmakefile.write("LDFLAGS=\n")
+        for subBCName,subBCObject in bc_file.getSubBC():
+            cfgmakefile.write(subBCName.upper() + '_CC = ' + subBCObject.getCompiler().cdef['CCCOM'] + '\n')
+            cfgmakefile.write(subBCName.upper() + '_CFLAGS = ' + subBCObject.getCompiler().cdef['CFLAGS'] + '\n')
 	cfgmakefile.write("\n# Additional compiler parameters, such as include paths\n")
 	cfgmakefile.write("ADDFLAGS=\n")
 	cfgmakefile.write("\n")
@@ -315,7 +319,11 @@ for mod in module_map:
                 if srcFile[-4:] == '.cpp':
         		makefile.write("\t$(CXX) $(CFLAGS) $(ADDFLAGS)")
                 else:
-        		makefile.write("\t$(CC) $(CFLAGS) $(ADDFLAGS)")
+                        if srcFile in subBCSrcs:
+                                subBCName = os.path.basename(os.path.dirname(srcFile))
+                		makefile.write("\t$('+ subBCName.upper() '_CC) $(' + subBCName.upper() + 'CFLAGS) $(ADDFLAGS)")
+                        else:
+                		makefile.write("\t$(CC) $(CFLAGS) $(ADDFLAGS)")
 		if linkHeaders == True:
 			makefile.write(" $(INCLUDES)")
 		else:

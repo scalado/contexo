@@ -175,7 +175,6 @@ def getSourcesFromDir( self, srcDir ):
             if os.path.isdir(subBCEntry) and self.subBC.keys().count( subBC ) > 0:
                 for subBC_sourceFile in os.listdir(subBCEntry):
                     baseFileName, ext = os.path.splitext( subBC_sourceFile )
-                    print baseFileName
                     # we accept assembly here
                     if arch_spec_source_extensions.count( ext ) > 0:
                         for key in srcListDict.keys():
@@ -187,7 +186,6 @@ def getSourcesFromDir( self, srcDir ):
                             subBCificListDict[subBC] = list()
                         
                         subBCificListDict[subBC] = subBCEntry + os.sep + subBC_sourceFile
-                        print 'dictList: ' + subBCificListDict[subBC]
 
     for srcFile in srcListDict.values():
         srcList.append(srcFile)
@@ -218,7 +216,7 @@ class CTXRawCodeModule:
     # The constructor aborts execution with an error if the path doesn't
     # qualify as a code module when passing it to isContexoCodeModule().
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
-    def __init__( self, moduleRoot, pathlist = None, buildUnitTests = False ,archPath = list(), legacyCompilingMod = False, outputDir = None, subBC = dict()):
+    def __init__( self, moduleRoot, pathlist = None, buildUnitTests = False ,archPath = list(), legacyCompilingMod = False, outputDir = None, bc = None):
         self.modName        = str()
         self.modRoot        = str()
         self.srcFiles       = list()
@@ -233,7 +231,8 @@ class CTXRawCodeModule:
         self.buildUnitTests = buildUnitTests
         self.archPath       = archPath
         self.legacyCompilingMod = legacyCompilingMod
-	self.subBC          = subBC
+        self.bc             = bc
+	self.subBC          = bc.getSubBC()
         # TODO: cmod should not know about output dir, nor how to build itself. This data dependency should be removed in the future
         self.globalOutputDir = outputDir
 
@@ -403,16 +402,17 @@ class CTXCodeModule( CTXRawCodeModule ):
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
     #
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - -
-    def __init__( self, moduleRoot, pathlist = None, buildUnitTests = False, forceRebuild = False, archPath = list(), legacyCompilingMod = False, outputDir = None, subBC = dict() ):
+    def __init__( self, moduleRoot, pathlist = None, buildUnitTests = False, forceRebuild = False, archPath = list(), legacyCompilingMod = False, outputDir = None, bc = None ):
         outputDir_ = outputDir
-        CTXRawCodeModule.__init__( self, moduleRoot, pathlist, buildUnitTests, archPath, False, outputDir_, subBC = subBC )
+        CTXRawCodeModule.__init__( self, moduleRoot, pathlist, buildUnitTests, archPath, False, outputDir_, bc = bc )
         self.moduleTag     = str()
         self.buildParams   = ctx_base.CTXBuildParams()
         self.buildDir      = str()
         self.rebuildAll    = forceRebuild
         self.msgSender     = 'CTXCodeModule'
         self.legacyCompilingMod = legacyCompilingMod
-	self.subBC          = subBC
+	self.bc             = bc
+	self.subBC          = bc.getSubBC()
 
         # TODO: cmod should not know about output dir, nor how to build itself. This data dependency should be removed in the future
         self.globalOutputDir = outputDir
@@ -537,12 +537,6 @@ class CTXCodeModule( CTXRawCodeModule ):
         for prebuiltObjectFile in self.prebuiltObjFiles:
             obj = session.copyPrebuiltObject( os.path.normpath( prebuiltObjectFile), outputDir)
             objlist.append( obj)
-	if len(self.subBCSrcDict) > 0:
-		for subBCName,subBCSrcFiles in self.subBCSrcDict.iteritems():
-                        for subBCSrcFile in subBCSrcFiles:
-                                absSubBCSrcFile = self.getSourceDir() + os.sep + subBCName + os.sep + subBCSrcFile
-            		        obj = session.buildStaticObject( os.path.normpath( absSubBCSrcFile ), os.path.normpath( outputDir ), self.subBC[subBCName].getBuildParams(), self.rebuildAll )
-
         #LOG
         for obj in objlist:
             ctx_log.ctxlogAddObjectFile( obj.filename, os.path.basename(obj.source) )

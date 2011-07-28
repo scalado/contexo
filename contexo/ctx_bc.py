@@ -19,7 +19,7 @@ import os
 #import sys
 import string
 #import shutil
-import config
+import ctx_config
 #import platform.ctx_platform
 from ctx_common import *
 from ctx_base import *
@@ -158,7 +158,7 @@ class BCFile:
         bcsec_config = dict()
         illegal_title_chars = ['&',]
 
-        cfg = config.Config( bcFilePath )
+        cfg = ctx_config.CTXConfig( bcFilePath )
 
         if cfg.has_section( 'meta' ):
             bcsec_meta  = cfg.get_section( 'meta'  )

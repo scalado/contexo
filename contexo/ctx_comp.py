@@ -19,7 +19,7 @@ import os
 import shutil
 #import sys
 #import string
-import config
+import ctx_config
 import ctx_base
 import ctx_log
 import ctx_cmod
@@ -127,7 +127,7 @@ class COMPFile:
         #
 
         compfile_path = self.path
-        cfg = config.Config( compfile_path )
+        cfg = ctx_config.CTXConfig( compfile_path )
 
         #
         ## Go through existing sections.

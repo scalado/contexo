@@ -15,7 +15,7 @@ import os
 import sys
 #import string
 #import shutil
-import config
+import ctx_config
 from ctx_common import *
 from ctx_log import *
 #import ctx_depmgr
@@ -144,7 +144,7 @@ class CTXCompiler:
         if not os.path.exists( self.cdefPath ):
             userErrorExit("Compiler definition '%s' not found."%self.cdefPath)
 
-        cdef_config = config.Config( self.cdefPath )
+        cdef_config = ctx_config.CTXConfig( self.cdefPath )
 
         #
         # Read meta section

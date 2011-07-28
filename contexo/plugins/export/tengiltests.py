@@ -53,7 +53,9 @@ def allComponentModules( component_list ):
 
 #------------------------------------------------------------------------------
 def cmd_parse( args ):
+    import sys
     import string
+    print sys.path
     infoMessage("Receiving export data from Contexo...", 1)
     package = ctx_export.CTXExportData()
     package.receive() # Reads pickled export data from stdin

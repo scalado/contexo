@@ -18,7 +18,7 @@ import shutil
 import linecache
 import compiler
 import re
-import config
+import ctx_config
 import logging
 import inspect
 import os.path

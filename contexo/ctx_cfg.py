@@ -9,7 +9,7 @@
 #                                                                             #
 ###############################################################################
 
-from config import Config
+from ctx_config import CTXConfig
 import os.path
 import shutil
 
@@ -49,7 +49,7 @@ class CFGFile:
                 print >>sys.stderr, strerror
                 raise IOError
 
-        self.cfgFile = Config( cfgFilePath )
+        self.cfgFile = CTXConfig( cfgFilePath )
 
     def saveAs ( self, filePath ):
         #TODO: Shouldn't filePath be stored in self.path?

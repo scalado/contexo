@@ -11,12 +11,12 @@
 #
 ###############################################################################
 
-from config import Config
+from ctx_config import CTXConfig
 import os
 import os.path
 import sys
 import string
-import config
+import ctx_config
 from ctx_common import *
 
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -42,7 +42,7 @@ class EnvironmentLayout:
             self.__resolveENVFileLocations(sysEnvPaths)
 
             for path in self.envFilePaths:
-                cfg = Config( path )
+                cfg = CTXConfig( path )
                 if not cfg.has_section( 'env' ):
                     userErrorExit("Missing mandatory section '%s'"%('env'))
 

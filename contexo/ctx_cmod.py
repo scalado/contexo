@@ -167,6 +167,7 @@ def getSourcesFromDir( self, srcDir ):
                         # TODO: If more languages are added to contexo in the future, this may need a cleanup.
                         # for now, bypass the dependency manager and add an absolute path directly
                         objListDict[baseFileName] = os.path.join( srcDir, archFile[len(srcDir)+1:])
+
     subBC_dir = os.path.join(srcDir, 'sub_bc')
     if os.path.isdir(subBC_dir):
         for subBC in os.listdir(subBC_dir):
@@ -174,16 +175,19 @@ def getSourcesFromDir( self, srcDir ):
             if os.path.isdir(subBCEntry) and self.subBC.keys().count( subBC ) > 0:
                 for subBC_sourceFile in os.listdir(subBCEntry):
                     baseFileName, ext = os.path.splitext( subBC_sourceFile )
+                    print baseFileName
                     # we accept assembly here
                     if arch_spec_source_extensions.count( ext ) > 0:
                         for key in srcListDict.keys():
                             if key == baseFileName:
-                                msg = 'Overriding source file '+os.path.join(srcDir, srcListDict[baseFileName])+' with build configuration specific file: '+subBC_sourceFile + '. Specific build configuration: ' + os.path.basename(subBCEntry) + '.bc'
+                                msg = 'Overriding source file '+os.path.join(srcDir, srcListDict[baseFileName])+' with build configuration specific file: '+subBC_sourceFile + '. Specific build configuration: ' + subBCEntry + '.bc'
                                 infoMessage(msg, 1)
-                            	del srcListDict[baseFileName]
+                        srcListDict[baseFileName] = subBCEntry[len(srcDir)+1:] + os.sep + subBC_sourceFile
                         if not subBCificListDict.has_key(subBC):
                             subBCificListDict[subBC] = list()
-                        subBCificListDict[subBC].append(subBC_sourceFile)
+                        
+                        subBCificListDict[subBC] = subBCEntry + os.sep + subBC_sourceFile
+                        print 'dictList: ' + subBCificListDict[subBC]
 
     for srcFile in srcListDict.values():
         srcList.append(srcFile)
@@ -269,11 +273,11 @@ class CTXRawCodeModule:
             self.srcFiles, self.prebuiltObjFiles,self.subBCSrcDict = getSourcesFromDir( self, srcDir )
         return self.prebuiltObjFiles
 
-    def getBCSpecificSources(self):
+    def getSubBCSources(self):
         if len(self.subBCSrcDict) == 0 or len(self.prebuiltObjFiles) == 0:
             srcDir = self.getSourceDir()
             self.srcFiles, self.prebuiltObjFiles,self.subBCSrcDict = getSourcesFromDir( self, srcDir )
-        return self.prebuiltObjFiles
+        return self.subBCSrcDict
 
 
     def getPreBuiltObjectAbsolutePaths(self):
@@ -369,6 +373,7 @@ class CTXRawCodeModule:
     #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     def getSourceDir( self ):
         return os.path.join( self.modRoot, src_dirname )
+
     #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     def getTestDir( self ):
         return os.path.join( self.modRoot, test_dirname )
@@ -513,14 +518,20 @@ class CTXCodeModule( CTXRawCodeModule ):
         #
         # Build sources for this module.
         #
-
         srcFiles = self.getSourceAbsolutePaths()
         if self.buildUnitTests:
             srcFiles.extend( self.getTestSourceAbsolutePaths() )
+    
+        subBCSrcFiles = self.getSubBCSources()
 
         objlist = list()
         for src in srcFiles:
-            obj = session.buildStaticObject( os.path.normpath( src ), os.path.normpath( outputDir ), buildParams, self.rebuildAll )
+            if src in subBCSrcFiles.values():
+                subBCName = os.path.basename(os.path.dirname(src))
+                bc = self.subBC[subBCName]
+            else:
+                bc = self.bc
+            obj = session.buildStaticObject( os.path.normpath( src ), os.path.normpath( outputDir ), bc, self.rebuildAll )
             objlist.append( obj )
  
         for prebuiltObjectFile in self.prebuiltObjFiles:
@@ -528,7 +539,9 @@ class CTXCodeModule( CTXRawCodeModule ):
             objlist.append( obj)
 	if len(self.subBCSrcDict) > 0:
 		for subBCName,subBCSrcFiles in self.subBCSrcDict.iteritems():
-            		obj = session.buildStaticObject( os.path.normpath( src ), os.path.normpath( outputDir ), buildParams, self.rebuildAll )
+                        for subBCSrcFile in subBCSrcFiles:
+                                absSubBCSrcFile = self.getSourceDir() + os.sep + subBCName + os.sep + subBCSrcFile
+            		        obj = session.buildStaticObject( os.path.normpath( absSubBCSrcFile ), os.path.normpath( outputDir ), self.subBC[subBCName].getBuildParams(), self.rebuildAll )
 
         #LOG
         for obj in objlist:

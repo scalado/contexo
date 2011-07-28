@@ -763,11 +763,14 @@ class CTXBuildSession:
     #
     # Builds a source file and returns a CTXStaticObject.
     #
-    def buildStaticObject( self, srcFile, outputDir, buildParams = None, forceRebuild = False ):
+    def buildStaticObject( self, srcFile, outputDir, bc = None, forceRebuild = False ):
         objFileTitle = None
 
         joinedBuildParams = CTXBuildParams()
         joinedBuildParams.incPaths.extend( self.depMgr.getIncludePaths( [srcFile] ) )
+
+        buildParams = bc.getBuildParams()
+        compiler = bc.getCompiler()
 
         joinedBuildParams.add( self.buildParams )
         if buildParams != None:
@@ -781,7 +784,7 @@ class CTXBuildSession:
         srcFile = self.depMgr.getFullPathname( srcFile )
 
         objChecksum     = self.makeStaticObjectChecksum( srcFile, buildParamsChecksum )
-        objectFilename  = self.compiler.makeObjFileName( srcFile, objFileTitle )
+        objectFilename  = compiler.makeObjFileName( srcFile, objFileTitle )
 
 
         if forceRebuild == False:
@@ -795,10 +798,10 @@ class CTXBuildSession:
                               %(objectFilename, objChecksum, oldChecksum), 4)
 
         if needRebuild:
-            obj = self.compiler.staticObject( srcFile, joinedBuildParams, outputDir, objFileTitle )
+            obj = compiler.staticObject( srcFile, joinedBuildParams, outputDir, objFileTitle )
             self.writeStaticObjectChecksum( os.path.join(obj.filepath,obj.filename), objChecksum )
         else:
-            obj = self.compiler.wrapStaticObject( srcFile, objectFilename, outputDir, buildParams, "n/a" )
+            obj = compiler.wrapStaticObject( srcFile, objectFilename, outputDir, buildParams, "n/a" )
 
         return obj
 

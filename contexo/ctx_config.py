@@ -6,7 +6,7 @@ import string
 import os.path
 import os
 
-__name__ = 'config'
+#__name__ = 'ctx_config'
 
 NAMED_VALUE     = 1
 NAMED_VALUE_ADD = 2
@@ -276,11 +276,11 @@ def get_environment ():
 
 
 #------------------------------------------------------------------------------
-# Config Class
+# CTXConfig Class
 #
 #
 #------------------------------------------------------------------------------
-class Config:
+class CTXConfig:
     section_dict = None
 
     def __init__(self, filename = None):

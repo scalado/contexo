@@ -38,7 +38,7 @@ import os
 import shutil
 import sys
 import string
-import config
+import ctx_config
 import ctx_bc
 import ctx_cmod
 from ctx_common import *

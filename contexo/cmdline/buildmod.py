@@ -59,7 +59,7 @@ import shutil
 import sys
 import string
 import time
-import config
+import ctx_config
 import ctx_bc
 import ctx_envswitch
 import ctx_cmod

@@ -91,7 +91,7 @@ def deprecated_nra_warning( args ):
 #------------------------------------------------------------------------------
 def getBuildConfiguration( cview ,  args):
     from contexo import ctx_bc
-    from contexo import config
+    from contexo import ctx_config
 
     if args.bconf != None:
         bcFile = args.bconf
@@ -115,7 +115,7 @@ def getBuildConfiguration( cview ,  args):
     bcFilename = os.path.basename( bcFilePath )
     bcPath = os.path.dirname( bcFilePath )
 
-    bcDict = config.Config( bcFilePath )
+    bcDict = ctx_config.CTXConfig( bcFilePath )
     section = bcDict.get_section( 'config'  )
     if not section.has_key( 'CDEF' ):
         userErrorExit("Mandatory BC option 'CDEF' is missing.")

@@ -111,7 +111,7 @@ class CTXExportData:
         i = data_buffer.rfind( export_header )
         
         if i == -1:
-            print >>sys.stderr, data_buffer #Most likely errors from main system
+            print data_buffer #Most likely errors from main system
             infoMessage("\n********** Export handler entry point **********\n\n", 2)
             userErrorExit("Ctx export failed because of previous errors! Check the log for previous errors.")
             
@@ -137,8 +137,8 @@ class CTXExportData:
         #
         
         package_dump = data_buffer[ package_start : package_end ]
-        print >>sys.stderr, data_buffer[ 0 : package_start - header_len ]
-        print >>sys.stderr, data_buffer[ package_end : -1 ]
+        print data_buffer[ 0 : package_start - header_len ]
+        print data_buffer[ package_end : -1 ]
 
         infoMessage("\n********** Export handler entry point **********\n\n", 2)
         

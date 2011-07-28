@@ -15,7 +15,7 @@ import os
 import sys
 import string
 import shutil
-import config
+import ctx_config
 from ctx_common import *
 from time import localtime, strftime
 

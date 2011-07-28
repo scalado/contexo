@@ -39,16 +39,6 @@ ln -s $PWD/testrepo.svn /tmp/testrepo.svn || fail
 #rm -f hello.a goodbye.a
 #cleanup
 #cd ..
-echo "build with sub_bc"
-cd sub_bc_view
-$CTX build -b "sub_bc_main.bc" hello||fail
-#1>/dev/null 2>>$OUT || fail
-test -f .ctx/obj/Gcc/hello.o ||{ echo "hello.o not compiled"; fail;}
-test -f "hello.a"|| fail
-cd ..
-cleanup
-exit 0
-
 echo "build standard"
 $CTX build -b "$BCONF" bare_hello 1>/dev/null 2>>$OUT || fail
 test -f "bare_hello.a"|| fail
@@ -169,5 +159,13 @@ $CTX build -b "$BCONF" --legacy-duplicate-sources wazzup 1>/dev/null 2>>$OUT ||f
 rm -f wazzup.a
 cleanup
 cd ..
+
+echo "build with sub_bc"
+cd sub_bc_view
+$CTX build -b "sub_bc_main.bc" hello 1>/dev/null 2>>$OUT || fail
+test -f .ctx/obj/Gcc/hello.o ||{ echo "hello.o not compiled"; fail;}
+test -f "hello.a"|| fail
+cd ..
+cleanup
 
 

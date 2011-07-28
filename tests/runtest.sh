@@ -43,7 +43,7 @@ echo "build with sub_bc"
 cd sub_bc_view
 $CTX build -b "sub_bc_main.bc" hello||fail
 #1>/dev/null 2>>$OUT || fail
-test -f sub_bc_view/.ctx/obj/Gcc/hello.o ||{ echo "hello.o not compiled"; fail;}
+test -f .ctx/obj/Gcc/hello.o ||{ echo "hello.o not compiled"; fail;}
 test -f "hello.a"|| fail
 cd ..
 cleanup

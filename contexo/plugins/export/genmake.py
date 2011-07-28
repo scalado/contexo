@@ -165,13 +165,13 @@ makefile.write("### Makefile generated with contexo plugin.\n")
 if not os.path.isfile("Makefile.cfg"):
 	cfgmakefile = open("Makefile.cfg", 'w')
 	cfgmakefile.write("### Compiler settings\n")
-	cfgmakefile.write("CC=" + bc_file.getCompiler().cdef['CCCOM'] + "\n")
+	cfgmakefile.write("CC=" + bc_file.getCompiler().cdef['CC'] + "\n")
 	cfgmakefile.write("CXX=g++\n")
 	cfgmakefile.write("CFLAGS="+build_params.cflags+"\n")
 	cfgmakefile.write("LDFLAGS=\n")
-        for subBCName,subBCObject in bc_file.getSubBC():
-            cfgmakefile.write(subBCName.upper() + '_CC = ' + subBCObject.getCompiler().cdef['CCCOM'] + '\n')
-            cfgmakefile.write(subBCName.upper() + '_CFLAGS = ' + subBCObject.getCompiler().cdef['CFLAGS'] + '\n')
+        for subBCName,subBCObject in bc_file.getSubBC().iteritems():
+            cfgmakefile.write(subBCName.upper() + '_CC=' + subBCObject.getCompiler().cdef['CC'] + '\n')
+            cfgmakefile.write(subBCName.upper() + '_CFLAGS =' + subBCObject.getBuildParams().cflags + '\n')
 	cfgmakefile.write("\n# Additional compiler parameters, such as include paths\n")
 	cfgmakefile.write("ADDFLAGS=\n")
 	cfgmakefile.write("\n")
@@ -319,9 +319,9 @@ for mod in module_map:
                 if srcFile[-4:] == '.cpp':
         		makefile.write("\t$(CXX) $(CFLAGS) $(ADDFLAGS)")
                 else:
-                        if srcFile in subBCSrcs:
+                        if srcFile in mod['SUB_BC_SOURCES'].values():
                                 subBCName = os.path.basename(os.path.dirname(srcFile))
-                		makefile.write("\t$('+ subBCName.upper() '_CC) $(' + subBCName.upper() + 'CFLAGS) $(ADDFLAGS)")
+                		makefile.write("\t$(" + subBCName.upper() + "_CC) $(" + subBCName.upper() + "_CFLAGS) $(ADDFLAGS)")
                         else:
                 		makefile.write("\t$(CC) $(CFLAGS) $(ADDFLAGS)")
 		if linkHeaders == True:

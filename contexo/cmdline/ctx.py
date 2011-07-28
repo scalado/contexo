@@ -979,4 +979,5 @@ parser_view_validate.add_argument('-nra', '--no-remote-repo-access', action='sto
 # Parse cmdline
 argsa=parser.parse_args()
 argsa.func(argsa)
-infoMessage("Contexo finished successfully.", 1)
+infoMessage("Contexo " + ctx_sysinfo.CTX_DISPLAYVERSION + " finished successfully.", 1)
+

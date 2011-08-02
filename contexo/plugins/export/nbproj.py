@@ -24,6 +24,7 @@ import contexo.ctx_netbeans
 import contexo.ctx_cfg as ctx_cfg
 import contexo.ctx_common as ctx_common
 import contexo.ctx_sysinfo as ctx_sysinfo
+import sys
 
 msgSender = 'Netbeans Export'
 

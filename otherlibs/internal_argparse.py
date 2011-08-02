@@ -2242,7 +2242,7 @@ class ArgumentParser(_AttributeHolder, _ActionsContainer):
         self._print_message(self.format_help(), file)
 
     def print_version(self, file=None):
-        self._print_message(self.format_version(), file)
+        self._print_message(self.format_version(), _sys.stdout)
 
     def _print_message(self, message, file=None):
         if message:

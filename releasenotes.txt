@@ -1,3 +1,7 @@
+Contexo 0.16.1
+Bugfix: msvc.py stderr output fixed
+Bugfix: version print to stdout
+
 Contexo 0.16.0
 Feature: sub_bc support, in the main .bc-file, a sub_bc file may be referenced, eg: to reference clang2.9.bc:
 SUB_BC = clang2.9

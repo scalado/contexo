@@ -120,6 +120,21 @@ depMgr = package.export_data['DEPMGR']
 
 includeExtensions = ['.h','.inl','.hpp']
 
+lib_suffix = str()
+lib_suffix = bc_file.getCompiler().cdef['LIBSUFFIX']
+
+obj_suffix = str()
+obj_suffix = bc_file.getCompiler().cdef['OBJSUFFIX']
+
+inc_prefix = str()
+inc_prefix = bc_file.getCompiler().cdef['INCPREFIX']
+inc_suffix = str()
+inc_suffix = bc_file.getCompiler().cdef['INCSUFFIX']
+
+
+prep_prefix = str()
+prep_prefix = bc_file.getCompiler().cdef['CPPDEFPREFIX']
+
 modules = package.export_data['MODULES']
 
 
@@ -161,6 +176,14 @@ makefile = open("Makefile", 'w')
 makefile.write("#############################################\n")
 makefile.write("### Makefile generated with contexo plugin.\n")
 
+ranlib = str()
+if bc_file.getCompiler().cdef.has_key('RANLIB'):
+    ranlib = bc_file.getCompiler().cdef['RANLIB']
+else:
+    ranlib = ""
+
+ar = bc_file.getCompiler().cdef['AR']
+
 # config settings
 if not os.path.isfile("Makefile.cfg"):
 	cfgmakefile = open("Makefile.cfg", 'w')
@@ -175,8 +198,9 @@ if not os.path.isfile("Makefile.cfg"):
 	cfgmakefile.write("\n# Additional compiler parameters, such as include paths\n")
 	cfgmakefile.write("ADDFLAGS=\n")
 	cfgmakefile.write("\n")
-	cfgmakefile.write("AR=ar\n")
-	cfgmakefile.write("RANLIB=ranlib\n")
+	cfgmakefile.write("AR="+ar+"\n")
+        if len(ranlib) > 0:
+        	cfgmakefile.write("RANLIB=" + ranlib + "\n")
 	cfgmakefile.write("\n")
 	cfgmakefile.write("OUTPUT=output\n")
 	cfgmakefile.write("LIBDIR=" + os.path.join("$(OUTPUT)", "lib") + "\n")
@@ -204,14 +228,14 @@ makefile.write("\n")
 
 if linkHeaders == True:
 	makefile.write("### symlinked headers output dir\n")
-	makefile.write("INCLUDES=-I" + os.path.join("$(OUTPUT)", "hdrlinks"))
+	makefile.write("INCLUDES="+inc_prefix+os.path.join("$(OUTPUT)", "hdrlinks"))+inc_suffix
 	makefile.write("\n")
 
 # Preprocessor defines
 makefile.write("### Standard defines\n")
 makefile.write("PREP_DEFS=")
 for prepDefine in build_params.prepDefines:
-	makefile.write("-D"+prepDefine+" ")
+	makefile.write(prep_prefix+prepDefine+" ")
 makefile.write("\n")
 
 libs = set()
@@ -222,7 +246,7 @@ for comp in package.export_data['COMPONENTS']:
 makefile.write("### Build-all definition\n")
 makefile.write("LIBS =")
 for lib in libs:
-	makefile.write(" " + os.path.join("$(LIBDIR)", lib + ".a"))
+	makefile.write(" " + os.path.join("$(LIBDIR)", lib + lib_suffix))
 makefile.write("\n")
 
 # "all" definition
@@ -233,8 +257,8 @@ makefile.write("all: $(OBJDIR) $(HDRDIR) $(LIBDIR) $(LIBS)")
 makefile.write(" inc_all")
 makefile.write("\n")
 makefile.write("clean: inc_clean\n")
-makefile.write("\t$(RM) " + os.path.join("$(OBJDIR)", "*.o") + "\n")
-makefile.write("\t$(RM) " + os.path.join("$(LIBDIR)", "*.a") + "\n")
+makefile.write("\t$(RM) " + os.path.join("$(OBJDIR)", "*"+obj_suffix) + "\n")
+makefile.write("\t$(RM) " + os.path.join("$(LIBDIR)", "*"+lib_suffix) + "\n")
 makefile.write("\t$(RM) " + os.path.join("$(HDRDIR)", "*.h") + "\n")
 makefile.write("\n")
 
@@ -275,27 +299,31 @@ for comp in package.export_data['COMPONENTS']:
 
 	for lib in comp.libraries:
 		objectfiles=list()
-		libfilename=lib+".a"
+		libfilename=lib+lib_suffix
 
 		for libs in comp.libraries[lib]:
 			for srcFile in modules[libs].getSourceFilenames():
-				objectfiles.append(os.path.join("$(OBJDIR)", os.path.basename(srcFile[:-2])+".o "))
+				objectfiles.append(os.path.join("$(OBJDIR)", os.path.basename(srcFile[:-2])+obj_suffix +" "))
                         if buildTests == True:
             			for testFile in modules[libs].getTestSourceFilenames():
-	        			objectfiles.append(os.path.join("$(OBJDIR)", os.path.basename(testFile[:-2])+".o "))
+	        			objectfiles.append(os.path.join("$(OBJDIR)", os.path.basename(testFile[:-2])+obj_suffix+" "))
+
+                objfilestring = ""
+		for objfile in objectfiles:
+			objfilestring += objfile+" "
 
 		makefile.write(os.path.join("$(LIBDIR)", libfilename)+": ")
-		makefile.write("$(HDRDIR) $(OBJDIR) $(LIBDIR) ")
-		for objfile in objectfiles:
-			makefile.write(objfile+" ")
-		makefile.write("\n")
-
-		makefile.write("\t$(AR) r $@")
-		for objfile in objectfiles:
-			makefile.write(" " + objfile)
-		makefile.write("\n")
-
-		makefile.write("\t$(RANLIB) $@\n")
+		makefile.write("$(HDRDIR) $(OBJDIR) $(LIBDIR) "+objfilestring+"\n")
+                arcom = bc_file.getCompiler().cdef['ARCOM']
+                if len(arcom) > 0:
+                    cmdline = "\t" + arcom.lstrip() + "\n"
+                    cmdline = cmdline.replace("%AR","$(AR)")
+                    cmdline = cmdline.replace("%SOURCES",objfilestring)
+                    cmdline = cmdline.replace("%TARGET","$@")
+                else:
+                    cmdline = "\t$(AR) r $@ " + objfilestring +"\n"
+                if len(ranlib) > 0:
+		    makefile.write("\t$(RANLIB) $@\n")
 
 	
 	for headerFile in headerFiles:
@@ -308,28 +336,60 @@ for comp in package.export_data['COMPONENTS']:
 makefile.write("\n")
 makefile.write("### Object definitions\n")
 
+def write_build_command(srcFile = str(), test = False):
+    objfile = os.path.basename(srcFile)[:-2]+obj_suffix
+    
+    makefile.write(os.path.join("$(OBJDIR)", objfile) + ": " + srcFile)
+    for hdr in mod['DEPHDRS']:
+            makefile.write(" " + hdr)
+    makefile.write("\n")
+    cxx = "$(CXX)"
+    cmdline = str()
+    if srcFile[-4:] == '.cpp':
+            cmdline = "\t" + bc_file.getCompiler().cdef['CXXCOM'].lstrip() + "\n"
+    else:
+            cmdline = "\t" + bc_file.getCompiler().cdef['CCCOM'].lstrip() + "\n"
+            if srcFile in mod['SUB_BC_SOURCES'].values():
+                    subBCName = os.path.basename(os.path.dirname(srcFile))
+                    cc = "$(" + subBCName.upper() + "_CC)"
+                    cflags = "$(" + subBCName.upper() + "_CFLAGS)"
+            else:
+                    cc = "$(CC)"
+                    cflags = "$(CFLAGS)"
+    cflags = cflags + " $(ADDFLAGS)"
+    cppdefines = "$(PREP_DEFS)"
+    incpaths = str()
+    if linkHeaders == True:
+            incpaths = " $(incpaths)"
+    else:
+            for hdrdir in mod['DEPHDRS']:
+                    incpaths += " "+inc_prefix+os.path.dirname( hdrdir)+inc_suffix
+    if test:
+        incpaths +=" " + inc_prefix+ os.path.join(module.getRootPath(),"test")+inc_suffix
+
+    cmdline.replace("%CC", "$(CC)")
+    # Expand all commandline mask variables to the corresponding items we prepared.
+    cmdline = cmdline.replace( '%CC'          ,   cc)
+    cmdline = cmdline.replace( '%CXX'         ,   cxx)
+    # not supported yet
+    #cmdline = cmdline.replace( '%ASMFLAGS'    ,   asmflags_cmdline    )
+    # not supported yet
+    #cmdline = cmdline.replace( '%ASM'         ,   self.cdef['ASM']    )
+    cmdline = cmdline.replace( '%CFLAGS'      ,   cflags)
+    cmdline = cmdline.replace( '%CPPDEFINES'  ,   cppdefines )
+    cmdline = cmdline.replace( '%INCPATHS'    ,   incpaths )
+    cmdline = cmdline.replace( '%SOURCES'     ,   srcFile )
+    # is this directive used?
+    cmdline = cmdline.replace( '%TARGETDIR'   ,   "."           )
+    # make specific
+    cmdline = cmdline.replace( '%TARGETFILE'  ,   "$@" )
+    cmdline = cmdline.replace( '%TARGET'      ,   "$@")
+
+    makefile.write(cmdline)
+
 for mod in module_map:
 	for srcFile in mod['SOURCES']:
-		objfile = os.path.basename(srcFile)[:-2]+".o"
-		
-		makefile.write(os.path.join("$(OBJDIR)", objfile) + ": " + srcFile)
-		for hdr in mod['DEPHDRS']:
-			makefile.write(" " + hdr)
-		makefile.write("\n")
-                if srcFile[-4:] == '.cpp':
-        		makefile.write("\t$(CXX) $(CFLAGS) $(ADDFLAGS)")
-                else:
-                        if srcFile in mod['SUB_BC_SOURCES'].values():
-                                subBCName = os.path.basename(os.path.dirname(srcFile))
-                		makefile.write("\t$(" + subBCName.upper() + "_CC) $(" + subBCName.upper() + "_CFLAGS) $(ADDFLAGS)")
-                        else:
-                		makefile.write("\t$(CC) $(CFLAGS) $(ADDFLAGS)")
-		if linkHeaders == True:
-			makefile.write(" $(INCLUDES)")
-		else:
-			for hdrdir in mod['DEPHDRS']:
-				makefile.write(" -I"+os.path.dirname( hdrdir))
-		makefile.write(" $(PREP_DEFS) -c "+srcFile+" -o $@\n");
+            write_build_command(srcFile = srcFile, test = False)
 	for prebuiltObjFile in mod['PREBUILTSOURCES']:
 		objfile = os.path.basename(prebuiltObjFile)
 		makefile.write(os.path.join("$(OBJDIR)", objfile) + ": ")
@@ -337,26 +397,7 @@ for mod in module_map:
 		makefile.write("\t$(EXPORT_CMD) " + prebuiltObjFile + " $@\n")
         if buildTests == True:
         	for testFile in mod['TESTSOURCES']:
-	        	objfile = os.path.basename(testFile)[:-2]+".o"
-		        privInclude = module.getName().upper()+"_PRIV"
-		
-		        makefile.write(os.path.join("$(OBJDIR)", objfile) + ": " + testFile + " ")
-		        for hdr in mod['DEPHDRS']:
-			        makefile.write( " " + hdr)
-        		makefile.write("\n")
-                        if testFile[-4:] == '.cpp':
-        	        	makefile.write("\t$(CXX) $(CFLAGS) $(ADDFLAGS)")
-                        else:
-                                makefile.write("\t$(CC) $(CFLAGS) $(ADDFLAGS)")
-		        if linkHeaders == True:
-			        makefile.write(" $(INCLUDES)")
-        		else:
-	        		for hdrdir in mod['DEPHDRS']:
-		        		makefile.write(" -I"+os.path.dirname( hdrdir))
-        		makefile.write(" $(PREP_DEFS)")
-	        	for hdrdir in mod['DEPHDRS']:
-		        	makefile.write(" -I"+os.path.dirname( hdrdir))
-        		makefile.write(" -I" + os.path.join(module.getRootPath(),"test") + os.sep + " -c " + testFile + " -o $@\n")
+                    write_build_command(srcFile = testFile, test = True)
 makefile.write("### End of Makefile\n")
 makefile.write("\n")
 

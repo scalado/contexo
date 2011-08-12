@@ -63,6 +63,25 @@ for arg in sys.argv:
     if arg == '-rfs':
         relativeForwardSlashes = True
 
+
+def dir_has_rspec(view_dir):
+    view_filelist = os.listdir(view_dir)
+    for entry in view_filelist:
+        if entry.endswith('.rspec'):
+            return True
+    return False
+orig_view_dir = os.path.abspath('')
+view_dir = orig_view_dir
+while not dir_has_rspec(view_dir):
+    os.chdir('..')
+    if view_dir == os.path.abspath(''):
+        errorMessage('rspec not found, git ctx must be launched from a valid Contexo view')
+        exit(2)
+    view_dir = os.path.abspath('')
+    os.chdir(view_dir)
+os.chdir(orig_view_dir)
+
+
 #------------------------------------------------------------------------------
 def create_module_mapping_from_module_list( ctx_module_list, depMgr):
     code_module_map = list()
@@ -105,9 +124,9 @@ def create_module_mapping_from_module_list( ctx_module_list, depMgr):
 msgSender = 'Makefile Export'
 
 if relativeForwardSlashes:
-    sep = os.sep
-else:
     sep = '/'
+else:
+    sep = os.sep
 
 
 contexo_config_path = ctx_common.getUserCfgDir() + sep + ctx_sysinfo.CTX_CONFIG_FILENAME
@@ -215,10 +234,10 @@ if not os.path.isfile("Makefile.cfg"):
 	cfgmakefile.write("OUTPUT=output\n")
 	cfgmakefile.write("LIBDIR=" + "$(OUTPUT)" + sep + "lib" + "\n")
 	cfgmakefile.write("OBJDIR=" + "$(OUTPUT)" + sep + "obj"+ "\n")
-	cfgmakefile.write("HDRDIR=" + "$(OUTPUT)" + sep + "inc") + "\n")
+	cfgmakefile.write("HDRDIR=" + "$(OUTPUT)" + sep + "inc" + "\n")
 	cfgmakefile.write("\n")
     
-	if os.name == 'nt':
+	if os.name == 'nt' and not relativeForwardSlashes:
 		cfgmakefile.write("EXPORT_CMD=copy\n")
 		cfgmakefile.write("RM=del /S /Q\n")
 		cfgmakefile.write("MKDIR=mkdir\n")
@@ -338,7 +357,11 @@ for comp in package.export_data['COMPONENTS']:
 	
 	for headerFile in headerFiles:
                 if headerDict.has_key(headerFile):
-                    makefile.write("\t$(EXPORT_CMD) "+headerDict[headerFile]+ " " + $(HDRDIR)" + sep + headerFile + "\n")
+                    if relativeForwardSlashes:
+                        relHdr = headerDict[headerFile][len(view_dir)+1:].replace(os.sep, sep)
+                    else:
+                        relHdr = headerDict[headerFile]
+                    makefile.write("\t$(EXPORT_CMD) "+ relHdr + " $(HDRDIR)" + sep + headerFile + "\n")
                 else:
                     warningMessage('Headerfile '+headerFile+' could not be located')
 	makefile.write("\n")
@@ -348,10 +371,17 @@ makefile.write("### Object definitions\n")
 
 def write_build_command(srcFile = str(), test = False):
     objfile = os.path.basename(srcFile)[:-2]+obj_suffix
-    
-    makefile.write("$(OBJDIR)" +sep+ objfile + ": " + srcFile)
+    if relativeForwardSlashes:
+        relSrcFile = srcFile[len(view_dir)+1:].replace(os.sep,sep)
+    else:
+        relSrcFile = srcFile
+    makefile.write("$(OBJDIR)" +sep+ objfile + ": " + relSrcFile)
     for hdr in mod['DEPHDRS']:
-            makefile.write(" " + hdr)
+        if relativeForwardSlashes:
+            relHdr = hdr[len(view_dir)+1:].replace(os.sep,sep)
+        else:
+            relHdr = hdr
+        makefile.write(" " + relHdr)
     makefile.write("\n")
     cxx = "$(CXX)"
     cmdline = str()
@@ -369,11 +399,18 @@ def write_build_command(srcFile = str(), test = False):
     cflags = cflags + " $(ADDFLAGS)"
     cppdefines = "$(PREP_DEFS)"
     incpaths = str()
+    if relativeForwardSlashes:
+        srcFile = srcFile[len(view_dir)+1:].replace(os.sep,sep)
     if linkHeaders == True:
             incpaths = " $(incpaths)"
     else:
             for hdrdir in mod['DEPHDRS']:
-                    incpaths += " "+inc_prefix+os.path.dirname( hdrdir)+inc_suffix
+                relhdrdir = hdrdir
+                if relativeForwardSlashes:
+                    relhdrdir = os.path.dirname( hdrdir)[len(view_dir)+1:].replace(os.sep,sep)
+                else:
+                    relhdrdir = os.path.dirname( hdrdir)
+                incpaths += " "+inc_prefix+ relhdrdir +inc_suffix
     if test:
         incpaths +=" " + inc_prefix+ module.getRootPath()+sep+"test"+inc_suffix
 
@@ -382,9 +419,9 @@ def write_build_command(srcFile = str(), test = False):
     cmdline = cmdline.replace( '%CC'          ,   cc)
     cmdline = cmdline.replace( '%CXX'         ,   cxx)
     # not supported yet
-    #cmdline = cmdline.replace( '%ASMFLAGS'    ,   asmflags_cmdline    )
+    #cmdline = cmdline.replace( '%ASMFLAGS'   ,   asmflags_cmdline    )
     # not supported yet
-    #cmdline = cmdline.replace( '%ASM'         ,   self.cdef['ASM']    )
+    #cmdline = cmdline.replace( '%ASM'        ,   cdef['ASM']    )
     cmdline = cmdline.replace( '%CFLAGS'      ,   cflags)
     cmdline = cmdline.replace( '%CPPDEFINES'  ,   cppdefines )
     cmdline = cmdline.replace( '%INCPATHS'    ,   incpaths )
@@ -401,7 +438,7 @@ for mod in module_map:
 	for srcFile in mod['SOURCES']:
             write_build_command(srcFile = srcFile, test = False)
 	for prebuiltObjFile in mod['PREBUILTSOURCES']:
-		objfile = os.path.basename(prebuiltObjFile)
+                objfile = os.path.basename(prebuiltObjFile)
 		makefile.write("$(OBJDIR)"+sep+objfile + ": ")
 		makefile.write("\n")
 		makefile.write("\t$(EXPORT_CMD) " + prebuiltObjFile + " $@\n")

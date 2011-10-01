@@ -39,6 +39,18 @@ ln -s $PWD/testrepo.svn /tmp/testrepo.svn || fail
 #rm -f hello.a goodbye.a
 #cleanup
 #cd ..
+
+echo "build with inline sub_bc"
+cd sub_bc_view
+$CTX build -b "sub_bc_inline.bc" hello
+#1>/dev/null 2>>$OUT || fail
+test -f .ctx/obj/Gcc/hello.o ||{ echo "hello.o not compiled"; fail;}
+test -f "hello.a"|| fail
+cd ..
+cleanup
+
+
+
 echo "build standard"
 $CTX build -b "$BCONF" bare_hello 1>/dev/null 2>>$OUT || fail
 test -f "bare_hello.a"|| fail

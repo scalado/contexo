@@ -32,9 +32,9 @@ class CFGFile:
         self.path            = cfgFilePath
         self.defaultBConf    = str()
         self.defaultView     = str()
-        self.bcPaths         = list()
-        self.cdefPaths       = list()
-        self.EnvPaths        = list()
+        self.bcPaths         = set()
+        self.cdefPaths       = set()
+        self.EnvPaths        = set()
         self.verboseLevel    = 1
 
         #Copy default config into the user's directory if needed
@@ -77,13 +77,13 @@ class CFGFile:
         self.cfgFile.add_item ('default', 'CTX_DEFAULT_BCONF', bconfFile )
 
     def setBConfPaths ( self, bconfPaths ):
-        self.cfgFile.add_item ('default', 'CTX_BCONF_PATHS', bconfPaths)
+        self.cfgFile.add_item ('default', 'CTX_BCONF_PATHS', list(bconfPaths))
 
     def setCDefPaths ( self, cdefPaths ):
-        self.cfgFile.add_item ('default', 'CTX_CDEF_PATHS', cdefPaths )
+        self.cfgFile.add_item ('default', 'CTX_CDEF_PATHS', list(cdefPaths) )
 
     def setEnvPaths ( self, envPaths ):
-        self.cfgFile.add_item ('default', 'CTX_ENV_PATHS', envPaths )
+        self.cfgFile.add_item ('default', 'CTX_ENV_PATHS', list(envPaths) )
 
     def setVerboseLevel ( self, verboseLevel ):
         self.cfgFile.add_item ('default', 'CTX_VERBOSE_LEVEL', verboseLevel )

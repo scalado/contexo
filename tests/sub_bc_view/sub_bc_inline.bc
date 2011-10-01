@@ -16,7 +16,7 @@ CDEF                    = gcc_std.cdef
 CFLAGS                  = -pipe -Wall -W -O2 -std=c99 -funroll-loops -fstrict-aliasing
 PREP_DEFINES            = 
 SUB_BC_DIR              = sub_bc_other
-SUB_BC_CDEF             = sub_bc_clang.cdef
+SUB_BC_CDEF             = clang_std.cdef
 SUB_BC_CFLAGS           = -DSUB_BC_COMPILER -pipe -Wall -W -O2 -std=c99 -funroll-loops -fstrict-aliasing
 
 

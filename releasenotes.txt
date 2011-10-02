@@ -1,3 +1,7 @@
+Contexo 0.17.0
+Feature: new inline sub_bc directives: SUB_BC_DIR SUB_BC_CDEF SUB_BC_CFLAGS to specify the dir for the sub_bc subdirectory, the cdef to use for that directory and the specific cflags.
+Feature: Improvements to the genmake plugin on Windows: the switch -rfs (Relative Forward Slashes) can now be used to generate relative Makefile:s with forward slashes for compatibility with MinGW, Cygwin and possibility to load Makefile:s calling Visual Studio in Eclipse/Netbeans.
+
 Contexo 0.16.2
 Bugfix: msvc.py stderr output fixed
 Bugfix: version print to stdout

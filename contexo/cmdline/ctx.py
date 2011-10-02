@@ -94,39 +94,15 @@ def getBuildConfiguration( cview ,  args):
     from contexo import ctx_config
 
     if args.bconf != None:
-        bcFile = args.bconf
+        bcFilename = args.bconf
     else:
         if CTX_DEFAULT_BCONF != None:
             infoMessage("Using default build configuration '%s'"%(CTX_DEFAULT_BCONF), 2)
-            bcFile = CTX_DEFAULT_BCONF
+            bcFilename = CTX_DEFAULT_BCONF
         else:
             userErrorExit("No build configuration specified.")
 
-    # Uglyness:
-    # Historically the BCFile class located both the bc file and the cdef file
-    # on its own from a provided list of search locations. We work around this
-    # by providing only the single paths to these items which we get from the
-    # view (maintaining backward compatibility).
-    # Since we don't know the name of the CDEF yet, we have to violate some
-    # good coding morale and extract it manually from the bc file. Some of this
-    # code was copied from BCFile::__process_bc().
-
-    bcFilePath = cview.locateItem( bcFile, 'bconf' )
-    bcFilename = os.path.basename( bcFilePath )
-    bcPath = os.path.dirname( bcFilePath )
-
-    bcDict = ctx_config.CTXConfig( bcFilePath )
-    section = bcDict.get_section( 'config'  )
-    if not section.has_key( 'CDEF' ):
-        userErrorExit("Mandatory BC option 'CDEF' is missing.")
-
-    cdefFilename = section[ 'CDEF' ]
-    cdefFilePath = cview.locateItem( cdefFilename, 'cdef' )
-    cdefPath = os.path.dirname( cdefFilePath )
-
-    ctxAssert( os.path.basename( os.path.normcase(cdefFilePath) ) == os.path.normcase(cdefFilename), "Something went wrong in our workaround.." )
-
-    bc = ctx_bc.BCFile( bcFilename, bcPath, cdefPath, cfgFile)
+    bc = ctx_bc.BCFile( bcFilename, cview, cfgFile)
 
     return bc
 

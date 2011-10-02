@@ -32,7 +32,7 @@ import copy
 class BCFile:
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - - -
-    def __init__( self, bcFilename = str(), bcFilePaths = set(), cdefPaths = set(), cfgFile = str(), referenceSubBC = True ):
+    def __init__( self, bcFilename = None, cview = None, cfgFile = None, referenceSubBC = True ):
         self.path            = str()
         self.buildParams     = CTXBuildParams()
         self.bcTitle         = str()
@@ -48,26 +48,23 @@ class BCFile:
         self.msgSender       = 'BCFile'
         self.subBC           = dict()
         self.archPath        = list()
-	self.bcFilePaths     = set()
-	self.cdefPaths       = set()
+	self.bcFilePaths     = list()
+	self.cdefPaths       = list()
 	self.cfgFile         = cfgFile
         #
-        import pdb
-        pdb.set_trace()
 
-        if type(bcFilePaths) != type(set()):
-            self.bcFilePaths.add(bcFilePaths)
-        else:
-            self.bcFilePaths = bcFilePaths
+        #bcFilePaths.append( os.getcwd() )
+        
+        self.bcFilePaths.append(cview.getRoot())
+        self.bcFilePaths.extend(cfgFile.getBConfPaths())
+        self.bcFilePaths.extend(cview.getGlobalPaths("bconf"))
 
-        if type(cdefPaths) != type(set()):
-            self.cdefPaths.add(cdefPaths)
-        else:
-            self.cdefPaths = cdefPaths
-
+        self.cdefPaths.append(cview.getRoot())
+        self.cdefPaths.extend(cfgFile.getCDefPaths())
+        self.cdefPaths.extend(cview.getGlobalPaths("cdef"))
 
         self.__resolveBCFileLocation( bcFilename, cfgFile, self.bcFilePaths )
-        self.__process_bc( self.path, self.cfgFile, self.cdefPaths, referenceSubBC )
+        self.__process_bc( self.path, cview, self.bcFilePaths, self.cdefPaths, cfgFile, referenceSubBC )
         self.__updateBuildParams()
         self.compiler = CTXCompiler( os.path.join( self.cdefPath, self.cdef ) )
 
@@ -91,12 +88,6 @@ class BCFile:
         # try at calling location and last in config variable.
         #
 
-        bcFilePaths.add( os.getcwd() )
-
-        # TODO: change this to set()
-        configBCPaths = set(cfgFile.getBConfPaths())
-
-        bcFilePaths = bcFilePaths | configBCPaths
 
         found = False
 
@@ -166,9 +157,6 @@ class BCFile:
     def __resolve_cdefPath(self, section, cfgFile, cdefPaths, cdef):
         found = False
 
-        import pdb
-        pdb.set_trace()
-
         for pathCandidate in cdefPaths:
             candidate = os.path.join( pathCandidate, cdef )
             if os.path.exists( candidate ):
@@ -183,15 +171,13 @@ class BCFile:
         return cdefPath
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - - -
-    def __process_bc( self, bcFilePath, cfgFile, cdefPaths, referenceSubBC ):
-
-#        msgSender    = 'BCFile'
+    def __process_bc( self, bcFilename, cview, bcFilePaths, cdefPaths, cfgFile, referenceSubBC ):
         option_name  = str()
         bcsec_meta   = dict()
         bcsec_config = dict()
         illegal_title_chars = ['&',]
 
-        cfg = ctx_config.CTXConfig( bcFilePath )
+        cfg = ctx_config.CTXConfig( bcFilename )
 
         if cfg.has_section( 'meta' ):
             bcsec_meta  = cfg.get_section( 'meta'  )
@@ -367,7 +353,7 @@ class BCFile:
                         bc_name = section[option_name][:-3]
 		else:
 			bc_name = section[option_name]
-    		sub_bc = BCFile( bcFilename = bcFilename, bcFilePaths = bcFilePaths, cdefPaths = cdefPaths, cfgFile = cfgFile, referenceSubBC = False )
+    		sub_bc = BCFile( bcFilename = bc_name, cview = cview, cfgFile = cfgFile, referenceSubBC = False )
                 self.subBC[ bc_name ] = sub_bc
             else:
                 for subBCElem in section[ option_name ]:
@@ -375,7 +361,7 @@ class BCFile:
                                 bc_name = subBCElem[:-3]
 			else:
 				bc_name = subBCElem
-			sub_bc = BCFile( bc_name, self.bcFilePaths, cdefPaths, self.cfgFile, referenceSubBC = False )
+			sub_bc = BCFile( bcFilename = bc_name, cview = cview, cfgFile = cfgFile, referenceSubBC = False )
 			self.subBC[bc_name] = sub_bc
  #
         # Colormodes
@@ -428,7 +414,7 @@ class BCFile:
 	        bc_name = section[option_name]
                 if self.subBC.has_key( bc_name ):
                     userErrorExit("ambiguos SUB_BC_DIR directive overrides SUB_BC; did you intend to replace the SUB_BC entry with a SUB_BC_DIR entry?")
-		sub_bc = BCFile( bc_name, self.bcFilePaths, cdefPaths, self.cfgFile, referenceSubBC = False )
+		sub_bc = BCFile( bc_name, cview = cview, cfgFile = cfgFile, referenceSubBC = False )
                 sub_bc.cflags = self.__parse_cflags( section['SUB_BC_CFLAGS'] )
                 sub_bc.cdef = section['SUB_BC_CDEF']
                 sub_bc.cdefPath = self.__resolve_cdefPath(section, cfgFile, cdefPaths, sub_bc.cdef)
@@ -437,7 +423,6 @@ class BCFile:
         else:
             if section.has_key( 'SUB_BC_CFLAGS' ) or section.has_key( 'SUB_BC_CDEF' ):
                 userErrorExit("SUB_BC_CFLAGS and SUB_BC_CDEF requires a SUB_BC_DIR entry")
-        self.subBC[bc_name]
 
         self.__assert_correct_type( option_name, self.buildParams.prepDefines, [list] )
 

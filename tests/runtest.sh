@@ -9,6 +9,7 @@ cleanup(){
     rm -rf delete_view/delete_repo/delete_modules/delete/src
     rm -rf delete_view/.ctx
     rm -rf hello_view/.ctx
+    rm -rf sub_bc_view/.ctx
     rm -f *.a test_repo/*.a test_repo/*.h *.h freeze.rspec delete_view/*.a hello_view/hello.exe
     rm -f $OUT
 }
@@ -40,21 +41,11 @@ ln -s $PWD/testrepo.svn /tmp/testrepo.svn || fail
 #cleanup
 #cd ..
 
-echo "build with inline sub_bc"
-cd sub_bc_view
-$CTX build -b "sub_bc_inline.bc" hello
-#1>/dev/null 2>>$OUT || fail
-test -f .ctx/obj/Gcc/hello.o ||{ echo "hello.o not compiled"; fail;}
-test -f "hello.a"|| fail
-cd ..
-cleanup
-
-
-
 echo "build standard"
 $CTX build -b "$BCONF" bare_hello 1>/dev/null 2>>$OUT || fail
 test -f "bare_hello.a"|| fail
 cleanup
+
 
 
 
@@ -171,6 +162,15 @@ $CTX build -b "$BCONF" --legacy-duplicate-sources wazzup 1>/dev/null 2>>$OUT ||f
 rm -f wazzup.a
 cleanup
 cd ..
+
+echo "build with inline sub_bc"
+cd sub_bc_view
+$CTX build -b "sub_bc_inline.bc" hello 1>/dev/null 2>>$OUT || fail
+test -f .ctx/obj/Gcc/hello.o ||{ echo "hello.o not compiled"; fail;}
+test -f "hello.a"|| fail
+cd ..
+cleanup
+
 
 echo "build with sub_bc"
 cd sub_bc_view

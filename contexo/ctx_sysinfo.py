@@ -17,8 +17,8 @@
 #
 
 CTX_VER_MAJOR           = 0
-CTX_VER_MINOR_1         = 17
-CTX_VER_MINOR_2         = 0
+CTX_VER_MINOR_1         = 16
+CTX_VER_MINOR_2         = 3
 CTX_VER_STATE           = ''
 CTX_DISPLAYVERSION      = '%d.%d.%d %s'%(CTX_VER_MAJOR, CTX_VER_MINOR_1, CTX_VER_MINOR_2, CTX_VER_STATE)
 CTX_LICENSE             = 'licesed under GPLv2 ( http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt )'

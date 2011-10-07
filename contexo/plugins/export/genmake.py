@@ -323,8 +323,8 @@ for mod in module_map:
                         	if srcFile in srcList:
                         		subBCName = os.path.basename(os.path.dirname(srcFile))
                 			makefile.write("\t$(" + subBCName.upper() + "_CC) $(" + subBCName.upper() + "_CFLAGS) $(ADDFLAGS)")
-                        else:
-                		makefile.write("\t$(CC) $(CFLAGS) $(ADDFLAGS)")
+                        	else:
+                			makefile.write("\t$(CC) $(CFLAGS) $(ADDFLAGS)")
 		if linkHeaders == True:
 			makefile.write(" $(INCLUDES)")
 		else:

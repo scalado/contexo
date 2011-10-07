@@ -117,12 +117,12 @@ def getSourcesFromDir( self, srcDir ):
     srcListDict = dict()
     objListDict = dict()
     # 'bc name': list()
-    subBCListDict = dict()
+    subBCificListDict = dict()
     srcList = list ()
     objList = list()
     if not os.path.exists(srcDir):
 	    srcList = list()
-	    return srcList, objList,subBCListDict
+	    return srcList, objList,subBCificListDict
     source_extensions = [ '.c', '.cpp']
 
     # Collect all source files.
@@ -181,16 +181,16 @@ def getSourcesFromDir( self, srcDir ):
                                 msg = 'Overriding source file '+os.path.join(srcDir, srcListDict[baseFileName])+' with build configuration specific file: '+subBC_sourceFile + '. Specific build configuration: ' + subBCEntry + '.bc'
                                 infoMessage(msg, 1)
                         srcListDict[baseFileName] = subBCEntry[len(srcDir)+1:] + os.sep + subBC_sourceFile
-                        if not subBCListDict.has_key(subBC):
-                            subBCListDict[subBC] = list()
+                        if not subBCificListDict.has_key(subBC):
+                            subBCificListDict[subBC] = list()
                         
-                        subBCListDict[subBC].append(subBCEntry + os.sep + subBC_sourceFile)
+                        subBCificListDict[subBC] = subBCEntry + os.sep + subBC_sourceFile
 
     for srcFile in srcListDict.values():
         srcList.append(srcFile)
     for objFile in objListDict.values():
         objList.append(objFile)
-    return srcList,objList,subBCListDict
+    return srcList,objList,subBCificListDict
 
 
 #------------------------------------------------------------------------------
@@ -260,14 +260,12 @@ class CTXRawCodeModule:
         return self.modRoot
     #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     def getSourceFilenames(self):
-
         if len(self.srcFiles) == 0:
             srcDir = self.getSourceDir()
             self.srcFiles, self.prebuiltObjFiles, self.subBCSrcDict = getSourcesFromDir( self, srcDir )
         return self.srcFiles
 
     def getPreBuiltObjectFilenames(self):
-
         if len(self.srcFiles) == 0 or len(self.prebuiltObjFiles) == 0:
             srcDir = self.getSourceDir()
             self.srcFiles, self.prebuiltObjFiles,self.subBCSrcDict = getSourcesFromDir( self, srcDir )
@@ -527,13 +525,11 @@ class CTXCodeModule( CTXRawCodeModule ):
 
         objlist = list()
         for src in srcFiles:
-            bc = self.bc
-
-            for srcList in subBCSrcFiles.values():
-                if src in srcList:
-                    for subBCSrc in srcList:
-                        subBCName = os.path.basename(os.path.dirname(subBCSrc))
-                        bc = self.subBC[subBCName]
+            if src in subBCSrcFiles.values():
+                subBCName = os.path.basename(os.path.dirname(src))
+                bc = self.subBC[subBCName]
+            else:
+                bc = self.bc
             obj = session.buildStaticObject( os.path.normpath( src ), os.path.normpath( outputDir ), bc, self.rebuildAll )
             objlist.append( obj )
  

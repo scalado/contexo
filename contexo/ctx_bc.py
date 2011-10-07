@@ -23,7 +23,6 @@ import ctx_config
 #import platform.ctx_platform
 from ctx_common import *
 from ctx_base import *
-import copy
 
 #------------------------------------------------------------------------------
 
@@ -32,7 +31,7 @@ import copy
 class BCFile:
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - - -
-    def __init__( self, bcFilename = None, cview = None, cfgFile = None, referenceSubBC = True ):
+    def __init__( self, bcFilename, bcFilePaths, cdefPaths, cfgFile ):
         self.path            = str()
         self.buildParams     = CTXBuildParams()
         self.bcTitle         = str()
@@ -48,23 +47,16 @@ class BCFile:
         self.msgSender       = 'BCFile'
         self.subBC           = dict()
         self.archPath        = list()
-	self.bcFilePaths     = list()
-	self.cdefPaths       = list()
+	self.bcFilePaths     = bcFilePaths
+	self.cdefPaths       = cdefPaths
 	self.cfgFile         = cfgFile
         #
 
-        #bcFilePaths.append( os.getcwd() )
-        
-        self.bcFilePaths.append(cview.getRoot())
-        self.bcFilePaths.extend(cfgFile.getBConfPaths())
-        self.bcFilePaths.extend(cview.getGlobalPaths("bconf"))
+        bcFilePaths = assureList( bcFilePaths )
+        cdefPaths = assureList( cdefPaths )
 
-        self.cdefPaths.append(cview.getRoot())
-        self.cdefPaths.extend(cfgFile.getCDefPaths())
-        self.cdefPaths.extend(cview.getGlobalPaths("cdef"))
-
-        self.__resolveBCFileLocation( bcFilename, cfgFile, self.bcFilePaths )
-        self.__process_bc( self.path, cview, self.bcFilePaths, self.cdefPaths, cfgFile, referenceSubBC )
+        self.__resolveBCFileLocation( bcFilename, cfgFile, bcFilePaths )
+        self.__process_bc( self.path, cfgFile, cdefPaths ) #TODO: __process_bc needs to be run before __updateBuildParams
         self.__updateBuildParams()
         self.compiler = CTXCompiler( os.path.join( self.cdefPath, self.cdef ) )
 
@@ -88,8 +80,12 @@ class BCFile:
         # try at calling location and last in config variable.
         #
 
+        bcFilePaths.append( os.getcwd() )
 
-        found = False
+        configBCPaths = cfgFile.getBConfPaths()
+        if type(configBCPaths) != list:
+            configBCPaths = [configBCPaths,]
+        bcFilePaths.extend( configBCPaths )
 
         for pathCandidate in bcFilePaths:
             candidate = os.path.join( pathCandidate, bcFilename )
@@ -97,12 +93,16 @@ class BCFile:
             if os.path.exists( candidate ):
                 self.path = candidate
                 infoMessage("Using BC: %s"%( self.path ), 1)
-                found = True
-                break
+                return
+            else:
+                tried.append( candidate )
 
-        if not found:
+        #
+        # If we reach this point we have tried everything we can and failed.
+        #
+
+        if not os.path.exists(self.path):
             userErrorExit("BC file '%s' not found."%(bcFilename))
-        return
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - - -
     def __assert_correct_type( self, option, value, allowed_types ):
@@ -146,38 +146,19 @@ class BCFile:
             errorMessage("Unknown character encoding: %s"%self.charEncoding)
             ctxExit(1)
 
-    def __parse_cflags( self, sectionCflags ):
-            # this is a fix for gcc, where compiler arguments may include , which the python config doesn't seem to handle
-            if type(sectionCflags) == list and len( sectionCflags) > 1:
-                cflags = (''.join("%s," % (k) for k in sectionCflags))[0:-1]
-            else:
-                cflags = sectionCflags
-            return cflags
 
-    def __resolve_cdefPath(self, section, cfgFile, cdefPaths, cdef):
-        found = False
 
-        for pathCandidate in cdefPaths:
-            candidate = os.path.join( pathCandidate, cdef )
-            if os.path.exists( candidate ):
-                cdefPath = pathCandidate
-                infoMessage("Using CDEF: %s"%( candidate ), 1)
-                found = True
-                break
-
-        if not found:
-            userErrorExit("CDEF file '%s' not found. Attempted following locations:\n  %s"%(cdef, string.join(cdefPaths, '\n  ')))
-
-        return cdefPath
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - - -
-    def __process_bc( self, bcFilename, cview, bcFilePaths, cdefPaths, cfgFile, referenceSubBC ):
+    def __process_bc( self, bcFilePath, cfgFile, cdefPaths ):
+
+#        msgSender    = 'BCFile'
         option_name  = str()
         bcsec_meta   = dict()
         bcsec_config = dict()
         illegal_title_chars = ['&',]
 
-        cfg = ctx_config.CTXConfig( bcFilename )
+        cfg = ctx_config.CTXConfig( bcFilePath )
 
         if cfg.has_section( 'meta' ):
             bcsec_meta  = cfg.get_section( 'meta'  )
@@ -241,15 +222,30 @@ class BCFile:
         self.cdef = section[ option_name ]
 
         configCDefPaths = cfgFile.getCDefPaths()
-
-        if type(configCDefPaths) != type(list()):
+        if type(configCDefPaths) != list:
             configCDefPaths = [configCDefPaths,]
+
+        if len(cfgFile.getCDefPaths()) != 0:
+            cdefPaths.extend( configCDefPaths )
 
         if section.has_key( 'CDEF_PATH' ):
             warningMessage("BC/BConf section 'CDEF_PATH' is deprecated and may produce unexpected results when working with views and RSpecs")
             cdefPaths.append( section['CDEF_PATH'] )
 
-        self.cdefPath = self.__resolve_cdefPath(section, cfgFile, cdefPaths, self.cdef)
+        tried_cdefs = list()
+        for pathCandidate in cdefPaths:
+            candidate = os.path.join( pathCandidate, self.cdef )
+            infoMessage("Trying CDEF: %s"%(candidate), 2)
+            if os.path.exists( candidate ):
+                self.cdefPath = pathCandidate
+                infoMessage("Using CDEF: %s"%( candidate ), 1)
+                break
+            else:
+                tried_cdefs.append( candidate )
+
+        if not os.path.exists( os.path.join( self.cdefPath, self.cdef) ):
+            userErrorExit("CDEF file '%s' not found. Attempted following locations:\n  %s"%(self.cdef, string.join(tried_cdefs, '\n  ')))
+
 
         # Notes:
         #
@@ -347,13 +343,13 @@ class BCFile:
                     self.archPath.append(pathElem)
 
 	option_name = 'SUB_BC'
-        if section.has_key( option_name ) and referenceSubBC:
+        if section.has_key( option_name ):
             if type( section[ option_name ] ) == type( str() ):
 		if section[option_name].endswith(".bc"):
                         bc_name = section[option_name][:-3]
 		else:
 			bc_name = section[option_name]
-    		sub_bc = BCFile( bcFilename = bc_name, cview = cview, cfgFile = cfgFile, referenceSubBC = False )
+    		sub_bc = BCFile( bc_name, self.bcFilePaths, self.cdefPaths, self.cfgFile )
                 self.subBC[ bc_name ] = sub_bc
             else:
                 for subBCElem in section[ option_name ]:
@@ -361,9 +357,9 @@ class BCFile:
                                 bc_name = subBCElem[:-3]
 			else:
 				bc_name = subBCElem
-			sub_bc = BCFile( bcFilename = bc_name, cview = cview, cfgFile = cfgFile, referenceSubBC = False )
+			sub_bc = BCFile( bc_name, self.bcFilePaths, self.cdefPaths, self.cfgFile )
 			self.subBC[bc_name] = sub_bc
- #
+        #
         # Colormodes
         #
 
@@ -377,7 +373,11 @@ class BCFile:
         option_name = 'CFLAGS'
 
         if section.has_key( option_name ):
-            self.buildParams.cflags = self.__parse_cflags( section['CFLAGS'] )
+            # this is a fix for gcc, where compiler arguments may include , which the python config doesn't seem to handle
+            if type(section[ option_name ]) == list and len( section[ option_name ]) > 1:
+                self.buildParams.cflags = (''.join("%s," % (k) for k in section[ option_name ]))[0:-1]
+            else:
+                self.buildParams.cflags = section[ option_name ]
 
         self.__assert_correct_type( option_name, self.buildParams.cflags, [str,] )
 
@@ -405,24 +405,6 @@ class BCFile:
                 self.buildParams.prepDefines = [ section[option_name], ]
             else:
                 self.buildParams.prepDefines = section[option_name]
-
-        option_name = 'SUB_BC_DIR'
-        if section.has_key( option_name ) and referenceSubBC:
-            if not section.has_key( 'SUB_BC_CFLAGS' ) or not section.has_key( 'SUB_BC_CDEF' ):
-                userErrorExit("SUB_BC_DIR requires SUB_BC_CFLAGS and SUB_BC_CDEF")
-            if type( section[ option_name ] ) == type( str() ):
-	        bc_name = section[option_name]
-                if self.subBC.has_key( bc_name ):
-                    userErrorExit("ambiguos SUB_BC_DIR directive overrides SUB_BC; did you intend to replace the SUB_BC entry with a SUB_BC_DIR entry?")
-		sub_bc = BCFile( bc_name, cview = cview, cfgFile = cfgFile, referenceSubBC = False )
-                sub_bc.cflags = self.__parse_cflags( section['SUB_BC_CFLAGS'] )
-                sub_bc.cdef = section['SUB_BC_CDEF']
-                sub_bc.cdefPath = self.__resolve_cdefPath(section, cfgFile, cdefPaths, sub_bc.cdef)
-
-                self.subBC[ bc_name ] = sub_bc
-        else:
-            if section.has_key( 'SUB_BC_CFLAGS' ) or section.has_key( 'SUB_BC_CDEF' ):
-                userErrorExit("SUB_BC_CFLAGS and SUB_BC_CDEF requires a SUB_BC_DIR entry")
 
         self.__assert_correct_type( option_name, self.buildParams.prepDefines, [list] )
 

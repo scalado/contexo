@@ -319,9 +319,10 @@ for mod in module_map:
                 if srcFile[-4:] == '.cpp':
         		makefile.write("\t$(CXX) $(CFLAGS) $(ADDFLAGS)")
                 else:
-                        if srcFile in mod['SUB_BC_SOURCES'].values():
-                                subBCName = os.path.basename(os.path.dirname(srcFile))
-                		makefile.write("\t$(" + subBCName.upper() + "_CC) $(" + subBCName.upper() + "_CFLAGS) $(ADDFLAGS)")
+			for srcList in mod['SUB_BC_SOURCES'].values():
+                        	if srcFile in srcList:
+                        		subBCName = os.path.basename(os.path.dirname(srcFile))
+                			makefile.write("\t$(" + subBCName.upper() + "_CC) $(" + subBCName.upper() + "_CFLAGS) $(ADDFLAGS)")
                         else:
                 		makefile.write("\t$(CC) $(CFLAGS) $(ADDFLAGS)")
 		if linkHeaders == True:

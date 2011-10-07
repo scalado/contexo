@@ -1,3 +1,6 @@
+Contexo 0.16.5
+Bugfix: 0.16.4 broke makefile generator
+
 Contexo 0.16.4
 Bugfix: 0.16.3 broke bc search paths in rspecs
 

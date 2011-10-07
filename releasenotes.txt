@@ -1,3 +1,10 @@
+Contexo 0.16.4
+Bugfix: 0.16.3 broke bc search paths in rspecs
+
+Contexo 0.16.3
+Bugfix: sub_bc had some critical fixes
+Feature: makefile generator in windows now have -rfs flag to generate Makefiels compatible with cl.exe running under cygwin or mingw32
+
 Contexo 0.16.2
 Bugfix: msvc.py stderr output fixed
 Bugfix: version print to stdout

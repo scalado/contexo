@@ -47,40 +47,17 @@ exearg = False
 buildTests = False
 linkHeaders = False
 exe = str()
-relativeForwardSlashes = False
 
 for arg in sys.argv:
     if arg == '-h':
         print >>sys.stderr, 'help:'
         print >>sys.stderr, '-l, symlink all headers to one directory and use that for include path'
         print >>sys.stderr, '-t, build tests'
-        print >>sys.stderr, '-rfs, Relative build paths with Forward Slashes'
         sys.exit(1)
     if arg == '-t':
         buildTests = True
     if arg == '-l':
         linkHeaders = True
-    if arg == '-rfs':
-        relativeForwardSlashes = True
-
-
-def dir_has_rspec(view_dir):
-    view_filelist = os.listdir(view_dir)
-    for entry in view_filelist:
-        if entry.endswith('.rspec'):
-            return True
-    return False
-orig_view_dir = os.path.abspath('')
-view_dir = orig_view_dir
-while not dir_has_rspec(view_dir):
-    os.chdir('..')
-    if view_dir == os.path.abspath(''):
-        errorMessage('rspec not found, git ctx must be launched from a valid Contexo view')
-        exit(2)
-    view_dir = os.path.abspath('')
-    os.chdir(view_dir)
-os.chdir(orig_view_dir)
-
 
 #------------------------------------------------------------------------------
 def create_module_mapping_from_module_list( ctx_module_list, depMgr):
@@ -123,13 +100,7 @@ def create_module_mapping_from_module_list( ctx_module_list, depMgr):
 
 msgSender = 'Makefile Export'
 
-if relativeForwardSlashes:
-    sep = '/'
-else:
-    sep = os.sep
-
-
-contexo_config_path = ctx_common.getUserCfgDir() + sep + ctx_sysinfo.CTX_CONFIG_FILENAME
+contexo_config_path = os.path.join( ctx_common.getUserCfgDir(), ctx_sysinfo.CTX_CONFIG_FILENAME )
 infoMessage("Using config file '%s'"%contexo_config_path,  1)
 cfgFile = ctx_cfg.CFGFile(contexo_config_path)
 ctx_common.setInfoMessageVerboseLevel( int(cfgFile.getVerboseLevel()) )
@@ -149,21 +120,6 @@ depMgr = package.export_data['DEPMGR']
 
 includeExtensions = ['.h','.inl','.hpp']
 
-lib_suffix = str()
-lib_suffix = bc_file.getCompiler().cdef['LIBSUFFIX']
-
-obj_suffix = str()
-obj_suffix = bc_file.getCompiler().cdef['OBJSUFFIX']
-
-inc_prefix = str()
-inc_prefix = bc_file.getCompiler().cdef['INCPREFIX']
-inc_suffix = str()
-inc_suffix = bc_file.getCompiler().cdef['INCSUFFIX']
-
-
-prep_prefix = str()
-prep_prefix = bc_file.getCompiler().cdef['CPPDEFPREFIX']
-
 modules = package.export_data['MODULES']
 
 
@@ -181,11 +137,11 @@ if linkHeaders:
         userErrorExit('output must not be a file if using symlinks')
     if not os.path.isdir('output'):
         os.mkdir('output')
-    hdrlinkOutputDir = 'output' + sep + 'hdrlinks'
+    hdrlinkOutputDir = 'output' + os.sep + 'hdrlinks'
     shutil.rmtree(hdrlinkOutputDir,True)
-    os.mkdir('output' + sep + 'hdrlinks')
+    os.mkdir('output' + os.sep + 'hdrlinks')
     for header in headers:
-        os.symlink(header, 'output' + sep + 'hdrlinks' + sep + os.path.basename(header))
+        os.symlink(header, 'output' + os.sep + 'hdrlinks' + os.sep + os.path.basename(header))
 
 
 if not os.path.isfile("Makefile.inc"):
@@ -205,14 +161,6 @@ makefile = open("Makefile", 'w')
 makefile.write("#############################################\n")
 makefile.write("### Makefile generated with contexo plugin.\n")
 
-ranlib = str()
-if bc_file.getCompiler().cdef.has_key('RANLIB'):
-    ranlib = bc_file.getCompiler().cdef['RANLIB']
-else:
-    ranlib = ""
-
-ar = bc_file.getCompiler().cdef['AR']
-
 # config settings
 if not os.path.isfile("Makefile.cfg"):
 	cfgmakefile = open("Makefile.cfg", 'w')
@@ -227,17 +175,16 @@ if not os.path.isfile("Makefile.cfg"):
 	cfgmakefile.write("\n# Additional compiler parameters, such as include paths\n")
 	cfgmakefile.write("ADDFLAGS=\n")
 	cfgmakefile.write("\n")
-	cfgmakefile.write("AR="+ar+"\n")
-        if len(ranlib) > 0:
-        	cfgmakefile.write("RANLIB=" + ranlib + "\n")
+	cfgmakefile.write("AR=ar\n")
+	cfgmakefile.write("RANLIB=ranlib\n")
 	cfgmakefile.write("\n")
 	cfgmakefile.write("OUTPUT=output\n")
-	cfgmakefile.write("LIBDIR=" + "$(OUTPUT)" + sep + "lib" + "\n")
-	cfgmakefile.write("OBJDIR=" + "$(OUTPUT)" + sep + "obj"+ "\n")
-	cfgmakefile.write("HDRDIR=" + "$(OUTPUT)" + sep + "inc" + "\n")
+	cfgmakefile.write("LIBDIR=" + os.path.join("$(OUTPUT)", "lib") + "\n")
+	cfgmakefile.write("OBJDIR=" + os.path.join("$(OUTPUT)", "obj") + "\n")
+	cfgmakefile.write("HDRDIR=" + os.path.join("$(OUTPUT)", "inc") + "\n")
 	cfgmakefile.write("\n")
     
-	if os.name == 'nt' and not relativeForwardSlashes:
+	if os.name == 'nt':
 		cfgmakefile.write("EXPORT_CMD=copy\n")
 		cfgmakefile.write("RM=del /S /Q\n")
 		cfgmakefile.write("MKDIR=mkdir\n")
@@ -257,14 +204,14 @@ makefile.write("\n")
 
 if linkHeaders == True:
 	makefile.write("### symlinked headers output dir\n")
-	makefile.write("INCLUDES="+inc_prefix+"$(OUTPUT)" + sep + "hdrlinks")+inc_suffix
+	makefile.write("INCLUDES=-I" + os.path.join("$(OUTPUT)", "hdrlinks"))
 	makefile.write("\n")
 
 # Preprocessor defines
 makefile.write("### Standard defines\n")
 makefile.write("PREP_DEFS=")
 for prepDefine in build_params.prepDefines:
-	makefile.write(prep_prefix+prepDefine+" ")
+	makefile.write("-D"+prepDefine+" ")
 makefile.write("\n")
 
 libs = set()
@@ -275,7 +222,7 @@ for comp in package.export_data['COMPONENTS']:
 makefile.write("### Build-all definition\n")
 makefile.write("LIBS =")
 for lib in libs:
-	makefile.write(" " + "$(LIBDIR)" + sep + lib + lib_suffix)
+	makefile.write(" " + os.path.join("$(LIBDIR)", lib + ".a"))
 makefile.write("\n")
 
 # "all" definition
@@ -286,9 +233,9 @@ makefile.write("all: $(OBJDIR) $(HDRDIR) $(LIBDIR) $(LIBS)")
 makefile.write(" inc_all")
 makefile.write("\n")
 makefile.write("clean: inc_clean\n")
-makefile.write("\t$(RM) " + "$(OBJDIR)" + sep + "*"+obj_suffix + "\n")
-makefile.write("\t$(RM) " + "$(LIBDIR)" + sep + "*"+lib_suffix + "\n")
-makefile.write("\t$(RM) " + "$(HDRDIR)" + sep + "*.h" + "\n")
+makefile.write("\t$(RM) " + os.path.join("$(OBJDIR)", "*.o") + "\n")
+makefile.write("\t$(RM) " + os.path.join("$(LIBDIR)", "*.a") + "\n")
+makefile.write("\t$(RM) " + os.path.join("$(HDRDIR)", "*.h") + "\n")
 makefile.write("\n")
 
 makefile.write("\n")
@@ -328,40 +275,32 @@ for comp in package.export_data['COMPONENTS']:
 
 	for lib in comp.libraries:
 		objectfiles=list()
-		libfilename=lib+lib_suffix
+		libfilename=lib+".a"
 
 		for libs in comp.libraries[lib]:
 			for srcFile in modules[libs].getSourceFilenames():
-				objectfiles.append("$(OBJDIR)" + sep + os.path.basename(srcFile[:-2])+obj_suffix +" ")
+				objectfiles.append(os.path.join("$(OBJDIR)", os.path.basename(srcFile[:-2])+".o "))
                         if buildTests == True:
             			for testFile in modules[libs].getTestSourceFilenames():
-	        			objectfiles.append("$(OBJDIR)" + sep + os.path.basename(testFile[:-2])+obj_suffix+" ")
+	        			objectfiles.append(os.path.join("$(OBJDIR)", os.path.basename(testFile[:-2])+".o "))
 
-                objfilestring = ""
+		makefile.write(os.path.join("$(LIBDIR)", libfilename)+": ")
+		makefile.write("$(HDRDIR) $(OBJDIR) $(LIBDIR) ")
 		for objfile in objectfiles:
-			objfilestring += objfile+" "
+			makefile.write(objfile+" ")
+		makefile.write("\n")
 
-		makefile.write("$(LIBDIR)" + sep + libfilename+": ")
-		makefile.write("$(HDRDIR) $(OBJDIR) $(LIBDIR) "+objfilestring+"\n")
-                arcom = bc_file.getCompiler().cdef['ARCOM']
-                if len(arcom) > 0:
-                    cmdline = "\t" + arcom.lstrip() + "\n"
-                    cmdline = cmdline.replace("%AR","$(AR)")
-                    cmdline = cmdline.replace("%SOURCES",objfilestring)
-                    cmdline = cmdline.replace("%TARGET","$@")
-                else:
-                    cmdline = "\t$(AR) r $@ " + objfilestring +"\n"
-                if len(ranlib) > 0:
-		    makefile.write("\t$(RANLIB) $@\n")
+		makefile.write("\t$(AR) r $@")
+		for objfile in objectfiles:
+			makefile.write(" " + objfile)
+		makefile.write("\n")
+
+		makefile.write("\t$(RANLIB) $@\n")
 
 	
 	for headerFile in headerFiles:
                 if headerDict.has_key(headerFile):
-                    if relativeForwardSlashes:
-                        relHdr = headerDict[headerFile][len(view_dir)+1:].replace(os.sep, sep)
-                    else:
-                        relHdr = headerDict[headerFile]
-                    makefile.write("\t$(EXPORT_CMD) "+ relHdr + " $(HDRDIR)" + sep + headerFile + "\n")
+                    makefile.write("\t$(EXPORT_CMD) "+headerDict[headerFile]+ " " + os.path.join("$(HDRDIR)", headerFile) + "\n")
                 else:
                     warningMessage('Headerfile '+headerFile+' could not be located')
 	makefile.write("\n")
@@ -369,82 +308,55 @@ for comp in package.export_data['COMPONENTS']:
 makefile.write("\n")
 makefile.write("### Object definitions\n")
 
-def write_build_command(srcFile = str(), test = False):
-    objfile = os.path.basename(srcFile)[:-2]+obj_suffix
-    if relativeForwardSlashes:
-        relSrcFile = srcFile[len(view_dir)+1:].replace(os.sep,sep)
-    else:
-        relSrcFile = srcFile
-    makefile.write("$(OBJDIR)" +sep+ objfile + ": " + relSrcFile)
-    for hdr in mod['DEPHDRS']:
-        if relativeForwardSlashes:
-            relHdr = hdr[len(view_dir)+1:].replace(os.sep,sep)
-        else:
-            relHdr = hdr
-        makefile.write(" " + relHdr)
-    makefile.write("\n")
-    cxx = "$(CXX)"
-    cmdline = str()
-    if srcFile[-4:] == '.cpp':
-            cmdline = "\t" + bc_file.getCompiler().cdef['CXXCOM'].lstrip() + "\n"
-    else:
-            cmdline = "\t" + bc_file.getCompiler().cdef['CCCOM'].lstrip() + "\n"
-            if srcFile in mod['SUB_BC_SOURCES'].values():
-                    subBCName = os.path.basename(os.path.dirname(srcFile))
-                    cc = "$(" + subBCName.upper() + "_CC)"
-                    cflags = "$(" + subBCName.upper() + "_CFLAGS)"
-            else:
-                    cc = "$(CC)"
-                    cflags = "$(CFLAGS)"
-    cflags = cflags + " $(ADDFLAGS)"
-    cppdefines = "$(PREP_DEFS)"
-    incpaths = str()
-    if relativeForwardSlashes:
-        srcFile = srcFile[len(view_dir)+1:].replace(os.sep,sep)
-    if linkHeaders == True:
-            incpaths = " $(incpaths)"
-    else:
-            for hdrdir in mod['DEPHDRS']:
-                relhdrdir = hdrdir
-                if relativeForwardSlashes:
-                    relhdrdir = os.path.dirname( hdrdir)[len(view_dir)+1:].replace(os.sep,sep)
-                else:
-                    relhdrdir = os.path.dirname( hdrdir)
-                incpaths += " "+inc_prefix+ relhdrdir +inc_suffix
-    if test:
-        incpaths +=" " + inc_prefix+ module.getRootPath()+sep+"test"+inc_suffix
-
-    cmdline.replace("%CC", "$(CC)")
-    # Expand all commandline mask variables to the corresponding items we prepared.
-    cmdline = cmdline.replace( '%CC'          ,   cc)
-    cmdline = cmdline.replace( '%CXX'         ,   cxx)
-    # not supported yet
-    #cmdline = cmdline.replace( '%ASMFLAGS'   ,   asmflags_cmdline    )
-    # not supported yet
-    #cmdline = cmdline.replace( '%ASM'        ,   cdef['ASM']    )
-    cmdline = cmdline.replace( '%CFLAGS'      ,   cflags)
-    cmdline = cmdline.replace( '%CPPDEFINES'  ,   cppdefines )
-    cmdline = cmdline.replace( '%INCPATHS'    ,   incpaths )
-    cmdline = cmdline.replace( '%SOURCES'     ,   srcFile )
-    # is this directive used?
-    cmdline = cmdline.replace( '%TARGETDIR'   ,   "."           )
-    # make specific
-    cmdline = cmdline.replace( '%TARGETFILE'  ,   "$@" )
-    cmdline = cmdline.replace( '%TARGET'      ,   "$@")
-
-    makefile.write(cmdline)
-
 for mod in module_map:
 	for srcFile in mod['SOURCES']:
-            write_build_command(srcFile = srcFile, test = False)
+		objfile = os.path.basename(srcFile)[:-2]+".o"
+		
+		makefile.write(os.path.join("$(OBJDIR)", objfile) + ": " + srcFile)
+		for hdr in mod['DEPHDRS']:
+			makefile.write(" " + hdr)
+		makefile.write("\n")
+                if srcFile[-4:] == '.cpp':
+        		makefile.write("\t$(CXX) $(CFLAGS) $(ADDFLAGS)")
+                else:
+                        if srcFile in mod['SUB_BC_SOURCES'].values():
+                                subBCName = os.path.basename(os.path.dirname(srcFile))
+                		makefile.write("\t$(" + subBCName.upper() + "_CC) $(" + subBCName.upper() + "_CFLAGS) $(ADDFLAGS)")
+                        else:
+                		makefile.write("\t$(CC) $(CFLAGS) $(ADDFLAGS)")
+		if linkHeaders == True:
+			makefile.write(" $(INCLUDES)")
+		else:
+			for hdrdir in mod['DEPHDRS']:
+				makefile.write(" -I"+os.path.dirname( hdrdir))
+		makefile.write(" $(PREP_DEFS) -c "+srcFile+" -o $@\n");
 	for prebuiltObjFile in mod['PREBUILTSOURCES']:
-                objfile = os.path.basename(prebuiltObjFile)
-		makefile.write("$(OBJDIR)"+sep+objfile + ": ")
+		objfile = os.path.basename(prebuiltObjFile)
+		makefile.write(os.path.join("$(OBJDIR)", objfile) + ": ")
 		makefile.write("\n")
 		makefile.write("\t$(EXPORT_CMD) " + prebuiltObjFile + " $@\n")
         if buildTests == True:
         	for testFile in mod['TESTSOURCES']:
-                    write_build_command(srcFile = testFile, test = True)
+	        	objfile = os.path.basename(testFile)[:-2]+".o"
+		        privInclude = module.getName().upper()+"_PRIV"
+		
+		        makefile.write(os.path.join("$(OBJDIR)", objfile) + ": " + testFile + " ")
+		        for hdr in mod['DEPHDRS']:
+			        makefile.write( " " + hdr)
+        		makefile.write("\n")
+                        if testFile[-4:] == '.cpp':
+        	        	makefile.write("\t$(CXX) $(CFLAGS) $(ADDFLAGS)")
+                        else:
+                                makefile.write("\t$(CC) $(CFLAGS) $(ADDFLAGS)")
+		        if linkHeaders == True:
+			        makefile.write(" $(INCLUDES)")
+        		else:
+	        		for hdrdir in mod['DEPHDRS']:
+		        		makefile.write(" -I"+os.path.dirname( hdrdir))
+        		makefile.write(" $(PREP_DEFS)")
+	        	for hdrdir in mod['DEPHDRS']:
+		        	makefile.write(" -I"+os.path.dirname( hdrdir))
+        		makefile.write(" -I" + os.path.join(module.getRootPath(),"test") + os.sep + " -c " + testFile + " -o $@\n")
 makefile.write("### End of Makefile\n")
 makefile.write("\n")
 

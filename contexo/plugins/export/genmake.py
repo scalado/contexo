@@ -47,6 +47,7 @@ exearg = False
 buildTests = False
 linkHeaders = False
 exe = str()
+assignCC = True
 
 for arg in sys.argv:
     if arg == '-h':
@@ -58,6 +59,8 @@ for arg in sys.argv:
         buildTests = True
     if arg == '-l':
         linkHeaders = True
+    if arg == '-nocc':
+        assignCC = False
 
 #------------------------------------------------------------------------------
 def create_module_mapping_from_module_list( ctx_module_list, depMgr):
@@ -165,8 +168,9 @@ makefile.write("### Makefile generated with contexo plugin.\n")
 if not os.path.isfile("Makefile.cfg"):
 	cfgmakefile = open("Makefile.cfg", 'w')
 	cfgmakefile.write("### Compiler settings\n")
-	cfgmakefile.write("CC=" + bc_file.getCompiler().cdef['CC'] + "\n")
-	cfgmakefile.write("CXX=g++\n")
+	if assignCC:
+		cfgmakefile.write("CC=" + bc_file.getCompiler().cdef['CC'] + "\n")
+		cfgmakefile.write("CXX=g++\n")
 	cfgmakefile.write("CFLAGS="+build_params.cflags+"\n")
 	cfgmakefile.write("LDFLAGS=\n")
         for subBCName,subBCObject in bc_file.getSubBC().iteritems():

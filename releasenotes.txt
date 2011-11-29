@@ -1,3 +1,6 @@
+Contexo 0.16.9
+Feature: Added -nocc flag to makefile generator, does not override environment CC and CXX variables
+
 Contexo 0.16.8
 Bugfix: 0.16.4 broke makefile generator, hopefully fixed this time
 

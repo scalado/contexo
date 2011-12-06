@@ -31,7 +31,7 @@ from ctx_base import *
 class BCFile:
 
     # - - - - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - - -
-    def __init__( self, bcFilename, bcFilePaths, cdefPaths, cfgFile ):
+    def __init__( self, bcFilename = str(), bcFilePaths = list(), cdefPaths = list(), cfgFile = None):
         self.path            = str()
         self.buildParams     = CTXBuildParams()
         self.bcTitle         = str()
@@ -82,10 +82,11 @@ class BCFile:
 
         bcFilePaths.append( os.getcwd() )
 
-        configBCPaths = cfgFile.getBConfPaths()
-        if type(configBCPaths) != list:
-            configBCPaths = [configBCPaths,]
-        bcFilePaths.extend( configBCPaths )
+        if cfgFile != None:
+            configBCPaths = cfgFile.getBConfPaths()
+            if type(configBCPaths) != list:
+                configBCPaths = [configBCPaths,]
+            bcFilePaths.extend( configBCPaths )
 
         for pathCandidate in bcFilePaths:
             candidate = os.path.join( pathCandidate, bcFilename )
@@ -221,12 +222,13 @@ class BCFile:
 
         self.cdef = section[ option_name ]
 
-        configCDefPaths = cfgFile.getCDefPaths()
-        if type(configCDefPaths) != list:
-            configCDefPaths = [configCDefPaths,]
+        if cfgFile != None:
+            configCDefPaths = cfgFile.getCDefPaths()
+            if type(configCDefPaths) != list:
+                configCDefPaths = [configCDefPaths,]
 
-        if len(cfgFile.getCDefPaths()) != 0:
-            cdefPaths.extend( configCDefPaths )
+            if len(cfgFile.getCDefPaths()) != 0:
+                cdefPaths.extend( configCDefPaths )
 
         if section.has_key( 'CDEF_PATH' ):
             warningMessage("BC/BConf section 'CDEF_PATH' is deprecated and may produce unexpected results when working with views and RSpecs")

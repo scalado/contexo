@@ -21,32 +21,40 @@ import os
 import os.path
 import sys
 import shutil
-import ctx_view
-import ctx_cfg
-import ctx_envswitch
-import ctx_common
-import ctx_comp
-import ctx_sysinfo
-import ctx_cmod
-import ctx_base
-import ctx_envswitch
+from contexo import ctx_view 
+from contexo import ctx_cfg
+from contexo import ctx_envswitch
+from contexo import ctx_common
+from contexo import ctx_comp
+from contexo import ctx_sysinfo
+from contexo import ctx_cmod
+from contexo import ctx_base
+from contexo import ctx_envswitch
+from contexo import ctx_bc
+from contexo import ctx_config
 
-exearg = False
-buildTests = False
-linkHeaders = False
-exe = str()
-assignCC = True
-buildItems = list()
-envFile = str()
-viewDir = str()
 
-def parseArgs():
+def main(argv):
+    exearg = False
+    buildTests = False
+    linkHeaders = False
+    exe = str()
+    assignCC = True
+    buildItems = list()
+    envFile = ""
+    viewDir = ""
+    bcFile = "" 
+
     nextArgIsEnv = False
     nextArgIsBC = False
     nextArgIsViewDir = False
     parsedAllOptions = False
+    firstArg = True
 
-    for arg in sys.argv:
+    for arg in argv:
+        if firstArg:
+            firstArg = False
+            continue
         if arg == '-h':
             print >>sys.stderr, 'help:'
             print >>sys.stderr, '-l, symlink all headers to one directory and use that for include path'
@@ -88,6 +96,15 @@ def parseArgs():
             print >>sys.stderr, 'arguments must be either comp(s) or listfile(s) containing comp(s)'
             sys.exit(1)
         buildItems.append(arg)
+    if bcFile == "":
+        print >>sys.stderr, 'must have -b argument'
+        sys.exit(1)
+    if len(buildItems) == 0:
+        print >>sys.stderr, 'must have at least one listfile or comp file as argument'
+        sys.exit(1)
+    argDict = dict()
+
+    genMakefile(viewDir = viewDir, envFile = envFile, bcFile = bcFile, buildItems = buildItems)
 
 logging.basicConfig(format = '%(asctime)s %(levelname)-8s %(message)s',
                                 datefmt='%H:%M:%S',
@@ -100,20 +117,9 @@ def dir_has_rspec(view_dir):
             return True
     return False
 
-def getBuildConfiguration(cview, args):
-    import ctx_bc
-    import ctx_config
+def getBuildConfiguration(cview, bconf):
 
-    if args.bconf != None:
-        bcFile = args.bconf
-    else:
-        if CTX_DEFAULT_BCONF != None:
-            infoMessage("Using default build configuration '%s'"%(CTX_DEFAULT_BCONF), 2)
-            bcFile = CTX_DEFAULT_BCONF
-        else:
-            logging.userErrorExit("No build configuration specified.")
-
-    bcFilePath = cview.locateItem(bcFile, 'bconf')
+    bcFilePath = cview.locateItem(bconf, 'bconf')
     bcFilename = os.path.basename(bcFilePath)
     bcPath = os.path.dirname(bcFilePath)
 
@@ -125,7 +131,7 @@ def getBuildConfiguration(cview, args):
     cdefFilename = section['CDEF']
     cdefFilePath = cview.locateItem(cdefFilename, 'cdef')
     cdefPath = os.path.dirname(cdefFilePath)
-    bc = ctx_bc.BCFile(bcFilename, bcPath, cdefPath, cfgFile)
+    bc = ctx_bc.BCFile(bcFilename, bcPath, cdefPath)
     return bc
 
 def expand_list_files(view, item_list):
@@ -147,7 +153,7 @@ def expand_list_files(view, item_list):
 def create_components(compFilenames, componentPaths, objDir, launchPath):
     components = list()
     for compFilename in compFilenames:
-        comp = ctx_base.COMPFile(comp_file = compFilename, component_paths = componentPaths, globalOutputDir = objDir, launchPath = launchPath)
+        comp = ctx_comp.COMPFile(comp_file = compFilename, component_paths = componentPaths, globalOutputDir = objDir, launchPath = launchPath)
         components.append(comp)
     return components
 
@@ -163,7 +169,7 @@ def get_view_dir(args_view):
         view_dir = os.path.abspath('')
     return view_dir
  
-def cmd_export(viewDir = str(), envFile = str(), buildItems = list()):
+def genMakefile(viewDir = str(), envFile = str(), bcFile = str(), buildItems = list()):
     launch_path = os.path.abspath('.')
     view_dir = get_view_dir(viewDir)
     obj_dir = view_dir + os.sep + '.ctx/obj'
@@ -175,7 +181,7 @@ def cmd_export(viewDir = str(), envFile = str(), buildItems = list()):
         oldEnv = ctx_envswitch.switchEnvironment(envLayout, True)
 
     cview = ctx_view.CTXView(view_dir, validate=False)
-    bc = getBuildConfiguration(cview, args)
+    bc = getBuildConfiguration(cview, bcFile)
 
     comps = expand_list_files(cview, buildItems)
 
@@ -190,6 +196,6 @@ def cmd_export(viewDir = str(), envFile = str(), buildItems = list()):
     if envFile != "":
         switchEnvironment(oldEnv, False)
 
-cmd_export(viewDir = viewDir, envFile = envFile, comps = comps)
+main(sys.argv)
 
 

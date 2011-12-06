@@ -104,7 +104,7 @@ def main(argv):
         sys.exit(1)
     argDict = dict()
 
-    genMakefile(viewDir = viewDir, envFile = envFile, bcFile = bcFile, buildItems = buildItems)
+    genMakefile(viewDir = viewDir, envFile = envFile, bcFile = bcFile, buildItems = buildItems, buildTests = buildTests)
 
 logging.basicConfig(format = '%(asctime)s %(levelname)-8s %(message)s',
                                 datefmt='%H:%M:%S',
@@ -169,7 +169,7 @@ def get_view_dir(args_view):
         view_dir = os.path.abspath('')
     return view_dir
  
-def genMakefile(viewDir = str(), envFile = str(), bcFile = str(), buildItems = list()):
+def genMakefile(viewDir = str(), envFile = str(), bcFile = str(), buildItems = list(), buildTests = False):
     launch_path = os.path.abspath('.')
     view_dir = get_view_dir(viewDir)
     obj_dir = view_dir + os.sep + '.ctx/obj'
@@ -192,6 +192,110 @@ def genMakefile(viewDir = str(), envFile = str(), bcFile = str(), buildItems = l
         for library, compModules in comp.libraries.items():
             modules.extend(compModules)
     print modules
+
+    parseModules(cview, buildTests, bc)
+
+    if envFile != "":
+        switchEnvironment(oldEnv, False)
+
+def parseModules(cview, buildTests, bc):
+    buildSources = list()
+    includes = list()
+    for dir in cview.getItemPaths('modules'):
+        for repo in os.listdir(dir):
+            if os.path.isdir(repo):
+                for entry in os.listdir(repo):
+                    if os.path.isdir(repo + os.sep + entry):
+                        print repo + os.sep + entry
+                        sourceDir = ctx_cmod.getSourceDir(entry)
+                        sources, prebuiltObjFiles, subBCSrcDict = ctx_cmod.getSourcesFromDir(sourceDir, bc.getArchPath(), bc.getSubBC())
+                        buildSources.extend(sources)
+
+
+                        for inlineSource in sources:
+                            if inlineSource.endsWith('.inl'):
+                                includes.append(inlineSource)
+
+                        privHeaderDir = ctx_cmod.getPrivHeaderDir(entry)
+                        privHeaders = ctx_cmod.getPrivHeadersFromDir(privHeaderDir)
+                        includes.extend(privHeaders)
+
+                        pubHeaderDir = ctx_cmod.getPubHeaderDir(entry)
+                        pubHeaders = ctx_cmod.getPubHeadersFromDir(pubHeaderDir)
+                        includes.extend(pubHeaders)
+
+                        if buildTests:
+                            testSourceDir = ctx_cmod.getTestDir(entry)
+                            testSources = ctx_cmod.getSourcesFromDir(testHeaderDir)
+                            sourceFiles.extend(testSources)
+                            for headerOrInline in testSources:
+                                root,ext = os.path.splitext(headerOrInline)
+                                if ext in ['.hpp', '.h', '.inl']:
+                                    includes.append(headerOrInline)
+    print buildSources
+    print includes
+
+
+def expand_list_files(view, item_list):
+
+    expanded_item_list = list()
+    for item in item_list:
+        item = item.strip(' ')
+        if item.startswith('@'):
+            infoMessage("Expanding list file '%s'"%item, 2)
+            item = item.lstrip('@')
+            list_file = view.locateItem(item, ctx_view.REPO_PATH_SECTIONS)
+            list_file_items = ctx_common.readLstFile(list_file)
+            expanded_item_list.extend(list_file_items)
+        else:
+            expanded_item_list.append(item)
+
+    return expanded_item_list
+
+def create_components(compFilenames, componentPaths, objDir, launchPath):
+    components = list()
+    for compFilename in compFilenames:
+        comp = ctx_comp.COMPFile(comp_file = compFilename, component_paths = componentPaths, globalOutputDir = objDir, launchPath = launchPath)
+        components.append(comp)
+    return components
+
+def get_view_dir(args_view):
+    caller_dir = os.path.abspath('.')
+    view_dir = os.path.abspath(args_view)
+    os.chdir(view_dir)
+    view_dir = os.path.abspath('')
+    while not dir_has_rspec(view_dir):
+        os.chdir('..')
+        if view_dir == os.path.abspath(''):
+            logging.userErrorExit('ctx could not find an rspec in the supplied argument or any subdirectory')
+        view_dir = os.path.abspath('')
+    return view_dir
+ 
+def genMakefile(viewDir = str(), envFile = str(), bcFile = str(), buildItems = list(), buildTests = False):
+    launch_path = os.path.abspath('.')
+    view_dir = get_view_dir(viewDir)
+    obj_dir = view_dir + os.sep + '.ctx/obj'
+
+    envLayout = None
+    oldEnv = None
+    if envFile != "":
+        envLayout = ctx_envswitch.EnvironmentLayout(cfgFile, envFile)
+        oldEnv = ctx_envswitch.switchEnvironment(envLayout, True)
+
+    cview = ctx_view.CTXView(view_dir, validate=False)
+    bc = getBuildConfiguration(cview, bcFile)
+
+    comps = expand_list_files(cview, buildItems)
+
+    components = list()
+    modules = list()
+    components = create_components(comps, cview.getItemPaths('comp'), obj_dir, launch_path)
+    for comp in components:
+        for library, compModules in comp.libraries.items():
+            modules.extend(compModules)
+    print modules
+
+    parseModules(cview, buildTests, bc)
 
     if envFile != "":
         switchEnvironment(oldEnv, False)

@@ -76,6 +76,18 @@ def resolveModuleLocation( modName, pathlist ):
     else:
         return new_path
 
+def getSourceDir( baseDir ):
+    return baseDir + os.sep + src_dirname
+
+def getTestDir( baseDir ):
+    return baseDir + os.sep + test_dirname
+
+def getPrivHeaderDir(baseDir):
+    return baseDir + inc_dirname
+
+def getPubHeaderDir(baseDir):
+    return baseDir 
+
 #------------------------------------------------------------------------------
 def isContexoCodeModule( path ):
 
@@ -112,8 +124,31 @@ def assertValidContexoCodeModule( path, msgSender ):
     if not isContexoCodeModule( path ):
         userErrorExit("'%s' was found but is not a valid Contexo code module"%(path))
 
+def getPubHeadersFromDir(pubHdrDir):
+    pubHeaders = list()
+    header_extensions = [ '.h','.hpp',]
+    if os.path.exists( pubHdrDir ):
+        dirlist = os.listdir( pubHdrDir )
+        for entry in dirlist:
+            if os.path.isfile( pubHdrDir + os.sep + entry ):
+                root, ext = os.path.splitext( entry )
+                if header_extensions.count( ext ) != 0:
+                    pubHeaders.append(entry)
+    return pubHeaders
 
-def getSourcesFromDir( self, srcDir ):
+def getPrivHeadersFromDir(privHdrDir):
+    privHeaders = list()
+    header_extensions = [ '.h','.hpp',]
+    if os.path.exists(privHdrDir):
+        dirlist = os.listdir(privHdrDir)
+        for entry in dirlist:
+            if os.path.isfile(privHdrDir + os.sep + entry):
+                root, ext = os.path.splitext( entry )
+                if header_extensions.count(ext) != 0:
+                    privHeaders.append(entry)
+    return privHeaders
+
+def getSourcesFromDir( srcDir, archPath, subBCDict ):
     srcListDict = dict()
     objListDict = dict()
     # 'bc name': list()
@@ -121,19 +156,20 @@ def getSourcesFromDir( self, srcDir ):
     srcList = list ()
     objList = list()
     if not os.path.exists(srcDir):
-	    srcList = list()
-	    return srcList, objList,subBCListDict
+	srcList = list()
+	return srcList, objList,subBCListDict
     source_extensions = [ '.c', '.cpp']
 
     # Collect all source files.
     dirlist = os.listdir( srcDir )
-    for file in dirlist:
-        if os.path.isfile( os.path.join(srcDir, file) ):
-            fileRoot, ext = os.path.splitext( file )
+    for entry in dirlist:
+        if os.path.isfile( os.path.join(srcDir, entry) ):
+            fileRoot, ext = os.path.splitext( entry )
             if source_extensions.count( ext ) != 0:
                 baseFileName = os.path.basename(fileRoot)
-                srcListDict[baseFileName] = file
-    archPathCopy = self.archPath[:]
+                srcListDict[baseFileName] = entry
+    
+    archPathCopy = archPath[:]
     # thus we must reverse the list so the values with highest precedence
     # overrides earlier values
     archPathCopy.reverse()
@@ -160,7 +196,6 @@ def getSourcesFromDir( self, srcDir ):
                             if key == baseFileName:
                                 msg = 'Overriding source file '+os.path.join(srcDir, srcListDict[baseFileName])+' with prebuilt object file: '+ archFile
                                 infoMessage(msg, 1)
-                        # remove and (discard) returned object
                         srcListDict.pop(baseFileName)
                         # making object files a "first class citizen" in the dependency manager would mean that we'd have to add a whole lot of functions and extra stuff just to support object files which aren't used or referenced by any other source file anyway.
                         # TODO: If more languages are added to contexo in the future, this may need a cleanup.
@@ -171,7 +206,7 @@ def getSourcesFromDir( self, srcDir ):
     if os.path.isdir(subBC_dir):
         for subBC in os.listdir(subBC_dir):
 	    subBCEntry = srcDir + os.sep + 'sub_bc' + os.sep + subBC
-            if os.path.isdir(subBCEntry) and self.subBC.keys().count( subBC ) > 0:
+            if os.path.isdir(subBCEntry) and subBCDict.keys().count( subBC ) > 0:
                 for subBC_sourceFile in os.listdir(subBCEntry):
                     baseFileName, ext = os.path.splitext( subBC_sourceFile )
                     # we accept assembly here
@@ -263,20 +298,20 @@ class CTXRawCodeModule:
 
         if len(self.srcFiles) == 0:
             srcDir = self.getSourceDir()
-            self.srcFiles, self.prebuiltObjFiles, self.subBCSrcDict = getSourcesFromDir( self, srcDir )
+            self.srcFiles, self.prebuiltObjFiles, self.subBCSrcDict = getSourcesFromDir( srcDir, self.archPath, self.subBC )
         return self.srcFiles
 
     def getPreBuiltObjectFilenames(self):
 
         if len(self.srcFiles) == 0 or len(self.prebuiltObjFiles) == 0:
             srcDir = self.getSourceDir()
-            self.srcFiles, self.prebuiltObjFiles,self.subBCSrcDict = getSourcesFromDir( self, srcDir )
+            self.srcFiles, self.prebuiltObjFiles,self.subBCSrcDict = getSourcesFromDir( srcDir, self.archPath, self.subBC )
         return self.prebuiltObjFiles
 
     def getSubBCSources(self):
         if len(self.subBCSrcDict) == 0 or len(self.prebuiltObjFiles) == 0:
             srcDir = self.getSourceDir()
-            self.srcFiles, self.prebuiltObjFiles,self.subBCSrcDict = getSourcesFromDir( self, srcDir )
+            self.srcFiles, self.prebuiltObjFiles,self.subBCSrcDict = getSourcesFromDir( srcDir, self.archPath, self.subBC )
         return self.subBCSrcDict
 
 
@@ -293,10 +328,14 @@ class CTXRawCodeModule:
         import functools
         return map ( functools.partial( os.path.join,  self.getTestDir() ),  self.getTestSourceFilenames() )
 
+    def getTestHeaderAbsolutePaths(self):
+        import functools
+        return map ( functools.partial( os.path.join,  self.getTestDir() ),  self.getTestHeaderFilenames() )
+
     def getTestSourceFilenames(self):
         if len(self.testSrcFiles) == 0:
             srcDir = self.getTestDir()
-            self.testSrcFiles, self.testObjFiles,self.subBCSrcDict = getSourcesFromDir( self, srcDir )
+            self.testSrcFiles, self.testObjFiles,self.subBCSrcDict = getSourcesFromDir( srcDir, self.archPath, self.subBC )
         return self.testSrcFiles
 
     def getTestHeaderFilenames(self):
@@ -317,10 +356,6 @@ class CTXRawCodeModule:
                     if header_extensions.count( ext ) != 0:
                         self.testHeaders.append(file)
         return self.testHeaders
-
-    def getTestHeaderAbsolutePaths(self):
-        import functools
-        return map ( functools.partial( os.path.join,  self.getTestDir() ),  self.getTestHeaderFilenames() )
 
     #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     def getPrivHeaderFilenames(self):
@@ -347,15 +382,11 @@ class CTXRawCodeModule:
 
     #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     def getPubHeaderFilenames(self):
-        # update if list is empty.
         if len(self.pubHeaders) == 0:
-            ### Assemble public header files
             header_extensions = [ '.h','.hpp',]
-            # Determine the path to the private header directory of the module.
             pubHdrDir = self.getPubHeaderDir()
 	    if not os.path.exists( pubHdrDir ):
 	        return self.pubHeaders
-            # Collect all source files.
             dirlist = os.listdir( pubHdrDir )
             for file in dirlist:
                 if os.path.isfile( os.path.join(pubHdrDir, file) ):

@@ -148,6 +148,18 @@ def getPrivHeadersFromDir(privHdrDir):
                     privHeaders.append(entry)
     return privHeaders
 
+def getInlSourcesFromDir(inlSrcDir):
+    inlSources = list()
+    header_extensions = [ '.inl',]
+    if os.path.exists( inlSrcDir ):
+        dirlist = os.listdir( inlSrcDir )
+        for entry in dirlist:
+            if os.path.isfile( inlSrcDir + os.sep + entry ):
+                root, ext = os.path.splitext( entry )
+                if header_extensions.count( ext ) != 0:
+                    inlSources.append(entry)
+    return inlSources
+
 def getSourcesFromDir( srcDir, archPath, subBCDict ):
     srcListDict = dict()
     objListDict = dict()

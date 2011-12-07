@@ -169,22 +169,37 @@ def get_view_dir(args_view):
         view_dir = os.path.abspath('')
     return view_dir
  
-def parseModules(cview, viewDir, buildTests, bc, modulesToBuild):
-    buildSources = list()
+def parseComps(cview, viewDir, buildTests, bc, compsToBuild):
+    librarySources = dict()
     includes = list()
-    for moduleSearchDir in cview.getItemPaths('modules'):
-        for moduleDir in os.listdir(moduleSearchDir):
-            if not os.path.isdir(moduleSearchDir + os.sep + moduleDir):
-                continue
-            print "moduleDir: " + moduleSearchDir + os.sep + moduleDir
-            sourceDir = ctx_cmod.getSourceDir(moduleSearchDir + os.sep + moduleDir)
-            sources, prebuiltObjFiles, subBCSrcDict = ctx_cmod.getSourcesFromDir(sourceDir, bc.getArchPath(), bc.getSubBC())
 
-            if os.path.basename(moduleDir) in modulesToBuild:
+    modulesToBuild = list()
+    compDict = dict()
+    moduleDict = dict()
+
+    for comp in compsToBuild:
+        for library, compModules in comp.libraries.items():
+            compDict[library] = compModules
+            for module in compModules:
+                moduleDict[module] = library
+
+    for moduleSearchDir in cview.getItemPaths('modules'):
+        for module in os.listdir(moduleSearchDir):
+            moduleDir = moduleSearchDir + os.sep + module
+            if not os.path.isdir(moduleDir):
+                continue
+            if module in moduleDict.keys():
+                sourceDir = ctx_cmod.getSourceDir(moduleDir)
+                sources, prebuiltObjFiles, subBCSrcDict = ctx_cmod.getSourcesFromDir(sourceDir, bc.getArchPath(), bc.getSubBC())
+
+                libraryName = moduleDict[module] 
+                if libraryName not in librarySources.keys():
+                    librarySources[libraryName] = list()
                 for baseSourceFile in sources:
-                    buildSources.append(sourceDir + os.sep + baseSourceFile)
-                    if baseSourceFile[-4:] == '.inl':
-                        includes.append(sourceDir + os.sep + inlineSource)
+                    librarySources[libraryName].append(sourceDir + os.sep + baseSourceFile)
+                inlSources = ctx_cmod.getInlSourcesFromDir(sourceDir)
+                for baseInlSource in inlSources:
+                    includes.append(sourceDir + os.sep + baseInlSource)
 
             privHeaderDir = ctx_cmod.getPrivHeaderDir(moduleDir)
             privHeaders = ctx_cmod.getPrivHeadersFromDir(privHeaderDir)
@@ -199,13 +214,15 @@ def parseModules(cview, viewDir, buildTests, bc, modulesToBuild):
             if buildTests:
                 testSourceDir = ctx_cmod.getTestDir(moduleDir)
                 testSources = ctx_cmod.getSourcesFromDir(testHeaderDir)
+                libraryName = moduleDict[module] 
+                if libraryName not in librarySources.keys():
+                    librarySources[libraryName] = list()
                 for baseTestSource in testSources:
-                    buildSources.append(testSourceDir + os.sep + baseTestSource)
+                    librarySources[libraryName].append(testSourceDir + os.sep + baseTestSource)
                     root,ext = os.path.splitext(baseTestSource)
                     if ext in ['.hpp', '.h', '.inl']:
                         includes.append(testSourceDir + os.sep + baseTestSource)
-    print buildSources
-    print includes
+
 
 def expand_list_files(view, item_list):
 
@@ -265,7 +282,7 @@ def genMakefile(viewDir = str(), envFile = str(), bcFile = str(), buildItems = l
         for library, compModules in comp.libraries.items():
             modules.extend(compModules)
 
-    parseModules(cview, view_dir, buildTests, bc, modules)
+    parseComps(cview, view_dir, buildTests, bc, components)
 
     if envFile != "":
         switchEnvironment(oldEnv, False)

@@ -169,72 +169,43 @@ def get_view_dir(args_view):
         view_dir = os.path.abspath('')
     return view_dir
  
-def genMakefile(viewDir = str(), envFile = str(), bcFile = str(), buildItems = list(), buildTests = False):
-    launch_path = os.path.abspath('.')
-    view_dir = get_view_dir(viewDir)
-    obj_dir = view_dir + os.sep + '.ctx/obj'
-
-    envLayout = None
-    oldEnv = None
-    if envFile != "":
-        envLayout = ctx_envswitch.EnvironmentLayout(cfgFile, envFile)
-        oldEnv = ctx_envswitch.switchEnvironment(envLayout, True)
-
-    cview = ctx_view.CTXView(view_dir, validate=False)
-    bc = getBuildConfiguration(cview, bcFile)
-
-    comps = expand_list_files(cview, buildItems)
-
-    components = list()
-    modules = list()
-    components = create_components(comps, cview.getItemPaths('comp'), obj_dir, launch_path)
-    for comp in components:
-        for library, compModules in comp.libraries.items():
-            modules.extend(compModules)
-    print modules
-
-    parseModules(cview, buildTests, bc)
-
-    if envFile != "":
-        switchEnvironment(oldEnv, False)
-
-def parseModules(cview, buildTests, bc):
+def parseModules(cview, viewDir, buildTests, bc, modulesToBuild):
     buildSources = list()
     includes = list()
-    for dir in cview.getItemPaths('modules'):
-        for repo in os.listdir(dir):
-            if os.path.isdir(repo):
-                for entry in os.listdir(repo):
-                    if os.path.isdir(repo + os.sep + entry):
-                        print repo + os.sep + entry
-                        sourceDir = ctx_cmod.getSourceDir(entry)
-                        sources, prebuiltObjFiles, subBCSrcDict = ctx_cmod.getSourcesFromDir(sourceDir, bc.getArchPath(), bc.getSubBC())
-                        buildSources.extend(sources)
+    for moduleSearchDir in cview.getItemPaths('modules'):
+        for moduleDir in os.listdir(moduleSearchDir):
+            if not os.path.isdir(moduleSearchDir + os.sep + moduleDir):
+                continue
+            print "moduleDir: " + moduleSearchDir + os.sep + moduleDir
+            sourceDir = ctx_cmod.getSourceDir(moduleSearchDir + os.sep + moduleDir)
+            sources, prebuiltObjFiles, subBCSrcDict = ctx_cmod.getSourcesFromDir(sourceDir, bc.getArchPath(), bc.getSubBC())
 
+            if os.path.basename(moduleDir) in modulesToBuild:
+                for baseSourceFile in sources:
+                    buildSources.append(sourceDir + os.sep + baseSourceFile)
+                    if baseSourceFile[-4:] == '.inl':
+                        includes.append(sourceDir + os.sep + inlineSource)
 
-                        for inlineSource in sources:
-                            if inlineSource.endsWith('.inl'):
-                                includes.append(inlineSource)
+            privHeaderDir = ctx_cmod.getPrivHeaderDir(moduleDir)
+            privHeaders = ctx_cmod.getPrivHeadersFromDir(privHeaderDir)
+            for basePrivHeader in privHeaders:
+                includes.append(privHeaderDir + os.sep + basePrivHeader)
 
-                        privHeaderDir = ctx_cmod.getPrivHeaderDir(entry)
-                        privHeaders = ctx_cmod.getPrivHeadersFromDir(privHeaderDir)
-                        includes.extend(privHeaders)
+            pubHeaderDir = ctx_cmod.getPubHeaderDir(moduleDir)
+            pubHeaders = ctx_cmod.getPubHeadersFromDir(pubHeaderDir)
+            for basePubHeader in pubHeaders:
+                includes.append(pubHeaderDir + os.sep + basePubHeader)
 
-                        pubHeaderDir = ctx_cmod.getPubHeaderDir(entry)
-                        pubHeaders = ctx_cmod.getPubHeadersFromDir(pubHeaderDir)
-                        includes.extend(pubHeaders)
-
-                        if buildTests:
-                            testSourceDir = ctx_cmod.getTestDir(entry)
-                            testSources = ctx_cmod.getSourcesFromDir(testHeaderDir)
-                            sourceFiles.extend(testSources)
-                            for headerOrInline in testSources:
-                                root,ext = os.path.splitext(headerOrInline)
-                                if ext in ['.hpp', '.h', '.inl']:
-                                    includes.append(headerOrInline)
+            if buildTests:
+                testSourceDir = ctx_cmod.getTestDir(moduleDir)
+                testSources = ctx_cmod.getSourcesFromDir(testHeaderDir)
+                for baseTestSource in testSources:
+                    buildSources.append(testSourceDir + os.sep + baseTestSource)
+                    root,ext = os.path.splitext(baseTestSource)
+                    if ext in ['.hpp', '.h', '.inl']:
+                        includes.append(testSourceDir + os.sep + baseTestSource)
     print buildSources
     print includes
-
 
 def expand_list_files(view, item_list):
 
@@ -293,9 +264,8 @@ def genMakefile(viewDir = str(), envFile = str(), bcFile = str(), buildItems = l
     for comp in components:
         for library, compModules in comp.libraries.items():
             modules.extend(compModules)
-    print modules
 
-    parseModules(cview, buildTests, bc)
+    parseModules(cview, view_dir, buildTests, bc, modules)
 
     if envFile != "":
         switchEnvironment(oldEnv, False)

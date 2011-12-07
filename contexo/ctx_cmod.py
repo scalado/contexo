@@ -83,7 +83,7 @@ def getTestDir( baseDir ):
     return baseDir + os.sep + test_dirname
 
 def getPrivHeaderDir(baseDir):
-    return baseDir + inc_dirname
+    return baseDir + os.sep + inc_dirname
 
 def getPubHeaderDir(baseDir):
     return baseDir 

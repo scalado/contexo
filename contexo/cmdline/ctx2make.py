@@ -314,7 +314,22 @@ def writeMakefile(librarySources = dict(), includes = list(), linkHeaders = Fals
     # TODO: hardcoded for now
     libPrefix = bc.getCompiler().cdef['LIBPREFIX']
     libSuffix = bc.getCompiler().cdef['LIBSUFFIX']
-    objSuffix = bc.getCompiler().cdef['OBJSUFFIX'] 
+    objSuffix = bc.getCompiler().cdef['OBJSUFFIX']
+    cppDefPrefix = bc.getCompiler().cdef['CPPDEFPREFIX']
+    cppDefSuffix = bc.getCompiler().cdef['CPPDEFSUFFIX']
+    arCommandLine = bc.getCompiler().cdef['ARCOM']   
+    cxx = bc.getCompiler().cdef['CXX']
+    ccCommandLine = bc.getCompiler().cdef['CCCOM']
+    cxxCommandLine = bc.getCompiler().cdef['CXXCOM']
+
+
+    ccCommandLine = ccCommandLine.replace('%CFLAGS', '$(CFLAGS) $(ADDFLAGS)')
+    ccCommandLine = ccCommandLine.replace('%CC', '$(CC)')
+    incPrefix = bc.getCompiler().cdef['INCPREFIX']
+    incSuffix = bc.getCompiler().cdef['INCSUFFIX']
+    ccCommandLine = ccCommandLine.replace("%SOURCES", "$<")
+    ccCommandLine = ccCommandLine.replace("%TARGET", "$@")
+    ccCommandLine = ccCommandLine.replace("%INCPATHS", incPrefix +  "\"$(LINKHEADERS)\"" + incSuffix)
 
     if not os.path.isfile("Makefile.inc"):
         incmakefile = open("Makefile.inc", 'w')
@@ -340,17 +355,18 @@ def writeMakefile(librarySources = dict(), includes = list(), linkHeaders = Fals
         cfgmakefile.write("### Compiler settings\n")
         if assignCC:
             cfgmakefile.write("CC=" + bc.getCompiler().cdef['CC'] + "\n")
-            cfgmakefile.write("CXX=g++\n")
+            cfgmakefile.write("CXX=" + bc.getCompiler().cdef['CXX'] + "\n")
         cfgmakefile.write("CFLAGS="+bc.getBuildParams().cflags+"\n")
         cfgmakefile.write("LDFLAGS=\n")
         for subBCName,subBCObject in bc.getSubBC().iteritems():
             cfgmakefile.write(subBCName.upper() + '_CC=' + subBCObject.getCompiler().cdef['CC'] + '\n')
+            cfgmakefile.write(subBCName.upper() + '_CXX=' + subBCObject.getCompiler().cdef['CXX'] + '\n')
             cfgmakefile.write(subBCName.upper() + '_CFLAGS = ' + subBCObject.getBuildParams().cflags + '\n')
         cfgmakefile.write("\n# Additional compiler parameters, such as include paths\n")
         cfgmakefile.write("ADDFLAGS=\n")
         cfgmakefile.write("\n")
-        cfgmakefile.write("AR=ar\n")
-        cfgmakefile.write("RANLIB=ranlib\n")
+        cfgmakefile.write("AR=" + bc.getCompiler().cdef['AR'] + "\n")
+        cfgmakefile.write("RANLIB=" "\n")
         cfgmakefile.write("\n")
         cfgmakefile.write("OUTPUT=output\n")
         cfgmakefile.write("LIBDIR=$(OUTPUT)/lib\n")
@@ -379,8 +395,8 @@ def writeMakefile(librarySources = dict(), includes = list(), linkHeaders = Fals
     makefile.write("### Standard defines\n")
     makefile.write("PREP_DEFS=")
     for prepDefine in bc.getBuildParams().prepDefines:
-            makefile.write("-D"+prepDefine+" ")
-    makefile.write("\n\n")
+            makefile.write(cppDefPrefix+prepDefine"+cppDefSuffix)
+    makefile.write(" \n\n")
 
     makefile.write("### Build-all definition\n")
     makefile.write("LIBS =")
@@ -470,8 +486,9 @@ def writeMakefile(librarySources = dict(), includes = list(), linkHeaders = Fals
 # -e '/^C:/d' 
             makefile.write("\t@case $< in ")
             for subBCName,subBCObject in bc.getSubBC().iteritems():
-                makefile.write("*/sub_bc/" + subBCName + "/*) $(" + subBCName.upper() + "_CC) -I$(LINKHEADERS) $(" + subBCName.upper() + "_CFLAGS) -o $@ $< ;; ")
-            makefile.write("*) $(CC) -I\"$(LINKHEADERS)\" $(CFLAGS) -o $@ $<;;esac\n")
+                makefile.write("*/sub_bc/" + subBCName + "/*) $(" + subBCName.upper() + "_CC) " + subIncPrefix + "$(LINKHEADERS) $(" + subBCName.upper() + "_CFLAGS) -o $@ $< ;; ")
+            #makefile.write("*) $(CC) " + incPrefix + "\"$(LINKHEADERS)\" $(CFLAGS) -o $@ $<;;esac\n")
+            makefile.write("*) " + ccCommandLine + ";;esac\n")
 
     makefile.write("-include $(DEPDIR)/*.d\n")
     makefile.write("\n")

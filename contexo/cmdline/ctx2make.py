@@ -322,15 +322,19 @@ def writeMakefile(librarySources = dict(), includes = list(), linkHeaders = Fals
     ccCommandLine = bc.getCompiler().cdef['CCCOM']
     cxxCommandLine = bc.getCompiler().cdef['CXXCOM']
 
-
     ccCommandLine = ccCommandLine.replace('%CFLAGS', '$(CFLAGS) $(ADDFLAGS)')
     ccCommandLine = ccCommandLine.replace('%CC', '$(CC)')
     incPrefix = bc.getCompiler().cdef['INCPREFIX']
     incSuffix = bc.getCompiler().cdef['INCSUFFIX']
     ccCommandLine = ccCommandLine.replace("%SOURCES", "$<")
     ccCommandLine = ccCommandLine.replace("%TARGET", "$@")
-    ccCommandLine = ccCommandLine.replace("%INCPATHS", incPrefix +  "\"$(LINKHEADERS)\"" + incSuffix)
+    ccCommandLine = ccCommandLine.replace("%INCPATHS", incPrefix +  "$(LINKHEADERS)" + incSuffix)
 
+    for subBCName,subBCObject in bc.getSubBC().iteritems():
+	subIncPrefix = subBCObject.getCompiler().cdef['INCPREFIX']
+	subIncSuffix = subBCObject.getCompiler().cdef['INCSUFFIX']
+	subCcCommandLine = subBCObject.getCompiler().cdef['CCCOM']
+	break
     if not os.path.isfile("Makefile.inc"):
         incmakefile = open("Makefile.inc", 'w')
         incmakefile.write("### inc_all is built after all other projects is built\n")
@@ -356,12 +360,13 @@ def writeMakefile(librarySources = dict(), includes = list(), linkHeaders = Fals
         if assignCC:
             cfgmakefile.write("CC=" + bc.getCompiler().cdef['CC'] + "\n")
             cfgmakefile.write("CXX=" + bc.getCompiler().cdef['CXX'] + "\n")
-        cfgmakefile.write("CFLAGS="+bc.getBuildParams().cflags+"\n")
+        cfgmakefile.write("CFLAGS="+bc.getBuildParams().cflags.replace('\\','/')+"\n")
         cfgmakefile.write("LDFLAGS=\n")
         for subBCName,subBCObject in bc.getSubBC().iteritems():
             cfgmakefile.write(subBCName.upper() + '_CC=' + subBCObject.getCompiler().cdef['CC'] + '\n')
             cfgmakefile.write(subBCName.upper() + '_CXX=' + subBCObject.getCompiler().cdef['CXX'] + '\n')
             cfgmakefile.write(subBCName.upper() + '_CFLAGS = ' + subBCObject.getBuildParams().cflags + '\n')
+	    break
         cfgmakefile.write("\n# Additional compiler parameters, such as include paths\n")
         cfgmakefile.write("ADDFLAGS=\n")
         cfgmakefile.write("\n")
@@ -395,7 +400,7 @@ def writeMakefile(librarySources = dict(), includes = list(), linkHeaders = Fals
     makefile.write("### Standard defines\n")
     makefile.write("PREP_DEFS=")
     for prepDefine in bc.getBuildParams().prepDefines:
-            makefile.write(cppDefPrefix+prepDefine"+cppDefSuffix)
+            makefile.write(cppDefPrefix+prepDefine+cppDefSuffix)
     makefile.write(" \n\n")
 
     makefile.write("### Build-all definition\n")
@@ -471,26 +476,25 @@ def writeMakefile(librarySources = dict(), includes = list(), linkHeaders = Fals
             if relPath:
                 basePath = basePath[len(viewDir)+1:]
             makefile.write("$(OBJDIR)/" + os.path.basename(basePath) + objSuffix + ": " + sourceDependency[len(viewDir)+1:].replace('\\','/') + "\n")
-            makefile.write("\tOUTPUT=$<;SOURCEFILE=$*;OBJFILE=$${SOURCEFILE%.*}" + objSuffix + ";makedepend -f-")
-            if platform.system() == 'Windows':
-                makefile.write(" -D_WIN32")
-                if os.environ.has_key("INCLUDE"):
-                    for vsIncDir in os.environ['INCLUDE'].split(';'):
-                        if len(vsIncDir) == 0:
-                            continue
-                        vsIncDirMsys = vsIncDir.replace('\\', '/')
-                        vsIncDirCygwin = '/cygdrive/' + vsIncDir.replace('\\', '/').replace(':','')
-                        makefile.write(" -I\"" + vsIncDirMsys + "\"")
-                        makefile.write(" -I\"" + vsIncDirCygwin + "\"")
-            makefile.write(" -I\"$(LINKHEADERS)\" $< | sed 's,.*:,\\$$(OBJDIR)/'$${SOURCEFILE##*/}'" + objSuffix + ":,' > $(DEPDIR)/$${OUTPUT##*/}.d\n")
+	    makefile.write("\tOUTPUT=\"$<\";export CYGWIN=nodosfilewarning;SOURCEFILE=\"$*\";OBJFILE=\"$${SOURCEFILE%.*}\"" + objSuffix + ";makedepend -f-")
+            #if platform.system() == 'Windows':
+            #    makefile.write(" -D_WIN32")
+            #    if os.environ.has_key("INCLUDE"):
+            #        for vsIncDir in os.environ['INCLUDE'].split(';'):
+            #            if len(vsIncDir) == 0:
+            #                continue
+            #            vsIncDirMsys = vsIncDir.replace('\\', '/')
+            #            vsIncDirCygwin = '/cygdrive/' + vsIncDir.replace('\\', '/').replace(':','')
+            #            makefile.write(" -I\"" + vsIncDirMsys + "\"")
+            #            makefile.write(" -I\"" + vsIncDirCygwin + "\"")
+            makefile.write(" -I\"$(LINKHEADERS)\" $< 2>/dev/null | sed \"s,.*:,\\$$(OBJDIR)/$${SOURCEFILE##*/}" + objSuffix + ":,\" > $(DEPDIR)/$${OUTPUT##*/}.d\n")
 # -e '/^C:/d' 
-            makefile.write("\t@case $< in ")
+            makefile.write("\tcase $< in ")
             for subBCName,subBCObject in bc.getSubBC().iteritems():
-                makefile.write("*/sub_bc/" + subBCName + "/*) $(" + subBCName.upper() + "_CC) " + subIncPrefix + "$(LINKHEADERS) $(" + subBCName.upper() + "_CFLAGS) -o $@ $< ;; ")
-            #makefile.write("*) $(CC) " + incPrefix + "\"$(LINKHEADERS)\" $(CFLAGS) -o $@ $<;;esac\n")
-            makefile.write("*) " + ccCommandLine + ";;esac\n")
+                makefile.write("*/sub_bc/" + subBCName + "/*) $(" + subBCName.upper() + "_CC) " + subIncPrefix + "$(LINKHEADERS)" + subIncSuffix + " $(" + subBCName.upper() + "_CFLAGS) -o $@ $< ;; ")
+            makefile.write("*) " + ccCommandLine.replace("%CPPDEFINES","$(PREP_DEFINES)") + ";;esac\n")
 
-    makefile.write("-include $(DEPDIR)/*.d\n")
+    makefile.write("-include \"$(DEPDIR)\"/*.d\n")
     makefile.write("\n")
 
     makefile.close()

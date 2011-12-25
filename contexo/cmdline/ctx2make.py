@@ -15,6 +15,12 @@
 ###############################################################################
 # coding=UTF-8
 
+# TODO:
+# * change output dir to absolute path, -o argument?
+# * parse sub_bc in python instead of bash
+# * translate msys/cygwin path to ntpath
+#
+
 import logging
 import logging.handlers
 import os
@@ -22,6 +28,7 @@ import os.path
 import sys
 import shutil
 import platform
+import posixpath
 from contexo import ctx_view 
 from contexo import ctx_cfg
 from contexo import ctx_envswitch
@@ -115,8 +122,7 @@ logging.basicConfig(format = '%(asctime)s %(levelname)-8s %(message)s',
 def winPathToMsys(winPath):
     # C:\foo\bar to /C/foo/bar
     # with the /cygdrive prefix it will be compatible with cygwin
-    msysPath = "/" + winPath.replace("\\","/").replace(":","")
-    
+    return "/" + winPath.replace("\\","/").replace(":","")
 
 def dir_has_rspec(view_dir):
     view_filelist = os.listdir(view_dir)
@@ -128,8 +134,8 @@ def dir_has_rspec(view_dir):
 def getBuildConfiguration(cview, bconf, cfgFile):
 
     bcFilePath = cview.locateItem(bconf, 'bconf')
-    bcFilename = os.path.basename(bcFilePath)
-    bcPath = os.path.dirname(bcFilePath)
+    bcFilename = posixpath.basename(bcFilePath)
+    bcPath = posixpath.dirname(bcFilePath)
 
     bcDict = ctx_config.CTXConfig(bcFilePath)
     section = bcDict.get_section('config')
@@ -138,7 +144,7 @@ def getBuildConfiguration(cview, bconf, cfgFile):
 
     cdefFilename = section['CDEF']
     cdefFilePath = cview.locateItem(cdefFilename, 'cdef')
-    cdefPath = os.path.dirname(cdefFilePath)
+    cdefPath = posixpath.dirname(cdefFilePath)
     bc = ctx_bc.BCFile(bcFilename, bcPath, cdefPath, cfgFile)
     return bc
 
@@ -166,15 +172,15 @@ def create_components(compFilenames, componentPaths, objDir, launchPath):
     return components
 
 def get_view_dir(args_view):
-    caller_dir = os.path.abspath('.')
-    view_dir = os.path.abspath(args_view)
+    caller_dir = posixpath.abspath('.')
+    view_dir = posixpath.abspath(args_view)
     os.chdir(view_dir)
-    view_dir = os.path.abspath('')
+    view_dir = posixpath.abspath('')
     while not dir_has_rspec(view_dir):
         os.chdir('..')
-        if view_dir == os.path.abspath(''):
+        if view_dir == posixpath.abspath(''):
             logging.userErrorExit('ctx could not find an rspec in the supplied argument or any subdirectory')
-        view_dir = os.path.abspath('')
+        view_dir = posixpath.abspath('')
     return view_dir
  
 def parseComps(cview, viewDir, buildTests, bc, compsToBuild):
@@ -194,7 +200,7 @@ def parseComps(cview, viewDir, buildTests, bc, compsToBuild):
     for moduleSearchDir in cview.getItemPaths('modules'):
         for module in os.listdir(moduleSearchDir):
             moduleDir = moduleSearchDir + os.sep + module
-            if not os.path.isdir(moduleDir):
+            if not posixpath.isdir(moduleDir):
                 continue
             if module in moduleDict.keys():
                 sourceDir = ctx_cmod.getSourceDir(moduleDir)
@@ -227,7 +233,7 @@ def parseComps(cview, viewDir, buildTests, bc, compsToBuild):
                     librarySources[libraryName] = list()
                 for baseTestSource in testSources:
                     librarySources[libraryName].append(testSourceDir + os.sep + baseTestSource)
-                    root,ext = os.path.splitext(baseTestSource)
+                    root,ext = posixpath.splitext(baseTestSource)
                     if ext in ['.hpp', '.h', '.inl']:
                         includes.append(testSourceDir + os.sep + baseTestSource)
     return librarySources,includes
@@ -257,26 +263,26 @@ def create_components(compFilenames, componentPaths, objDir, launchPath):
     return components
 
 def get_view_dir(args_view):
-    caller_dir = os.path.abspath('.')
-    view_dir = os.path.abspath(args_view)
+    caller_dir = posixpath.abspath('.')
+    view_dir = posixpath.abspath(args_view)
     os.chdir(view_dir)
-    view_dir = os.path.abspath('')
+    view_dir = posixpath.abspath('')
     while not dir_has_rspec(view_dir):
         os.chdir('..')
-        if view_dir == os.path.abspath(''):
+        if view_dir == posixpath.abspath(''):
             logging.userErrorExit('ctx could not find an rspec in the supplied argument or any subdirectory')
-        view_dir = os.path.abspath('')
+        view_dir = posixpath.abspath('')
     return view_dir
  
 def genMakefile(viewDir = str(), envFile = str(), bcFile = str(), buildItems = list(), buildTests = False, linkHeaders = False, assignCC = False):
-    launch_path = os.path.abspath('.')
+    launch_path = posixpath.abspath('.')
     view_dir = get_view_dir(viewDir)
     obj_dir = view_dir + os.sep + '.ctx/obj'
 
     envLayout = None
     oldEnv = None
 
-    contexo_config_path = os.path.join( ctx_common.getUserCfgDir(), ctx_sysinfo.CTX_CONFIG_FILENAME )
+    contexo_config_path = posixpath.join( ctx_common.getUserCfgDir(), ctx_sysinfo.CTX_CONFIG_FILENAME )
     cfgFile = ctx_cfg.CFGFile( contexo_config_path )
     if envFile != "":
         envLayout = ctx_envswitch.EnvironmentLayout(cfgFile, envFile)
@@ -309,7 +315,6 @@ def linkIncludes(includes, dest, viewDir):
     for includeFile in includes:
         if not os.path.isdir(dest):
             os.makedirs(dest)
-        includeFile = winPathToMsys(includeFile)
         linkFile = open(dest + os.sep + os.path.basename(includeFile), 'w')
         linkFile.write("/* Autogenerated by Contexo\n * changes to this file WILL BE LOST\n */\n")
         linkFile.write("#include \"../../" + includeFile + "\"\n\n")
@@ -351,7 +356,7 @@ def writeMakefile(librarySources = dict(), includes = list(), linkHeaders = Fals
         subCxxCommandLine = subBCObject.getCompiler().cdef['CXXCOM']
 
  	break
-    if not os.path.isfile("Makefile.inc"):
+    if not posixpath.isfile("Makefile.inc"):
         incmakefile = open("Makefile.inc", 'w')
         incmakefile.write("### inc_all is built after all other projects is built\n")
         incmakefile.write("### add dependencies for inc_all to add further build steps\n")
@@ -370,12 +375,12 @@ def writeMakefile(librarySources = dict(), includes = list(), linkHeaders = Fals
     makefile.write("### Makefile generated with contexo plugin.\n")
     makefile.write("ifeq ($(OSTYPE),cygwin\n")
     makefile.write("\tCYGPREFIX=\"/cygdrive\"\n")
-    makefile.write("else")
+    makefile.write("else\n")
     makefile.write("\tCYGPREFIX=\"\"\n")
     makefile.write("endif\n")
 
 # config settings
-    if not os.path.isfile("Makefile.cfg"):
+    if not posixpath.isfile("Makefile.cfg"):
         cfgmakefile = open("Makefile.cfg", 'w')
         cfgmakefile.write("### Compiler settings\n")
         if assignCC:
@@ -479,8 +484,9 @@ def writeMakefile(librarySources = dict(), includes = list(), linkHeaders = Fals
         libraryBuildRule = "$(LIBDIR)/" + libPrefix + library + libSuffix
         makefile.write( libraryBuildRule + ":")
         for sourceDependency in librarySources[library]:
-            baseName, ext = os.path.splitext(sourceDependency)
-            makefile.write(" $(OBJDIR)/" + os.path.basename(baseName) + objSuffix)
+            sourceDependencyName = winPathToMsys(sourceDependency)
+            baseName, ext = posixpath.splitext(sourceDependencyName)
+            makefile.write(" $(OBJDIR)/" + posixpath.basename(baseName) + objSuffix)
         makefile.write("\n")
         libraryBuildRules.append(libraryBuildRule)
     makefile.write("\n")
@@ -494,19 +500,21 @@ def writeMakefile(librarySources = dict(), includes = list(), linkHeaders = Fals
     for library in librarySources.keys():
         for sourceFile in librarySources[library]:
             sourceFileName = winPathToMsys(sourceFile)
-            makefile.write(" " + sourceFileName)
+            makefile.write(" $(CYGPREFIX)" + sourceFileName)
     makefile.write("\n")
     for library in librarySources.keys():
         for sourceDependency in librarySources[library]:
-            basePath, ext = os.path.splitext(sourceDependency)
-            makefile.write("$(CYGPREFIX)$(OBJDIR)/" + os.path.basename(basePath) + objSuffix + ": " + sourceDependency.replace('\\','/') + "\n")
+            sourceDependencyName = winPathToMsys(sourceDependency)
+            basePath, ext = posixpath.splitext(sourceDependencyName)
+            makefile.write("$(CYGPREFIX)$(OBJDIR)/" + posixpath.basename(basePath) + objSuffix + ": $(CYGPREFIX)" + sourceDependencyName + "\n")
+            makefile.write("RAW_SRC="$@";SRC_NOPREFIX=$${FOO#/};DRIVE=$${SRC_NOPREFIX%%/*};UNC_SRC=$${DRIVE}:/$${SRC_NOPREFIX#*/};")
 	    makefile.write("\t@OUTPUT=\"$<\";export CYGWIN=nodosfilewarning;SOURCEFILE=\"$*\";OBJFILE=\"$${SOURCEFILE%.*}\"" + objSuffix + ";makedepend -f-")
             makefile.write(" -I\"$(LINKHEADERS)\" $< 2>/dev/null | sed \"s,.*:,\\$$(OBJDIR)/$${SOURCEFILE##*/}" + objSuffix + ":,\" > $(DEPDIR)/$${OUTPUT##*/}.d\n")
-# -e '/^C:/d' 
-            makefile.write("\tcase $< in ")
-            for subBCName,subBCObject in bc.getSubBC().iteritems():
-                makefile.write("*/sub_bc/" + subBCName + "/*) " + subCcCommandLine.replace('%CPPDEFINES','$(SUB_PREP_DEFS)') +" ;; ")
-            makefile.write("*) " + ccCommandLine.replace("%CPPDEFINES","$(PREP_DEFS)") + ";;esac\n")
+# -e '/^C:/d'
+            if sourceDependencyName.count("/sub_bc/") > 0:
+                makefile.write(subCcCommandLine.replace('%CPPDEFINES','$(SUB_PREP_DEFS)'))
+            else:
+                makefile.write(ccCommandLine.replace("%CPPDEFINES","$(PREP_DEFS)"))
 
     makefile.write("-include \"$(DEPDIR)\"/*.d\n")
     makefile.write("\n")

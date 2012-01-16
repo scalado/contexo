@@ -136,13 +136,15 @@ logging.basicConfig(format = '%(asctime)s %(levelname)-8s %(message)s',
 def winPathToMsys(winPath):
     # C:\foo\bar to /C/foo/bar
     # with the /cygdrive prefix it will be compatible with cygwin
-    return "/" + winPath.replace("\\","/").replace(":","")
+    if winPath[0] != '/':
+        winPath = '/' + winPath
+    return winPath.replace("\\","/").replace(":","")
 
 def privIncPathForSourceFile(srcFile):
     # /foo/bar/src/baz.c to /foo/bar/inc/
     srcDirIndex = srcFile.rfind('/')
     modDirIndex = srcFile.rfind('/',0,srcDirIndex)
-    return srcFile[0:modDirIndex] + 'inc' + '/'
+    return srcFile[0:modDirIndex] + '/inc/'
 
 def dir_has_rspec(view_dir):
     view_filelist = os.listdir(view_dir)
@@ -234,11 +236,6 @@ def parseComps(cview, viewDir, buildTests, bc, compsToBuild):
                 inlSources = ctx_cmod.getInlSourcesFromDir(sourceDir)
                 for baseInlSource in inlSources:
                     includes.append(sourceDir + os.sep + baseInlSource)
-
-            privHeaderDir = ctx_cmod.getPrivHeaderDir(moduleDir)
-            privHeaders = ctx_cmod.getPrivHeadersFromDir(privHeaderDir)
-            for basePrivHeader in privHeaders:
-                includes.append(privHeaderDir + os.sep + basePrivHeader)
 
             pubHeaderDir = ctx_cmod.getPubHeaderDir(moduleDir)
             pubHeaders = ctx_cmod.getPubHeadersFromDir(pubHeaderDir)

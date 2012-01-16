@@ -1,3 +1,6 @@
+Contexo 0.16.10
+Feature: genmake.py updates to correctly use CPPFLAGS [gustafp]
+
 Contexo 0.16.9
 Feature: Added -nocc flag to makefile generator, does not override environment CC and CXX variables
 

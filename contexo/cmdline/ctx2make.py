@@ -348,6 +348,8 @@ def writeMakefile(librarySources = dict(), includes = list(), linkHeaders = Fals
     ccCommandLine = bc.getCompiler().cdef['CCCOM']
     cxxCommandLine = bc.getCompiler().cdef['CXXCOM']
 
+    cxxFileSuffix = bc.getCompiler().cdef['CXXFILESUFFIX']
+
     ccCommandLine = ccCommandLine.replace('%CFLAGS', '$(CFLAGS) $(ADDFLAGS)')
     ccCommandLine = ccCommandLine.replace('%CC', '$(CC)')
     incPrefix = bc.getCompiler().cdef['INCPREFIX']
@@ -363,6 +365,7 @@ def writeMakefile(librarySources = dict(), includes = list(), linkHeaders = Fals
         subCppDefPrefix = subBCObject.getCompiler().cdef['CPPDEFPREFIX']
         subCppDefSuffix = subBCObject.getCompiler().cdef['CPPDEFSUFFIX']
         subCcCommandLine = subCcCommandLine.replace('%CFLAGS', '$('+ subBCName.upper() + '_CFLAGS) $(ADDFLAGS)')
+        subCxxCommandLine = subCxxCommandLine.replace('%CXXFLAGS', '$('+ subBCName.upper() + '_CXXFLAGS) $(ADDFLAGS)')
         subCcCommandLine = subCcCommandLine.replace('%CC', '$(' + subBCName.upper() + '_CC)')
         subCcCommandLine = subCcCommandLine.replace("%SOURCES", "$<")
         subCcCommandLine = subCcCommandLine.replace("%TARGET", "$@")
@@ -370,6 +373,7 @@ def writeMakefile(librarySources = dict(), includes = list(), linkHeaders = Fals
         subCcCommandLine = subCcCommandLine.replace('\\','/')
         subCxx = subBCObject.getCompiler().cdef['CXX']
         subCxxCommandLine = subBCObject.getCompiler().cdef['CXXCOM']
+        subCxxFileSuffix = subBCObject.getCompiler().cdef['CXXFILESUFFIX']
 
         break
     if not posixpath.isfile("Makefile.inc"):
@@ -403,11 +407,13 @@ def writeMakefile(librarySources = dict(), includes = list(), linkHeaders = Fals
             cfgmakefile.write("CC=" + bc.getCompiler().cdef['CC'].replace('\\','/') + "\n")
             cfgmakefile.write("CXX=" + bc.getCompiler().cdef['CXX'].replace('\\','/') + "\n")
         cfgmakefile.write("CFLAGS="+bc.getBuildParams().cflags.replace('\\','/')+"\n")
+        cfgmakefile.write("CXXFLAGS="+bc.getBuildParams().cxxflags.replace('\\','/') +"\n")
         cfgmakefile.write("LDFLAGS=\n")
         for subBCName,subBCObject in bc.getSubBC().iteritems():
             cfgmakefile.write(subBCName.upper() + '_CC=' + subBCObject.getCompiler().cdef['CC'].replace('\\','/') + '\n')
             cfgmakefile.write(subBCName.upper() + '_CXX=' + subBCObject.getCompiler().cdef['CXX'].replace('\\','/') + '\n')
             cfgmakefile.write(subBCName.upper() + '_CFLAGS = ' + subBCObject.getBuildParams().cflags.replace('\\','/') + '\n')
+            cfgmakefile.write(subBCName.upper() + '_CXXFLAGS = ' + subBCObject.getBuildParams().cxxflags.replace('\\','/') + '\n')
             break
         cfgmakefile.write("\n# Additional compiler parameters, such as include paths\n")
         cfgmakefile.write("ADDFLAGS=\n")
@@ -528,12 +534,20 @@ def writeMakefile(librarySources = dict(), includes = list(), linkHeaders = Fals
             makefile.write(" -I" + privIncPathForSourceFile(sourceDependencyName) + " -I\"$(LINKHEADERS)\" $< 2>/dev/null | sed \"s,.*:,\\$$(OBJDIR)/$${SOURCEFILE##*/}" + objSuffix + ":,\" > $(DEPDIR)/$${OUTPUT##*/}.d\n")
 # -e '/^C:/d'
             if sourceDependencyName.count("/sub_bc/") > 0:
-                subCommandLine = "\t" + subCcCommandLine
+                if sourceDependencyName[-len(subCxxFileSuffix):] == subCxxFileSuffix:
+                    subCommandLine = "\t" + subCcCommandLine
+                else:
+                    subCommandLine = "\t" + subCxxCommandLine
+
                 subCommandLine = subCommandLine.replace("%INCPATHS", subIncPrefix + privIncPathForSourceFile(sourceDependencyName) + subIncSuffix + " " + subIncPrefix + "$(LINKHEADERS)" + subIncSuffix)
                 subCommandLine = subCommandLine.replace('%CPPDEFINES','$(SUB_PREP_DEFS)')
                 makefile.write(subCommandLine)
             else:
-                commandLine = "\t" + ccCommandLine
+                if sourceDependencyName[-len(cxxFileSuffix):] == cxxFileSuffix:
+                    commandLine = "\t" + ccCommandLine
+                else:
+                    commandLine = "\t" + ccCommandLine
+
                 commandLine = commandLine.replace("%INCPATHS", incPrefix + privIncPathForSourceFile(sourceDependencyName) + incSuffix + " " + incPrefix + "$(LINKHEADERS)" + incSuffix)
                 commandLine = commandLine.replace("%CPPDEFINES","$(PREP_DEFS)")
                 makefile.write(commandLine)

@@ -138,6 +138,12 @@ def winPathToMsys(winPath):
     # with the /cygdrive prefix it will be compatible with cygwin
     return "/" + winPath.replace("\\","/").replace(":","")
 
+def privIncPathForSourceFile(srcFile):
+    # /foo/bar/src/baz.c to /foo/bar/inc/
+    srcDirIndex = srcFile.rfind('/')
+    modDirIndex = srcFile.rfind('/',0,srcDirIndex)
+    return srcFile[0:modDirIndex] + 'inc' + '/'
+
 def dir_has_rspec(view_dir):
     view_filelist = os.listdir(view_dir)
     for entry in view_filelist:
@@ -351,13 +357,12 @@ def writeMakefile(librarySources = dict(), includes = list(), linkHeaders = Fals
     incSuffix = bc.getCompiler().cdef['INCSUFFIX']
     ccCommandLine = ccCommandLine.replace("%SOURCES", "$<")
     ccCommandLine = ccCommandLine.replace("%TARGET", "$@")
-    ccCommandLine = ccCommandLine.replace("%INCPATHS", incPrefix +  "$(LINKHEADERS)" + incSuffix)
 
     for subBCName,subBCObject in bc.getSubBC().iteritems():
-	subIncPrefix = subBCObject.getCompiler().cdef['INCPREFIX']
-	subIncSuffix = subBCObject.getCompiler().cdef['INCSUFFIX']
-	subCcCommandLine = subBCObject.getCompiler().cdef['CCCOM']
-	subCxxCommandLine = subBCObject.getCompiler().cdef['CXXCOM']
+        subIncPrefix = subBCObject.getCompiler().cdef['INCPREFIX']
+        subIncSuffix = subBCObject.getCompiler().cdef['INCSUFFIX']
+        subCcCommandLine = subBCObject.getCompiler().cdef['CCCOM']
+        subCxxCommandLine = subBCObject.getCompiler().cdef['CXXCOM']
         subCppDefPrefix = subBCObject.getCompiler().cdef['CPPDEFPREFIX']
         subCppDefSuffix = subBCObject.getCompiler().cdef['CPPDEFSUFFIX']
         subCcCommandLine = subCcCommandLine.replace('%CFLAGS', '$('+ subBCName.upper() + '_CFLAGS) $(ADDFLAGS)')
@@ -365,11 +370,11 @@ def writeMakefile(librarySources = dict(), includes = list(), linkHeaders = Fals
         subCcCommandLine = subCcCommandLine.replace("%SOURCES", "$<")
         subCcCommandLine = subCcCommandLine.replace("%TARGET", "$@")
         subCcCommandLine = subCcCommandLine.replace("%INCPATHS", subIncPrefix +  "$(LINKHEADERS)" + subIncSuffix)
-	subCcCommandLine = subCcCommandLine.replace('\\','/')
-	subCxx = subBCObject.getCompiler().cdef['CXX']
+        subCcCommandLine = subCcCommandLine.replace('\\','/')
+        subCxx = subBCObject.getCompiler().cdef['CXX']
         subCxxCommandLine = subBCObject.getCompiler().cdef['CXXCOM']
 
- 	break
+        break
     if not posixpath.isfile("Makefile.inc"):
         incmakefile = open("Makefile.inc", 'w')
         incmakefile.write("### inc_all is built after all other projects is built\n")
@@ -387,10 +392,10 @@ def writeMakefile(librarySources = dict(), includes = list(), linkHeaders = Fals
 # File header
     makefile.write("#############################################\n")
     makefile.write("### Makefile generated with contexo plugin.\n")
-    makefile.write("ifeq ($(OSTYPE),cygwin\n")
+    makefile.write("ifeq ($(OSTYPE),cygwin)\n")
     makefile.write("\tCYGPREFIX=\"/cygdrive\"\n")
     makefile.write("else\n")
-    makefile.write("\tCYGPREFIX=\"\"\n")
+    makefile.write("\tCYGPREFIX=\n")
     makefile.write("endif\n")
 
 # config settings
@@ -406,7 +411,7 @@ def writeMakefile(librarySources = dict(), includes = list(), linkHeaders = Fals
             cfgmakefile.write(subBCName.upper() + '_CC=' + subBCObject.getCompiler().cdef['CC'].replace('\\','/') + '\n')
             cfgmakefile.write(subBCName.upper() + '_CXX=' + subBCObject.getCompiler().cdef['CXX'].replace('\\','/') + '\n')
             cfgmakefile.write(subBCName.upper() + '_CFLAGS = ' + subBCObject.getBuildParams().cflags.replace('\\','/') + '\n')
-	    break
+            break
         cfgmakefile.write("\n# Additional compiler parameters, such as include paths\n")
         cfgmakefile.write("ADDFLAGS=\n")
         cfgmakefile.write("\n")
@@ -440,15 +445,15 @@ def writeMakefile(librarySources = dict(), includes = list(), linkHeaders = Fals
     makefile.write("### Standard defines\n")
     makefile.write("PREP_DEFS=")
     for prepDefine in bc.getBuildParams().prepDefines:
-            makefile.write(cppDefPrefix+prepDefine+cppDefSuffix)
-    makefile.write(" \n\n")
+            makefile.write(" " + cppDefPrefix+prepDefine+cppDefSuffix)
+    makefile.write("\n\n")
 
     for subBCName,subBCObject in bc.getSubBC().iteritems():
         makefile.write("SUB_PREP_DEFS=")
         for prepDefine in subBCObject.getBuildParams().prepDefines:
-            makefile.write(subCppDefPrefix+prepDefine+subCppDefSuffix)
-        makefile.write(" \n\n")
-	break
+            makefile.write(" " + subCppDefPrefix+prepDefine+subCppDefSuffix)
+        makefile.write("\n\n")
+        break
 
     makefile.write("### Build-all definition\n")
     makefile.write("LIBS =")
@@ -500,7 +505,7 @@ def writeMakefile(librarySources = dict(), includes = list(), linkHeaders = Fals
         for sourceDependency in librarySources[library]:
             sourceDependencyName = winPathToMsys(sourceDependency)
             baseName, ext = posixpath.splitext(sourceDependencyName)
-            makefile.write(" $(OBJDIR)/" + posixpath.basename(baseName) + objSuffix)
+            makefile.write(" $(CYGPREFIX)$(OBJDIR)/" + posixpath.basename(baseName) + objSuffix)
         makefile.write("\n")
         libraryBuildRules.append(libraryBuildRule)
     makefile.write("\n")
@@ -521,14 +526,21 @@ def writeMakefile(librarySources = dict(), includes = list(), linkHeaders = Fals
             sourceDependencyName = winPathToMsys(sourceDependency)
             basePath, ext = posixpath.splitext(sourceDependencyName)
             makefile.write("$(CYGPREFIX)$(OBJDIR)/" + posixpath.basename(basePath) + objSuffix + ": $(CYGPREFIX)" + sourceDependencyName + "\n")
-            makefile.write("RAW_SRC="$@";SRC_NOPREFIX=$${FOO#/};DRIVE=$${SRC_NOPREFIX%%/*};UNC_SRC=$${DRIVE}:/$${SRC_NOPREFIX#*/};")
-	    makefile.write("\t@OUTPUT=\"$<\";export CYGWIN=nodosfilewarning;SOURCEFILE=\"$*\";OBJFILE=\"$${SOURCEFILE%.*}\"" + objSuffix + ";makedepend -f-")
-            makefile.write(" -I\"$(LINKHEADERS)\" $< 2>/dev/null | sed \"s,.*:,\\$$(OBJDIR)/$${SOURCEFILE##*/}" + objSuffix + ":,\" > $(DEPDIR)/$${OUTPUT##*/}.d\n")
+            makefile.write("\tRAW_SRC=$@;SRC_NOPREFIX=$${FOO#/};DRIVE=$${SRC_NOPREFIX%%/*};UNC_SRC=$${DRIVE}:/$${SRC_NOPREFIX#*/};")
+            makefile.write("OUTPUT=\"$<\";export CYGWIN=nodosfilewarning;SOURCEFILE=\"$*\";OBJFILE=\"$${SOURCEFILE%.*}\"" + objSuffix + ";makedepend -f-")
+            makefile.write(" -I" + privIncPathForSourceFile(sourceDependencyName) + " -I\"$(LINKHEADERS)\" $< 2>/dev/null | sed \"s,.*:,\\$$(OBJDIR)/$${SOURCEFILE##*/}" + objSuffix + ":,\" > $(DEPDIR)/$${OUTPUT##*/}.d\n")
 # -e '/^C:/d'
             if sourceDependencyName.count("/sub_bc/") > 0:
-                makefile.write(subCcCommandLine.replace('%CPPDEFINES','$(SUB_PREP_DEFS)'))
+                subCommandLine = "\t" + subCcCommandLine
+                subCommandLine = subCommandLine.replace("%INCPATHS", subIncPrefix + privIncPathForSourceFile(sourceDependencyName) + subIncSuffix + " " + subIncPrefix + "$(LINKHEADERS)" + subIncSuffix)
+                subCommandLine = subCommandLine.replace('%CPPDEFINES','$(SUB_PREP_DEFS)')
+                makefile.write(subCommandLine)
             else:
-                makefile.write(ccCommandLine.replace("%CPPDEFINES","$(PREP_DEFS)"))
+                commandLine = "\t" + ccCommandLine
+                commandLine = commandLine.replace("%INCPATHS", incPrefix + privIncPathForSourceFile(sourceDependencyName) + incSuffix + " " + incPrefix + "$(LINKHEADERS)" + incSuffix)
+                commandLine = commandLine.replace("%CPPDEFINES","$(PREP_DEFS)")
+                makefile.write(commandLine)
+            makefile.write("\n")
 
     makefile.write("-include \"$(DEPDIR)\"/*.d\n")
     makefile.write("\n")

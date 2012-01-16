@@ -381,6 +381,17 @@ class BCFile:
 
         self.__assert_correct_type( option_name, self.buildParams.cflags, [str,] )
 
+        option_name = 'CXXFLAGS'
+
+        if section.has_key( option_name ):
+            # this is a fix for gcc, where compiler arguments may include , which the python config doesn't seem to handle
+            if type(section[ option_name ]) == list and len( section[ option_name ]) > 1:
+                self.buildParams.cxxflags = (''.join("%s," % (k) for k in section[ option_name ]))[0:-1]
+            else:
+                self.buildParams.cxxflags = section[ option_name ]
+
+        self.__assert_correct_type( option_name, self.buildParams.cxxflags, [str,] )
+
         option_name = 'ASMFLAGS'
 
         self.buildParams.asmflags = str()

@@ -37,6 +37,9 @@ class CTXBuildParams:
         # \member {cflags}
         self.cflags          = str()
 
+        # \member {cxxflags}
+        self.cxxflags          = str()
+
         # \member { incPaths }
         self.incPaths        = list()
 
@@ -49,6 +52,7 @@ class CTXBuildParams:
     def add( self, addParams ):
         self.prepDefines.extend(  addParams.prepDefines )
         self.cflags = "%s %s"%(self.cflags, addParams.cflags)
+        self.cxxflags = "%s %s"%(self.cxxflags, addParams.cxxflags)
         self.asmflags = "%s %s"%(self.asmflags, addParams.asmflags)
         self.incPaths.extend(     addParams.incPaths )
         self.ldDirs.extend(addParams.ldDirs)
@@ -73,6 +77,7 @@ class CTXBuildParams:
 
         md.update( self.ldFlags )
         md.update( self.cflags )
+        md.update( self.cxxflags )
         md.update( self.asmflags )
 
         return md.hexdigest()
@@ -399,6 +404,11 @@ class CTXCompiler:
             cflag_dec = "%s"%( cflag )
             cflags_cmdline += cflag_dec
 
+        cxxflags_cmdline = str()
+        for cxxflag in buildParams.cxxflags:
+            cxxflag_dec = "%s"%( cxxflag )
+            cxxflags_cmdline += cxxflag_dec
+
         asmflags_cmdline = str()
         for asmflag in buildParams.asmflags:
             asmflag_dec = "%s"%( asmflag )
@@ -454,6 +464,7 @@ class CTXCompiler:
         cmdline = cmdline.replace( '%ASMFLAGS'    ,   asmflags_cmdline    )
         cmdline = cmdline.replace( '%ASM'         ,   self.cdef['ASM']    )
         cmdline = cmdline.replace( '%CFLAGS'      ,   cflags_cmdline      )
+        cmdline = cmdline.replace( '%CXXFLAGS'    ,   cxxflags_cmdline    )
         cmdline = cmdline.replace( '%CPPDEFINES'  ,   cppdefines_cmdline  )
         cmdline = cmdline.replace( '%INCPATHS'    ,   incpaths_cmdline    )
         cmdline = cmdline.replace( '%SOURCES'     ,   srcfile_cmdline     )

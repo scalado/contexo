@@ -17,9 +17,23 @@
 
 # TODO:
 # * change output dir to absolute path, -o argument?
-# * parse sub_bc in python instead of bash
 # * translate msys/cygwin path to ntpath
+# * -ai additional includes ?
 #
+
+
+# cygwin make does not handle mixed paths in target definitions well:
+#
+# C:/foo/bar.obj: C:/foo/bar.c
+#
+# instead we need to write them as:
+# $(CYGPREFIX)/c/foo/bar.obj: $(CYGPREFIX)/c/foo/bar.c
+#
+# CYGPREFIX is set to /cygdrive if in cygwin, empty string if in MSYS
+# this makes makefiles work on both cygwin and msys
+#
+# the compiler cannot handle cygwin/msys paths, so we need to retranslate them
+# to mixed mode: cc -c C:/foo/bar.c -o C:/foo/bar.o
 
 import logging
 import logging.handlers

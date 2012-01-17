@@ -33,7 +33,7 @@ class CTXGitClient():
         os.chdir( repo_path )
         import subprocess
         args = [self.git, '--no-pager', 'log', '--pretty=oneline', '--no-color']
-        p = subprocess.Popen(args, bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=None)
+        p = subprocess.Popen(args, bufsize=8192, stdin=None, stdout=subprocess.PIPE, stderr=None)
         stdout = p.stdout.read()
 
         retcode = p.wait()

@@ -1,3 +1,7 @@
+Contexo 0.17.1
+Bugfix: hopefully a fix for those git deadlocks on windows
+Bugfix: ctx2make fixes
+
 Contexo 0.17.0
 Feature: added the 'ctx2make' command.
          This is basically a replacement for ctx+genmake, but designed to be much faster.

@@ -1,19 +1,19 @@
 Contexo 0.17.0
 Feature: added the 'ctx2make' command.
          This is basically a replacement for ctx+genmake, but designed to be much faster.
-		 ctx2make is designed to be compatible with Windows, however, it has some external dependencies:
+	 ctx2make is designed to be compatible with Windows, however, it has some external dependencies:
 
-		 The following cygwin packages must be installed
-		 make
-		 makedepend
-		 C:\cygwin\bin - must be added at the end of user environment variable PATH.
+	 The following cygwin packages must be installed
+	 make
+	 makedepend
+	 C:\cygwin\bin - must be added at the end of user environment variable PATH.
 
-		 If the dependencies above are fulfilled, Makefiles produced with ctx2make can be built with
-  		 * MSys GNU make
-		 * GNU make from rvct
-		 * Cygwin GNU make
-		 * Eclipse
-		 * Netbeans
+	 If the dependencies above are fulfilled, Makefiles produced with ctx2make can be built with
+	 * MSys GNU make
+	 * GNU make from rvct
+	 * Cygwin GNU make
+	 * Eclipse
+	 * Netbeans
 
 Contexo 0.16.10
 Feature: genmake.py updates to correctly use CPPFLAGS [gustafp]

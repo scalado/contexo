@@ -111,14 +111,28 @@ def addPathsInWindowsRegistry():
     #
     python_path    = os.path.dirname( sys.executable )
     key = r'Software\Microsoft\Windows\CurrentVersion\Policies\Explorer'
-    win32reg_add_dword_value( key, r'InheritConsoleHandles', 1 )
+    try:
+        win32reg_add_dword_value( key, r'InheritConsoleHandles', 1 )
+    except:
+        print "\n\n\nYou must run the Contexo installer as Administrator!\n\n\n"
+        import time
+        raw_input("Press Enter to Exit")
+        sys.exit(1)
+
+
 
     #
     # Add standard contexo paths to windows environment PATH
     #
 
     # The Python installation path
-    win32reg_add_to_path( python_path )
+    try:
+        win32reg_add_to_path( python_path )
+    except:
+        print "You must run the Contexo installer as Administrator!"
+        raw_input("Press Enter to Exit")
+        sys.exit(1)
+
 
     # The Python##/Script directory
     distutils.sysconfig.get_config_var('BINDIR')

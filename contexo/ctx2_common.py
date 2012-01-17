@@ -153,16 +153,18 @@ def parseComps(cview, viewDir, buildTests, bc, compsToBuild):
 
             if buildTests:
                 testSourceDir = ctx_cmod.getTestDir(moduleDir)
-                testSources = ctx_cmod.getSourcesFromDir(srcDir = testSourceDir, archPath = [], subBCDict = dict())
+                testSourceLists = ctx_cmod.getSourcesFromDir(srcDir = testSourceDir, archPath = bc.getArchPath(), subBCDict = bc.getSubBC())
                 if module in moduleDict.keys():
                     libraryName = moduleDict[module] 
                     if libraryName not in librarySources.keys():
                         librarySources[libraryName] = list()
-                    for baseTestSource in testSources:
-                        librarySources[libraryName].append(testSourceDir + os.sep + baseTestSource)
-                        root,ext = posixpath.splitext(baseTestSource)
-                        if ext in ['.hpp', '.h', '.inl']:
-                            includes.append(testSourceDir + os.sep + baseTestSource)
+                    for baseTestSourceList in testSourceLists:
+                        for baseTestSource in baseTestSourceList:
+
+                            librarySources[libraryName].append(testSourceDir + os.sep + baseTestSource)
+                            root,ext = posixpath.splitext(baseTestSource)
+                            if ext in ['.hpp', '.h', '.inl']:
+                                includes.append(testSourceDir + os.sep + baseTestSource)
     return librarySources,includes
 
 

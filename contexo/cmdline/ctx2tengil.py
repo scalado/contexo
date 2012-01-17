@@ -32,7 +32,7 @@
 #
 # the compiler cannot handle cygwin/msys paths, so we need to retranslate them
 # to mixed mode: cc -c C:/foo/bar.c -o C:/foo/bar.o
-
+import tempfile
 import logging
 import logging.handlers
 import os
@@ -41,6 +41,8 @@ import sys
 import shutil
 import platform
 import posixpath
+import subprocess
+
 from contexo import ctx2_common
 from contexo import ctx_view 
 from contexo import ctx_cfg
@@ -65,6 +67,7 @@ def main(argv):
     outputName = ""
     inputName = ""
     viewDir = ""
+    nextArgIsBC = False
 
     linkHeaders = True
 
@@ -81,6 +84,7 @@ def main(argv):
             continue
         if arg == '-h':
             print >>sys.stderr, 'help:'
+            print >>sys.stderr, '-b <BCFILE>, .bc file to use'
             print >>sys.stderr, '-in <INPUT_NAME>, input name'
             print >>sys.stderr, '-on <OUTPUT_NAME>, output name'
             print >>sys.stderr, '-o <OUTPUT_FILE>, resulting output file'
@@ -88,6 +92,10 @@ def main(argv):
         if nextArgIsOutputName:
             outputName = arg
             nextArgIsOutputName = False
+            continue
+        if nextArgIsBC:
+            bcFile = arg
+            nextArgIsBC = False
             continue
         if nextArgIsInputName:
             inputName = arg
@@ -107,10 +115,16 @@ def main(argv):
             if arg == '-o':
                 nextArgIsOutputFile = True
                 continue
+            if arg == '-b':
+                nextArgIsBC = True
+                continue
             parsedAllOptions = True
         if outputFile == "":
             print >>sys.stderr, 'must have \'-o\' argument'
             sys.exit(1)
+        if bcFile == "":
+           print >>sys.stderr, 'must have -b argument'
+           sys.exit(1)
 
         if outputName == "":
             print >>sys.stderr, 'must have \'-on\' argument'
@@ -129,13 +143,13 @@ def main(argv):
         sys.exit(1)
     argDict = dict()
 
-    genTengilFile(outputFile = outputFile, viewDir = viewDir, outputName = outputName, inputName = inputName, buildItems = buildItems)
+    genTengilFile(outputFile = outputFile, viewDir = viewDir, outputName = outputName, inputName = inputName, buildItems = buildItems, bcFile = bcFile)
 
 logging.basicConfig(format = '%(asctime)s %(levelname)-8s %(message)s',
                                 datefmt='%H:%M:%S',
                                 level = logging.DEBUG);
 
-def genTengilFile(outputFile = str(), viewDir = str(), outputName = str(), inputName = str(), buildItems = list()):
+def genTengilFile(outputFile = str(), viewDir = str(), outputName = str(), inputName = str(), buildItems = list(), bcFile = str()):
     launch_path = posixpath.abspath('.')
     view_dir = ctx2_common.get_view_dir(viewDir)
     obj_dir = view_dir + os.sep + '.ctx/obj'
@@ -147,6 +161,7 @@ def genTengilFile(outputFile = str(), viewDir = str(), outputName = str(), input
     cfgFile = ctx_cfg.CFGFile( contexo_config_path )
 
     cview = ctx_view.CTXView(view_dir, validate=False)
+    bc = ctx2_common.getBuildConfiguration(cview, bcFile, cfgFile)
 
     comps = ctx2_common.expand_list_files(cview, buildItems)
 
@@ -157,15 +172,27 @@ def genTengilFile(outputFile = str(), viewDir = str(), outputName = str(), input
         for library, compModules in comp.libraries.items():
             modules.extend(compModules)
 
-    bc = None
     buildTests = True
     librarySources, includes = ctx2_common.parseComps(cview, view_dir, buildTests, bc, components)
+    tempdir = tempfile.mkdtemp(prefix='ctx2tengil')
 
-    if linkHeaders:
-        dest = 'output' + os.sep + 'linkheaders'
-        linkIncludes(includes, dest, view_dir)
+    for file in includes:
+        shutil.copy(file, tempdir)
+    for sources in librarySources.values():
+        for file in sources:
+            shutil.copy(file, tempdir)
 
-    copySources(includes + sources, dest)
+    args = " ".join(['grep', '-h', inputName, tempdir + os.sep + '*',  '|', 'grep', '-v', '"#define"' + '>', outputFile])
+    print args
+    if subprocess.call(args, shell=True) != 0:
+        sys.exit()
+    
+    args = " ".join(['sed', '-i', 's/' + inputName + '/' + outputName + '/g', outputFile])
+    print args
+    if subprocess.Popen(args, shell=True) != 0:
+        sys.exit()
+ 
+    shutil.rmtree(tempdir)
 
 main(sys.argv)
 

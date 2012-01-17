@@ -31,20 +31,6 @@ def locate_git():
  
     userErrorExit("Git cannot be found in your PATH. Please re-install Git and make sure the git.cmd, git.exe or git binary can be found in your PATH")
 
-def old_git_error():
-    import subprocess
-    import os
-
-    git = locate_git()
-    p = subprocess.Popen([git, '--version'], bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    retcode = p.wait()
-    stdout = p.stdout.read()
-    version = stdout.split()
-    if len(version) != 3:
-        userErrorExit('git version check failed')
-    if int(version[2].split('.')[0]) >= 1 and int(version[2].split('.')[0]) >= 7:
-        userErrorExit('your git version is too old. Git version needs to be at least of version 1.7')
-
 #------------------------------------------------------------------------------
 class CTXRepositoryGIT(CTXRepository):
     def __init__(self, id_name, local_path, href, rev):
@@ -53,7 +39,6 @@ class CTXRepositoryGIT(CTXRepository):
         self.id_name = id_name
         self.git = locate_git()
         self.rev = rev
-        old_git_error() 
 
 
         if href == None:
@@ -78,20 +63,6 @@ class CTXRepositoryGIT(CTXRepository):
         os.chdir(self.path)
         if not os.path.isdir(self.destpath):
             return False
-
-
-        os.chdir(self.destpath)
-        p = subprocess.Popen([self.git, 'status'], bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        retcode = p.wait()
-
-	# git 1.6 returns 1
-	# git 1.7 returns 0
-        if retcode != 0 and retcode != 1:
-            stderr = p.stderr.read()
-            print >>sys.stderr, stderr
-            warningMessage("Not a valid GIT repo")
-            os.chdir(self.path)
-            return False
         os.chdir(self.path)
 
         return True
@@ -109,10 +80,8 @@ class CTXRepositoryGIT(CTXRepository):
         os.chdir(self.destpath)
         import subprocess
         args = [self.git, 'branch', '--no-color' ]
-        p = subprocess.Popen(args, bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        p = subprocess.Popen(args, bufsize=4096)
         retcode = p.wait()
-        stderr = p.stderr.read()
-        stdout = p.stdout.read()
 
         if retcode != 0:
             print >>sys.stderr, stderr
@@ -121,15 +90,6 @@ class CTXRepositoryGIT(CTXRepository):
 
         retcode = p.wait()
         os.chdir(self.path)
-        for line in stdout.split('\n'):
-            split_line = line.split()
-            if len(split_line) == 3:
-                if split_line[0] == '*' and split_line[1] == '(no' and split_line[2] == 'branch)':
-                    return '(no branch)'
-            if line.find('*') == 0:
-                branch = split_line[1]
-                return branch
-
         return ''
 
     #--------------------------------------------------------------------------
@@ -144,57 +104,17 @@ class CTXRepositoryGIT(CTXRepository):
             exit(42)
 
         tmpdir = ''
-        if self.getBranch() == '':
-            # git can validate remote repos, but only if it is executed from a
-            # git repository, this creates a temporary git repo to check the remote repo
-            tmpdir = tempfile.mkdtemp(suffix='ctx_git')
-            os.chdir(tmpdir)
-            args = [self.git, 'init']
-            p = subprocess.Popen(args, bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            retcode = p.wait()
-            if retcode != 0:
-                # this should not happen!
-                errorMessage("failed during creation of temporary git dir")
-                raise
-        else:
-            os.chdir(self.destpath)
+        os.chdir(self.destpath)
         remote = ''
 
         args = [self.git, 'remote', 'show', fetch_url]
-        p = subprocess.Popen(args, bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        p = subprocess.Popen(args, bufsize=4096)
         retcode = p.wait()
 
-        stderr = p.stderr.read()
-        stdout = p.stdout.read()
- 
         if retcode != 0:
             remote = ''
-		# this section is a bit version dependent
-        for line in stdout.split('\n'):
-            split_line = line.split()
-			# git 1.6
-            if len(split_line) == 2:
-				if split_line[0] == 'URL:':
-					remote = split_line[1]
-            # git v1.7
-            if len(split_line) == 3:
-                if split_line[0] == 'Fetch' and split_line[1] == 'URL:':
-                    remote = split_line[2]
         os.chdir(self.path)
-        # clean up
-        if tmpdir != '':
-            import shutil
-            import time
-            failcount = 0
-            max_failures = 20
-            while failcount < max_failures:
-                try:
-                    shutil.rmtree(tmpdir)
-                    failcount = max_failures
-                except:
-                    failcount = failcount + 1
-                    time.sleep(0.1)
-                    pass
+
         return remote
     #--------------------------------------------------------------------------
     def getRcs(self):
@@ -213,49 +133,35 @@ class CTXRepositoryGIT(CTXRepository):
         os.chdir(self.destpath)
 
         infoMessage("Fetching new tags in '%s': 'git fetch'"%(self.id_name))
-        p = subprocess.Popen([self.git, 'fetch'], bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        p = subprocess.Popen([self.git, 'fetch'], bufsize=4096)
         retcode = p.wait()
         if retcode != 0:
-            print >>sys.stderr, p.stderr.read()
             warningMessage("could not fetch from %s"%(self.href))
+            sys.exit(1)
         
         workingBranchName = self.getBranch()
         # getBranch changes dir, go back to git dir
-        os.chdir(self.destpath)
-        if workingBranchName == '(no branch)':
-            restoreWorkBranch = False
-        else:
-            restoreWorkBranch = True
+        restoreWorkBranch = False
 
         infoMessage("Checking out %s in %s 'git checkout %s'"%(self.rev, self.id_name, self.rev),1)
-        p = subprocess.Popen([self.git, 'checkout', self.rev], bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        os.chdir(self.destpath)
+        p = subprocess.Popen([self.git, 'checkout', self.rev], bufsize=4096)
         retcode = p.wait()
-        stderr = p.stderr.read()
         if retcode != 0:
-            print >>sys.stderr, stderr
+            sys.exit(1)
         updateBranchName = self.getBranch()
         # getBranch changes dir, go back to git dir
         os.chdir(self.destpath)
         if updateBranchName != '' and updateBranchName != '(no branch)':
             infoMessage("Updating branch '%s' in '%s': 'git pull %s %s''"%(self.rev, self.id_name, 'origin', self.rev))
-            p = subprocess.Popen([self.git, 'pull', 'origin', self.rev], bufsize=4096, stdin=None)
+            p = subprocess.Popen([self.git, 'pull', 'origin', self.rev], bufsize=4096)
             retcode = p.wait()
             print >>sys.stderr, ''
             if retcode != 0:
                 #print >>sys.stderr, p.stderr.read()
                 errorMessage("could not pull from %s"%(self.href))
                 exit(retcode)
-        elif updateBranchName == '(no branch)':
-            restoreWorkBranch = False
 
-        if restoreWorkBranch == True:
-            infoMessage("Restoring branch: 'git checkout %s' in '%s'"%(workingBranchName, self.id_name),1)
-            p = subprocess.Popen([self.git, 'checkout', workingBranchName], bufsize=4096, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            retcode = p.wait()
-            stderr = p.stderr.read()
-            if retcode != 0:
-                print >>sys.stderr, stderr
- 
         os.chdir(self.path)
 
     #--------------------------------------------------------------------------
@@ -278,10 +184,9 @@ class CTXRepositoryGIT(CTXRepository):
         os.chdir(self.id_name)
         infoMessage("Running 'git checkout %s' in '%s'"%(self.rev, self.id_name), 1)
         args = [self.git, 'checkout', self.rev]
-        p = subprocess.Popen( args,bufsize=0 ,stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        p = subprocess.Popen( args,bufsize=0 ,stdin=None, stdout=None)
+
         retnum = p.wait()
-        stderr = p.stderr.read()
-        stdout = p.stdout.read()
         if retnum != 0:
             print >>sys.stderr, stdout
             print >>sys.stderr, stderr
@@ -296,24 +201,11 @@ class CTXRepositoryGIT(CTXRepository):
     #--------------------------------------------------------------------------
     # this method is unused
     def checkValidRevision(self):
-        if self.getBranch() != '':
-            # repo is cloned
-            return True
-        else:
-            return False
+        return True
 
     #--------------------------------------------------------------------------
     def checkValid(self, updating ):
-        if self.getBranch() != '':
-            # repo is cloned
-            return True
-        else:
-            # repo is remote
-            # cannot validate remote repo if git is not initialized
-            if self.getRemote(self.href) == '':
-                errorMessage("Remote git repo %s is not valid"%(self.href))
-                return False
-            return True
+        return True
 
     #--------------------------------------------------------------------------
     # call clone() instead to avoid confusion over function naming

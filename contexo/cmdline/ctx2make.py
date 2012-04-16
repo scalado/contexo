@@ -103,7 +103,10 @@ def main(argv):
             nextArgIsEnv = False
             continue
         if nextArgIsViewDir:
-            viewDir = arg
+            viewDir = arg.replace('\\','/')
+            if len(viewDir) > 0:
+                if viewDir[-1] != '/':
+                    viewDir = viewDir + '/'
             nextArgIsViewDir = False
             continue
         if nextArgIsBC:
@@ -239,7 +242,7 @@ def writeMakefile(outputDir = str(), librarySources = dict(), includes = list(),
         cfgmakefile.write("AR=" + bc.getCompiler().cdef['AR'] + "\n")
         cfgmakefile.write("RANLIB=" "\n")
         cfgmakefile.write("\n")
-        cfgmakefile.write("OUTPUT=" + viewDir + os.sep + "output\n")
+        cfgmakefile.write("OUTPUT=" + viewDir + '/' + "output\n")
         cfgmakefile.write("LIBDIR=$(OUTPUT)/lib\n")
         cfgmakefile.write("OBJDIR=$(OUTPUT)/obj\n")
         cfgmakefile.write("HDRDIR=$(OUTPUT)/inc\n")
@@ -384,7 +387,11 @@ def writeMakefile(outputDir = str(), librarySources = dict(), includes = list(),
 def genMakefile(outputDir = str(), viewDir = str(), envFile = str(), bcFile = str(), buildItems = list(), buildTests = False, linkHeaders = False, assignCC = False, addInc = str()):
     launch_path = posixpath.abspath('.')
     view_dir = ctx2_common.get_view_dir(viewDir)
-    obj_dir = view_dir + os.sep + '.ctx/obj'
+    view_dir = view_dir.replace('\\','/')
+    if len(viewDir) > 0:
+        if viewDir[-1] != '/':
+            viewDir = viewDir + '/'
+    obj_dir = view_dir + '/' + '.ctx/obj'
 
     envLayout = None
     oldEnv = None
@@ -410,7 +417,7 @@ def genMakefile(outputDir = str(), viewDir = str(), envFile = str(), bcFile = st
     librarySources, includes = ctx2_common.parseComps(cview, view_dir, buildTests, bc, components)
 
     if linkHeaders:
-        dest = 'output' + os.sep + 'linkheaders'
+        dest = 'output' + '/' + 'linkheaders'
         ctx2_common.linkIncludes(includes, dest, view_dir)
 
     writeMakefile(librarySources = librarySources, includes = includes, linkHeaders = linkHeaders, bc = bc, viewDir = view_dir, assignCC = assignCC, addInc = addInc)

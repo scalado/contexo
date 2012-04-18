@@ -103,7 +103,10 @@ def main(argv):
             nextArgIsEnv = False
             continue
         if nextArgIsViewDir:
-            viewDir = arg
+            viewDir = arg.replace('\\','/')
+            if len(viewDir) > 0:
+                if viewDir[-1] != '/':
+                    viewDir = viewDir + '/'
             nextArgIsViewDir = False
             continue
         if nextArgIsBC:
@@ -394,7 +397,11 @@ def writeMakefile(outputDir = str(), librarySources = dict(), includes = list(),
 def genMakefile(outputDir = str(), viewDir = str(), envFile = str(), bcFile = str(), buildItems = list(), buildTests = False, linkHeaders = False, assignCC = False, addInc = str()):
     launch_path = posixpath.abspath('.')
     view_dir = ctx2_common.get_view_dir(viewDir)
-    obj_dir = view_dir + os.sep + '.ctx/obj'
+    view_dir = view_dir.replace('\\','/')
+    if len(viewDir) > 0:
+        if viewDir[-1] != '/':
+            viewDir = viewDir + '/'
+    obj_dir = view_dir + '/' + '.ctx/obj'
 
     envLayout = None
     oldEnv = None

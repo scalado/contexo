@@ -121,6 +121,9 @@ def main(argv):
             if arg == '-t':
                 buildTests = True
                 continue
+            if arg == '-o':
+                nextArgIsOutputDir = True
+                continue
             if arg == '-l':
                 linkHeaders = True
                 continue
@@ -239,7 +242,7 @@ def writeMakefile(outputDir = str(), librarySources = dict(), includes = list(),
         cfgmakefile.write("AR=" + bc.getCompiler().cdef['AR'] + "\n")
         cfgmakefile.write("RANLIB=" + bc.getCompiler().cdef['RANLIB'] + "\n")
         cfgmakefile.write("\n")
-        cfgmakefile.write("OUTPUT=" + viewDir + os.sep + "output\n")
+        cfgmakefile.write("OUTPUT=" + outputDir + os.sep + "output\n")
         cfgmakefile.write("LIBDIR=$(OUTPUT)/lib\n")
         cfgmakefile.write("OBJDIR=$(OUTPUT)/obj\n")
         cfgmakefile.write("HDRDIR=$(OUTPUT)/inc\n")
@@ -417,10 +420,10 @@ def genMakefile(outputDir = str(), viewDir = str(), envFile = str(), bcFile = st
     librarySources, includes = ctx2_common.parseComps(cview, view_dir, buildTests, bc, components)
 
     if linkHeaders:
-        dest = 'output' + os.sep + 'linkheaders'
+        dest = outputDir + os.sep + 'output' + os.sep + 'linkheaders'
         ctx2_common.linkIncludes(includes, dest, view_dir)
 
-    writeMakefile(librarySources = librarySources, includes = includes, linkHeaders = linkHeaders, bc = bc, viewDir = view_dir, assignCC = assignCC, addInc = addInc)
+    writeMakefile(outputDir = outputDir, librarySources = librarySources, includes = includes, linkHeaders = linkHeaders, bc = bc, viewDir = view_dir, assignCC = assignCC, addInc = addInc)
 
     if envFile != "":
         switchEnvironment(oldEnv, False)

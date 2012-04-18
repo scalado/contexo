@@ -1,3 +1,6 @@
+Contexo 0.17.2
+Bugfix: ctx2make fixes 
+
 Contexo 0.17.1
 Bugfix: hopefully a fix for those git deadlocks on windows
 Bugfix: ctx2make fixes

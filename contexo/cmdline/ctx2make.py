@@ -237,7 +237,7 @@ def writeMakefile(outputDir = str(), librarySources = dict(), includes = list(),
         cfgmakefile.write("ADDFLAGS=\n")
         cfgmakefile.write("\n")
         cfgmakefile.write("AR=" + bc.getCompiler().cdef['AR'] + "\n")
-        cfgmakefile.write("RANLIB=" "\n")
+        cfgmakefile.write("RANLIB=" + bc.getCompiler().cdef['RANLIB'] + "\n")
         cfgmakefile.write("\n")
         cfgmakefile.write("OUTPUT=" + viewDir + os.sep + "output\n")
         cfgmakefile.write("LIBDIR=$(OUTPUT)/lib\n")
@@ -334,6 +334,14 @@ def writeMakefile(outputDir = str(), librarySources = dict(), includes = list(),
             makefile.write(" $(CYGPREFIX)$(OBJDIR)/" + posixpath.basename(baseName) + objSuffix)
         makefile.write("\n")
         libraryBuildRules.append(libraryBuildRule)
+        makefile.write("\t$(AR) r $@ ")
+        for sourceDependency in librarySources[library]:
+            sourceDependencyName = ctx2_common.winPathToMsys(sourceDependency)
+            basePath, ext = posixpath.splitext(sourceDependencyName)
+            makefile.write(" $(OBJDIR)/" + posixpath.basename(basePath) + objSuffix)
+        makefile.write("\n")
+        makefile.write("\t$(RANLIB) $@\n")
+    
     makefile.write("\n")
     makefile.write(".PHONY: all\n")
     makefile.write("all: ")
@@ -375,7 +383,6 @@ def writeMakefile(outputDir = str(), librarySources = dict(), includes = list(),
                 commandLine = commandLine.replace("%CPPDEFINES","$(PREP_DEFS)")
                 makefile.write(commandLine)
             makefile.write("\n")
-
     makefile.write("-include \"$(DEPDIR)\"/*.d\n")
     makefile.write("\n")
 

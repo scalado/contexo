@@ -242,7 +242,9 @@ def writeMakefile(outputDir = str(), librarySources = dict(), includes = list(),
         cfgmakefile.write("AR=" + bc.getCompiler().cdef['AR'] + "\n")
         cfgmakefile.write("RANLIB=" "\n")
         cfgmakefile.write("\n")
-        cfgmakefile.write("OUTPUT=" + viewDir + '/' + "output\n")
+        if viewDir[0] != "/":
+            viewDir = "/" + viewDir.replace(":","")
+        cfgmakefile.write("OUTPUT=$(CYGPREFIX)" + viewDir + '/' + "output\n")
         cfgmakefile.write("LIBDIR=$(OUTPUT)/lib\n")
         cfgmakefile.write("OBJDIR=$(OUTPUT)/obj\n")
         cfgmakefile.write("HDRDIR=$(OUTPUT)/inc\n")
